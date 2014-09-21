@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.huantnguyen.radcases.app" >
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-library
+        android:name="com.huantnguyen.radcases.app/eu.janmuller.android.simplecropimage"
+        android:required="true" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <!--
+        <activity
+            android:name="com.dropbox.client2.android.AuthActivity"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboard">
+            <intent-filter>
+                <data android:scheme="db-lmpak4xza1baejo" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        -->
+
+        <activity
+            android:name="com.huantnguyen.radcases.app.CaseCardListActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="com.huantnguyen.radcases.app.CasesProvider"
+            android:authorities="com.huantnguyen.radcases.app.CasesProvider" >
+        </provider>
+
+        <activity
+            android:name="com.huantnguyen.radcases.app.CaseDetailActivity"
+            android:label="@string/title_case_detail"
+            android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity"
+            android:theme="@style/AppTheme.TranslucentActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
+        </activity>
+        <activity
+            android:name="com.huantnguyen.radcases.app.AddCaseActivity"
+            android:label="@string/title_activity_add_case"
+            android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
+        </activity>
+        <activity
+            android:name="com.huantnguyen.radcases.app.EditCaseActivity"
+            android:label="@string/title_activity_edit_case"
+            android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />
+        </activity>
+        <activity
+            android:name="com.huantnguyen.radcases.app.KeyImageGalleryActivity"
+            android:label="Key Images"
+            android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity"
+            android:theme="@style/AppTheme.TranslucentActionBar" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />
+        </activity>
+
+        <!-- this is the searchable activity; it performs searches -->
+        <activity
+            android:name="com.huantnguyen.radcases.app.SearchActivity"
+            android:label="@string/title_activity_search" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+
+        <!-- enable the search dialog to send searches to SearchableActivity -->
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value=".SearchActivity" />
+
+        <activity android:name="eu.janmuller.android.simplecropimage.CropImage" />
+        <activity
+            android:name=".CloudStorageActivity"
+            android:label="@string/title_activity_export" >
+            <meta-data
+                android:name="com.google.android.apps.drive.APP_ID"
+                android:value="id=895901757508" />
+
+            <intent-filter>
+                <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.huantnguyen.radcases.app.NavigationDrawerActivity"
+            android:label="@string/title_activity_navigation_drawer" >
+        </activity>
+    </application>
+
+</manifest>

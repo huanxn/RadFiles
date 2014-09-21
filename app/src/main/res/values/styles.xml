@@ -1,0 +1,139 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="Widget"/>
+    <style name="Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse"/>
+    <style name="Widget.Light"/>
+    <style name="Widget.Light.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid"/>
+    <style name="Widget.ActionBar.Transparent">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+    <style name="Widget.Light.ActionBar.Transparent">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
+
+    <style name="stickySectionHeader"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
+        <item name="android:drawableBottom">@drawable/list_section_divider</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/text_box_height</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">@dimen/largeTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingTop">5dip</item>
+        <item name="android:background">@color/bg_gray</item>
+    </style>
+
+
+    <style name="sectionHeader"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
+        <item name="android:drawableBottom">@drawable/list_section_divider</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/text_box_height</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">@dimen/standardTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingTop">10dip</item>
+    </style>
+
+
+    <style name="sectionText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/text_box_height</item>
+        <item name="android:textSize">@dimen/standardTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
+
+    <style name="sectionText2">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">-6dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingBottom">8dip</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="android:textColor">@color/gray_text</item>
+    </style>
+
+    <style name="sectionEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:textSize">@dimen/standardTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:inputType">textCapSentences</item>
+    </style>
+
+    <style name="sectionSearch">
+        <item name="android:drawableTop">@drawable/search_section_divider</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:textSize">@dimen/largeTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+    </style>
+
+    <style name="imageGridView">
+        <item name="android:layout_width">fill_parent</item>
+        <item name="android:layout_height">350dp</item>
+        <item name="android:numColumns">auto_fit</item>
+        <item name="android:verticalSpacing">1dp</item>
+        <item name="android:horizontalSpacing">0dp</item>
+        <item name="android:stretchMode">columnWidth</item>
+        <item name="android:gravity">center</item>
+        <item name="android:adjustViewBounds">true</item>
+    </style>
+
+    <style name="spinner">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:textSize">@dimen/standardTextSize</item>
+    </style>
+
+    <!-- Cards -->
+    <style name="cardTitle"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
+        <item name="android:drawableBottom">@drawable/list_section_divider</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/text_box_height</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/primary</item>
+        <item name="android:textSize">@dimen/standardTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+    </style>
+
+
+    <style name="cardText1">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/text_box_height</item>
+        <item name="android:textSize">@dimen/cardTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/dark_gray_text</item>
+    </style>
+
+    <style name="cardText2">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:textAllCaps">true</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:textSize">12sp</item>
+    <item name="android:paddingLeft">8dip</item>
+    <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
+    <item name="android:textColor">@color/gray_text</item>
+    </style>
+
+</resources>
+
+

@@ -1,0 +1,203 @@
+<?xml version="1.0"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            tools:context="com.huantnguyen.radcases.app.EditCaseActivity$PlaceholderFragment">
+
+    <RelativeLayout
+        android:id="@+id/CASE_CONTAINER"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:orientation="vertical"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            >
+
+            <requestFocus/>
+
+            <!-- CASE INFO -->
+            <TextView
+                android:id="@+id/CaseInfoLabel"
+                style="@style/sectionHeader"
+                android:text="Case Information"/>
+
+            <EditText
+                android:id="@+id/edit_patient_id"
+                style="@style/sectionEditText"
+                android:hint="@string/patient_id_prompt"
+                android:inputType="number"/>
+
+            <EditText
+                android:id="@+id/edit_diagnosis"
+                style="@style/sectionEditText"
+                android:hint="Diagnosis"
+                android:inputType="textCapWords"/>
+
+            <EditText
+                android:id="@+id/edit_findings"
+                style="@style/sectionEditText"
+                android:hint="Imaging findings"/>
+
+            <!-- Radiology Section -->
+            <TextView
+                android:id="@+id/SectionLabel"
+                style="@style/sectionHeader"
+                android:text="Radiology Section"/>
+
+            <com.huantnguyen.radcases.app.MultiSelectSpinner
+                android:id="@+id/edit_section"
+                style="@style/spinner"
+                android:prompt="@string/section_prompt"/>
+
+            <!-- STUDIES -->
+            <TextView
+                android:id="@+id/StudyLabel"
+                style="@style/sectionHeader"
+                android:layout_height="@dimen/text_box_height"
+                android:text="Studies"/>
+
+            <com.huantnguyen.radcases.app.CustomSpinner
+                android:id="@+id/edit_study_type"
+                style="@style/spinner"
+                android:prompt="@string/studyType_prompt"/>
+
+            <Button
+                android:id="@+id/edit_date"
+                style="?android:attr/spinnerStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="11dp"
+                android:textSize="@dimen/standardTextSize"
+                android:hint="@string/date_prompt"
+                android:onClick="onClick_showDatePicker"/>
+
+            <!-- KEY WORDS -->
+            <TextView
+                android:id="@+id/KeyWordsLabel"
+                style="@style/sectionHeader"
+                android:text="KEY WORDS"/>
+
+            <com.huantnguyen.radcases.app.MultiSelectSpinner
+                android:id="@+id/edit_key_words"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:textSize="@dimen/standardTextSize"
+                android:prompt="@string/keyWords_prompt"/>
+
+            <!-- BIOPSY -->
+            <TextView
+                android:id="@+id/BiopsyLabel"
+                style="@style/sectionHeader"
+                android:text="Biopsy"/>
+
+            <EditText
+                android:id="@+id/edit_biopsy"
+                style="@style/sectionEditText"
+                android:hint="Biopsy proven pathology"
+                />
+
+            <!-- FOLLOW UP -->
+            <TextView
+                android:id="@+id/FollowupLabel"
+                style="@style/sectionHeader"
+                android:text="Follow Up"/>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+            <CheckBox
+                android:id="@+id/checkbox_followup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onCheckboxClicked_followup"
+                />
+            <EditText
+                android:id="@+id/edit_followup"
+                style="@style/sectionEditText"
+                android:hint="Reason for followup"
+                />
+            </LinearLayout>
+
+            <!-- COMMENTS -->
+            <TextView
+                android:id="@+id/CommentsLabel"
+                style="@style/sectionHeader"
+                android:text="Comments"/>
+
+            <EditText
+                android:id="@+id/edit_comments"
+                style="@style/sectionEditText"
+                android:hint="Other details"
+                />
+
+            <!-- IMAGES -->
+            <TextView
+                android:id="@+id/ImagesLabel"
+                style="@style/sectionHeader"
+                android:text="Key Images"/>
+
+            <GridView
+                android:id="@+id/imageGridview"
+                style="@style/imageGridView"
+                />
+
+
+        </LinearLayout>
+
+        <!-- BUTTON BAR -->
+        <LinearLayout
+            android:id="@+id/buttonBar"
+            style="?android:buttonBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:background="@color/bg_gray">
+
+            <Button
+                android:id="@+id/cancelButton"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onClick_cancelButton"
+                android:text="@string/button_discard"/>
+
+
+            <Button
+                android:id="@+id/doneButton"
+                style="?android:buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:onClick="onClick_doneButton"
+                android:text="@string/button_save"/>
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/edit_ImageView_expanded"
+        android:layout_width = "fill_parent"
+        android:layout_height="500dp"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:visibility="invisible"/>
+
+
+    </RelativeLayout>
+</ScrollView>

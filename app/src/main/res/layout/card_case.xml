@@ -1,0 +1,50 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+<LinearLayout
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_marginLeft="3dp"
+              android:layout_marginRight="3dp"
+              android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/card_main_inner_title"
+        style="@style/cardTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Title"/>
+
+    <TextView
+        android:id="@+id/card_main_inner_text1"
+        style="@style/cardText1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="text 1"/>
+
+
+    <TextView
+        android:id="@+id/card_main_inner_text2"
+        style="@style/cardText2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="text 2"/>
+
+
+
+
+</LinearLayout>
+
+    <CheckBox
+        android:id="@+id/card_star"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:visibility="visible"
+        android:contentDescription="star"
+        style="?android:attr/starStyle" />
+
+</RelativeLayout>
