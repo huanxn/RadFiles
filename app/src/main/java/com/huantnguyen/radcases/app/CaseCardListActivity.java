@@ -47,24 +47,53 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	// intent arguments
 	public final static String ARG_KEY_ID = "com.huantnguyen.radcases.ARG_KEY_ID";
 
+	// saved state argument for action bar spinner
+	private static final String CURRENT_SPINNER_STATE = "spinner_state";
+
 	private PlaceholderFragment fragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-
 		super.onCreate(savedInstanceState);
 //		setContentView(R.layout.activity_case_cardlist);
 
-		if (savedInstanceState == null) {
+		if (savedInstanceState == null)
+		{
 			fragment = new PlaceholderFragment();
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment)
 					.commit();
 		}
+		else
+		{
+			// set the saved filter/spinner state
+			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
+		}
 
-		// restoreActionBar will set up the spinner list and run the first populateCards
+		// Set up the Action Bar dropdown spinner list
+		// used for sorting the cases per user selected criteria
+		SpinnerAdapter actionbarSpinnerAdapter = ArrayAdapter.createFromResource(getActionBar().getThemedContext(), R.array.action_list, android.R.layout.simple_spinner_dropdown_item);
+		ActionBar actionBar = getActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new ActionBar.OnNavigationListener()
+		{
+			String[] strings = getResources().getStringArray(R.array.action_list);
 
+			@Override
+			public boolean onNavigationItemSelected(int itemPosition, long itemId)
+			{
+				// if item position changes, then repopulate cards using the new criteria
+				if(caseFilterMode != itemPosition)
+				{
+					caseFilterMode = itemPosition;
+					fragment.populateCards();
+				}
+
+				return false;
+			}
+		});
 	}
 
 	//
@@ -74,7 +103,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-
 		// Inflate the menu items for use in the action bar
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.case_list, menu);
@@ -93,7 +121,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-
 		// Handle presses on the action bar items
 		switch (item.getItemId())
 		{
@@ -120,6 +147,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 	final static int REQUEST_CASE_DETAILS = 1;
 	final static int REQUEST_ADD_CASE = 2;
+
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -155,40 +183,33 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 	/**
 	 * Set up / Restore the spinner action bar after navigation drawer is closed
+	 * override to use NAVIGATION_MODE_LIST instead of NAVIGATION_MODE_STANDARD
 	 */
 	@Override
 	public void restoreActionBar()
 	{
-		// Action Bar dropdown spinner list
-		SpinnerAdapter actionbarSpinnerAdapter = ArrayAdapter.createFromResource(getActionBar().getThemedContext(), R.array.action_list, android.R.layout.simple_spinner_dropdown_item);
 		ActionBar actionBar = getActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new ActionBar.OnNavigationListener()
-		{
-			String[] strings = getResources().getStringArray(R.array.action_list);
+	}
 
-			@Override
-			public boolean onNavigationItemSelected(int itemPosition, long itemId)
-			{
-				// if switching modes, otherwise it is closing the navigation drawer and should do nothing to the list
-				if(caseFilterMode == itemPosition)
-				{
-					caseFilterMode = itemPosition;
-					fragment.populateCards();
-				}
 
-				return false;
-			}
-		});
+	/**
+	 * Save state of the action bar spinner
+	 * @param outState
+	 */
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState)
+	{
+		super.onSaveInstanceState(outState);
+		outState.putInt(CURRENT_SPINNER_STATE, getActionBar().getSelectedNavigationIndex());
 	}
 
 
 	/**
 	 * Placeholder fragment
 	 */
-
 	public static class PlaceholderFragment extends Fragment
 	{
 		View rootView;

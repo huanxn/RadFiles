@@ -401,7 +401,6 @@ public class TouchImageView extends ImageView {
     /**
      * Set zoom parameters equal to another TouchImageView. Including scale, position,
      * and ScaleType.
-     * @param TouchImageView
      */
     public void setZoom(TouchImageView img) {
     	PointF center = img.getScrollPosition();
@@ -431,9 +430,7 @@ public class TouchImageView extends ImageView {
     
     /**
      * Set the focus point of the zoomed image. The focus points are denoted as a fraction from the
-     * left and top of the view. The focus points can range in value between 0 and 1. 
-     * @param focusX
-     * @param focusY
+     * left and top of the view. The focus points can range in value between 0 and 1.
      */
     public void setScrollPosition(float focusX, float focusY) {
     	setZoom(normalizedScale, focusX, focusY);
@@ -811,7 +808,6 @@ public class TouchImageView extends ImageView {
     /**
      * Responsible for all touch events. Handles the heavy lifting of drag and also sends
      * touch events to Scale Detector and Gesture Detector.
-     * @author Ortiz
      *
      */
     private class PrivateOnTouchListener implements OnTouchListener {
@@ -1020,7 +1016,6 @@ public class TouchImageView extends ImageView {
 		 * Interpolate between where the image should start and end in order to translate
 		 * the image so that the point that is touched is what ends up centered at the end
 		 * of the zoom.
-		 * @param t
 		 */
 		private void translateImageToCenterTouchPosition(float t) {
 			float targetX = startTouch.x + t * (endTouch.x - startTouch.x);
@@ -1031,7 +1026,6 @@ public class TouchImageView extends ImageView {
 		
 		/**
 		 * Use interpolator to get t
-		 * @return
 		 */
 		private float interpolate() {
 			long currTime = System.currentTimeMillis();
@@ -1043,8 +1037,6 @@ public class TouchImageView extends ImageView {
 		/**
 		 * Interpolate the current targeted zoom and get the delta
 		 * from the current zoom.
-		 * @param t
-		 * @return
 		 */
 		private double calculateDeltaScale(float t) {
 			double zoom = startZoom + t * (targetZoom - startZoom);
