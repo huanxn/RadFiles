@@ -1,12 +1,17 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.SearchManager;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -85,7 +90,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			public boolean onNavigationItemSelected(int itemPosition, long itemId)
 			{
 				// if item position changes, then repopulate cards using the new criteria
-				if(caseFilterMode != itemPosition)
+				if (caseFilterMode != itemPosition)
 				{
 					caseFilterMode = itemPosition;
 					fragment.populateCards();
@@ -501,6 +506,57 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 							}
 
 							startActivityForResult(detailIntent, REQUEST_CASE_DETAILS);
+						}
+					});
+
+					// set the OnLongClickListener: opens alert dialog
+					case_card.setOnLongClickListener(new Card.OnLongCardClickListener()
+					{
+						@Override
+						public boolean onLongClick(Card card, View view)
+						{
+							// declared "final" for access from within alert dialog
+							final long key_id = Long.parseLong(card.getId());
+
+							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+							CharSequence[] imageSources = {"Edit", "*Delete", "*Share", "Cancel"};
+							builder.setItems(imageSources, new DialogInterface.OnClickListener()
+							{
+								public void onClick(DialogInterface dialog, int index)
+								{
+									switch (index)
+									{
+										// Edit Case
+										case 0:
+											// open EditCaseActivity, giving the CASE key_id argument
+											Intent intent = new Intent(getActivity(), EditCaseActivity.class);
+											intent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
+
+											startActivityForResult(intent, CaseDetailActivity.REQUEST_EDIT_CASE);
+
+											break;
+
+										// Delete Case
+										case 1:
+
+											break;
+
+										// Share Case
+										case 2:
+											break;
+
+										// Cancel.  Do Nothing.
+										case 3:
+											break;
+
+									}
+								}
+							});
+
+							AlertDialog alert = builder.create();
+							alert.show();
+
+							return true; // not sure what this does TODO
 						}
 					});
 

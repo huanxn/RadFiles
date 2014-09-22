@@ -66,7 +66,9 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		}
 		else
 		{
-			// for FadingActionBar, add extra top margin to compensate for transparent overlying action bar
+			// translucent and overlying action bar theme set in manifest XML
+
+			// for FadingActionBar, add extra top margin to navigation drawer to compensate for transparent overlying action bar
 			super.onCreate_for_FAB(savedInstanceState);
 		}
 
@@ -289,8 +291,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				//int actionBarBg = mArguments != null ? mArguments.getInt(ARG_ACTION_BG_RES) : R.drawable.ab_background_light;
 
 				mFadingHelper = new FadingActionBarHelper()
-						                //.actionBarBackground(R.drawable.actionbar_background_dark)
-						                .actionBarBackground(R.drawable.ab_background)
+						                .actionBarBackground(R.drawable.actionbar_background_dark)
+						                //.actionBarBackground(R.drawable.ab_background_blue)
 						                .headerLayout(R.layout.activity_case_detail_header)
 						                .contentLayout(R.layout.fragment_case_detail)
 				;

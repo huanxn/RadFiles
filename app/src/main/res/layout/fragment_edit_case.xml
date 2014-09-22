@@ -39,7 +39,7 @@
                 android:id="@+id/edit_patient_id"
                 style="@style/sectionEditText"
                 android:hint="@string/patient_id_prompt"
-                android:inputType="number"/>
+                />
 
             <EditText
                 android:id="@+id/edit_diagnosis"

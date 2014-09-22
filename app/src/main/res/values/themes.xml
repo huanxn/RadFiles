@@ -18,5 +18,5 @@
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
-    
+
 </resources>
