@@ -15,7 +15,6 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,9 +63,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 	static String followup_comment;
 	static boolean followup_bool = false;
 
-	private static ImageAdapter mGridAdapter; //del
-	private static GridView gridview; //del
-	private static ImageGridView imageGridView;
+	private static ImageGridView imageGridView; // Grid of images
 
 	private static final int MAX_IMAGES = CasesProvider.MAX_NUM_IMAGES;
 	private static String [] tempImageFilename;	            // images to add if user presses "Save"
@@ -113,27 +110,15 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 			// no key_id passed from the parent activity
 
 			Toast.makeText(this, "Add data", Toast.LENGTH_SHORT).show();
-
-/*
-			//TODO possibly implement AddNewActivity code
-			//AddNew
-			study_type = "";
+			// possibly implement AddNewActivity code
 			// default date shown in calendar for new case is the current day (today)
-
-			//Action Bar
-*/
 		}
 		else
 		{
 			// UpdateData activity
-
-
 			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
 			selected_row_cursor = getContentResolver().query(row_uri, null, null, null, null);
-
-			//ActionBar
 		}
-
 
 		// get study types list for the spinner
 		study_types_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
@@ -497,7 +482,6 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 				if(imageGridView != null)
 				{
 					imageGridView.addImage(tempImageFilename[imageCounter]);
-					//UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
 				}
 
 				// Increment counter for next image captured
@@ -545,17 +529,9 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 	// Button to show datePicker
 	public void onClick_showDatePicker(View v)
 	{
-		//TODO open datepicker with default to date selected in button text
 		DialogFragment datePicker = DatePickerFragment.newInstance(selected_date.get(Calendar.YEAR), selected_date.get(Calendar.MONTH), selected_date.get(Calendar.DAY_OF_MONTH));
 
 		datePicker.show(this.getFragmentManager(), "datePicker");
-	}
-
-	// Button to show KeyWords checkboxlist
-	public void onClick_showKeyWords(View v)
-	{
-		//TODO open datepicker with default to date selected in button text
-		Toast.makeText(this,"Clicked key words",Toast.LENGTH_SHORT).show();
 	}
 
 	/*
@@ -646,8 +622,6 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState)
 		{
-
-
 			// SPINNER
 			study_type_spinner = (CustomSpinner) view.findViewById(R.id.edit_study_type);
 			String[] columns = new String[]{CasesProvider.KEY_STUDY_TYPE};
@@ -700,7 +674,6 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 			{
 				// set up imageGridView to be able to add images later to new case
 				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview));
-
 			}
 
 			super.onViewCreated(view, savedInstanceState);
@@ -708,24 +681,6 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 
 		public void populateFields(View view, final long selected_key_id)
 		{
-			/*
-			//TODO FIX THIS to refresh?
-			if (getArguments().containsKey(ARG_CASE_ID))
-			{
-				selected_key_id = getArguments().getLong(ARG_CASE_ID);
-
-				// get db row of clicked case
-				Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
-				case_cursor = getActivity().getContentResolver().query(uri, null, null, null, null, null);
-
-			}
-			else    //TODO show error message (no selected key id from listview)
-			{
-				selected_key_id = -1;
-				return;
-			}
-			*/
-
 			// get db row of clicked case
 			Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
 			case_cursor = getActivity().getContentResolver().query(uri, null, null, null, null, null);
@@ -812,7 +767,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 					}
 					catch (ParseException e)
 					{
-						// TODO Auto-generated catch block
+						// Auto-generated catch block
 						e.printStackTrace();
 					}
 
@@ -833,100 +788,12 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 				// KEY IMAGES
 
 				//if(numImages > 0)
-				{
-
-					// get all of the images linked to this case _id
+				{					// get all of the images linked to this case _id
 					String [] image_args = {String.valueOf(selected_key_id)};
 					Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 
 					imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
 					imageGridView.notifyDataSetChanged();
-					/*
-					//////////////
-					// IMAGE GRID VIEW
-
-					gridview = (GridView) view.findViewById(R.id.imageGridview);
-					mGridAdapter = new ImageAdapter(getActivity());
-					mGridAdapter.setImages(image_cursor);
-					gridview.setAdapter(mGridAdapter);
-
-					gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-						public void onItemClick(AdapterView<?> parent, View v, int position, long id)
-						{
-							Intent imageGalleryIntent = new Intent(getActivity(), ImageGalleryActivity.class);
-							imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, selected_key_id);
-							imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
-							startActivity(imageGalleryIntent);
-						}
-					});
-
-					gridview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-						public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id)
-						{
-							// Delete image
-							final long image_key_id = id;
-							final int image_position = position;
-
-							AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
-							CharSequence[] imageSources = {"Delete Image", "Set Thumbnail", "Cancel"};
-							builder.setItems(imageSources, new DialogInterface.OnClickListener()
-							{
-								public void onClick(DialogInterface dialog, int index)
-								{
-									switch (index)
-									{
-										// Delete the photo.
-										case 0:
-
-											// if image_key_id = -1, then it is a temporary image, not in database
-											if(image_key_id != -1)
-											{
-												// delete from IMAGES table by unique row id
-												Uri image_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_key_id);
-												getActivity().getContentResolver().delete(image_row_uri, null, null);
-
-												// Update the CASES table, with image count decremented by 1
-												ContentValues case_values = new ContentValues();
-												case_values.put(CasesProvider.KEY_IMAGE_COUNT, numImages--);
-
-												Uri case_row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-												getActivity().getContentResolver().update(case_row_uri, case_values, null, null);
-											}
-
-											// delete from gridview adapter
-											mGridAdapter.deleteImage(image_position);
-											UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
-
-											// TODO Delete the actual file
-
-
-											break;
-
-										// Set thumbnail
-										case 1:
-											//TODO set thumbnail
-											break;
-
-										// Cancel.  Do Nothing.
-										case 2:
-											break;
-
-									}
-								}
-							});
-
-							AlertDialog alert = builder.create();
-							alert.show();
-
-							Toast.makeText(getActivity(), "Long press image: " + position + " / " + id, Toast.LENGTH_SHORT).show();
-							return false;
-						}
-					});
-
-					mGridAdapter.notifyDataSetChanged();
-					UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
-					////////////////
-					*/
 				}
 
 				// KEYWORD_LIST

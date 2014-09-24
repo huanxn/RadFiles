@@ -30,7 +30,8 @@ public class ImageGalleryActivity extends Activity {
 	private static long case_id;
 	private static String TAG = "KeyImageGallery Activity";
 
-	public static final String ARG_POSITION = "INITIAL_POSITION";
+	public static final String ARG_POSITION = "com.huantnguyen.radcases.INITIAL_POSITION";
+	public final static String ARG_IMAGE_FILES = "com.huantnguyen.radcases.ARG_IMAGE_FILES";
 
 	ViewPager mPager;
 	PageIndicator mIndicator;
@@ -76,28 +77,34 @@ public class ImageGalleryActivity extends Activity {
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState)
+	{
 
 		case_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
-		int init_pos = getIntent().getIntExtra(ARG_POSITION,0);
+		int init_pos = getIntent().getIntExtra(ARG_POSITION, 0);
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_keyimage_gallery);
+		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
+		TouchImageAdapter mAdapter = new TouchImageAdapter();
 
 		if(case_id == -1)   //error getting case id in intent extra
 		{
 			Log.e(TAG, "Did not get usable case id for key image gallery.");
-			return;
+
+			String [] imageFilenames = getIntent().getStringArrayExtra(ARG_IMAGE_FILES);
+			mAdapter.setImages(imageFilenames);
+		}
+		else
+		{
+			// get all of the images linked to this case _id
+			String[] image_args = {String.valueOf(case_id)};
+			Cursor cursor = getApplication().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+			//Set the adapter to get images from cursor
+			mAdapter.setImages(cursor);
 		}
 
-		// get all of the images linked to this case _id
-		String [] image_args = {String.valueOf(case_id)};
-		Cursor cursor = getApplication().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_keyimage_gallery);
-
-		//Set the adapter to get images from cursor
-        ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
-        TouchImageAdapter mAdapter = new TouchImageAdapter();
-		mAdapter.setImages(cursor);
 		mViewPager.setAdapter(mAdapter);
 
 		mIndicator = (UnderlinePageIndicator)findViewById(R.id.indicator);
@@ -155,9 +162,16 @@ public class ImageGalleryActivity extends Activity {
 		    return;
 	    }
 
-	    // TODO
-	    public void setImages(ImageAdapter image_adapter)
+	    // set the ImageGalleryActivity images by String array)
+	    public void setImages(String [] in_filenames)
 	    {
+		    imageFilename = new String[in_filenames.length];
+		    int image_counter = 0;
+		    for(int i = 0; i < in_filenames.length; i++)
+		    {
+			    imageFilename[i] = in_filenames[i];
+		    }
+		    return;
 
 	    }
 

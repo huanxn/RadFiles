@@ -23,7 +23,6 @@ public class ImageGridView
 	private ImageAdapter mAdapter;
 
 	// Constructor for ImageGridView without any intial images
-	// TODO how to handle image click gallery without case image cursor
 	public ImageGridView(Context ctx, GridView gView)
 	{
 		context = ctx;
@@ -31,6 +30,9 @@ public class ImageGridView
 		case_key_id = -1;
 
 		mAdapter = new ImageAdapter(context);
+		gridView.setAdapter(mAdapter);
+
+		SetClickListeners();
 
 	}
 	// Constructor for ImageGridView, set up with images
@@ -41,16 +43,21 @@ public class ImageGridView
 		case_key_id = _id;
 
 		mAdapter = new ImageAdapter(context);
+		gridView.setAdapter(mAdapter);
 
 		mAdapter.setImages(image_cursor);
-		gridView.setAdapter(mAdapter);
 		Resize();
 
+		SetClickListeners();
+	}
+
+	private void SetClickListeners()
+	{
 		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
 				Intent imageGalleryIntent = new Intent(context, ImageGalleryActivity.class);
-				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, case_key_id);  //TODO pass imageadapter or string of image file names instead of a cursor
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilenames());
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
 				context.startActivity(imageGalleryIntent);
 
@@ -86,6 +93,7 @@ public class ImageGridView
 
 								// delete from gridview adapter
 								mAdapter.deleteImage(image_position);
+								notifyDataSetChanged();
 
 								// TODO if delete last image, change HAS_IMAGE to false
 								if(mAdapter.getCount()==0)
@@ -133,10 +141,10 @@ public class ImageGridView
 		//UtilClass.expandGridView(gridView, mAdapter.getImageSizePx());
 		//int numCols = gridView.getNumColumns(); //doesn't work
 		int numCols = 2;
-
 		int itemCount = mAdapter.getCount();
 
-		int itemHeight = mAdapter.getImageSizePx();
+		//int itemHeight = mAdapter.getImageSizePx();
+		int itemHeight = UtilClass.IMAGE_GRID_SIZE;
 
 		int numRows = itemCount/numCols;
 		if(itemCount%numCols > 0)
@@ -160,6 +168,7 @@ public class ImageGridView
 	public void addImage(String newImage)
 	{
 		mAdapter.addImage(newImage);
+		notifyDataSetChanged();
 		Resize();
 	}
 

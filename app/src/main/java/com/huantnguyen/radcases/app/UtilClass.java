@@ -595,32 +595,6 @@ public class UtilClass extends Activity
 		return displayMetrics.heightPixels / displayMetrics.density;
 	}
 
-	/**
-	 * Change the vertical size of a GridView to fit the number of images
-	 * @param gridView
-	 * @param itemHeight
-	 */
-	public static void expandGridView(GridView gridView, int itemHeight)
-	{
-		int numCols = gridView.getNumColumns(); //doesn't work
-		numCols = 2;
-
-		int itemCount = gridView.getAdapter().getCount();
-
-		int numRows = itemCount/numCols;
-		if(itemCount%numCols > 0)
-			numRows += 1;
-
-		ViewGroup.LayoutParams layoutParams = gridView.getLayoutParams();
-
-
-		//layoutParams.height = convertDpToPixels(context, IMAGE_GRID_SIZE*numRows); //this is in pixels
-		layoutParams.height = itemHeight*numRows; //this is in pixels
-
-
-		gridView.setLayoutParams(layoutParams);
-	}
-
 	public static String convertDateString(String original_date_str, SimpleDateFormat original_sdf, SimpleDateFormat display_sdf)
 	{
 		if(original_date_str == null)

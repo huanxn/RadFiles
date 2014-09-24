@@ -131,4 +131,23 @@ public class ImageAdapter extends BaseAdapter
 		return imageSizePx;
 	}
 
+	// get the image filename at the specified index within the string array
+	public String getImageFilename(int index)
+	{
+		if(index < getCount())
+		{
+			return imageFilenames[index];
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	// get the image filename at the specified index within the string array
+	public String [] getImageFilenames()
+	{
+		return imageFilenames;
+	}
+
 }
