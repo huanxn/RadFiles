@@ -81,7 +81,7 @@
                 android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />
         </activity>
         <activity
-            android:name="com.huantnguyen.radcases.app.KeyImageGalleryActivity"
+            android:name=".ImageGalleryActivity"
             android:label="Key Images"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity"
             android:theme="@style/AppTheme.TranslucentActionBar" >

@@ -64,8 +64,9 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 	static String followup_comment;
 	static boolean followup_bool = false;
 
-	private static ImageAdapter mGridAdapter;
-	private static GridView gridview;
+	private static ImageAdapter mGridAdapter; //del
+	private static GridView gridview; //del
+	private static ImageGridView imageGridView;
 
 	private static final int MAX_IMAGES = CasesProvider.MAX_NUM_IMAGES;
 	private static String [] tempImageFilename;	            // images to add if user presses "Save"
@@ -493,10 +494,10 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 				tempImageFilename[imageCounter] = tempImageFile.getAbsolutePath();
 
 				// show new image in grid display of key images
-				if(mGridAdapter != null)
+				if(imageGridView != null)
 				{
-					mGridAdapter.addImage(tempImageFilename[imageCounter]);
-					UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
+					imageGridView.addImage(tempImageFilename[imageCounter]);
+					//UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
 				}
 
 				// Increment counter for next image captured
@@ -522,10 +523,9 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 
 			//UtilClass.setPic(imageViews[imageCounter], tempImageFilename[imageCounter], UtilClass.IMAGE_THUMB_SIZE);
 
-			if (mGridAdapter != null)
+			if (imageGridView != null)
 			{
-				mGridAdapter.addImage(tempImageFilename[imageCounter]);
-				UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
+				imageGridView.addImage(tempImageFilename[imageCounter]);
 			}
 
 
@@ -698,9 +698,9 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 			// else selected_row_cursor==null, then adding new data row.  no data to fetch
 			else
 			{
-				gridview = (GridView) view.findViewById(R.id.imageGridview);
-				mGridAdapter = new ImageAdapter(getActivity());
-				gridview.setAdapter(mGridAdapter);
+				// set up imageGridView to be able to add images later to new case
+				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview));
+
 			}
 
 			super.onViewCreated(view, savedInstanceState);
@@ -839,8 +839,12 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 					String [] image_args = {String.valueOf(selected_key_id)};
 					Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 
+					imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
+					imageGridView.notifyDataSetChanged();
+					/*
 					//////////////
 					// IMAGE GRID VIEW
+
 					gridview = (GridView) view.findViewById(R.id.imageGridview);
 					mGridAdapter = new ImageAdapter(getActivity());
 					mGridAdapter.setImages(image_cursor);
@@ -849,9 +853,9 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 					gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 						public void onItemClick(AdapterView<?> parent, View v, int position, long id)
 						{
-							Intent imageGalleryIntent = new Intent(getActivity(), KeyImageGalleryActivity.class);
+							Intent imageGalleryIntent = new Intent(getActivity(), ImageGalleryActivity.class);
 							imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, selected_key_id);
-							imageGalleryIntent.putExtra(KeyImageGalleryActivity.ARG_POSITION, position);
+							imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
 							startActivity(imageGalleryIntent);
 						}
 					});
@@ -922,6 +926,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 					mGridAdapter.notifyDataSetChanged();
 					UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
 					////////////////
+					*/
 				}
 
 				// KEYWORD_LIST

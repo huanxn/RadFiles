@@ -17,7 +17,7 @@ import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
 
-public class KeyImageGalleryActivity extends Activity {
+public class ImageGalleryActivity extends Activity {
 	
 	/**
 	 * Step 1: Download and set up v4 support library: http://developer.android.com/tools/support-library/setup.html
@@ -153,6 +153,12 @@ public class KeyImageGalleryActivity extends Activity {
 
 		    }
 		    return;
+	    }
+
+	    // TODO
+	    public void setImages(ImageAdapter image_adapter)
+	    {
+
 	    }
 
     }

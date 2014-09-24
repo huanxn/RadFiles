@@ -291,7 +291,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				//int actionBarBg = mArguments != null ? mArguments.getInt(ARG_ACTION_BG_RES) : R.drawable.ab_background_light;
 
 				mFadingHelper = new FadingActionBarHelper()
-						                .actionBarBackground(R.drawable.actionbar_background_dark)
+						                .actionBarBackground(R.drawable.ab_background_gray)
 						                //.actionBarBackground(R.drawable.ab_background_blue)
 						                .headerLayout(R.layout.activity_case_detail_header)
 						                .contentLayout(R.layout.fragment_case_detail)
@@ -321,22 +321,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			}
 			else
 			{
+				// standard ActionBar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
-				// TODO probably can delete this (added style property)
-				// work-around to take space of actionbar that now isn't there because FadingActionBar
-				//view.findViewById(R.id.place_holder).setVisibility(View.VISIBLE);
-
-
-
-/*			LinearLayout layout = (LinearLayout)view.findViewById(R.id.case_detail_info_container);
-			layout.setLayoutParams(new LinearLayout.LayoutParams(
-					                                                 LinearLayout.LayoutParams.WRAP_CONTENT,
-					                                                 LinearLayout.LayoutParams.WRAP_CONTENT
-			));
-
-			final LinearLayout.MarginLayoutParams params =(LinearLayout.MarginLayoutParams)layout.getLayoutParams();
-			params.setMargins(0,48,0,0);
-*/
 			}
 
 			return view;
@@ -503,33 +489,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					String headerImageFilename = image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);
 					UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
-					// rootView.findViewById(R.id.place_holder).setVisibility(View.GONE);
 
-
-					//////////////
-					// IMAGE GRID VIEW
-					GridView gridview = (GridView) rootView.findViewById(R.id.imageGridview);
-					ImageAdapter mAdapter = new ImageAdapter(getActivity());
-					mAdapter.setImages(image_cursor);
-					gridview.setAdapter(mAdapter);
-
-					gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-						public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-
-							Intent imageGalleryIntent = new Intent(getActivity(), KeyImageGalleryActivity.class);
-							imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, selected_key_id);
-							imageGalleryIntent.putExtra(KeyImageGalleryActivity.ARG_POSITION, position);
-							startActivity(imageGalleryIntent);
-
-						}
-					});
+					ImageGridView imageGridView = new ImageGridView(getActivity(),(GridView)rootView.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
 
 					image_cursor.close();
 
-					UtilClass.expandGridView(gridview, mAdapter.getImageSizePx());
-					////////////////
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
-
 				}
 				else
 				{

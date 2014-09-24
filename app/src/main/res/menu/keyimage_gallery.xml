@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.huantnguyen.radcases.app.KeyImageGalleryActivity">
+      tools:context="com.huantnguyen.radcases.app.ImageGalleryActivity">
 
     <!-- Edit this case, should appear as action button -->
     <item
