@@ -22,7 +22,7 @@
         <item name="android:textSize">@dimen/largeTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
-        <item name="android:paddingTop">5dip</item>
+        <item name="android:paddingTop">0dip</item>
         <item name="android:background">@color/dark_gray</item>
     </style>
 

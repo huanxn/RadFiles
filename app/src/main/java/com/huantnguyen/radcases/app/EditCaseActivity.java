@@ -69,9 +69,9 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 	private static String [] tempImageFilename;	            // images to add if user presses "Save"
 	private static int numImages;
 	private File tempImageFile;
-	private static int imageCounter;
+	private static int imageCounter;                            // counter for tempImageFilename, as new images are added  ***right now same as numNewImages?  //todo delete this?
 	private static int new_image_index;
-	private static int numNewImages;
+	private static int numNewImages;                            // counter for number of new images taken.  to be added into DB when saving changes, or deleted from file system when discarding changes
 	private static int [] deleteImages = new int[MAX_IMAGES];  // indeces of images marked for deletion if user presses "Save"
 
 	private static Animator mCurrentAnimator;
@@ -335,6 +335,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		}
 
 
+		// Save image table data
 		ContentValues imageValues = new ContentValues();
 
 		for(int i = 0; i < numNewImages; i++)
@@ -346,7 +347,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 			//store in image table
 			imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
 			imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, tempImageFilename[i]);
-			imageValues.put(CasesProvider.KEY_ORDER, numImages+i);
+			imageValues.put(CasesProvider.KEY_ORDER, numImages+i);      // set order to display images.  new files last.  //todo user reodering
 
 			getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
 		}
@@ -430,20 +431,8 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 	 */
 	public void getPictureFromCamera()
 	{
-		/*
-		imageCounter = 0;
-		tempImageFilename[imageCounter] = UtilClass.getCroppedPictureFromCamera(this);
-
-		UtilClass.setPic((ImageView) findViewById(R.id.edit_ImageView), tempImageFilename[imageCounter], IMAGE_SIZE);
-		UtilClass.setPic((ImageView) findViewById(R.id.edit_ImageView_expanded), tempImageFilename[imageCounter], IMAGE_SIZE_EXPANDED);
-
-		// Increment counter for next image captured
-		imageCounter += 1;
-		*/
-
 		// runs camera intent.  returns result code to onActivityResult, which will run crop intent if successful
 		tempImageFile = UtilClass.getPictureFromCamera(this, REQUEST_IMAGE_CAPTURE);
-
 	}
 
 	////////////////////////
@@ -458,11 +447,13 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		{
 			// successful capture of new photo from camera (called from UtilClass method)
 			// replaces tempImageFile with the new cropped image
-			// if successful, return to onActivityResult request crop image
+			// if successful, return to onActivityResult(REQUEST_CROP_IMAGE)
 			UtilClass.CropPicture(this, tempImageFile, REQUEST_CROP_IMAGE);
 		}
 		else if(requestCode == REQUEST_CROP_IMAGE && resultCode == RESULT_OK)
 		{
+			// successful crop of new photo from the camera (called from onActivityResult(REQUEST_IMAGE_CAPTURE)->UtilClass.CropPicture())
+
 			/*
 			//Wysie_Soh: Delete the temporary file
 			File f = new File(mImageCaptureUri.getPath());
@@ -479,10 +470,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 				tempImageFilename[imageCounter] = tempImageFile.getAbsolutePath();
 
 				// show new image in grid display of key images
-				if(imageGridView != null)
-				{
-					imageGridView.addImage(tempImageFilename[imageCounter]);
-				}
+				imageGridView.addImage(tempImageFilename[imageCounter]);
 
 				// Increment counter for next image captured
 				imageCounter += 1;
@@ -494,11 +482,11 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 				// delete tempImageFile since crop was canceled?
 			}
 
-
-
 		}
 		else if(requestCode == REQUEST_SELECT_IMAGE_FROM_FILE && resultCode == RESULT_OK)
 		{
+			// successful selection of photo from file explorer
+
 			//todo make copy of file into app pictures folder
 			//UtilClass.copyFile(src, dst);
 
@@ -507,21 +495,11 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 
 			//UtilClass.setPic(imageViews[imageCounter], tempImageFilename[imageCounter], UtilClass.IMAGE_THUMB_SIZE);
 
-			if (imageGridView != null)
-			{
-				imageGridView.addImage(tempImageFilename[imageCounter]);
-			}
-
-
-
-	//not using this anymore i think
-	// 		UtilClass.setPic((ImageView) findViewById(R.id.edit_ImageView_expanded), tempImageFilename[imageCounter], UtilClass.IMAGE_SIZE);
+			imageGridView.addImage(tempImageFilename[imageCounter]);
 
 			// Increment counter for next image captured
 			imageCounter += 1;
 			numNewImages += 1;
-
-			//UtilClass.expandGridView(gridview, UtilClass.IMAGE_GRID_SIZE);
 		}
 	}
 
@@ -704,7 +682,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 
 				study_type = case_cursor.getString(CasesProvider.COL_STUDY_TYPE);
 				db_date_str = case_cursor.getString(CasesProvider.COL_DATE);
-				numImages = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
+//				numImages = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
 
 
 				if (patient_ID != null)
@@ -786,15 +764,13 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 				}
 
 				// KEY IMAGES
+				String [] image_args = {String.valueOf(selected_key_id)};
+				Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+				numImages = image_cursor.getCount();
 
-				//if(numImages > 0)
-				{					// get all of the images linked to this case _id
-					String [] image_args = {String.valueOf(selected_key_id)};
-					Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
+				imageGridView.notifyDataSetChanged();
 
-					imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
-					imageGridView.notifyDataSetChanged();
-				}
 
 				// KEYWORD_LIST
 				if (original_keyWords != null && !original_keyWords.isEmpty())

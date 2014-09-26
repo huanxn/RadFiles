@@ -4,14 +4,11 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.SearchManager;
-import android.content.ContentUris;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -69,6 +66,27 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment)
 					.commit();
+
+			// Set up the Action Bar dropdown spinner list
+			// used for sorting the cases per user selected criteria
+			SpinnerAdapter actionbarSpinnerAdapter = ArrayAdapter.createFromResource(getActionBar().getThemedContext(), R.array.action_list, android.R.layout.simple_spinner_dropdown_item);
+			ActionBar actionBar = getActionBar();
+			actionBar.setDisplayShowTitleEnabled(false);
+			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+			actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new ActionBar.OnNavigationListener()
+			{
+				//String[] strings = getResources().getStringArray(R.array.action_list);
+
+				@Override
+				public boolean onNavigationItemSelected(int itemPosition, long itemId)
+				{
+					// when item position changes, then repopulate cards using the new criteria
+					caseFilterMode = itemPosition;
+					fragment.populateCards();
+
+					return false;
+				}
+			});
 		}
 		else
 		{
@@ -76,29 +94,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
 		}
 
-		// Set up the Action Bar dropdown spinner list
-		// used for sorting the cases per user selected criteria
-		SpinnerAdapter actionbarSpinnerAdapter = ArrayAdapter.createFromResource(getActionBar().getThemedContext(), R.array.action_list, android.R.layout.simple_spinner_dropdown_item);
-		ActionBar actionBar = getActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new ActionBar.OnNavigationListener()
-		{
-			String[] strings = getResources().getStringArray(R.array.action_list);
 
-			@Override
-			public boolean onNavigationItemSelected(int itemPosition, long itemId)
-			{
-				// if item position changes, then repopulate cards using the new criteria
-				if (caseFilterMode != itemPosition)
-				{
-					caseFilterMode = itemPosition;
-					fragment.populateCards();
-				}
-
-				return false;
-			}
-		});
 	}
 
 	//
