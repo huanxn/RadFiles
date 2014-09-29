@@ -35,7 +35,7 @@ import android.widget.SpinnerAdapter;
  * A Spinner view that does not dismiss the dialog displayed when the control is "dropped down"
  * and the user presses it. This allows for the selection of more than one option.
  */
-public class MultiSelectSpinner extends Spinner implements OnMultiChoiceClickListener {
+public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickListener {
     String[] _items = null;
     boolean[] _selection = null;
     
@@ -45,7 +45,7 @@ public class MultiSelectSpinner extends Spinner implements OnMultiChoiceClickLis
      * Constructor for use when instantiating directly.
      * @param context
      */
-    public MultiSelectSpinner(Context context) {
+    public SpinnerMultiSelect(Context context) {
         super(context);
         
         _proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
@@ -57,7 +57,7 @@ public class MultiSelectSpinner extends Spinner implements OnMultiChoiceClickLis
      * @param context
      * @param attrs
      */
-    public MultiSelectSpinner(Context context, AttributeSet attrs) {
+    public SpinnerMultiSelect(Context context, AttributeSet attrs) {
         super(context, attrs);
         
         _proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
@@ -93,12 +93,12 @@ public class MultiSelectSpinner extends Spinner implements OnMultiChoiceClickLis
     }
     
     /**
-     * MultiSelectSpinner does not support setting an adapter. This will throw an exception.
+     * SpinnerMultiSelect does not support setting an adapter. This will throw an exception.
      * @param adapter
      */
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
-        throw new RuntimeException("setAdapter is not supported by MultiSelectSpinner.");
+        throw new RuntimeException("setAdapter is not supported by SpinnerMultiSelect.");
     }
     
     /**

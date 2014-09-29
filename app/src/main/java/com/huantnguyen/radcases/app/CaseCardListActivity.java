@@ -18,7 +18,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.SearchView;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -69,7 +68,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 			// Set up the Action Bar dropdown spinner list
 			// used for sorting the cases per user selected criteria
-			SpinnerAdapter actionbarSpinnerAdapter = ArrayAdapter.createFromResource(getActionBar().getThemedContext(), R.array.action_list, android.R.layout.simple_spinner_dropdown_item);
+			//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
+			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getActionBar().getThemedContext(), R.layout.spinner_actionbar, "Cases", getResources().getStringArray(R.array.actionbar_sort_list));
+			((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			ActionBar actionBar = getActionBar();
 			actionBar.setDisplayShowTitleEnabled(false);
 			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);

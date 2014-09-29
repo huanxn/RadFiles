@@ -58,7 +58,7 @@
                 style="@style/sectionHeader"
                 android:text="Radiology Section"/>
 
-            <com.huantnguyen.radcases.app.MultiSelectSpinner
+            <com.huantnguyen.radcases.app.SpinnerMultiSelect
                 android:id="@+id/edit_section"
                 style="@style/spinner"
                 android:prompt="@string/section_prompt"/>
@@ -70,7 +70,7 @@
                 android:layout_height="@dimen/text_box_height"
                 android:text="Studies"/>
 
-            <com.huantnguyen.radcases.app.CustomSpinner
+            <com.huantnguyen.radcases.app.SpinnerCustom
                 android:id="@+id/edit_study_type"
                 style="@style/spinner"
                 android:prompt="@string/studyType_prompt"/>
@@ -91,7 +91,7 @@
                 style="@style/sectionHeader"
                 android:text="KEY WORDS"/>
 
-            <com.huantnguyen.radcases.app.MultiSelectSpinner
+            <com.huantnguyen.radcases.app.SpinnerMultiSelect
                 android:id="@+id/edit_key_words"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"

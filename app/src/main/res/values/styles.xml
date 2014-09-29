@@ -11,6 +11,21 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    <!-- Action Bar Spinner -->
+    <style name = "spinner_actionBar_title">
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name = "android:layout_marginTop">-2dp</item>
+        <item name="android:textColor">@color/bg_white</item>
+    </style>
+
+    <style name = "spinner_actionBar_subtitle">
+        <item name = "android:textSize">12dp</item>
+        <item name = "android:layout_marginTop">-2dp</item>
+        <item name = "android:paddingLeft">1dp</item>
+        <item name="android:textColor">@color/bg_white</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
 
     <style name="stickySectionHeader"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
         <item name="android:drawableBottom">@drawable/list_section_divider</item>

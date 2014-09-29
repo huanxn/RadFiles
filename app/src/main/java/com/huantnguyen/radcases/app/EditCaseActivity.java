@@ -286,7 +286,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		}
 
 		// SECTIONS
-		String new_sections = ((MultiSelectSpinner)findViewById(R.id.edit_section)).getSelectedString();
+		String new_sections = ((SpinnerMultiSelect)findViewById(R.id.edit_section)).getSelectedString();
 		if (new_sections != null && !new_sections.isEmpty())
 		{
 			values.put(CasesProvider.KEY_SECTION, new_sections);
@@ -297,7 +297,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		}
 
 		// KEYWORDS
-		String new_keyWords = ((MultiSelectSpinner)findViewById(R.id.edit_key_words)).getSelectedString();
+		String new_keyWords = ((SpinnerMultiSelect)findViewById(R.id.edit_key_words)).getSelectedString();
 		if (new_keyWords != null && !new_keyWords.isEmpty())
 		{
 			values.put(CasesProvider.KEY_KEYWORDS, new_keyWords);
@@ -579,9 +579,9 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 	{
 		private static Cursor case_cursor;
 
-		private CustomSpinner study_type_spinner;
-		private MultiSelectSpinner key_words_spinner;
-		private MultiSelectSpinner section_spinner;
+		private SpinnerCustom study_type_spinner;
+		private SpinnerMultiSelect key_words_spinner;
+		private SpinnerMultiSelect section_spinner;
 
 		public EditCaseFragment()
 		{
@@ -601,7 +601,7 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		public void onViewCreated(View view, Bundle savedInstanceState)
 		{
 			// SPINNER
-			study_type_spinner = (CustomSpinner) view.findViewById(R.id.edit_study_type);
+			study_type_spinner = (SpinnerCustom) view.findViewById(R.id.edit_study_type);
 			String[] columns = new String[]{CasesProvider.KEY_STUDY_TYPE};
 			int[] to = new int[]{android.R.id.text1};
 
@@ -634,11 +634,11 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 			//end spinner
 
 
-			section_spinner = (MultiSelectSpinner) view.findViewById(R.id.edit_section);
+			section_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_section);
 			section_spinner.setItems(section_cursor);
 
 
-			key_words_spinner = (MultiSelectSpinner) view.findViewById(R.id.edit_key_words);
+			key_words_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_key_words);
 			key_words_spinner.setItems(key_words_cursor);
 
 			// Fetch and display data

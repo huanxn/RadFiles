@@ -40,7 +40,7 @@
     <string name="title_activity_google_drive_create_file">GoogleDriveCreateFile</string>
 
     <!-- Spinner List of sorting/filters -->
-    <string-array name="action_list">
+    <string-array name="actionbar_sort_list">
         <item>Section</item>
         <item>Recent</item>
         <item>Study Date</item>

@@ -24,22 +24,22 @@ import android.widget.TextView;
  * <p/>
  * Limitations: does not display prompt if the entry list is empty.
  */
-public class CustomSpinner extends Spinner implements DialogInterface.OnMultiChoiceClickListener
+public class SpinnerCustom extends Spinner implements DialogInterface.OnMultiChoiceClickListener
 {
 	private boolean[] selected;
 	private String[] items;
 
-	public CustomSpinner(Context context)
+	public SpinnerCustom(Context context)
 	{
 		super(context);
 	}
 
-	public CustomSpinner(Context context, AttributeSet attrs)
+	public SpinnerCustom(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
 	}
 
-	public CustomSpinner(Context context, AttributeSet attrs, int defStyle)
+	public SpinnerCustom(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
 	}
