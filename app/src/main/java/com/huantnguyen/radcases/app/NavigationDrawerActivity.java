@@ -22,37 +22,35 @@ public class NavigationDrawerActivity extends Activity
 	/**
 	 * Used to store the last screen title. For use in {@link #restoreActionBar()}.
 	 */
-	private CharSequence mTitle;
+	protected CharSequence mTitle;
+
+	final static public int POS_CASE_LIST = 0;
+	final static public int POS_CLOUD_STORAGE = 3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.activity_navigation_drawer);
-
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-
 		mTitle = getTitle();
-
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
-
-
 	}
 
 	protected void onCreate_for_FAB(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-
 		setContentView(R.layout.activity_navigation_drawer_fab);
-
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-
 		mTitle = getTitle();
-
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+	}
+
+	public void setDrawerPosition(int position)
+	{
+		mNavigationDrawerFragment.setDrawerPosition(position);
 	}
 
 	@Override
@@ -62,14 +60,14 @@ public class NavigationDrawerActivity extends Activity
 		switch (position)
 		{
 			// Interesting Case File
-			case 0:
+			case POS_CASE_LIST:
 			{
 				Intent intent = new Intent(this, CaseCardListActivity.class);
 				startActivity(intent);
 				break;
 			}
 			// Cloud Storage
-			case 3:
+			case POS_CLOUD_STORAGE:
 			{
 				Intent intent = new Intent(this, CloudStorageActivity.class);
 				startActivity(intent);

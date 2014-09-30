@@ -18,6 +18,7 @@
     <string name="title_activity_add_case">Add Case</string>
     <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
     <string name="title_activity_edit_case">Edit Case</string>
+    <string name="title_activity_export">Cloud Storage</string>
 
     <!-- Text Field Prompt Strings -->
     <string name="patient_id_prompt">Patient MRN</string>
@@ -35,7 +36,7 @@
     <string name="Ultrasound">Ultrasound</string>
     <string name="Nuclear">Nuclear</string>
     <string name="MSK">MSK</string>
-    <string name="title_activity_export">ExportActivity</string>
+
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_google_drive_create_file">GoogleDriveCreateFile</string>
 
@@ -69,6 +70,5 @@
         <item>Help</item>
     </string-array>
 
-    <string name="title_activity_nav_drawer">NavDrawerActivity</string>
 
 </resources>

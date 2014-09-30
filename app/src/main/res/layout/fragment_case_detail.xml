@@ -59,6 +59,18 @@
                 />
 
             <TextView
+                android:id="@+id/SectionLabel"
+                style="@style/sectionHeader"
+                android:autoText="false"
+                android:paddingTop="8dp"
+                android:text="SECTION"/>
+
+            <TextView
+                android:id="@+id/detail_section"
+                style="@style/sectionText"
+                android:text="detail_section"/>
+
+            <TextView
                 android:id="@+id/StudyLabel"
                 style="@style/sectionHeader"
                 android:autoText="false"

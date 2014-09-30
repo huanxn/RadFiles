@@ -29,7 +29,7 @@ import static android.view.View.GONE;
  * An activity representing a single Case detail screen. This
  * activity is only used on handset devices. On tablet-size devices,
  * item details are presented side-by-side with a list of items
- * in a {@link CaseListActivity}.
+ * in a {@link CaseCardListActivity}.
  * <p/>
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link CaseDetailFragment}.
@@ -109,23 +109,17 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if(super.onCreateOptionsMenu(menu))
-		{
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.case_detail, menu);
+		MenuItem star = menu.findItem(R.id.action_star);
 
-			// Inflate the menu; this adds items to the action bar if it is present.
-			getMenuInflater().inflate(R.menu.case_detail, menu);
-			MenuItem star = menu.findItem(R.id.action_star);
+		// Set the starred icon in action bar
+		if (fragment.isStarred())
+			star.setIcon(R.drawable.ic_action_important);
+		else
+			star.setIcon(R.drawable.ic_action_not_important);
 
-			// Set the starred icon in action bar
-			if (fragment.isStarred())
-				star.setIcon(R.drawable.ic_action_important);
-			else
-				star.setIcon(R.drawable.ic_action_not_important);
-
-		}
-
-		return true;
-
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	static final int REQUEST_EDIT_CASE = 1;
@@ -161,8 +155,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			case R.id.action_edit:
 				if (key_id != -1)
 				{
-					// open EditCaseActivity, giving the CASE key_id argument
-					Intent intent = new Intent(this, EditCaseActivity.class);
+					// open CaseEditActivity, giving the CASE key_id argument
+					Intent intent = new Intent(this, CaseEditActivity.class);
 					intent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 
 					startActivityForResult(intent, REQUEST_EDIT_CASE);
@@ -212,7 +206,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		{
 			case REQUEST_EDIT_CASE:
 
-				// return the result code from EditCaseActivity back, so CaseCardList will know to refresh
+				// return the result code from CaseEditActivity back, so CaseCardList will know to refresh
 				setResult(resultCode);
 
 				if(resultCode == CaseCardListActivity.RESULT_DELETED)
@@ -238,7 +232,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 	/**
 	 * A fragment representing a single Case detail screen.
-	 * This fragment is either contained in a {@link CaseListActivity}
+	 * This fragment is either contained in a {@link CaseCardListActivity}
 	 * in two-pane mode (on tablets) or a {@link CaseDetailActivity}
 	 * on handsets.
 	 */
@@ -390,8 +384,32 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				// set global variable isStarred for Activity action bar menu toggle
 				favorite = case_cursor.getInt(CasesProvider.COL_FAVORITE);
 
+				// ACTION BAR Title
+				// mTitle declared in super NavigationDrawerActivity, and used to restore the same title after nav drawer is closed
+				if(patient_id != null && !patient_id.isEmpty())
+				{
+					mTitle = patient_id;
 
-				// Case Information (Diagnosis and Findings)
+					//if(section != null && !section.isEmpty())
+					//	actionBar.setSubtitle(section);
+				}
+				else if(section != null && !section.isEmpty())
+				{
+					mTitle = section + " Case";
+				}
+				else if(diagnosis != null && !diagnosis.isEmpty())
+				{
+					mTitle = diagnosis;
+				}
+				else
+				{
+					mTitle = "Case Details";
+				}
+
+				ActionBar actionBar = getActivity().getActionBar();
+				actionBar.setTitle(mTitle);
+
+				// Case Information (DIAGNOSIS and FINDINGS)
 				TextView TV_case_info1 = (TextView) rootView.findViewById(R.id.detail_case_info1);
 				TextView TV_case_info2 = (TextView) rootView.findViewById(R.id.detail_case_info2);
 
@@ -433,6 +451,19 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setVisibility(GONE);
 				}
 
+				// SECTION
+				TextView TV_section = (TextView) rootView.findViewById(R.id.detail_section);
+				if(section != null && !section.isEmpty())
+				{
+					TV_section.setText(section);
+					TV_section.setVisibility(View.VISIBLE);
+					((TextView) rootView.findViewById(R.id.SectionLabel)).setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					TV_section.setVisibility(GONE);
+					((TextView) rootView.findViewById(R.id.SectionLabel)).setVisibility(GONE);
+				}
 
 				// STUDY TYPE
 				TextView TV_study_type = (TextView) rootView.findViewById(R.id.detail_study_type);
@@ -553,26 +584,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					((TextView) rootView.findViewById(R.id.CommentsLabel)).setVisibility(GONE);
 				}
 
-				ActionBar actionBar = getActivity().getActionBar();
-				if(patient_id != null && !patient_id.isEmpty())
-				{
-					actionBar.setTitle(patient_id);
-
-					if(section != null && !section.isEmpty())
-						actionBar.setSubtitle(section);
-				}
-				else if(section != null && !section.isEmpty())
-				{
-					actionBar.setTitle(section + " Case");
-				}
-				else if(diagnosis != null && !diagnosis.isEmpty())
-				{
-					actionBar.setTitle(diagnosis);
-				}
-				else
-				{
-					actionBar.setTitle("Case Details");
-				}
 			}
 
 			case_cursor.close();

@@ -5,7 +5,6 @@ import java.util.Calendar;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.widget.DatePicker;
 import android.app.DialogFragment;
 import android.app.DatePickerDialog;
 
@@ -55,7 +54,7 @@ public class DatePickerFragment extends DialogFragment
 		// Create a new instance of DatePickerDialog and return it
 
 		//TODO extend activity so it'll work in both addnew and edit
-		return new DatePickerDialog(getActivity(), (EditCaseActivity) getActivity(), year, month, day);
+		return new DatePickerDialog(getActivity(), (CaseEditActivity) getActivity(), year, month, day);
 
 	}
 

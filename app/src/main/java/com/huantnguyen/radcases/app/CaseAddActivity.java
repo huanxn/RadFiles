@@ -5,7 +5,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class AddCaseActivity extends EditCaseActivity
+public class CaseAddActivity extends CaseEditActivity
 {
 
 	@Override

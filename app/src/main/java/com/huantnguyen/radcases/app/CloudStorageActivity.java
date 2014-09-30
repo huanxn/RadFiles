@@ -39,6 +39,7 @@ public class CloudStorageActivity extends GoogleBaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+	    setDrawerPosition(NavigationDrawerActivity.POS_CLOUD_STORAGE);
         //setContentView(R.layout.activity_cloud_storage);
 
 	    if (savedInstanceState == null)
@@ -57,11 +58,12 @@ public class CloudStorageActivity extends GoogleBaseActivity
 
 
     @Override
+    // Inflate the menu; this adds items to the action bar if it is present.
     public boolean onCreateOptionsMenu(Menu menu)
     {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.cloud_storage, menu);
-        return true;
+		getMenuInflater().inflate(R.menu.cloud_storage, menu);
+
+	    return super.onCreateOptionsMenu(menu);     // nav drawer
     }
 
     @Override

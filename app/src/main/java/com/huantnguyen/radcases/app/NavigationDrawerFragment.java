@@ -191,16 +191,38 @@ public class NavigationDrawerFragment extends Fragment {
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}
 
-	private void selectItem(int position) {
+	public void setDrawerPosition(int position)
+	{
 		mCurrentSelectedPosition = position;
-		if (mDrawerListView != null) {
-			mDrawerListView.setItemChecked(position, true);
+		mDrawerListView.setItemChecked(position, true);
+	}
+
+	private void selectItem(int position)
+	{
+		// if different item is selected, then change position and perform that action
+		if(mCurrentSelectedPosition != position)
+		{
+			mCurrentSelectedPosition = position;
+			if (mDrawerListView != null)
+			{
+				mDrawerListView.setItemChecked(position, true);
+			}
+			if (mDrawerLayout != null)
+			{
+				mDrawerLayout.closeDrawer(mFragmentContainerView);
+			}
+			if (mCallbacks != null)
+			{
+				mCallbacks.onNavigationDrawerItemSelected(position);
+			}
 		}
-		if (mDrawerLayout != null) {
-			mDrawerLayout.closeDrawer(mFragmentContainerView);
-		}
-		if (mCallbacks != null) {
-			mCallbacks.onNavigationDrawerItemSelected(position);
+		// otherwise, same item selected, just close the nav drawer, do not reopen activity
+		else
+		{
+			if (mDrawerLayout != null)
+			{
+				mDrawerLayout.closeDrawer(mFragmentContainerView);
+			}
 		}
 	}
 

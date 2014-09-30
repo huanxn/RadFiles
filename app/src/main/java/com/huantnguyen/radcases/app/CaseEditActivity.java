@@ -39,7 +39,7 @@ import java.util.Calendar;
 
 import eu.janmuller.android.simplecropimage.CropImage;
 
-public class EditCaseActivity extends Activity implements DatePickerDialog.OnDateSetListener
+public class CaseEditActivity extends Activity implements DatePickerDialog.OnDateSetListener
 {
 	static Cursor selected_row_cursor;
 	static long key_id;
@@ -267,6 +267,8 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		values.put(CasesProvider.KEY_FINDINGS, ((EditText)findViewById(R.id.edit_findings)).getText().toString());
 
 
+		String new_study_type = ((SpinnerCustom)findViewById(R.id.edit_study_type)).getSelectedString();
+		//todo
 		if (study_type != null)
 		{
 			values.put(CasesProvider.KEY_STUDY_TYPE, study_type);
@@ -600,7 +602,8 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState)
 		{
-			// SPINNER
+			// STUDY TYPES SPINNER
+
 			study_type_spinner = (SpinnerCustom) view.findViewById(R.id.edit_study_type);
 			String[] columns = new String[]{CasesProvider.KEY_STUDY_TYPE};
 			int[] to = new int[]{android.R.id.text1};
@@ -634,10 +637,11 @@ public class EditCaseActivity extends Activity implements DatePickerDialog.OnDat
 			//end spinner
 
 
+			// SECTION MULTI SPINNER
 			section_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_section);
 			section_spinner.setItems(section_cursor);
 
-
+			// KEYWORDS MULTI SPINNER
 			key_words_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_key_words);
 			key_words_spinner.setItems(key_words_cursor);
 

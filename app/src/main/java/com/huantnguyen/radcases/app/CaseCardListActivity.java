@@ -132,7 +132,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 				return true;
 
 			case R.id.action_new:
-				Intent intent = new Intent(this, AddCaseActivity.class);
+				Intent intent = new Intent(this, CaseAddActivity.class);
 				startActivityForResult(intent, REQUEST_ADD_CASE);
 
 				return true;
@@ -525,8 +525,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 									{
 										// Edit Case
 										case 0:
-											// open EditCaseActivity, giving the CASE key_id argument
-											Intent intent = new Intent(getActivity(), EditCaseActivity.class);
+											// open CaseEditActivity, giving the CASE key_id argument
+											Intent intent = new Intent(getActivity(), CaseEditActivity.class);
 											intent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 
 											startActivityForResult(intent, CaseDetailActivity.REQUEST_EDIT_CASE);

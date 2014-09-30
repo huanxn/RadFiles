@@ -50,6 +50,7 @@
             </intent-filter>
         </activity>
 
+        <!-- Database -->
         <provider
             android:name="com.huantnguyen.radcases.app.CasesProvider"
             android:authorities="com.huantnguyen.radcases.app.CasesProvider" >
@@ -65,7 +66,7 @@
                 android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
         </activity>
         <activity
-            android:name="com.huantnguyen.radcases.app.AddCaseActivity"
+            android:name=".CaseAddActivity"
             android:label="@string/title_activity_add_case"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity" >
             <meta-data
@@ -73,7 +74,7 @@
                 android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
         </activity>
         <activity
-            android:name="com.huantnguyen.radcases.app.EditCaseActivity"
+            android:name=".CaseEditActivity"
             android:label="@string/title_activity_edit_case"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity" >
             <meta-data
@@ -120,6 +121,7 @@
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="com.huantnguyen.radcases.app.NavigationDrawerActivity"
             android:label="@string/title_activity_navigation_drawer" >

@@ -167,4 +167,9 @@ public class SpinnerCustom extends Spinner implements DialogInterface.OnMultiCho
 	public interface MultiSpinnerListener {
 		public void onItemsSelected(boolean[] selected);
 	}
+
+	public String getSelectedString()
+	{
+		return items[2];
+	}
 }
