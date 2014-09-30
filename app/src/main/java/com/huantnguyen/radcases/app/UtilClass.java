@@ -25,6 +25,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 
@@ -727,6 +728,7 @@ public class UtilClass extends Activity
 		}
 	}
 
+	// delete the case from the action bar menu
 	public static void menuItem_deleteCase(Activity activity, long case_id)
 	{
 		final long key_id = case_id;
@@ -765,6 +767,33 @@ public class UtilClass extends Activity
 				});
 
 		AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+	public void buildEditTextAlert(Context context, String title, String message)
+	{
+		AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+		alert.setTitle(title);
+		alert.setMessage(message);
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(context);
+		alert.setView(input);
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				String value = input.getText().toString();
+				// Do something with value!
+			}
+		});
+
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// Canceled.
+			}
+		});
+
 		alert.show();
 	}
 }

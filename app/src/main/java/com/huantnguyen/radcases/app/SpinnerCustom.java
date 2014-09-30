@@ -3,7 +3,10 @@ package com.huantnguyen.radcases.app;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -13,9 +16,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * A modified Spinner that doesn't automatically select the first entry in the list.
@@ -24,24 +30,36 @@ import android.widget.TextView;
  * <p/>
  * Limitations: does not display prompt if the entry list is empty.
  */
-public class SpinnerCustom extends Spinner implements DialogInterface.OnMultiChoiceClickListener
+public class SpinnerCustom extends Spinner // implements DialogInterface.OnMultiChoiceClickListener
 {
-	private boolean[] selected;
-	private String[] items;
+	private int selected_position;                      // current selected position in the spinner list
+	private List<String> items;                         // spinner list of items
+
+	private int custom_position;                        // position in list, which is at the end
+	private String custom_string;                       // inputed string
+	private String custom_alert_title;                  // alert dialog title
+	static final private String CUSTOM_TEXT = "CUSTOM"; // test in spinner list
+	private int previous_position;                      // in case canceled custom input, revert back to previous
+
+	private Context context;
+	private ArrayAdapter<String> spinnerArrayAdapter;
 
 	public SpinnerCustom(Context context)
 	{
 		super(context);
+		this.context = context;
 	}
 
 	public SpinnerCustom(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
+		this.context = context;
 	}
 
 	public SpinnerCustom(Context context, AttributeSet attrs, int defStyle)
 	{
 		super(context, attrs, defStyle);
+		this.context = context;
 	}
 
 	@Override
@@ -67,6 +85,112 @@ public class SpinnerCustom extends Spinner implements DialogInterface.OnMultiCho
 		}
 	}
 
+
+
+	// default custom message
+	public void setItems(Cursor cursor, int column)
+	{
+		setItems(cursor, column, "Add new item");
+	}
+
+	// initialize with list items by cursor, and new custom alert dialog title
+	public void setItems(Cursor cursor, int column, String title)
+	{
+		custom_alert_title = title;
+
+		//List<String> stringList = new ArrayList<String>();
+		items = new ArrayList<String>();
+
+		if(cursor.moveToFirst())
+		{
+			do
+			{
+				items.add(cursor.getString(column));
+
+			} while(cursor.moveToNext());
+		}
+
+		// set spinner position of custom item at the of list
+		custom_position = cursor.getCount();
+		// add Custom selection at the end of the list
+		items.add(CUSTOM_TEXT);
+
+		//items = stringList.toArray(new String[stringList.size()]);
+
+		spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, items);
+		//spinnerArrayAdapter.addAll(items);
+		spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		setAdapter(spinnerArrayAdapter);
+
+		setOnItemSelectedListener(new OnItemSelectedListener()
+		{
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			{
+				final AdapterView<?> adapter = parent;
+
+				// normal selection of item, ie not Custom item
+				selected_position = position;
+
+				if(position == custom_position)
+				{
+					// Get user input for new list item
+					AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+					alert.setTitle(custom_alert_title);
+					//alert.setMessage("message");
+
+					// Set an EditText view to get user input
+					final EditText input = new EditText(context);
+					alert.setView(input);
+
+					alert.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int whichButton)
+						{
+							String value = input.getText().toString();
+							// Do something with value!
+
+							// add value to end of list, but before the Custom item
+							spinnerArrayAdapter.remove(CUSTOM_TEXT);
+							spinnerArrayAdapter.add(value);
+							spinnerArrayAdapter.add(CUSTOM_TEXT);
+							// adjust position of Custom item to reflect addition of new item
+							custom_position += 1;
+
+							// save position for future
+							previous_position = selected_position;
+						}
+					});
+
+					alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int whichButton) {
+							// revert back to previous position in list
+							selected_position = previous_position;
+							adapter.setSelection(previous_position);
+
+						}
+					});
+
+					alert.show();
+				}
+				else
+				{
+					// selection of normal list item (not Custom)
+					// save position for future
+					previous_position = position;
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent)
+			{
+
+			}
+		});
+
+	}
+
 	protected SpinnerAdapter newProxy(SpinnerAdapter obj)
 	{
 		return (SpinnerAdapter) java.lang.reflect.Proxy.newProxyInstance(
@@ -74,16 +198,6 @@ public class SpinnerCustom extends Spinner implements DialogInterface.OnMultiCho
 				                                                                new Class[]{SpinnerAdapter.class},
 				                                                                new SpinnerAdapterProxy(obj));
 	}
-
-	@Override
-	public void onClick(DialogInterface dialogInterface, int list_item, boolean isChecked)
-	{
-		if (isChecked)
-			selected[list_item] = true;
-		else
-			selected[list_item] = false;
-	}
-
 
 	/**
 	 * Intercepts getView() to display the prompt if position < 0
@@ -133,10 +247,7 @@ public class SpinnerCustom extends Spinner implements DialogInterface.OnMultiCho
 
 			if (position < 0)
 			{
-				final TextView v =
-						(TextView) ((LayoutInflater) getContext().getSystemService(
-								                                                          Context.LAYOUT_INFLATER_SERVICE)).inflate(
-										                                                                                                   android.R.layout.simple_spinner_item, parent, false);
+				final TextView v = (TextView) ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.simple_spinner_item, parent, false);
 
 				// set default text prompt and color
 				//TODO set text font/style to match
@@ -148,28 +259,47 @@ public class SpinnerCustom extends Spinner implements DialogInterface.OnMultiCho
 		}
 	}
 
-	public void Init(Cursor cursor, String text, MultiSpinnerListener listener) {
-		this.items = items;
-	//	this.defaultText = allText;
-	//	this.listener = listener;
-
-		// all selected by default
-	//	selected = new boolean[items.size()];
-		for (int i = 0; i < selected.length; i++)
-		{
-			selected[i] = true;
-		}
-
-		// selected = new Boolean
-
-	}
-
-	public interface MultiSpinnerListener {
-		public void onItemsSelected(boolean[] selected);
-	}
-
+	// returns the String value of currently selected list item
 	public String getSelectedString()
 	{
-		return items[2];
+		return items.get(selected_position);
 	}
+
+	// sets the current selection by inputed String
+	public void setSelection(String selection)
+	{
+		selected_position = -1;
+
+		for(int i = 0; i < items.size(); i++)
+		{
+			if(items.get(i).contentEquals(selection))
+			{
+				// item found, set position
+				selected_position = i;
+				previous_position = selected_position;
+				setSelection(selected_position);
+
+				return;
+			}
+		}
+
+		// if selected String not found in array list, add to bottom
+		if(selected_position == -1)
+		{
+			// add selection to end of list, but before the Custom item
+			items.remove(CUSTOM_TEXT);
+			items.add(selection);
+			items.add(CUSTOM_TEXT);
+			// adjust position of Custom item to reflect addition of new item
+			custom_position += 1;
+
+			// item created, set position
+			selected_position = items.lastIndexOf(selection);
+			previous_position = selected_position;
+			setSelection(selected_position);
+		}
+
+		return;
+	}
+
 }

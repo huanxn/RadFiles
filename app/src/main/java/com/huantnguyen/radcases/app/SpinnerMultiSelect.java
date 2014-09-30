@@ -123,22 +123,21 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
         Arrays.fill(_selection, false);
     }
 
-	public void setItems(Cursor cursor)
+	public void setItems(Cursor cursor, int column)
 	{
-		List<String> key_words = new ArrayList<String>();
+		List<String> stringList = new ArrayList<String>();
 
 		if(cursor.moveToFirst())
 		{
 			do
 			{
-				key_words.add(cursor.getString(CasesProvider.COL_VALUE
-				));
+				stringList.add(cursor.getString(column));
 
 			} while(cursor.moveToNext());
 		}
-		//setItems(key_words);
+		//setItems(stringList);
 
-		_items = key_words.toArray(new String[key_words.size()]);
+		_items = stringList.toArray(new String[stringList.size()]);
 		_selection = new boolean[_items.length];
 
 		Arrays.fill(_selection, false);

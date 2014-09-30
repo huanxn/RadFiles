@@ -75,6 +75,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		//setContentView(R.layout.activity_case_detail);
 
 
+		// TODO fix icon instead of drawer icon
 		// Show the Up button in the action bar.
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 

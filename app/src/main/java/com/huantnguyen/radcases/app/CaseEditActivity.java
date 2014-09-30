@@ -267,17 +267,18 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		values.put(CasesProvider.KEY_FINDINGS, ((EditText)findViewById(R.id.edit_findings)).getText().toString());
 
 
+		// STUDY TYPE
 		String new_study_type = ((SpinnerCustom)findViewById(R.id.edit_study_type)).getSelectedString();
-		//todo
-		if (study_type != null)
+		if (new_study_type != null)
 		{
-			values.put(CasesProvider.KEY_STUDY_TYPE, study_type);
+			values.put(CasesProvider.KEY_STUDY_TYPE, new_study_type);
 		}
 		else
 		{
 			values.put(CasesProvider.KEY_STUDY_TYPE, (String) null);
 		}
 
+		// STUDY DATE
 		if (db_date_str != null)
 		{
 			values.put(CasesProvider.KEY_DATE, db_date_str);
@@ -365,6 +366,11 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
 		}
 */
+
+		// TODO add custom study type to study type table
+		// if spinner text not in table, then add
+
+
 
 		setResult(CaseCardListActivity.RESULT_EDITED);
 	}
@@ -603,47 +609,17 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		public void onViewCreated(View view, Bundle savedInstanceState)
 		{
 			// STUDY TYPES SPINNER
-
 			study_type_spinner = (SpinnerCustom) view.findViewById(R.id.edit_study_type);
-			String[] columns = new String[]{CasesProvider.KEY_STUDY_TYPE};
-			int[] to = new int[]{android.R.id.text1};
-
-			SimpleCursorAdapter spinner_list_adapter = new SimpleCursorAdapter(getActivity(), android.R.layout.simple_spinner_dropdown_item, study_types_cursor, columns, to, 0);
-			spinner_list_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-			study_type_spinner.setAdapter(spinner_list_adapter);
-
-			study_type_spinner.setOnItemSelectedListener(new OnItemSelectedListener()
-			{
-				@Override
-				public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id)
-				{
-					//if(position == ??) TODO custom input
-					Cursor c = (Cursor) parentView.getItemAtPosition(position);
-					study_type = c.getString(CasesProvider.COL_VALUE);
-
-		//			c.close();
-
-					return;
-				}
-
-				@Override
-				public void onNothingSelected(AdapterView<?> parentView)
-				{
-				}
-
-
-			});
-			//end spinner
+			study_type_spinner.setItems(study_types_cursor, CasesProvider.COL_VALUE, "Custom study type");
 
 
 			// SECTION MULTI SPINNER
 			section_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_section);
-			section_spinner.setItems(section_cursor);
+			section_spinner.setItems(section_cursor, CasesProvider.COL_VALUE);
 
 			// KEYWORDS MULTI SPINNER
 			key_words_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_key_words);
-			key_words_spinner.setItems(key_words_cursor);
+			key_words_spinner.setItems(key_words_cursor, CasesProvider.COL_VALUE);
 
 			// Fetch and display data
 			if (selected_row_cursor != null)
@@ -717,22 +693,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 				// STUDY TYPE
 				if (study_type != null)
 				{
-					//find study type position
-					if (study_types_cursor.moveToFirst())
-					{
-						do
-						{
-							if (study_type.equalsIgnoreCase(study_types_cursor.getString(CasesProvider.COL_VALUE)))
-							{
-								int position = study_types_cursor.getPosition();
-								study_type_spinner.setSelection(position);
-								break;
-							}
-
-						} while (study_types_cursor.moveToNext());
-
-					}
-
+					study_type_spinner.setSelection(study_type);
 				}
 
 
