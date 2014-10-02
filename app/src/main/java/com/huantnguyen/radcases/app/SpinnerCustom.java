@@ -33,10 +33,8 @@ import android.widget.Toast;
 public class SpinnerCustom extends Spinner // implements DialogInterface.OnMultiChoiceClickListener
 {
 	private int selected_position;                      // current selected position in the spinner list
-	private List<String> items;                         // spinner list of items
 
 	private int custom_position;                        // position in list, which is at the end
-	private String custom_string;                       // inputed string
 	private String custom_alert_title;                  // alert dialog title
 	static final private String CUSTOM_TEXT = "CUSTOM"; // test in spinner list
 	private int previous_position;                      // in case canceled custom input, revert back to previous
@@ -98,14 +96,14 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 	{
 		custom_alert_title = title;
 
-		//List<String> stringList = new ArrayList<String>();
-		items = new ArrayList<String>();
+		List<String> stringList = new ArrayList<String>();
+		//items = new ArrayList<String>();
 
 		if(cursor.moveToFirst())
 		{
 			do
 			{
-				items.add(cursor.getString(column));
+				stringList.add(cursor.getString(column));
 
 			} while(cursor.moveToNext());
 		}
@@ -113,11 +111,11 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 		// set spinner position of custom item at the of list
 		custom_position = cursor.getCount();
 		// add Custom selection at the end of the list
-		items.add(CUSTOM_TEXT);
+		stringList.add(CUSTOM_TEXT);
 
 		//items = stringList.toArray(new String[stringList.size()]);
 
-		spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, items);
+		spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, stringList);
 		//spinnerArrayAdapter.addAll(items);
 		spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		setAdapter(spinnerArrayAdapter);
@@ -142,6 +140,7 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 
 					// Set an EditText view to get user input
 					final EditText input = new EditText(context);
+					//input.requestFocus();
 					alert.setView(input);
 
 					alert.setPositiveButton("Ok", new DialogInterface.OnClickListener()
@@ -149,7 +148,6 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 						public void onClick(DialogInterface dialog, int whichButton)
 						{
 							String value = input.getText().toString();
-							// Do something with value!
 
 							// add value to end of list, but before the Custom item
 							spinnerArrayAdapter.remove(CUSTOM_TEXT);
@@ -262,39 +260,26 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 	// returns the String value of currently selected list item
 	public String getSelectedString()
 	{
-		return items.get(selected_position);
+		return spinnerArrayAdapter.getItem(selected_position);
 	}
 
 	// sets the current selection by inputed String
 	public void setSelection(String selection)
 	{
-		selected_position = -1;
-
-		for(int i = 0; i < items.size(); i++)
-		{
-			if(items.get(i).contentEquals(selection))
-			{
-				// item found, set position
-				selected_position = i;
-				previous_position = selected_position;
-				setSelection(selected_position);
-
-				return;
-			}
-		}
+		selected_position = spinnerArrayAdapter.getPosition(selection);
 
 		// if selected String not found in array list, add to bottom
 		if(selected_position == -1)
 		{
 			// add selection to end of list, but before the Custom item
-			items.remove(CUSTOM_TEXT);
-			items.add(selection);
-			items.add(CUSTOM_TEXT);
+			spinnerArrayAdapter.remove(CUSTOM_TEXT);
+			spinnerArrayAdapter.add(selection);
+			spinnerArrayAdapter.add(CUSTOM_TEXT);
 			// adjust position of Custom item to reflect addition of new item
 			custom_position += 1;
 
 			// item created, set position
-			selected_position = items.lastIndexOf(selection);
+			selected_position = spinnerArrayAdapter.getPosition(selection);
 			previous_position = selected_position;
 			setSelection(selected_position);
 		}
