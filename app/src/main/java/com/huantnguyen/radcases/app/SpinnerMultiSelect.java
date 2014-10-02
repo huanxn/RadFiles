@@ -37,19 +37,18 @@ import android.widget.SpinnerAdapter;
  * and the user presses it. This allows for the selection of more than one option.
  */
 public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickListener {
-	List<String> stringList = new ArrayList<String>();
-	String[] _items = null;
+	//List<String> stringList = new ArrayList<String>();
+    String[] _items = null;
     boolean[] _selection = null;
 
 	private int custom_position;                        // position in list, which is at the end
-	private String custom_string;                       // inputed string
 	private String custom_alert_title;                  // alert dialog title
 	static final private String CUSTOM_TEXT = "CUSTOM"; // test in spinner list
-    
-    private ArrayAdapter<String> spinnerArrayAdapter;
+	private int previous_position;                      // in case canceled custom input, revert back to previous
 
-	Context context;
+    ArrayAdapter<String> _proxyAdapter;
     
+   	Context context;
     /**
      * Constructor for use when instantiating directly.
      * @param context
@@ -59,8 +58,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
         super(context);
 	    this.context = context;
         
-        spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
-        super.setAdapter(spinnerArrayAdapter);
+        _proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
+        super.setAdapter(_proxyAdapter);
     }
 
     /**
@@ -73,8 +72,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
         super(context, attrs);
 	    this.context = context;
         
-        spinnerArrayAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
-        super.setAdapter(spinnerArrayAdapter);
+        _proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
+        super.setAdapter(_proxyAdapter);
     }
 
     /**
@@ -89,8 +88,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 	        {
 		        _selection[which] = isChecked;
 
-		        spinnerArrayAdapter.clear();
-		        spinnerArrayAdapter.add(buildSelectedItemString());
+                _proxyAdapter.clear();
+                _proxyAdapter.add(buildSelectedItemString());
 		        setSelection(0);
 	        }
 	        else if (which == _selection.length-1) // add custom
@@ -115,12 +114,18 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 				        String value = input.getText().toString();
 
 				        // add value to end of list, but before the Custom item
-				        spinnerArrayAdapter.remove(CUSTOM_TEXT);
-				        spinnerArrayAdapter.add(value);
-				        spinnerArrayAdapter.add(CUSTOM_TEXT);
+				        _items[_items.length-1] = value;
+				        _selection[_selection.length-1] = true; //set newly created custom item (which is now last in list) to be true
+
+				        _items = addElement(_items, CUSTOM_TEXT);
+				        _selection = addElement(_selection, false);
 
 				        // save position for future
 				        //previous_position = selected_position;
+
+				        _proxyAdapter.clear();
+				        _proxyAdapter.add(buildSelectedItemString());
+				        setSelection(0);
 			        }
 		        });
 
@@ -146,7 +151,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
      * {@inheritDoc}
      */
     @Override
-    public boolean performClick() {
+    public boolean performClick()
+    {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMultiChoiceItems(_items, _selection, this);
         builder.show();
@@ -180,7 +186,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
      */
     public void setItems(List<String> items)
     {
-	    stringList = items;//does this work?
+	    //stringList = items;//does this work?
 
         _items = items.toArray(new String[items.size()]);
         _selection = new boolean[_items.length];
@@ -190,6 +196,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 
 	public void setItems(Cursor cursor, int column)
 	{
+		List<String> stringList = new ArrayList<String>();
+
 		if(cursor.moveToFirst())
 		{
 			do
@@ -198,7 +206,6 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 
 			} while(cursor.moveToNext());
 		}
-
 		stringList.add(CUSTOM_TEXT);
 
 		_items = stringList.toArray(new String[stringList.size()]);
@@ -225,10 +232,12 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
      * Sets the selected options based on a list of string.
      * @param selection
      */
-    public void setSelection(List<String> selection) {
+    public void setSelection(List<String> selection)
+    {
 	    Boolean isInItemList;
 
-        for (String sel : selection) {
+        for (String sel : selection)
+        {
 	        isInItemList = false;
             for (int j = 0; j < _items.length; ++j) {
                 if (_items[j].equals(sel)) {
@@ -243,7 +252,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 		        _selection = addElement(_selection, true);
 	        }
         }
-	    spinnerArrayAdapter.add(buildSelectedItemString());
+
+	    _proxyAdapter.add(buildSelectedItemString());
     }
     
     /**
@@ -274,7 +284,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
     public List<String> getSelectedStrings() {
         List<String> selection = new LinkedList<String>();
         for (int i = 0; i < _items.length; ++i) {
-            if (_selection[i]) {
+            if (_selection[i])
+            {
                 selection.add(_items[i]);
             }
         }
@@ -307,7 +318,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
     private String buildSelectedItemString() {
         StringBuilder sb = new StringBuilder();
         boolean foundOne = false;
-        
+
         for (int i = 0; i < _items.length; ++i) {
             if (_selection[i]) {
                 if (foundOne) {

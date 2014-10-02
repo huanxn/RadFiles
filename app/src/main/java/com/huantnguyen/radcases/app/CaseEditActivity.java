@@ -193,21 +193,10 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		    case android.R.id.home:
 			    saveToDatabase();
 			    finish();
-
-			    /*
-			    try
-			    {
-
-			    }
-			    catch(IOException ex)
-			    {
-				    Log.e(getClass().getName(), "Could not save to image file.");
-			    }
-			    */
                 return true;
 
 			case R.id.action_camera:
-				onClick_getPicture(item.getActionView());
+				choosePicture(item.getActionView());
 				return true;
 
 			case R.id.action_delete:
@@ -231,24 +220,40 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 	/**
 	 * UI clicks
 	 */
-	public void onCheckboxClicked_followup(View view)
+
+	public void onClick_Button(View view) throws IOException
 	{
-		if(followup_bool)
-			followup_bool=false;
-		else
-			followup_bool=true;
+		switch(view.getId())
+		{
+			case R.id.cancelButton:
+				//TODO delete files that we don't need
+				setResult(CaseCardListActivity.RESULT_NOCHANGE);
+				finish();
+				break;
+
+			case R.id.doneButton:
+				saveToDatabase();
+				finish();
+				break;
+		}
+	}
+
+	public void onClick_Checkbox(View view)
+	{
+		switch(view.getId())
+		{
+			case R.id.checkbox_followup:
+
+				if (followup_bool)
+					followup_bool = false;
+				else
+					followup_bool = true;
+
+				break;
+		}
 
 	}
 
-	/**
-	 * Called when the user clicks the OK button
-	 */
-	public void onClick_doneButton(View view) throws IOException
-	{
-		saveToDatabase();
-		finish();
-
-	}
 
 	/**
 	 * saveToDatabase
@@ -372,22 +377,13 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		setResult(CaseCardListActivity.RESULT_EDITED);
 	}
 
-	/**
-	 * Called when the user clicks the cancel button
-	 */
-	public void onClick_cancelButton(View view)
-	{
-		//TODO delete files that we don't need
-		setResult(CaseCardListActivity.RESULT_NOCHANGE);
-		finish();
-	}
 
 	/**
 	 * Called when clicking to add new image
 	 * opens alert dialog to choose from file/gallery or take a photo with camera intent
 	 * @param view
 	 */
-	public void onClick_getPicture(View view)
+	public void choosePicture(View view)
 	{
 
 		// Alert dialog to choose either to take a new photo with camera, or select existing picture from file storage
@@ -608,7 +604,6 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			// STUDY TYPES SPINNER
 			study_type_spinner = (SpinnerCustom) view.findViewById(R.id.edit_study_type);
 			study_type_spinner.setItems(study_types_cursor, CasesProvider.COL_VALUE, "Custom study type");
-
 
 			// SECTION MULTI SPINNER
 			section_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_section);
