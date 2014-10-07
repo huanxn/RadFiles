@@ -23,20 +23,12 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageView;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,9 +36,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import eu.janmuller.android.simplecropimage.CropImage;
 
@@ -536,27 +525,7 @@ public class UtilClass extends Activity
 
 
 
-	static public void copyFile(Uri dst_uri, Uri src_uri)
-	{
-		// make File
-		//copyFile(dstFile, srcFile)
-	}
 
-	static public void copyFile(File dst, File src) throws IOException
-	{
-		InputStream in = new FileInputStream(src);
-		OutputStream out = new FileOutputStream(dst);
-
-		// Transfer bytes from in to out
-		byte[] buf = new byte[1024];
-		int len;
-		while ((len = in.read(buf)) > 0)
-		{
-			out.write(buf, 0, len);
-		}
-		in.close();
-		out.close();
-	}
 
 	public static int convertDpToPixels(Context context, float dp)
 	{
@@ -625,108 +594,7 @@ public class UtilClass extends Activity
 	}
 
 
-	/**
-	 * zip files for backup
-	 *
-	 * @param files
-	 * @param zipFile
-	 * @throws IOException
-	 */
 
-	private static final int BUFFER_SIZE = 8192;
-
-	public static void zip(String[] files, String zipFile) throws IOException {
-		BufferedInputStream origin = null;
-		ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)));
-		try {
-			byte data[] = new byte[BUFFER_SIZE];
-
-			for (int i = 0; i < files.length; i++) {
-				FileInputStream fi = new FileInputStream(files[i]);
-				origin = new BufferedInputStream(fi, BUFFER_SIZE);
-				try {
-					ZipEntry entry = new ZipEntry(files[i].substring(files[i].lastIndexOf("/") + 1));
-					out.putNextEntry(entry);
-					int count;
-					while ((count = origin.read(data, 0, BUFFER_SIZE)) != -1) {
-						out.write(data, 0, count);
-					}
-					out.closeEntry();
-				}
-				finally {
-					origin.close();
-				}
-			}
-		}
-		finally {
-			out.close();
-		}
-	}
-
-	/**
-	 * Unzip a zip file.  Will overwrite existing files.
-	 *
-	 * @param zipFile Full path of the zip file you'd like to unzip.
-	 * @param location Full path of the directory you'd like to unzip to (will be created if it doesn't exist).
-	 * @throws IOException
-	 */
-	public static void unzip(String zipFile, String location) throws IOException {
-		int size;
-		byte[] buffer = new byte[BUFFER_SIZE];
-
-		try {
-			if ( !location.endsWith("/") ) {
-				location += "/";
-			}
-			File f = new File(location);
-			if(!f.isDirectory()) {
-				f.mkdirs();
-			}
-			ZipInputStream zin = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile), BUFFER_SIZE));
-			try {
-				ZipEntry ze = null;
-				while ((ze = zin.getNextEntry()) != null) {
-					String path = location + ze.getName();
-					File unzipFile = new File(path);
-
-					if (ze.isDirectory()) {
-						if(!unzipFile.isDirectory()) {
-							unzipFile.mkdirs();
-						}
-					} else {
-						// check for and create parent directories if they don't exist
-						File parentDir = unzipFile.getParentFile();
-						if ( null != parentDir ) {
-							if ( !parentDir.isDirectory() ) {
-								parentDir.mkdirs();
-							}
-						}
-
-						// unzip the file
-						FileOutputStream out = new FileOutputStream(unzipFile, false);
-						BufferedOutputStream fout = new BufferedOutputStream(out, BUFFER_SIZE);
-						try {
-							while ( (size = zin.read(buffer, 0, BUFFER_SIZE)) != -1 ) {
-								fout.write(buffer, 0, size);
-							}
-
-							zin.closeEntry();
-						}
-						finally {
-							fout.flush();
-							fout.close();
-						}
-					}
-				}
-			}
-			finally {
-				zin.close();
-			}
-		}
-		catch (Exception e) {
-			Log.e(TAG, "Unzip exception", e);
-		}
-	}
 
 	// delete the case from the action bar menu
 	public static void menuItem_deleteCase(Activity activity, long case_id)
@@ -774,8 +642,11 @@ public class UtilClass extends Activity
 	{
 		AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
-		alert.setTitle(title);
-		alert.setMessage(message);
+
+		if(title != null)
+			alert.setTitle(title);
+		if(message != null)
+			alert.setMessage(message);
 
 		// Set an EditText view to get user input
 		final EditText input = new EditText(context);
@@ -783,8 +654,8 @@ public class UtilClass extends Activity
 
 		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
-				String value = input.getText().toString();
-				// Do something with value!
+				String result = input.getText().toString();
+
 			}
 		});
 

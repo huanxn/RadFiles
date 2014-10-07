@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="test backup"
-        android:onClick="onClick_backupButton">
+        android:onClick="onClick_Button">
         </Button>
 
     <Button
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="test restore"
-        android:onClick="onClick_restoreButton"
+        android:onClick="onClick_Button"
         android:layout_below="@id/backup_button">
     </Button>
 

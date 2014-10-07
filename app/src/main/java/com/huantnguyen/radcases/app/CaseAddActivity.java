@@ -19,7 +19,6 @@ public class CaseAddActivity extends CaseEditActivity
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.edit_case, menu);
 		return true;

@@ -1,7 +1,9 @@
 package com.huantnguyen.radcases.app;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -13,15 +15,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
-
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -54,10 +59,20 @@ public class CloudStorageActivity extends GoogleBaseActivity
 				    .commit();
 
 	    }
+
     }
 
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		//if(isGooglePlayServicesAvailable(this) == SUCCESS)
+		{
 
-    @Override
+		}
+	}
+
+	@Override
     // Inflate the menu; this adds items to the action bar if it is present.
     public boolean onCreateOptionsMenu(Menu menu)
     {
@@ -79,76 +94,85 @@ public class CloudStorageActivity extends GoogleBaseActivity
         return super.onOptionsItemSelected(item);
     }
 
-	public void onClick_backupButton(View view)
+	public void onClick_Button(View view) throws IOException
 	{
-		String filename;  //TODO get from edit text box
-
-
-
-		//File storageDir = getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-		File storageDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-		String state = Environment.getExternalStorageState();
-
-		// Create an image file name based on timestamp
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
-		filename = "Backup_cases_" + timeStamp + "_";
-
-
-		File tempFile = null;
-		try
+		switch(view.getId())
 		{
-			tempFile= File.createTempFile(filename, ".csv", storageDir);
+			case R.id.backup_button:
+				String filename;  //TODO get from edit text box
 
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
+				AlertDialog.Builder alert = new AlertDialog.Builder(this);
+				alert.setTitle("Create Backup File");
+				alert.setMessage("Filename");
 
-		/*
-//		if(tempFile != null)
-		File tempFile = new File(filename);
-		try
-		{
-			tempFile.createNewFile();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-*/
-		if(backupCases(tempFile))
-		{
-			Toast.makeText(this, "Saved data to " + tempFile, Toast.LENGTH_LONG).show();
-		}
+				// default file
+				//File storageDir = getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+				// Create an image file name based on timestamp
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
+				filename = "Backup_cases_" + timeStamp;
+
+				// Set an EditText view to get user input
+				final EditText input = new EditText(this);
+				input.setText(filename);
+
+				alert.setView(input);
+
+				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String value = input.getText().toString();
+
+						/*
+						File storageDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 
 
-		/*
-		// IMAGES
-		filename = "Backup_images_" + timeStamp + "_";
+						File tempCSV = null;
+						try
+						{
+							tempCSV = File.createTempFile(value, ".csv", storageDir);
+							//tempDB = File.createTempFile(value, ".db", storageDir);
+						}
+						catch (IOException e)
+						{
+							e.printStackTrace();
+						}
 
-		try
-		{
-			tempFile= File.createTempFile(filename, ".csv", storageDir);
 
+						// create CSV file
+						if(exportCasesCSV(tempCSV))
+						{
+							Toast.makeText(getApplicationContext(), "Saved data to " + tempCSV, Toast.LENGTH_LONG).show();
+						}
+						*/
+
+						// export SQLite file
+						backupDB(value);
+
+					}
+				});
+
+				alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Canceled.
+					}
+				});
+
+				alert.show();
+
+				break;
+
+			case R.id.restore_button:
+				Intent intent = new Intent();
+				intent.setType("DOWNLOADS/*.csv");
+				intent.setAction(Intent.ACTION_GET_CONTENT);
+				//intent.putExtra("image_filename", filename);
+				startActivityForResult(Intent.createChooser(intent,"Select Backup File"), REQUEST_SELECT_BACKUP_FILE);
+
+				break;
 		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-*/
 	}
 
-	public void onClick_restoreButton(View view)
-	{
-		Intent intent = new Intent();
-		intent.setType("DOWNLOADS/*.csv");
-		intent.setAction(Intent.ACTION_GET_CONTENT);
-		//intent.putExtra("image_filename", filename);
-		startActivityForResult(Intent.createChooser(intent,"Select Backup"), REQUEST_SELECT_BACKUP_FILE);
-	}
-
-	private boolean backupCases(File outFile)
+	private boolean exportCasesCSV(File outFile)
 	{
 		Boolean returnCode = false;
 
@@ -241,7 +265,7 @@ public class CloudStorageActivity extends GoogleBaseActivity
 
 			// backup actual images into a zip
 			String zip_filename = outFile.getPath().replace("csv", "zip");
-			UtilClass.zip(image_filenames, zip_filename);
+			UtilsFile.zip(image_filenames, zip_filename);
 
 			returnCode = true;
 		} catch (IOException e) {
@@ -286,7 +310,7 @@ public class CloudStorageActivity extends GoogleBaseActivity
 		return returnCode;
 	}
 
-	public void restoreCases(File inFile)
+	public void importCasesCSV(File inFile)
 	{
 		BufferedReader br = null;
 		String line;
@@ -301,13 +325,15 @@ public class CloudStorageActivity extends GoogleBaseActivity
 		// Clear old data
 		// TODO: Delete old image files using the images table to find the file locations
 
-		// Delete all rows from CASES and IMAGES tables in the database
-		getContentResolver().delete(CasesProvider.CASES_URI, null, null);
-		getContentResolver().delete(CasesProvider.IMAGES_URI, null, null);
+
 
 		try
 		{
 			br = new BufferedReader(new FileReader(inFile));
+
+			// If successfully opened file, clear old database: delete all rows from CASES and IMAGES tables in the database
+			getContentResolver().delete(CasesProvider.CASES_URI, null, null);
+			getContentResolver().delete(CasesProvider.IMAGES_URI, null, null);
 
 			br.readLine(); // header
 
@@ -350,6 +376,8 @@ public class CloudStorageActivity extends GoogleBaseActivity
 		catch (IOException e)
 		{
 			e.printStackTrace();
+			Toast.makeText(this, "Unable to open CSV file", Toast.LENGTH_SHORT).show();
+			return;
 		}
 
 		// unzip image files
@@ -357,11 +385,13 @@ public class CloudStorageActivity extends GoogleBaseActivity
 		{
 			// zip file name is same as the csv file, except with zip extension
 			// unzip image files to android pictures directory
-			UtilClass.unzip(inFile.getPath().replace("csv", "zip"),getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES).getPath());
+			UtilsFile.unzip(inFile.getPath().replace("csv", "zip"),getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES).getPath());
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
+			Toast.makeText(this, "Unable to open images zip file:", Toast.LENGTH_SHORT).show();
+			return;
 		}
 
 		Toast.makeText(this, "Restored database", Toast.LENGTH_SHORT).show();
@@ -388,14 +418,118 @@ public class CloudStorageActivity extends GoogleBaseActivity
 					// File file = new File(path);
 					// Initiate the upload
 
-					File restoreFile = new File(restoreFilename);
-					restoreCases(restoreFile);
+					//File restoreFile = new File(restoreFilename);
+					//importCasesCSV(restoreFile);
+
+					restoreDB(restoreFilename);
 
 				}
 				break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
+
+
+	/////////////////////
+
+	//importing database
+	private void restoreDB(String restoreFilename)
+	{
+		// TODO Auto-generated method stub
+
+		try {
+			//File sd = Environment.getExternalStorageDirectory();
+			File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
+			File data  = Environment.getDataDirectory();
+
+			String currentDBDirPath = "//data//" + getPackageName() + "//databases//";
+			File currentDBDir  = new File(data, currentDBDirPath);
+
+			if (currentDBDir.canWrite())
+			{
+				/*
+				String  currentDBPath= "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
+				String backupDBPath  = "/Backup/" + restoreFilename;
+				File  backupDB= new File(data, currentDBPath);
+				File currentDB  = new File(appDir, backupDBPath);
+
+				FileChannel src = new FileInputStream(currentDB).getChannel();
+				FileChannel dst = new FileOutputStream(backupDB).getChannel();
+				*/
+
+				String currentDBPath = "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
+				File currentDB  = new File(data, currentDBPath);
+				File  backupDB= new File(restoreFilename);
+
+				FileChannel src = new FileInputStream(backupDB).getChannel();
+				FileChannel dst = new FileOutputStream(currentDB).getChannel();
+
+				dst.transferFrom(src, 0, src.size());
+				src.close();
+				dst.close();
+				Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_LONG).show();
+
+			}
+		} catch (Exception e) {
+
+			Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
+					.show();
+
+		}
+	}
+	//exporting database
+	private boolean backupDB(String backupFilename) {
+		// TODO Auto-generated method stub
+
+		try {
+			//File sd = Environment.getExternalStorageDirectory();
+			File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
+			File data = Environment.getDataDirectory();
+
+			if (appDir.canWrite()) {
+				String  currentDBPath= "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
+				String backupDBPath  = "/Backup/" + backupFilename;
+				File currentDB = new File(data, currentDBPath);
+				File backupDB = new File(appDir, backupDBPath);
+
+
+				String backupDirPath  = "/Backup/";
+				File backupDir = new File(appDir, backupDirPath);
+
+				if(!backupDir.exists())
+				{
+					if(backupDir.mkdirs())
+					{
+						Toast.makeText(this, "Created directory: " + backupDir.getPath(), Toast.LENGTH_LONG).show();
+					}
+					else
+					{
+						Toast.makeText(this, "Unable to create directory: " + backupDir.getPath(), Toast.LENGTH_LONG).show();
+					}
+
+				}
+
+				FileChannel src = new FileInputStream(currentDB).getChannel();
+				FileChannel dst = new FileOutputStream(backupDB).getChannel();
+				dst.transferFrom(src, 0, src.size());
+				src.close();
+				dst.close();
+				Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_LONG).show();
+
+			}
+		} catch (Exception e) {
+
+			Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG).show();
+			return false;
+
+		}
+
+		// success
+		return true;
+	}
+
+
+	//////////////////////
 
 	public static class CloudStorageFragment extends Fragment
 	{
@@ -411,5 +545,4 @@ public class CloudStorageActivity extends GoogleBaseActivity
 			return rootView;
 		}
 	}
-
 }
