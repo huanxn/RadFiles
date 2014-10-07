@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 
 public class CloudStorageActivity extends GoogleBaseActivity
@@ -39,6 +40,7 @@ public class CloudStorageActivity extends GoogleBaseActivity
 	String restoreFilename;
 
 	final static int REQUEST_SELECT_BACKUP_FILE = 0;
+	final static int REQUEST_SELECT_CSV_FILE = 1;
 
 
     @Override
@@ -96,33 +98,57 @@ public class CloudStorageActivity extends GoogleBaseActivity
 
 	public void onClick_Button(View view) throws IOException
 	{
+		String filename;  //TODO get from edit text box
+
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setTitle("Create Backup File");
+		alert.setMessage("Filename");
+
+		// default file
+		//File storageDir = getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+		// Create an image file name based on timestamp
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
+		filename = "Backup_cases_" + timeStamp;
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(this);
+		input.setText(filename);
+
+		alert.setView(input);
+
+
 		switch(view.getId())
 		{
 			case R.id.backup_button:
-				String filename;  //TODO get from edit text box
 
-				AlertDialog.Builder alert = new AlertDialog.Builder(this);
-				alert.setTitle("Create Backup File");
-				alert.setMessage("Filename");
-
-				// default file
-				//File storageDir = getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-				// Create an image file name based on timestamp
-				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
-				filename = "Backup_cases_" + timeStamp;
-
-				// Set an EditText view to get user input
-				final EditText input = new EditText(this);
-				input.setText(filename);
-
-				alert.setView(input);
 
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
 
-						/*
+						// export SQLite file
+						backupDB(value);
+
+					}
+				});
+
+				alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Canceled.
+					}
+				});
+
+				alert.show();
+
+				break;
+
+			case R.id.exportCSV_button:
+
+				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						String value = input.getText().toString();
+
 						File storageDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 
 
@@ -143,10 +169,7 @@ public class CloudStorageActivity extends GoogleBaseActivity
 						{
 							Toast.makeText(getApplicationContext(), "Saved data to " + tempCSV, Toast.LENGTH_LONG).show();
 						}
-						*/
 
-						// export SQLite file
-						backupDB(value);
 
 					}
 				});
@@ -162,17 +185,32 @@ public class CloudStorageActivity extends GoogleBaseActivity
 				break;
 
 			case R.id.restore_button:
-				Intent intent = new Intent();
-				intent.setType("DOWNLOADS/*.csv");
-				intent.setAction(Intent.ACTION_GET_CONTENT);
+				Intent restoreIntent = new Intent();
+				restoreIntent.setType("DOWNLOADS/*.db");
+				restoreIntent.setAction(Intent.ACTION_GET_CONTENT);
 				//intent.putExtra("image_filename", filename);
-				startActivityForResult(Intent.createChooser(intent,"Select Backup File"), REQUEST_SELECT_BACKUP_FILE);
+				startActivityForResult(Intent.createChooser(restoreIntent,"Select Backup File"), REQUEST_SELECT_BACKUP_FILE);
+
+				break;
+
+			case R.id.importCSV_button:
+				Intent importIntent = new Intent();
+				importIntent.setType("DOWNLOADS/*.csv");
+				importIntent.setAction(Intent.ACTION_GET_CONTENT);
+				//intent.putExtra("image_filename", filename);
+				startActivityForResult(Intent.createChooser(importIntent,"Select Backup File"), REQUEST_SELECT_CSV_FILE);
+
+				break;
+
+			case R.id.fix_DB_button:
+				//todo put image data into images table
 
 				break;
 		}
 	}
 
-	private boolean exportCasesCSV(File outFile)
+	//  todo export select cases, selected by integer list of case_id
+	private boolean exportCasesCSV(File outFile/*, List<Integer> caseList*/)
 	{
 		Boolean returnCode = false;
 
@@ -197,6 +235,16 @@ public class CloudStorageActivity extends GoogleBaseActivity
 
 		Log.d(TAG, "header=" + csvHeader);
 
+		/*
+		// convert list of integers into array
+		// todo test this!!!!!!!!!
+		int j=0;
+		String[] selectionArgs = new String[caseList.size()];
+		for(Integer i : caseList)
+		{
+			selectionArgs[j++] = String.valueOf(i);
+		}
+*/
 
 		try {
 			//File outFile = new File(outFileName);
@@ -243,6 +291,7 @@ public class CloudStorageActivity extends GoogleBaseActivity
 					String [] image_args = {String.valueOf(cursor.getInt(CasesProvider.COL_ROWID))};
 					Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 
+					// store image filenames in string array for zip
 					if(imageCursor.moveToFirst())
 					{
 						do
@@ -423,6 +472,27 @@ public class CloudStorageActivity extends GoogleBaseActivity
 
 					restoreDB(restoreFilename);
 
+				}
+				break;
+
+			case REQUEST_SELECT_CSV_FILE:
+				if (resultCode == RESULT_OK) {
+					// Get the Uri of the selected file
+					Uri uri = data.getData();
+					//String filename = data.getStringExtra()
+					Log.d(TAG, "File Uri: " + uri.toString());
+					// Get the path
+					//	String path = FileUtils.getPath(this, uri);
+					restoreFilename = uri.getPath();
+					Log.d(TAG, "File Uri: " + restoreFilename);
+
+					//	Log.d(TAG, "File Path: " + path);
+					// Get the file instance
+					// File file = new File(path);
+					// Initiate the upload
+
+					File restoreFile = new File(restoreFilename);
+					importCasesCSV(restoreFile);
 				}
 				break;
 		}

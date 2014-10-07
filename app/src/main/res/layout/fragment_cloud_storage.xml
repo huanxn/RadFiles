@@ -16,6 +16,15 @@
         android:text="test backup"
         android:onClick="onClick_Button">
         </Button>
+    <Button
+        android:id="@+id/exportCSV_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="test exportCSV"
+        android:onClick="onClick_Button"
+        android:layout_toRightOf="@id/backup_button">
+    </Button>
+
 
     <Button
         android:id="@+id/restore_button"
@@ -25,5 +34,22 @@
         android:onClick="onClick_Button"
         android:layout_below="@id/backup_button">
     </Button>
+    <Button
+        android:id="@+id/importCSV_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="test importCSV"
+        android:onClick="onClick_Button"
+        android:layout_toRightOf="@id/restore_button"
+        android:layout_alignBottom="@id/restore_button">
+    </Button>
 
+    <Button
+        android:id="@+id/fix_DB_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="fix DB: images table"
+        android:onClick="onClick_Button"
+        android:layout_below="@id/restore_button">
+    </Button>
 </RelativeLayout>
