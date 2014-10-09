@@ -24,8 +24,8 @@ public class NavigationDrawerActivity extends Activity
 	 */
 	protected CharSequence mTitle;
 
-	final static public int POS_CASE_LIST = 0;
-	final static public int POS_CLOUD_STORAGE = 3;
+	final static protected int POS_CASE_LIST = 0;
+	final static protected int POS_CLOUD_STORAGE = 3;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)

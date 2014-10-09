@@ -58,11 +58,13 @@ public class UtilsFile
 		}
 	}
 
+	/*
 	static public void copyFile(Uri dst_uri, Uri src_uri)
 	{
 		// make File
 		//copyFile(dstFile, srcFile)
 	}
+*/
 
 	static public void copyFile(File dst, File src) throws IOException
 	{

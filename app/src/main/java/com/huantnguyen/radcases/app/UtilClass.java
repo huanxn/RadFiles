@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,6 +52,13 @@ public class UtilClass extends Activity
 
 	public static final String TAG = "UtilClass";
 
+	/**
+	 * Shows a toast message.
+	 */
+	public void showMessage(String message)
+	{
+		Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+	}
 
 	static public void setPic(ImageView mImageView, String mCurrentPhotoPath, int size)
 	{
