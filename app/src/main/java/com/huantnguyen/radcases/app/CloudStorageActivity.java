@@ -25,17 +25,18 @@ import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
 import com.google.android.gms.drive.DriveContents;
 import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
 
-import com.google.android.gms.drive.DriveApi.DriveContentsResult;
 import com.google.android.gms.drive.DriveApi.DriveIdResult;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -52,10 +53,13 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 	private CloudStorageFragment fragment;
 	String restoreFilename;
+	String exportFilename;
 
 	final static int REQUEST_SELECT_BACKUP_FILE = 0;
 	final static int REQUEST_SELECT_CSV_FILE = 1;
 	final static int REQUEST_CREATE_GOOGLE_DRIVE_FILE = 2;
+
+	private File local_backup_zip_file;
 
 
     @Override
@@ -164,32 +168,13 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
-
-						//todo
-						//exportCasesCSV(value);
-
-						File storageDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-
-
-						File tempCSV = null;
-						try
-						{
-							tempCSV = File.createTempFile(value, ".csv", storageDir);
-							//tempDB = File.createTempFile(value, ".db", storageDir);
-						}
-						catch (IOException e)
-						{
-							e.printStackTrace();
-						}
-
+						exportFilename = value;
 
 						// create CSV file
-						if(exportCasesCSV(tempCSV))
+						if(exportCasesCSV(value))
 						{
-							Toast.makeText(getApplicationContext(), "Saved data to " + tempCSV, Toast.LENGTH_LONG).show();
+							Toast.makeText(getApplicationContext(), "Saved data to " + value + ".zip", Toast.LENGTH_LONG).show();
 						}
-
-
 					}
 				});
 
@@ -206,7 +191,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 			case R.id.restore_button:
 				Intent restoreIntent = new Intent();
-				restoreIntent.setType("DOWNLOADS/*.db");
+				//restoreIntent.setType("DOWNLOADS/*.db");
+				restoreIntent.setDataAndType(Uri.parse(getApplication().getExternalFilesDir(null).getPath() + "/Backup/"), "text/db");
 				restoreIntent.setAction(Intent.ACTION_GET_CONTENT);
 				//intent.putExtra("image_filename", filename);
 				startActivityForResult(Intent.createChooser(restoreIntent,"Select Backup File"), REQUEST_SELECT_BACKUP_FILE);
@@ -215,7 +201,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 			case R.id.importCSV_button:
 				Intent importIntent = new Intent();
-				importIntent.setType("DOWNLOADS/*.csv");
+				//importIntent.setType("DOWNLOADS/*.csv");
+				importIntent.setDataAndType(Uri.parse(getApplication().getExternalFilesDir(null).getPath() + "/CSV/"), "application/zip");
 				importIntent.setAction(Intent.ACTION_GET_CONTENT);
 				//intent.putExtra("image_filename", filename);
 				startActivityForResult(Intent.createChooser(importIntent,"Select Backup File"), REQUEST_SELECT_CSV_FILE);
@@ -230,17 +217,51 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	}
 
 	//  todo export select cases, selected by integer list of case_id
-	private boolean exportCasesCSV(File outFile/*, List<Integer> caseList*/)
+	private boolean exportCasesCSV(String filename /*File outFile, List<Integer> caseList*/)
 	{
 		Boolean returnCode = false;
 
+		// attempt to create CSV file
+		File casesCSV = null;
+		File imagesCSV = null;
+
+		// CSV subdirectory within internal app data directory
+		File CSV_dir = new File(getApplication().getExternalFilesDir(null), "/CSV/");
+
+		// create CSV dir if doesn't already exist
+		if(!CSV_dir.exists())
+		{
+			if(CSV_dir.mkdirs())
+			{
+				Toast.makeText(this, "Created directory: " + CSV_dir.getPath(), Toast.LENGTH_LONG).show();
+			}
+			else
+			{
+				Toast.makeText(this, "Unable to create directory: " + CSV_dir.getPath(), Toast.LENGTH_LONG).show();
+			}
+		}
+
+
+		try
+		{
+			//casesCSV = File.createTempFile(filename + "_cases", ".csv", storageDir);
+			casesCSV = new File(CSV_dir.getPath(), filename + "_cases.csv");
+			//imagesCSV = File.createTempFile(filename + "_images", ".csv", storageDir);
+			imagesCSV = new File(CSV_dir.getPath(), filename + "_images.csv");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			showMessage("unable to create local CSV backup files.");
+			return false;
+		}
 
 		String csvHeader = "";
-		String csvValues = "";
+		String case_csvValues = "";
+		String image_csvValues = "";
 
 		// to zip all images into a file for backup
-		String image_filenames[] = new String[0];
-		int image_counter = 0;
+		String zip_filenames[] = new String[0];
 
 		String value = "";
 
@@ -266,142 +287,123 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		}
 */
 
-		// Show the Google Drive interface to choose filename and location to create new backup file
-		Drive.DriveApi.newDriveContents(getGoogleApiClient())
-				.setResultCallback(driveContentsCallback);
-
-		// edit file
-
-		////////// 1
-		//Drive.DriveApi.fetchDriveId(getGoogleApiClient(), driveId.encodeToString())
-		//		.setResultCallback(idCallback);
-
-		////////// 2
-//		DriveFile file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
-
-		// Open the newly created Google Drive backup file
-		/*
-		file.open(getGoogleApiClient(), DriveFile.MODE_WRITE_ONLY, null).setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
-			@Override
-			public void onResult(DriveApi.DriveContentsResult result) {
-				if (!result.getStatus().isSuccess()) {
-					// Handle error
-					return;
-				}
-
-		});
-			*/
-
-		////////////// 3
-		/*
-		DriveFile file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
+		// create local CSV files
 		try
 		{
-			DriveApi.DriveContentsResult driveContentsResult = file.open(getGoogleApiClient(), DriveFile.MODE_WRITE_ONLY, null).await();
-			if (!driveContentsResult.getStatus().isSuccess())
-			{
-				return false;
-			}
-			DriveContents driveContents = driveContentsResult.getDriveContents();
-			OutputStream outputStream = driveContents.getOutputStream();
-			outputStream.write("Hello world".getBytes());
-			com.google.android.gms.common.api.Status status =
-					driveContents.commit(getGoogleApiClient(), null).await();
-			return status.getStatus().isSuccess();
-		}
-		catch (IOException e)
-		{
-			Log.e(TAG, "IOException while writing to the Google Drive output stream", e);
-		}
-*/
+			FileWriter casesWriter = new FileWriter(casesCSV);
+			BufferedWriter casesOut = new BufferedWriter(casesWriter);
 
-		////////////
-
-
-
-
-		try {
-			//File outFile = new File(outFileName);
-			FileWriter fileWriter = new FileWriter(outFile);
-			BufferedWriter out = new BufferedWriter(fileWriter);
+			FileWriter imagesWriter = new FileWriter(imagesCSV);
+			BufferedWriter imagesOut = new BufferedWriter(imagesWriter);
 
 			//			FileOutputStream outputStream = openFileOutput(outFileName, Context.MODE_PRIVATE);
 
 
 			// Cases table
-			Cursor cursor = getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+			Cursor caseCursor = getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
 
-			if (cursor.moveToFirst())
+			if (caseCursor.moveToFirst())
 			{
-				out.write(csvHeader);
+				casesOut.write(csvHeader);
 				//	outputStream.write(csvHeader.getBytes());
 
 				// loop through all cases
 				do
 				{
-					csvValues = "";
+					case_csvValues = "";
 					// output all case columns for this case
 					for (int i = 0; i < CasesProvider.ALL_KEYS.length; i++)
 					{
 						if (i > 0)
 						{
-							csvValues += ",";
+							case_csvValues += ",";
 						}
 
 						if (i == 6 || i == 11)
-							csvValues += "\"" + String.valueOf(cursor.getInt(i)) + "\"";
+							case_csvValues += "\"" + String.valueOf(caseCursor.getInt(i)) + "\"";
 						else
 						{
 
-							value = cursor.getString(i);
+							value = caseCursor.getString(i);
 
 							if(value == null)
 								value = "";
 
-							csvValues += "\"" + value + "\"";
+							case_csvValues += "\"" + value + "\"";
 						}
 					}
 
 					// output image files in last columns
-					String [] image_args = {String.valueOf(cursor.getInt(CasesProvider.COL_ROWID))};
+					String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
 					Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+					// loop through all images of this case
+					if(imageCursor.moveToFirst())
+					{
+						do
+						{
+							image_csvValues = "";
+							// output all image columns for this image
+
+							image_csvValues = imageCursor.getString(0) + "," + imageCursor.getString(1) + "," + imageCursor.getString(2) + "," + imageCursor.getString(3) + "\n";
+							imagesOut.write(image_csvValues);
+
+						} while (imageCursor.moveToNext());
+					}
 
 					// store image filenames in string array for zip
 					if(imageCursor.moveToFirst())
 					{
 						do
 						{
-							csvValues += "," + "\"" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME) + "\"";
+							case_csvValues += "," + "\"" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME) + "\"";
 
-							image_filenames = UtilClass.addArrayElement(image_filenames, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+							zip_filenames = UtilClass.addArrayElement(zip_filenames, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 
 						} while (imageCursor.moveToNext());
 					}
 
-					out.write(csvValues+"\n");
-					//			outputStream.write(csvValues.getBytes());
-				} while (cursor.moveToNext());
-				cursor.close();
+					imageCursor.close();
+
+					casesOut.write(case_csvValues + "\n");
+					//			outputStream.write(case_csvValues.getBytes());
+				} while (caseCursor.moveToNext());
+				caseCursor.close();
 
 			}
-			out.close();
+			casesOut.close();
+			imagesOut.close();
 			//outputStream.close();
+
+			//local_backup_zip_file = casesCSV;
 
 			//todo
 			// Images table
 
 
-			// backup actual images into a zip
-			String zip_filename = outFile.getPath().replace("csv", "zip");
-			UtilsFile.zip(image_filenames, zip_filename);
+			// zip image and csv files
+			String zip_filename = casesCSV.getPath().replace("_cases", "");
+			zip_filename = zip_filename.replace(".csv", ".zip");
+			zip_filenames = UtilClass.addArrayElement(zip_filenames, casesCSV.getPath());
+			zip_filenames = UtilClass.addArrayElement(zip_filenames, imagesCSV.getPath());
+			local_backup_zip_file = UtilsFile.zip(zip_filenames, zip_filename);
+
+			casesCSV.delete();
+			imagesCSV.delete();
 
 			returnCode = true;
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			returnCode = false;
 			e.printStackTrace();
 			Log.d(TAG, "IOException: " + e.getMessage());
 		}
 
+
+		// Show the Google Drive interface to choose filename and location to create cloud backup file
+		Drive.DriveApi.newDriveContents(getGoogleApiClient())
+				.setResultCallback(driveContentsCallback);
 
 
 		return returnCode;
@@ -446,6 +448,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			br = new BufferedReader(new FileReader(tempCSV));
 
 			// If successfully opened file, clear old database: delete all rows from CASES and IMAGES tables in the database
+			// todo change this to just add to existing database
 			getContentResolver().delete(CasesProvider.CASES_URI, null, null);
 			getContentResolver().delete(CasesProvider.IMAGES_URI, null, null);
 
@@ -568,35 +571,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				if (resultCode == RESULT_OK) {
 					driveId = (DriveId) data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
 
-					// edit
-					Drive.DriveApi.fetchDriveId(getGoogleApiClient(), driveId.encodeToString())
-							.setResultCallback(idCallback);
-
-					/*
-					DriveFile file = Drive.DriveApi.getFile(getGoogleApiClient(), driveId);
-					try
-					{
-						DriveApi.DriveContentsResult driveContentsResult = file.open(getGoogleApiClient(), DriveFile.MODE_WRITE_ONLY, null).await();
-						if (!driveContentsResult.getStatus().isSuccess())
-						{
-							showMessage("unable to open google drive file");
-							return;
-							//return false;
-						}
-						DriveContents driveContents = driveContentsResult.getDriveContents();
-						OutputStream outputStream = driveContents.getOutputStream();
-						outputStream.write("Hello world".getBytes());
-						com.google.android.gms.common.api.Status status =
-								driveContents.commit(getGoogleApiClient(), null).await();
-						//return status.getStatus().isSuccess();
-						return;
-					}
-					catch (IOException e)
-					{
-						Log.e(TAG, "IOException while writing to the Google Drive output stream", e);
-					}
-					*/
-
 					showMessage("File created with ID: " + driveId);
 				}
 				//finish();
@@ -713,26 +687,94 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	final ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
 			new ResultCallback<DriveApi.DriveContentsResult>() {
 				@Override
-				public void onResult(DriveApi.DriveContentsResult result) {
-					MetadataChangeSet metadataChangeSet = new MetadataChangeSet.Builder()
-																  .setTitle("Create File")
-							                                      .setMimeType("text/html").build();
-					IntentSender intentSender = Drive.DriveApi
-							                            .newCreateFileActivityBuilder()
-							                            .setInitialMetadata(metadataChangeSet)
-							                            .setInitialDriveContents(result.getDriveContents())
-							                            .build(getGoogleApiClient());
-					try
-					{
-						startIntentSenderForResult(intentSender, REQUEST_CREATE_GOOGLE_DRIVE_FILE, null, 0, 0, 0);
+				public void onResult(DriveApi.DriveContentsResult result)
+				{
+					if (!result.getStatus().isSuccess()) {
+						showMessage("Error while trying to create new file contents");
+						return;
 					}
-					catch (IntentSender.SendIntentException e)
+
+					final DriveContents driveContents = result.getDriveContents();
+					final File inFile = local_backup_zip_file;
+					final String filename = exportFilename;
+
+					// Perform I/O off the UI thread.
+					new Thread()
 					{
-						Log.w(TAG, "Unable to send intent", e);
-					}
+						@Override
+						public void run()
+						{
+							// write content to DriveContents
+							OutputStream outputStream = driveContents.getOutputStream();
+							FileInputStream inputStream = null;
+							try
+							{
+								// copy file contents to outstream
+								inputStream = new FileInputStream(inFile);
+								UtilsFile.copyFile((FileOutputStream)outputStream, inputStream);
+							}
+							catch (FileNotFoundException e)
+							{
+								e.printStackTrace();
+								showMessage("local CSV file not found");
+							}
+							catch (IOException e)
+							{
+								e.printStackTrace();
+								showMessage("Copy CSV to Google Drive: IO exception");
+							}
+
+
+							// setup google drive file
+							MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+									                              .setTitle(filename)
+									                              .setMimeType("application/zip")
+									                              .setStarred(true).build();
+
+							// create a file on root folder
+							/*
+							Drive.DriveApi.getRootFolder(getGoogleApiClient())
+									.createFile(getGoogleApiClient(), changeSet, driveContents)
+									.setResultCallback(fileCallback);
+									*/
+
+							// open up google drive file chooser and create file
+							IntentSender intentSender = Drive.DriveApi
+									                            .newCreateFileActivityBuilder()
+									                            .setInitialMetadata(changeSet)
+									                            .setInitialDriveContents(driveContents)
+									                            .build(getGoogleApiClient());
+							try
+							{
+								startIntentSenderForResult(intentSender, REQUEST_CREATE_GOOGLE_DRIVE_FILE, null, 0, 0, 0);
+							}
+							catch (IntentSender.SendIntentException e)
+							{
+								Log.w(TAG, "Unable to send intent", e);
+							}
+
+						}
+					}.start();
+
+
 				}
 			};
 
+	final private ResultCallback<DriveFolder.DriveFileResult> fileCallback = new ResultCallback<DriveFolder.DriveFileResult>()
+	 {
+	     @Override
+	     public void onResult(DriveFolder.DriveFileResult result) {
+	         if (!result.getStatus().isSuccess()) {
+	             showMessage("Error while trying to create the file");
+	             return;
+	         }
+	         showMessage("Created a file with content: " + result.getDriveFile().getDriveId());
+	     }
+	 };
+
+
+
+	//////////////////
 	// Write/Edit Google Drive file
 	final ResultCallback<DriveIdResult> idCallback = new ResultCallback<DriveIdResult>() {
 		@Override
@@ -783,7 +825,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			showMessage("Successfully edited contents");
 		}
 	}
-
+///////////////
 
 
 

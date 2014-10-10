@@ -37,7 +37,7 @@ public class UtilsFile
 	 * @param toFile
 	 *            - FileInputStream for the file to copy to.
 	 */
-	public static void copyFile(FileInputStream fromFile, FileOutputStream toFile) throws IOException
+	public static void copyFile(FileOutputStream toFile, FileInputStream fromFile) throws IOException
 	{
 		FileChannel fromChannel = null;
 		FileChannel toChannel = null;
@@ -92,10 +92,13 @@ public class UtilsFile
 
 	private static final int BUFFER_SIZE = 8192;
 
-	public static void zip(String[] files, String zipFile) throws IOException {
+	public static File zip(String[] files, String filename) throws IOException {
 		BufferedInputStream origin = null;
-		ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)));
-		try {
+		File outFile = new File(filename);
+		FileOutputStream outputStream = new FileOutputStream(outFile);
+		ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(outputStream));
+		try
+		{
 			byte data[] = new byte[BUFFER_SIZE];
 
 			for (int i = 0; i < files.length; i++) {
@@ -115,9 +118,12 @@ public class UtilsFile
 				}
 			}
 		}
-		finally {
+		finally
+		{
 			out.close();
 		}
+
+		return outFile;
 	}
 
 	/**
