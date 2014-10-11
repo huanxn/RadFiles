@@ -322,6 +322,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 
 		//values.put(CasesProvider.KEY_FAVORITE, ((EditText)findViewById(R.id.edit_favorite)).getText().toString());
 
+		// todo: just get count from image table
 		values.put(CasesProvider.KEY_IMAGE_COUNT, numImages+numNewImages);
 
 		if(key_id == -1)

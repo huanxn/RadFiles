@@ -25,7 +25,6 @@ import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
 import com.google.android.gms.drive.DriveContents;
 import com.google.android.gms.drive.DriveFile;
-import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
@@ -41,6 +40,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
@@ -52,14 +52,29 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	String TAG = "CloudStorageActivity";
 
 	private CloudStorageFragment fragment;
-	String restoreFilename;
-	String exportFilename;
+
 
 	final static int REQUEST_SELECT_BACKUP_FILE = 0;
 	final static int REQUEST_SELECT_CSV_FILE = 1;
 	final static int REQUEST_CREATE_GOOGLE_DRIVE_FILE = 2;
+	final static int REQUEST_OPEN_GOOGLE_DRIVE_FILE = 3;
 
-	private File local_backup_zip_file;
+	// for uploading to cloud
+	private File local_file_to_cloud;
+	private String exportFilename;
+
+	final static String CASES_CSV_FILENAME = "cases_table.csv";
+	final static String IMAGES_CSV_FILENAME = "images_table.csv";
+	final static String STUDIES_CSV_FILENAME = "studies_table.csv";
+
+	final static String DB_FILENAME = "RadCases.db";
+
+	// standard directories
+	private static File downloadsDir;
+	private static File picturesDir;
+	private static File appDir;             // internal app data directory
+	private static File dataDir;            // private data directory (with SQL database)
+	private static File CSV_dir;            // contains created zip files with CSV files and images
 
 
     @Override
@@ -67,6 +82,12 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
         super.onCreate(savedInstanceState);
 	    setDrawerPosition(NavigationDrawerActivity.POS_CLOUD_STORAGE);
         //setContentView(R.layout.activity_cloud_storage);
+
+	    downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+	    picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+		appDir = getExternalFilesDir(null);
+	    dataDir = Environment.getDataDirectory();
+	    CSV_dir = new File(appDir, "/CSV/");
 
 	    if (savedInstanceState == null)
 	    {
@@ -127,24 +148,25 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		//File storageDir = getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
 		// Create an image file name based on timestamp
-		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
-		filename = "Backup_cases_" + timeStamp;
+		//String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
+		String timeStamp = new SimpleDateFormat("MM-dd-yy").format(new Date());
 
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
-		input.setText(filename);
-
-		alert.setView(input);
-
 
 		switch(view.getId())
 		{
 			case R.id.backup_button:
 
+				filename = "RadBackup (" + timeStamp + ")";
+				input.setText(filename);
+				alert.setView(input);
 
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
+
+						exportFilename = value + ".zip";
 
 						// export SQLite file
 						backupDB(value);
@@ -164,11 +186,14 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 			case R.id.exportCSV_button:
 
+				filename = "RadExport (" + timeStamp + ")";
+				input.setText(filename);
+				alert.setView(input);
 
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
-						exportFilename = value;
+						exportFilename = value + ".zip";
 
 						// create CSV file
 						if(exportCasesCSV(value))
@@ -200,9 +225,10 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				break;
 
 			case R.id.importCSV_button:
+
 				Intent importIntent = new Intent();
 				//importIntent.setType("DOWNLOADS/*.csv");
-				importIntent.setDataAndType(Uri.parse(getApplication().getExternalFilesDir(null).getPath() + "/CSV/"), "application/zip");
+				importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "application/zip");
 				importIntent.setAction(Intent.ACTION_GET_CONTENT);
 				//intent.putExtra("image_filename", filename);
 				startActivityForResult(Intent.createChooser(importIntent,"Select Backup File"), REQUEST_SELECT_CSV_FILE);
@@ -226,7 +252,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		File imagesCSV = null;
 
 		// CSV subdirectory within internal app data directory
-		File CSV_dir = new File(getApplication().getExternalFilesDir(null), "/CSV/");
+		//File CSV_dir = new File(getApplication().getExternalFilesDir(null), "/CSV/");
 
 		// create CSV dir if doesn't already exist
 		if(!CSV_dir.exists())
@@ -241,13 +267,16 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			}
 		}
 
-
+		getGoogleApiClient().connect();
 		try
 		{
 			//casesCSV = File.createTempFile(filename + "_cases", ".csv", storageDir);
-			casesCSV = new File(CSV_dir.getPath(), filename + "_cases.csv");
+			//casesCSV = new File(CSV_dir.getPath(), filename + "_cases.csv");
 			//imagesCSV = File.createTempFile(filename + "_images", ".csv", storageDir);
-			imagesCSV = new File(CSV_dir.getPath(), filename + "_images.csv");
+			//imagesCSV = new File(CSV_dir.getPath(), filename + "_images.csv");
+
+			casesCSV = new File(CSV_dir.getPath(), CASES_CSV_FILENAME);
+			imagesCSV = new File(CSV_dir.getPath(), IMAGES_CSV_FILENAME);
 		}
 		catch (Exception e)
 		{
@@ -261,7 +290,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		String image_csvValues = "";
 
 		// to zip all images into a file for backup
-		String zip_filenames[] = new String[0];
+		String zip_files_array[] = new String[0];
 
 		String value = "";
 
@@ -356,9 +385,10 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					{
 						do
 						{
+							// todo delete this, because image data is in its own separate csv file
 							case_csvValues += "," + "\"" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME) + "\"";
 
-							zip_filenames = UtilClass.addArrayElement(zip_filenames, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+							zip_files_array = UtilClass.addArrayElement(zip_files_array, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 
 						} while (imageCursor.moveToNext());
 					}
@@ -375,18 +405,18 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			imagesOut.close();
 			//outputStream.close();
 
-			//local_backup_zip_file = casesCSV;
+			//local_file_to_cloud = casesCSV;
 
 			//todo
 			// Images table
 
-
 			// zip image and csv files
-			String zip_filename = casesCSV.getPath().replace("_cases", "");
-			zip_filename = zip_filename.replace(".csv", ".zip");
-			zip_filenames = UtilClass.addArrayElement(zip_filenames, casesCSV.getPath());
-			zip_filenames = UtilClass.addArrayElement(zip_filenames, imagesCSV.getPath());
-			local_backup_zip_file = UtilsFile.zip(zip_filenames, zip_filename);
+			String zip_filename = CSV_dir.getPath() + "/" + filename + ".zip";
+			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesCSV.getPath());
+			zip_files_array = UtilClass.addArrayElement(zip_files_array, imagesCSV.getPath());
+
+			// set file for upload to Google Drive
+			local_file_to_cloud = UtilsFile.zip(zip_files_array, zip_filename);
 
 			casesCSV.delete();
 			imagesCSV.delete();
@@ -400,10 +430,9 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			Log.d(TAG, "IOException: " + e.getMessage());
 		}
 
-
 		// Show the Google Drive interface to choose filename and location to create cloud backup file
 		Drive.DriveApi.newDriveContents(getGoogleApiClient())
-				.setResultCallback(driveContentsCallback);
+				.setResultCallback(driveCreateCopyCallback);
 
 
 		return returnCode;
@@ -424,17 +453,42 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		// Clear old data
 		// TODO: Delete old image files using the images table to find the file locations
 
-
-		// create local copy (if from cloud storage file)
-		File storageDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-		File tempCSV = null;
+		/*
+		File zipFile = null;
 		try
 		{
-			tempCSV = File.createTempFile("temp", ".csv", storageDir);
-
-			UtilsFile.copyFile(tempCSV, inFile);
+			zipFile = File.createTempFile("temp", ".zip", getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES));
+			UtilsFile.copyFile(zipFile, inFile);
 		}
 		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+*/
+
+		// unzip image files and csv files
+		try
+		{
+			// unzip image files to android pictures directory
+			UtilsFile.unzip(inFile.getPath(),picturesDir.getPath());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Toast.makeText(this, "Unable to open zip file:", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		File tempCasesCSV = null;
+		File tempImagesCSV = null;
+		try
+		{
+			// open existing files that should have been unzipped
+			tempCasesCSV = new File(picturesDir, CASES_CSV_FILENAME);
+			tempImagesCSV = new File(picturesDir, IMAGES_CSV_FILENAME);
+
+		}
+		catch (Exception e)
 		{
 			e.printStackTrace();
 			Toast.makeText(this, "Unable to copy CSV file", Toast.LENGTH_SHORT).show();
@@ -442,10 +496,9 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		}
 
 
-
 		try
 		{
-			br = new BufferedReader(new FileReader(tempCSV));
+			br = new BufferedReader(new FileReader(tempCasesCSV));
 
 			// If successfully opened file, clear old database: delete all rows from CASES and IMAGES tables in the database
 			// todo change this to just add to existing database
@@ -497,22 +550,12 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			return;
 		}
 
-		// unzip image files
-		try
-		{
-			// zip file name is same as the csv file, except with zip extension
-			// unzip image files to android pictures directory
-			UtilsFile.unzip(inFile.getPath().replace("csv", "zip"),getApplication().getExternalFilesDir(Environment.DIRECTORY_PICTURES).getPath());
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Toast.makeText(this, "Unable to open images zip file:", Toast.LENGTH_SHORT).show();
-			return;
-		}
+
 
 		Toast.makeText(this, "Restored database", Toast.LENGTH_SHORT).show();
 
+		tempCasesCSV.delete();
+		tempImagesCSV.delete();
 	}
 
 
@@ -522,7 +565,10 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		{
 			// Restore DB
 			case REQUEST_SELECT_BACKUP_FILE:
-				if (resultCode == RESULT_OK) {
+				if (resultCode == RESULT_OK)
+				{
+					String restoreFilename;
+
 					// Get the Uri of the selected file
 					Uri uri = data.getData();
 					//String filename = data.getStringExtra()
@@ -532,6 +578,45 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					restoreFilename = uri.getPath();
 					Log.d(TAG, "File Uri: " + restoreFilename);
 
+					// copy drive file uri content to new local file
+
+					// create new local file
+					File tempRestoreFile = null;
+					try
+					{
+						tempRestoreFile = File.createTempFile("RadCases", ".zip", downloadsDir);
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Unable to create temporary file.");
+					}
+
+					FileOutputStream outputStream = null;
+					FileInputStream inputStream = null;
+					try
+					{
+						// Google Drive file
+						inputStream = (FileInputStream)getContentResolver().openInputStream(uri);
+
+						// new local file
+						outputStream = new FileOutputStream(tempRestoreFile);
+
+						// copy backup file contents to local file
+						UtilsFile.copyFile(outputStream, inputStream);
+					}
+					catch (FileNotFoundException e)
+					{
+						e.printStackTrace();
+						showMessage("local file not found");
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Copy backup to Google Drive: IO exception");
+						showMessage("cannot open input stream from selected uri");
+					}
+
 				//	Log.d(TAG, "File Path: " + path);
 					// Get the file instance
 					// File file = new File(path);
@@ -540,30 +625,73 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					//File restoreFile = new File(restoreFilename);
 					//importCasesCSV(restoreFile);
 
-					restoreDB(restoreFilename);
+					restoreDB(tempRestoreFile);
+
+					// delete the temporary file
+					tempRestoreFile.delete();
 
 				}
 				break;
 
 			// Import CSV
 			case REQUEST_SELECT_CSV_FILE:
-				if (resultCode == RESULT_OK) {
+				if (resultCode == RESULT_OK)
+				{
+					String CSV_filename;
+
 					// Get the Uri of the selected file
 					Uri uri = data.getData();
 					//String filename = data.getStringExtra()
 					Log.d(TAG, "File Uri: " + uri.toString());
 					// Get the path
 					//	String path = FileUtils.getPath(this, uri);
-					restoreFilename = uri.getPath();
-					Log.d(TAG, "File Uri: " + restoreFilename);
+					CSV_filename = uri.getPath();
+					Log.d(TAG, "File Uri: " + CSV_filename);
 
-					//	Log.d(TAG, "File Path: " + path);
-					// Get the file instance
-					// File file = new File(path);
-					// Initiate the upload
+					// copy drive file uri content to new local file
 
-					File restoreFile = new File(restoreFilename);
-					importCasesCSV(restoreFile);
+					// create new local file
+					File tempCSV_File = null;
+					try
+					{
+						tempCSV_File = File.createTempFile("RadCases", ".zip", downloadsDir);
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Unable to create temporary file.");
+					}
+
+					FileOutputStream outputStream = null;
+					FileInputStream inputStream = null;
+					try
+					{
+						// Google Drive file
+						inputStream = (FileInputStream)getContentResolver().openInputStream(uri);
+
+						// new local file
+						outputStream = new FileOutputStream(tempCSV_File);
+
+						// copy backup file contents to local file
+						UtilsFile.copyFile(outputStream, inputStream);
+					}
+					catch (FileNotFoundException e)
+					{
+						e.printStackTrace();
+						showMessage("local CSV file not found");
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Copy CSV to Google Drive: IO exception");
+						showMessage("cannot open input stream from selected uri");
+					}
+
+					// process file: unzip images, add csv info to database
+					importCasesCSV(tempCSV_File);
+
+					// delete the temporary file
+					tempCSV_File.delete();
 				}
 				break;
 
@@ -571,7 +699,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				if (resultCode == RESULT_OK) {
 					driveId = (DriveId) data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
 
-					showMessage("File created with ID: " + driveId);
+					//showMessage("File created with ID: " + driveId);
 				}
 				//finish();
 				break;
@@ -587,64 +715,78 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	/////////////////////
 
 	//importing database
-	private void restoreDB(String restoreFilename)
+	private void restoreDB(File inFile /*restoreFilename*/)
 	{
-		// TODO Auto-generated method stub
+		// unzip image files and db files
+		try
+		{
+			// unzip image files to android pictures directory
+			UtilsFile.unzip(inFile.getPath(), picturesDir.getPath());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Toast.makeText(this, "Unable to open zip file:", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		File tempBackupDB = null;
+		try
+		{
+			// open existing file that should have been unzipped
+			tempBackupDB = new File(picturesDir, DB_FILENAME);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Toast.makeText(this, "Unable to copy CSV file", Toast.LENGTH_SHORT).show();
+			return;
+		}
 
 		try {
 			//File sd = Environment.getExternalStorageDirectory();
-			File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
-			File data  = Environment.getDataDirectory();
+			//File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
+			//File data  = Environment.getDataDirectory();
 
 			String currentDBDirPath = "//data//" + getPackageName() + "//databases//";
-			File currentDBDir  = new File(data, currentDBDirPath);
+			File currentDBDir  = new File(dataDir, currentDBDirPath);
 
 			if (currentDBDir.canWrite())
 			{
-				/*
-				String  currentDBPath= "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
-				String backupDBPath  = "/Backup/" + restoreFilename;
-				File  backupDB= new File(data, currentDBPath);
-				File currentDB  = new File(appDir, backupDBPath);
-
-				FileChannel src = new FileInputStream(currentDB).getChannel();
-				FileChannel dst = new FileOutputStream(backupDB).getChannel();
-				*/
-
 				String currentDBPath = "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
-				File currentDB  = new File(data, currentDBPath);
-				File  backupDB= new File(restoreFilename);
+				File currentDB  = new File(dataDir, currentDBPath);
+				//File  backupDB = new File(picturesDir, DB_FILENAME);
 
-				FileChannel src = new FileInputStream(backupDB).getChannel();
+				FileChannel src = new FileInputStream(tempBackupDB).getChannel();
 				FileChannel dst = new FileOutputStream(currentDB).getChannel();
 
 				dst.transferFrom(src, 0, src.size());
 				src.close();
 				dst.close();
-				Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_LONG).show();
-
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e)
+		{
 
 			Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
 					.show();
 
 		}
+		tempBackupDB.delete();
+
 	}
 	//exporting database
 	private boolean backupDB(String backupFilename) {
 		// TODO Auto-generated method stub
 
-		try {
-			//File sd = Environment.getExternalStorageDirectory();
-			File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
-			File data = Environment.getDataDirectory();
+		try
+		{
 
 			if (appDir.canWrite()) {
 				String  currentDBPath= "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
-				String backupDBPath  = "/Backup/" + backupFilename;
-				File currentDB = new File(data, currentDBPath);
-				File backupDB = new File(appDir, backupDBPath);
+				String backupDBPath  = "/Backup/" + DB_FILENAME;
+				File currentDB_file = new File(dataDir, currentDBPath);
+				File backupDB_file = new File(appDir, backupDBPath);
 
 
 				String backupDirPath  = "/Backup/";
@@ -663,12 +805,48 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 				}
 
-				FileChannel src = new FileInputStream(currentDB).getChannel();
-				FileChannel dst = new FileOutputStream(backupDB).getChannel();
+				FileChannel src = new FileInputStream(currentDB_file).getChannel();
+				FileChannel dst = new FileOutputStream(backupDB_file).getChannel();
 				dst.transferFrom(src, 0, src.size());
 				src.close();
 				dst.close();
-				Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_LONG).show();
+				Toast.makeText(getBaseContext(), backupDB_file.toString(), Toast.LENGTH_LONG).show();
+
+
+				// to zip all images into a file for backup
+				String zip_files_array[] = new String[0];
+
+				// get image filenames
+				//String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
+				Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, null, null, CasesProvider.KEY_ORDER);
+
+				// store image filenames in string array for zip
+				if(imageCursor.moveToFirst())
+				{
+					do
+					{
+						zip_files_array = UtilClass.addArrayElement(zip_files_array, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+
+					} while (imageCursor.moveToNext());
+				}
+
+				imageCursor.close();
+
+				// add the SQL database file
+				zip_files_array = UtilClass.addArrayElement(zip_files_array, backupDB_file.getPath());
+
+				// zip image and csv files
+				String zip_filename = backupDir.getPath() + "/" + backupFilename + ".zip";
+				// set file for upload to Google Drive
+				local_file_to_cloud = UtilsFile.zip(zip_files_array, zip_filename);
+
+				// copy to cloud
+				// Show the Google Drive interface to choose filename and location to create cloud backup file
+				Drive.DriveApi.newDriveContents(getGoogleApiClient())
+						.setResultCallback(driveCreateCopyCallback);
+
+				// delete db file (copy in zip)
+				backupDB_file.delete();
 
 			}
 		} catch (Exception e) {
@@ -684,7 +862,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 
 	// Create new Google Drive file
-	final ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
+	final ResultCallback<DriveApi.DriveContentsResult> driveCreateCopyCallback =
 			new ResultCallback<DriveApi.DriveContentsResult>() {
 				@Override
 				public void onResult(DriveApi.DriveContentsResult result)
@@ -695,7 +873,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					}
 
 					final DriveContents driveContents = result.getDriveContents();
-					final File inFile = local_backup_zip_file;
+					final File inFile = local_file_to_cloud;
 					final String filename = exportFilename;
 
 					// Perform I/O off the UI thread.
@@ -716,20 +894,22 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 							catch (FileNotFoundException e)
 							{
 								e.printStackTrace();
-								showMessage("local CSV file not found");
+								showMessage("local file not found");
 							}
 							catch (IOException e)
 							{
 								e.printStackTrace();
-								showMessage("Copy CSV to Google Drive: IO exception");
+								showMessage("Copy file to Google Drive: IO exception");
 							}
 
+
+							//todo default folder
 
 							// setup google drive file
 							MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
 									                              .setTitle(filename)
 									                              .setMimeType("application/zip")
-									                              .setStarred(true).build();
+									                              .build();
 
 							// create a file on root folder
 							/*
@@ -760,6 +940,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				}
 			};
 
+	/*
 	final private ResultCallback<DriveFolder.DriveFileResult> fileCallback = new ResultCallback<DriveFolder.DriveFileResult>()
 	 {
 	     @Override
@@ -771,7 +952,64 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	         showMessage("Created a file with content: " + result.getDriveFile().getDriveId());
 	     }
 	 };
+*/
 
+	/////////////
+	// copy from google drive
+
+	final private ResultCallback<DriveIdResult> driveDownloadCallback = new ResultCallback<DriveIdResult>() {
+		@Override
+		public void onResult(DriveIdResult result) {
+			new RetrieveDriveFileContentsAsyncTask(CloudStorageActivity.this).execute(result.getDriveId());
+		}
+	};
+
+	final private class RetrieveDriveFileContentsAsyncTask
+			extends ApiClientAsyncTask<DriveId, Boolean, String> {
+
+		public RetrieveDriveFileContentsAsyncTask(Context context) {
+			super(context);
+		}
+
+		@Override
+		protected String doInBackgroundConnected(DriveId... params) {
+		String contents = null;
+		DriveFile file = Drive.DriveApi.getFile(getGoogleApiClient(), params[0]);
+		DriveApi.DriveContentsResult driveContentsResult =
+				file.open(getGoogleApiClient(), DriveFile.MODE_READ_ONLY, null).await();
+		if (!driveContentsResult.getStatus().isSuccess()) {
+			return null;
+		}
+		DriveContents driveContents = driveContentsResult.getDriveContents();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(driveContents.getInputStream()));
+		StringBuilder builder = new StringBuilder();
+		String line;
+		try
+		{
+			while ((line = reader.readLine()) != null)
+			{
+				builder.append(line);
+			}
+			contents = builder.toString();
+		} catch (IOException e)
+		{
+			Log.e(TAG, "IOException while reading from the stream", e);
+		}
+
+		driveContents.discard(getGoogleApiClient());
+		return contents;
+		}
+
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			if (result == null) {
+				showMessage("Error while reading from the file");
+				return;
+			}
+			showMessage("File contents: " + result);
+		}
+	}
 
 
 	//////////////////

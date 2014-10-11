@@ -1,6 +1,7 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.SearchManager;
@@ -215,6 +216,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	public static class PlaceholderFragment extends Fragment
 	{
 		View rootView;
+		Activity mActivity;
 
 		public PlaceholderFragment()
 		{
@@ -228,6 +230,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			populateCards();
 
 			return rootView;
+		}
+
+		@Override
+		public void onAttach(Activity activity) {
+			super.onAttach(activity);
+			mActivity = activity;
 		}
 
 		/**
@@ -502,7 +510,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 								detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, true);
 							}
 
-							startActivityForResult(detailIntent, REQUEST_CASE_DETAILS);
+							mActivity.startActivityForResult(detailIntent, REQUEST_CASE_DETAILS);
 						}
 					});
 
@@ -529,7 +537,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 											Intent intent = new Intent(getActivity(), CaseEditActivity.class);
 											intent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 
-											startActivityForResult(intent, CaseDetailActivity.REQUEST_EDIT_CASE);
+											mActivity.startActivityForResult(intent, CaseDetailActivity.REQUEST_EDIT_CASE);
 
 											break;
 
