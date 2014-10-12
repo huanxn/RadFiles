@@ -59,11 +59,17 @@ public class UtilClass extends Activity
 	/**
 	 * Shows a toast message.
 	 */
-	public void showMessage(String message)
+	public static void showMessage(Context context, String message)
 	{
-		Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+		Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 	}
 
+	/**
+	 * Sets ImageView picture from file
+	 * @param mImageView: Layout ImageView that will display the picture
+	 * @param mCurrentPhotoPath: full file path of image to be displayed
+	 * @param size: scale down size of displayed picture (square)
+	 */
 	static public void setPic(ImageView mImageView, String mCurrentPhotoPath, int size)
 	{
 		// Get the dimensions of the View
@@ -536,9 +542,6 @@ public class UtilClass extends Activity
 	}
 
 
-
-
-
 	public static int convertDpToPixels(Context context, float dp)
 	{
 		Resources resources = context.getResources();
@@ -605,10 +608,11 @@ public class UtilClass extends Activity
 		return convertDateString(original_date_str, original_sdf, display_sdf);
 	}
 
-
-
-
-	// delete the case from the action bar menu
+	/**
+	 * Action Bar menu item: Delete the case from the action bar menu
+	 * @param activity: calling activity for context
+	 * @param case_id: unique row id of the case to be deleted
+	 */
 	public static void menuItem_deleteCase(Activity activity, long case_id)
 	{
 		final long key_id = case_id;
@@ -661,7 +665,11 @@ public class UtilClass extends Activity
 		alert.show();
 	}
 
-	// delete the case from the action bar menu
+	/**
+	 *
+	 * @param activity
+	 * @param case_id
+	 */
 	public static void menuItem_shareCase(Activity activity, long case_id)
 	{
 		final long key_id = case_id;
@@ -669,10 +677,48 @@ public class UtilClass extends Activity
 
 	}
 
-	/*
-	public static File exportCasesCSV(Activity context, String filename, List<Long> selectedCaseList)
+	public void buildEditTextAlert(Context context, String title, String message)
 	{
-		//Boolean returnCode = false;
+		AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+
+		if(title != null)
+			alert.setTitle(title);
+		if(message != null)
+			alert.setMessage(message);
+
+		// Set an EditText view to get user input
+		final EditText input = new EditText(context);
+		alert.setView(input);
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				String result = input.getText().toString();
+
+			}
+		});
+
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// Canceled.
+			}
+		});
+
+		alert.show();
+	}
+
+
+	/**
+	 * Creates zip file of images and CSV of database rows of select cases
+	 * used by CloudStorageActivity, CardCaseListActivity
+	 * @param activity: context of calling activity
+	 * @param filename: filename of zip to be created
+	 * @param selectedCaseList: list of unique case id of cases to be included
+	 * @return
+	 */
+
+	public static File exportCasesCSV(Activity activity, String filename, List<Long> selectedCaseList)
+	{
 		File returnFile;
 
 		// attempt to create CSV file
@@ -680,22 +726,21 @@ public class UtilClass extends Activity
 		File imagesCSV = null;
 
 		// CSV subdirectory within internal app data directory
-		File CSV_dir = CloudStorageActivity.CSV_dir;
+		File CSV_dir = CloudStorageActivity.CSV_dir; //new File(getApplication().getExternalFilesDir(null), "/CSV/");
 
 		// create CSV dir if doesn't already exist
 		if(!CSV_dir.exists())
 		{
 			if(CSV_dir.mkdirs())
 			{
-				Toast.makeText(context, "Created directory: " + CSV_dir.getPath(), Toast.LENGTH_LONG).show();
+				showMessage(activity, "Created directory: " + CSV_dir.getPath());
 			}
 			else
 			{
-				Toast.makeText(context, "Unable to create directory: " + CSV_dir.getPath(), Toast.LENGTH_LONG).show();
+				showMessage(activity, "Unable to create directory: " + CSV_dir.getPath());
 			}
 		}
 
-		//		getGoogleApiClient().connect();
 		try
 		{
 			casesCSV = new File(CSV_dir.getPath(), CloudStorageActivity.CASES_CSV_FILENAME);
@@ -704,7 +749,7 @@ public class UtilClass extends Activity
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			//showMessage("unable to create local CSV backup files.");
+			showMessage(activity, "Unable to create local CSV backup files.");
 			return null;
 		}
 
@@ -724,7 +769,8 @@ public class UtilClass extends Activity
 			csvHeader += "\"" + CasesProvider.ALL_KEYS[i] + "\"";
 		}
 
-		csvHeader += ",\"Image Files\"\n";
+		//csvHeader += ",\"Image Files\"\n";
+		csvHeader += "\n";
 
 		Log.d(TAG, "header=" + csvHeader);
 
@@ -742,7 +788,7 @@ public class UtilClass extends Activity
 			if(selectedCaseList == null)
 			{
 				// get all cases
-				caseCursor = context.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
 			}
 			else
 			{
@@ -756,7 +802,7 @@ public class UtilClass extends Activity
 					selectionArgs[j++] = String.valueOf(case_id);
 				}
 
-				caseCursor = context.getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_ROWID + " = ?", selectionArgs, null);
+				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_ROWID + " = ?", selectionArgs, null);
 			}
 
 			if (caseCursor.moveToFirst())
@@ -790,31 +836,18 @@ public class UtilClass extends Activity
 						}
 					}
 
-					// output image files in last columns
+					// Image Table CSV
 					String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
-					Cursor imageCursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+					Cursor imageCursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
 
 					// loop through all images of this case
 					if(imageCursor.moveToFirst())
 					{
 						do
 						{
-							image_csvValues = "";
-							// output all image columns for this image
-
 							image_csvValues = imageCursor.getString(0) + "," + imageCursor.getString(1) + "," + imageCursor.getString(2) + "," + imageCursor.getString(3) + "\n";
 							imagesOut.write(image_csvValues);
-
-						} while (imageCursor.moveToNext());
-					}
-
-					// store image filenames in string array for zip
-					if(imageCursor.moveToFirst())
-					{
-						do
-						{
-							// todo delete this, because image data is in its own separate csv file
-							case_csvValues += "," + "\"" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME) + "\"";
 
 							zip_files_array = UtilClass.addArrayElement(zip_files_array, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 
@@ -831,17 +864,16 @@ public class UtilClass extends Activity
 			}
 			casesOut.close();
 			imagesOut.close();
-			//outputStream.close();
 
 			// zip image and csv files
 			String zip_filename = CSV_dir.getPath() + "/" + filename + ".zip";
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesCSV.getPath());
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, imagesCSV.getPath());
 
-			// set file for upload to Google Drive
-			//local_file_to_cloud = UtilsFile.zip(zip_files_array, zip_filename);
+			// create zip file.  return link to that file.
 			returnFile = UtilsFile.zip(zip_files_array, zip_filename);
 
+			// delete temporary files
 			casesCSV.delete();
 			imagesCSV.delete();
 
@@ -855,36 +887,5 @@ public class UtilClass extends Activity
 
 		return returnFile;
 	}
-*/
 
-
-	public void buildEditTextAlert(Context context, String title, String message)
-	{
-		AlertDialog.Builder alert = new AlertDialog.Builder(context);
-
-
-		if(title != null)
-			alert.setTitle(title);
-		if(message != null)
-			alert.setMessage(message);
-
-		// Set an EditText view to get user input
-		final EditText input = new EditText(context);
-		alert.setView(input);
-
-		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				String result = input.getText().toString();
-
-			}
-		});
-
-		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
-				// Canceled.
-			}
-		});
-
-		alert.show();
-	}
 }

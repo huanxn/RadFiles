@@ -66,6 +66,12 @@ public class UtilsFile
 	}
 */
 
+	/**
+	 * Copy file contents
+	 * @param dst
+	 * @param src
+	 * @throws IOException
+	 */
 	static public void copyFile(File dst, File src) throws IOException
 	{
 		InputStream in = new FileInputStream(src);
@@ -83,10 +89,11 @@ public class UtilsFile
 	}
 
 	/**
-	 * zip files for backup
+	 * Create a zip files
 	 *
-	 * @param files
-	 * @param zipFile
+	 * @param files: String array of full path of files to be compressed into zip file
+	 * @param filename: filename of zip file to be created
+	 * @return File: reference to newly created zip File
 	 * @throws IOException
 	 */
 
@@ -142,7 +149,8 @@ public class UtilsFile
 				location += "/";
 			}
 			File f = new File(location);
-			if(!f.isDirectory()) {
+			if(!f.isDirectory())
+			{
 				f.mkdirs();
 			}
 			ZipInputStream zin = new ZipInputStream(new BufferedInputStream(new FileInputStream(zipFile), BUFFER_SIZE));
