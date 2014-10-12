@@ -206,12 +206,12 @@ public class CasesProvider extends ContentProvider
 					+ ALL_KEYS[3] + " text, "
 					+ ALL_KEYS[4] + " text, "
 					+ ALL_KEYS[5] + " text, "
-					+ ALL_KEYS[6] + " integer, "
+					+ ALL_KEYS[6] + " integer, "    //followup
 					+ ALL_KEYS[7] + " text, "
 					+ ALL_KEYS[8] + " text, "
 					+ ALL_KEYS[9] + " text, "
 					+ ALL_KEYS[10] + " text, "
-					+ ALL_KEYS[11] + " integer, "
+					+ ALL_KEYS[11] + " integer, "   //imagecount
 					+ ALL_KEYS[12] + " text, "
 					+ ALL_KEYS[13] + " text, "
 					+ ALL_KEYS[14] + " text, "

@@ -28,7 +28,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.google.android.gms.drive.Drive;
+
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -624,12 +628,23 @@ public class UtilClass extends Activity
 						Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
 						context.getContentResolver().delete(case_delete_uri, null, null);
 
-						// delete all associated images from IMAGES table, by parent case key_id
-						context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[] {String.valueOf(key_id)});
+						// delete all linked images files
+						Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
+						File imageFile = null;
+						if (image_cursor.moveToFirst())
+						{
+							do
+							{
+								imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+								imageFile.delete();
+							} while (image_cursor.moveToNext());
+						}
+						image_cursor.close();
 
-						// TODO delete local image files
+						// delete all child rows from IMAGES table, by parent case key_id
+						context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
 
-						// update case list
+						// update CaseCardListActivity
 						context.setResult(CaseCardListActivity.RESULT_DELETED);
 						context.finish();
 					}
@@ -645,6 +660,203 @@ public class UtilClass extends Activity
 		AlertDialog alert = builder.create();
 		alert.show();
 	}
+
+	// delete the case from the action bar menu
+	public static void menuItem_shareCase(Activity activity, long case_id)
+	{
+		final long key_id = case_id;
+		final Activity context = activity;
+
+	}
+
+	/*
+	public static File exportCasesCSV(Activity context, String filename, List<Long> selectedCaseList)
+	{
+		//Boolean returnCode = false;
+		File returnFile;
+
+		// attempt to create CSV file
+		File casesCSV = null;
+		File imagesCSV = null;
+
+		// CSV subdirectory within internal app data directory
+		File CSV_dir = CloudStorageActivity.CSV_dir;
+
+		// create CSV dir if doesn't already exist
+		if(!CSV_dir.exists())
+		{
+			if(CSV_dir.mkdirs())
+			{
+				Toast.makeText(context, "Created directory: " + CSV_dir.getPath(), Toast.LENGTH_LONG).show();
+			}
+			else
+			{
+				Toast.makeText(context, "Unable to create directory: " + CSV_dir.getPath(), Toast.LENGTH_LONG).show();
+			}
+		}
+
+		//		getGoogleApiClient().connect();
+		try
+		{
+			casesCSV = new File(CSV_dir.getPath(), CloudStorageActivity.CASES_CSV_FILENAME);
+			imagesCSV = new File(CSV_dir.getPath(), CloudStorageActivity.IMAGES_CSV_FILENAME);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			//showMessage("unable to create local CSV backup files.");
+			return null;
+		}
+
+		String csvHeader = "";
+		String case_csvValues = "";
+		String image_csvValues = "";
+
+		// to zip all images into a file for backup
+		String zip_files_array[] = new String[0];
+
+		String value = "";
+
+		for (int i = 0; i < CasesProvider.ALL_KEYS.length; i++) {
+			if (csvHeader.length() > 0) {
+				csvHeader += ",";
+			}
+			csvHeader += "\"" + CasesProvider.ALL_KEYS[i] + "\"";
+		}
+
+		csvHeader += ",\"Image Files\"\n";
+
+		Log.d(TAG, "header=" + csvHeader);
+
+		// create local CSV files
+		try
+		{
+			FileWriter casesWriter = new FileWriter(casesCSV);
+			BufferedWriter casesOut = new BufferedWriter(casesWriter);
+
+			FileWriter imagesWriter = new FileWriter(imagesCSV);
+			BufferedWriter imagesOut = new BufferedWriter(imagesWriter);
+
+			// Cases table
+			Cursor caseCursor;
+			if(selectedCaseList == null)
+			{
+				// get all cases
+				caseCursor = context.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+			}
+			else
+			{
+				// get select cases
+				// convert list of integers into array
+				int j=0;
+				String[] selectionArgs;
+				selectionArgs = new String[selectedCaseList.size()];
+				for(Long case_id : selectedCaseList)
+				{
+					selectionArgs[j++] = String.valueOf(case_id);
+				}
+
+				caseCursor = context.getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_ROWID + " = ?", selectionArgs, null);
+			}
+
+			if (caseCursor.moveToFirst())
+			{
+				casesOut.write(csvHeader);
+				//	outputStream.write(csvHeader.getBytes());
+
+				// loop through all cases
+				do
+				{
+					case_csvValues = "";
+					// output all case columns for this case
+					for (int i = 0; i < CasesProvider.ALL_KEYS.length; i++)
+					{
+						if (i > 0)
+						{
+							case_csvValues += ",";
+						}
+
+						if (i == 6 || i == 11)
+							case_csvValues += "\"" + String.valueOf(caseCursor.getInt(i)) + "\"";
+						else
+						{
+
+							value = caseCursor.getString(i);
+
+							if(value == null)
+								value = "";
+
+							case_csvValues += "\"" + value + "\"";
+						}
+					}
+
+					// output image files in last columns
+					String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
+					Cursor imageCursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+					// loop through all images of this case
+					if(imageCursor.moveToFirst())
+					{
+						do
+						{
+							image_csvValues = "";
+							// output all image columns for this image
+
+							image_csvValues = imageCursor.getString(0) + "," + imageCursor.getString(1) + "," + imageCursor.getString(2) + "," + imageCursor.getString(3) + "\n";
+							imagesOut.write(image_csvValues);
+
+						} while (imageCursor.moveToNext());
+					}
+
+					// store image filenames in string array for zip
+					if(imageCursor.moveToFirst())
+					{
+						do
+						{
+							// todo delete this, because image data is in its own separate csv file
+							case_csvValues += "," + "\"" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME) + "\"";
+
+							zip_files_array = UtilClass.addArrayElement(zip_files_array, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+
+						} while (imageCursor.moveToNext());
+					}
+
+					imageCursor.close();
+
+					casesOut.write(case_csvValues + "\n");
+					//			outputStream.write(case_csvValues.getBytes());
+				} while (caseCursor.moveToNext());
+				caseCursor.close();
+
+			}
+			casesOut.close();
+			imagesOut.close();
+			//outputStream.close();
+
+			// zip image and csv files
+			String zip_filename = CSV_dir.getPath() + "/" + filename + ".zip";
+			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesCSV.getPath());
+			zip_files_array = UtilClass.addArrayElement(zip_files_array, imagesCSV.getPath());
+
+			// set file for upload to Google Drive
+			//local_file_to_cloud = UtilsFile.zip(zip_files_array, zip_filename);
+			returnFile = UtilsFile.zip(zip_files_array, zip_filename);
+
+			casesCSV.delete();
+			imagesCSV.delete();
+
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Log.d(TAG, "IOException: " + e.getMessage());
+			return null;
+		}
+
+		return returnFile;
+	}
+*/
+
 
 	public void buildEditTextAlert(Context context, String title, String message)
 	{

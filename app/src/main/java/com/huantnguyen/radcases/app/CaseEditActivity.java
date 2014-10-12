@@ -359,6 +359,20 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		}
 
 		// TODO delete old images
+
+		/*
+		// delete old images from array/list
+
+		File imageFile = null;
+		for loop through array
+		{
+			imageFile = new File(filename_array[i]);
+			imageFile.delete();
+		}
+
+		*/
+
+
 		/*
 		//for(int i = 0; i < imageCounter; i++)
 		{
