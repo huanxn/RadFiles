@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,7 +22,9 @@ import android.widget.ArrayAdapter;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
@@ -54,11 +57,30 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 	private PlaceholderFragment fragment;
 
+	/*
+	// standard directories
+	private static File downloadsDir;
+	private static File picturesDir;
+	private static File appDir;             // internal app data directory
+	private static File dataDir;            // private data directory (with SQL database)
+
+	public static File CSV_dir;            // contains created zip files with CSV files and images
+	*/
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 //		setContentView(R.layout.activity_case_cardlist);
+
+		/*
+		downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+		picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+		appDir = getExternalFilesDir(null);
+		dataDir = Environment.getDataDirectory();
+		CSV_dir = new File(appDir, "/CSV/");
+		*/
+
 
 		if (savedInstanceState == null)
 		{
@@ -524,7 +546,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 							final long key_id = Long.parseLong(card.getId());
 
 							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-							CharSequence[] imageSources = {"Edit", "*Delete", "*Share", "Cancel"};
+							CharSequence[] imageSources = {"Edit", "*Delete", "Share", "Cancel"};
 							builder.setItems(imageSources, new DialogInterface.OnClickListener()
 							{
 								public void onClick(DialogInterface dialog, int index)
@@ -548,6 +570,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 										// Share Case
 										case 2:
+											String exportFilename = "test";
+											List<Long> caseList = new ArrayList<Long>();
+											caseList.add(key_id);
+
+											File exportFile = UtilClass.exportCasesCSV(getActivity(), exportFilename, caseList);
+
+											UtilClass.showMessage(getActivity(), "Exported case to " + exportFile.getPath());
 											break;
 
 										// Cancel.  Do Nothing.

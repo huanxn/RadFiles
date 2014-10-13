@@ -712,7 +712,7 @@ public class UtilClass extends Activity
 	 * Creates zip file of images and CSV of database rows of select cases
 	 * used by CloudStorageActivity, CardCaseListActivity
 	 * @param activity: context of calling activity
-	 * @param filename: filename of zip to be created
+	 * @param filename: filename of zip to be created (do not include path or extension)
 	 * @param selectedCaseList: list of unique case id of cases to be included
 	 * @return
 	 */
@@ -726,8 +726,9 @@ public class UtilClass extends Activity
 		File imagesCSV = null;
 
 		// CSV subdirectory within internal app data directory
-		File CSV_dir = CloudStorageActivity.CSV_dir; //new File(getApplication().getExternalFilesDir(null), "/CSV/");
+		File CSV_dir = new File(activity.getApplication().getExternalFilesDir(null), "/CSV/");
 
+		/*
 		// create CSV dir if doesn't already exist
 		if(!CSV_dir.exists())
 		{
@@ -740,7 +741,7 @@ public class UtilClass extends Activity
 				showMessage(activity, "Unable to create directory: " + CSV_dir.getPath());
 			}
 		}
-
+*/
 		try
 		{
 			casesCSV = new File(CSV_dir.getPath(), CloudStorageActivity.CASES_CSV_FILENAME);

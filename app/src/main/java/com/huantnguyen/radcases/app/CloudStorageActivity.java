@@ -32,20 +32,17 @@ import com.google.android.gms.drive.OpenFileActivityBuilder;
 import com.google.android.gms.drive.DriveApi.DriveIdResult;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 
 public class CloudStorageActivity extends GoogleDriveBaseActivity
@@ -58,7 +55,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	final static int REQUEST_SELECT_BACKUP_FILE = 0;
 	final static int REQUEST_SELECT_CSV_FILE = 1;
 	final static int REQUEST_CREATE_GOOGLE_DRIVE_FILE = 2;
-	final static int REQUEST_OPEN_GOOGLE_DRIVE_FILE = 3;
 
 	// for uploading to cloud
 	private File local_file_to_cloud;
@@ -309,7 +305,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 			// If successfully opened file, clear old database: delete all rows from IMAGES tables in the database
 			// todo change this to just add to existing database
-			getContentResolver().delete(CasesProvider.IMAGES_URI, null, null);
+			//getContentResolver().delete(CasesProvider.IMAGES_URI, null, null);
 
 			//br.readLine(); // no header
 
@@ -344,7 +340,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 			// If successfully opened file, clear old database: delete all rows from CASES tables in the database
 			// todo change this to just add to existing database
-			getContentResolver().delete(CasesProvider.CASES_URI, null, null);
+			//getContentResolver().delete(CasesProvider.CASES_URI, null, null);
 
 			br.readLine(); // header
 
@@ -396,7 +392,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			return;
 		}
 
-		Toast.makeText(this, "Restored database", Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "Imported cases", Toast.LENGTH_SHORT).show();
 
 		tempCasesCSV.delete();
 		tempImagesCSV.delete();
