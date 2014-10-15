@@ -19,22 +19,31 @@
 package com.huantnguyen.radcases.app;
 
 import android.content.Context;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.internal.CardArrayMultiChoiceAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
+import it.gmariotti.cardslib.library.view.CardView;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 /**
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class StickyCardArrayAdapter extends CardArrayAdapter implements StickyListHeadersAdapter
+public class StickyCardArrayAdapter extends CardArrayMultiChoiceAdapter implements StickyListHeadersAdapter
 {
 
 	/**
@@ -44,6 +53,11 @@ public class StickyCardArrayAdapter extends CardArrayAdapter implements StickyLi
 	private LayoutInflater inflater;
 	private HeaderViewHolder[] holder_list;
 	List<Card> cards;
+
+	/**
+	 * CardArrayMultiChoiceAdapter
+	 */
+	private ActionMode mActionMode;
 
 	/**
 	 * Constructor
@@ -57,7 +71,8 @@ public class StickyCardArrayAdapter extends CardArrayAdapter implements StickyLi
 		super(context, cards);
 		inflater = LayoutInflater.from(context);
 		this.cards = cards;
-		holder_list = new HeaderViewHolder[cards.size()];
+//		holder_list = new HeaderViewHolder[cards.size()];
+		holder_list = null;
 	}
 
 
@@ -65,6 +80,9 @@ public class StickyCardArrayAdapter extends CardArrayAdapter implements StickyLi
 	public View getHeaderView(int position, View convertView, ViewGroup parent)
 	{
 		HeaderViewHolder holder;
+
+		if(holder_list == null)
+			holder_list = new HeaderViewHolder[cards.size()];
 
 		if (convertView == null)
 		{
@@ -147,6 +165,72 @@ public class StickyCardArrayAdapter extends CardArrayAdapter implements StickyLi
 	{
 		this.mCardListView = cardListView;
 	}
+
+	//// MultiChoice
+	@Override
+	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+		//It is very important to call the super method
+		super.onCreateActionMode(mode, menu);
+
+		mActionMode=mode; // to manage mode in your Fragment/Activity
+
+		//If you would like to inflate your menu
+		MenuInflater inflater = mode.getMenuInflater();
+		inflater.inflate(R.menu.case_list_multichoice, menu);
+
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+		return false;
+	}
+
+	@Override
+	public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+		if (item.getItemId() == R.id.menu_share) {
+			Toast.makeText(getContext(), "Share;" + formatCheckedCard(), Toast.LENGTH_SHORT).show();
+			return true;
+		}
+
+		if (item.getItemId() == R.id.menu_delete) {
+			discardSelectedItems(mode);
+			return true;
+		}
+
+		return false;
+	}
+
+	@Override
+	public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked, CardView cardView, Card card) {
+		Toast.makeText(getContext(), "Click;" + position + " - " + checked, Toast.LENGTH_SHORT).show();
+	}
+
+	private void discardSelectedItems(ActionMode mode) {
+		ArrayList<Card> items = getSelectedCards();
+		for (Card item : items) {
+			remove(item);
+		}
+		mode.finish();
+	}
+
+
+	private String formatCheckedCard() {
+
+		SparseBooleanArray checked = mCardListView.getCheckedItemPositions();
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < checked.size(); i++) {
+			if (checked.valueAt(i) == true) {
+				sb.append("\nPosition=" + checked.keyAt(i));
+			}
+		}
+		return sb.toString();
+	}
+
+	//// MultiChoice
+
+
+
 
 	class HeaderViewHolder
 	{

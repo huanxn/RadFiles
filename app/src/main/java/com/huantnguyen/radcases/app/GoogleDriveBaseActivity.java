@@ -47,6 +47,7 @@ public abstract class GoogleDriveBaseActivity extends NavigationDrawerActivity i
      * folder operations samples.
      */
     public static final String EXISTING_FOLDER_ID = "0B2EEtIjPUdX6MERsWlYxN3J6RU0";
+	protected static DriveId GOOGLE_DRIVE_FOLDER_ID = null;
 
     /**
      * DriveId of an existing file to be used in file operation samples..
@@ -91,6 +92,8 @@ public abstract class GoogleDriveBaseActivity extends NavigationDrawerActivity i
 				                   .addConnectionCallbacks(this)
 				                   .addOnConnectionFailedListener(this)
 				                   .build();
+
+
 /*
 		GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(this, DriveScopes.DRIVE);
 		credential.setSelectedAccountName(accountName);

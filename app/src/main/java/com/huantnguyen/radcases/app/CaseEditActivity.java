@@ -195,11 +195,11 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			    finish();
                 return true;
 
-			case R.id.action_camera:
+			case R.id.menu_camera:
 				choosePicture(item.getActionView());
 				return true;
 
-			case R.id.action_delete:
+			case R.id.menu_delete:
 				Toast.makeText(this, "debug: delete " + key_id, Toast.LENGTH_SHORT).show();
 
 				// opens alert dialog to confirm delete
@@ -209,7 +209,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 				return true;
 
 
-			case R.id.action_settings:
+			case R.id.menu_settings:
 				return true;
 
 		}

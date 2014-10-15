@@ -25,6 +25,7 @@ import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveApi;
 import com.google.android.gms.drive.DriveContents;
 import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.DriveFolder;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.MetadataChangeSet;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
@@ -75,6 +76,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	public static File CSV_dir;            // contains created zip files with CSV files and images
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +89,9 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		appDir = getExternalFilesDir(null);
 	    dataDir = Environment.getDataDirectory();
 	    CSV_dir = new File(appDir, "/CSV/");
+
+
+
 
 	    if (savedInstanceState == null)
 	    {
@@ -128,7 +134,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.menu_settings) {
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -144,7 +150,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 		// Create an image file name based on timestamp
 		//String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
-		String timeStamp = new SimpleDateFormat("MM-dd-yy").format(new Date());
+		String timeStamp = new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date());
 
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
@@ -539,6 +545,15 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				if (resultCode == RESULT_OK) {
 					driveId = (DriveId) data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
 
+					/*
+					if(GOOGLE_DRIVE_FOLDER_ID == null)
+					{
+					//	DriveFolder driveFolder = Drive.DriveApi.getFolder(getGoogleApiClient(), driveId);
+
+						GOOGLE_DRIVE_FOLDER_ID = Drive.DriveApi.getAppFolder(getGoogleApiClient()).getDriveId();
+					}
+					*/
+
 					//showMessage("File created with ID: " + driveId);
 				}
 				//finish();
@@ -757,12 +772,29 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 									.setResultCallback(fileCallback);
 									*/
 
+
+							// todo user selectable default folder
+							//GOOGLE_DRIVE_FOLDER_ID = Drive.DriveApi.getAppFolder(getGoogleApiClient()).getDriveId();
+
 							// open up google drive file chooser and create file
-							IntentSender intentSender = Drive.DriveApi
-									                            .newCreateFileActivityBuilder()
-									                            .setInitialMetadata(changeSet)
-									                            .setInitialDriveContents(driveContents)
-									                            .build(getGoogleApiClient());
+							IntentSender intentSender;
+							if(GOOGLE_DRIVE_FOLDER_ID != null)
+							{
+								intentSender = Drive.DriveApi
+										                            .newCreateFileActivityBuilder()
+										                            .setActivityStartFolder(GOOGLE_DRIVE_FOLDER_ID)
+										                            .setInitialMetadata(changeSet)
+										                            .setInitialDriveContents(driveContents)
+										                            .build(getGoogleApiClient());
+							}
+							else
+							{
+								intentSender = Drive.DriveApi
+										                            .newCreateFileActivityBuilder()
+										                            .setInitialMetadata(changeSet)
+										                            .setInitialDriveContents(driveContents)
+										                            .build(getGoogleApiClient());
+							}
 							try
 							{
 								startIntentSenderForResult(intentSender, REQUEST_CREATE_GOOGLE_DRIVE_FILE, null, 0, 0, 0);

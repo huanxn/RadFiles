@@ -112,7 +112,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	{
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.case_detail, menu);
-		MenuItem star = menu.findItem(R.id.action_star);
+		MenuItem star = menu.findItem(R.id.menu_star);
 
 		// Set the starred icon in action bar
 		if (fragment.isStarred())
@@ -140,7 +140,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				finish();
 				return true;
 
-			case R.id.action_star:
+			case R.id.menu_star:
 				if (key_id != -1)
 				{
 //					findViewById(R.id.action_star);
@@ -153,7 +153,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				return true;
 
-			case R.id.action_edit:
+			case R.id.menu_edit:
 				if (key_id != -1)
 				{
 					// open CaseEditActivity, giving the CASE key_id argument
@@ -165,11 +165,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				return true;
 
-			case R.id.action_camera:
+			case R.id.menu_camera:
 				Toast.makeText(this, "debug: Camera function...", Toast.LENGTH_SHORT).show();
 				return true;
 
-			case R.id.action_delete:
+			case R.id.menu_delete:
 				if (key_id != -1)
 				{
 					// opens alert dialog to confirm delete
@@ -180,7 +180,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				return true;
 
-			case R.id.action_search:
+			case R.id.menu_search:
 				//openSearch();
 
 				//String query = intent.getStringExtra(SearchManager.QUERY);
@@ -189,7 +189,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				Toast.makeText(this, "debug: Search function...", Toast.LENGTH_SHORT).show();
 				return true;
 
-			case R.id.action_settings:
+			case R.id.menu_settings:
 				//openSettings();
 				Toast.makeText(this, "debug: Settings function...", Toast.LENGTH_SHORT).show();
 				return true;

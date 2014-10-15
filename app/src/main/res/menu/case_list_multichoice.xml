@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+
+<menu tools:context="com.huantnguyen.radcases.app.CaseCardListActivity" xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Share selected cases, should appear as action button -->
+    <item
+        android:id="@+id/menu_share"
+        android:showAsAction="ifRoom"
+        android:title="Share"
+        android:actionProviderClass=
+            "android.widget.ShareActionProvider" />
+
+    <!-- Delete selected cases, should appear as action button -->
+    <item android:title="@string/action_delete" android:showAsAction="never" android:icon="@drawable/ic_action_discard" android:id="@+id/menu_delete"/>
+
+    <!-- Settings, should always be in the overflow -->
+    <item android:title="@string/action_settings" android:showAsAction="never" android:id="@+id/menu_settings"/>
+
+
+</menu>

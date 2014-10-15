@@ -61,11 +61,11 @@ public class ImageGalleryActivity extends Activity {
 				finish();
 				return true;
 
-			case R.id.action_camera:
+			case R.id.menu_camera:
 				Toast.makeText(this, "debug: Camera function...", Toast.LENGTH_SHORT).show();
 				return true;
 
-			case R.id.action_settings:
+			case R.id.menu_settings:
 				//openSettings();
 				Toast.makeText(this, "debug: Settings function...", Toast.LENGTH_SHORT).show();
 				return true;

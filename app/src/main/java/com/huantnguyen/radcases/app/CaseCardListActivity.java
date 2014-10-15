@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
@@ -135,7 +135,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		// TODO add searchable code here
 		// Get the SearchView and set the searchable configuration
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+		SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
 		// Assumes current activity is the searchable activity
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setIconifiedByDefault(true);
@@ -149,18 +149,18 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		// Handle presses on the action bar items
 		switch (item.getItemId())
 		{
-			case R.id.action_search:
+			case R.id.menu_search:
 				// TODO check this onSearchRequested
 				onSearchRequested();
 				return true;
 
-			case R.id.action_new:
+			case R.id.menu_addnew:
 				Intent intent = new Intent(this, CaseAddActivity.class);
 				startActivityForResult(intent, REQUEST_ADD_CASE);
 
 				return true;
 
-			case R.id.action_settings:
+			case R.id.menu_settings:
 				//openSettings();
 				Toast.makeText(this, "debug: Settings function...", Toast.LENGTH_SHORT).show();
 				return true;
@@ -393,6 +393,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 
 			ArrayList<Card> cards = new ArrayList<Card>();
+			final StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(getActivity(), cards);
 
 			// loop through case cursor and put info into cards
 			if (case_cursor.moveToFirst())
@@ -542,11 +543,16 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 						@Override
 						public boolean onLongClick(Card card, View view)
 						{
+
+							return mCardArrayAdapter.startActionMode(getActivity());
+
+							/*
 							// declared "final" for access from within alert dialog
 							final long key_id = Long.parseLong(card.getId());
+							final StickyCardArrayAdapter mAdapter = mCardArrayAdapter;
 
 							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-							CharSequence[] imageSources = {"Edit", "*Delete", "Share", "Cancel"};
+							CharSequence[] imageSources = {"Edit", "MultiChoice", "Share", "Cancel"};
 							builder.setItems(imageSources, new DialogInterface.OnClickListener()
 							{
 								public void onClick(DialogInterface dialog, int index)
@@ -563,8 +569,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 											break;
 
-										// Delete Case
+										// multichoice
 										case 1:
+											// multichoice
+											// returns boolean
+											mAdapter.startActionMode(getActivity());
 
 											break;
 
@@ -591,6 +600,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 							alert.show();
 
 							return true; // not sure what this does TODO
+							*/
 						}
 					});
 
@@ -599,7 +609,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 				} while (case_cursor.moveToNext());
 			}
 
-			StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(getActivity(), cards);
+			//StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(getActivity(), cards);
 			StickyCardListView listView = (StickyCardListView) rootView.findViewById(R.id.myList);
 
 			if (listView != null)
@@ -610,6 +620,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			listView.setExternalAdapter(animCardArrayAdapter, mCardArrayAdapter);
 */
 				listView.setAdapter(mCardArrayAdapter);
+				listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 			}
 
 			case_cursor.close();
