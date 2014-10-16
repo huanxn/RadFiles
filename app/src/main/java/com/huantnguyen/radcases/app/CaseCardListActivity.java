@@ -35,7 +35,8 @@ import it.gmariotti.cardslib.library.internal.Card;
 public class CaseCardListActivity extends NavigationDrawerActivity
 {
 	// Spinner sort/filter
-	private static int caseFilterMode = -1;
+	private static int defaultFilterMode = 0;  //todo get from shared preferences
+	private static int caseFilterMode = defaultFilterMode;
 	private static final int FILTER_SECTION = 0;
 	private static final int FILTER_RECENT = 1;
 	private static final int FILTER_STUDYDATE = 2;

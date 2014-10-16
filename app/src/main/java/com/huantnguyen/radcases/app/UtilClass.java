@@ -56,6 +56,13 @@ public class UtilClass extends Activity
 
 	public static final String TAG = "UtilClass";
 
+	// standard directories
+	private static File downloadsDir = CaseCardListActivity.downloadsDir;
+	private static File picturesDir = CaseCardListActivity.picturesDir;
+	private static File appDir  = CaseCardListActivity.appDir;             // internal app data directory
+	private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
+	private static File CSV_dir  = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
+
 	/**
 	 * Shows a toast message.
 	 */
@@ -711,6 +718,35 @@ public class UtilClass extends Activity
 		alert.show();
 	}
 
+	/*
+	public void buildConfirmAlert(Context context, String title, String message)
+	{
+		AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+		if(title != null)
+			alert.setTitle(title);
+		if(message != null)
+			alert.setMessage(message);
+
+		// Set an EditText view to get user input
+
+
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+
+
+			}
+		});
+
+		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int whichButton) {
+				// Canceled.
+			}
+		});
+
+		alert.show();
+	}
+*/
 
 	/**
 	 * Creates zip file of images and CSV of database rows of select cases
@@ -730,7 +766,7 @@ public class UtilClass extends Activity
 		File imagesCSV = null;
 
 		// CSV subdirectory within internal app data directory
-		File CSV_dir = new File(activity.getApplication().getExternalFilesDir(null), "/CSV/");
+		//File CSV_dir = new File(activity.getApplication().getExternalFilesDir(null), "/CSV/");
 
 		/*
 		// create CSV dir if doesn't already exist
@@ -854,7 +890,7 @@ public class UtilClass extends Activity
 							image_csvValues = imageCursor.getString(0) + "," + imageCursor.getString(1) + "," + imageCursor.getString(2) + "," + imageCursor.getString(3) + "\n";
 							imagesOut.write(image_csvValues);
 
-							zip_files_array = UtilClass.addArrayElement(zip_files_array, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+							zip_files_array = UtilClass.addArrayElement(zip_files_array, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 
 						} while (imageCursor.moveToNext());
 					}

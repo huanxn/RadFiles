@@ -1,15 +1,18 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.AlertDialog;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -23,6 +26,11 @@ public class ImageGridView
 	private ImageAdapter mAdapter;
 
 	private ArrayList<String> deletedImageList;
+
+	public static final int EDIT_ACTIVITY = 0;
+	public static final int DETAIL_ACTIVITY = 1;
+
+	private int mode = EDIT_ACTIVITY;
 
 	// Constructor for ImageGridView without any intial images
 	public ImageGridView(Context ctx, GridView gView)
@@ -57,6 +65,11 @@ public class ImageGridView
 		SetClickListeners();
 	}
 
+	public void setMode(int m)
+	{
+		mode = m;
+	}
+
 	private void SetClickListeners()
 	{
 		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -74,8 +87,9 @@ public class ImageGridView
 			public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id)
 			{
 				// Delete image
-				final long image_key_id = id;
+				//final long image_key_id = id;
 				final int image_position = position;
+				final Context context = parent.getContext();
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
 				CharSequence[] imageSources = {"Delete Image", "Set Thumbnail", "Cancel"};
@@ -98,18 +112,59 @@ public class ImageGridView
 
 								}*/
 
-								// get image row ID of deleted image, for actual delete if user presses "SAVE"
-								deletedImageList.add(mAdapter.getImageFilepath(image_position));
+								if (mode == EDIT_ACTIVITY)
+								{
+									// get image row ID of deleted image, for actual delete if user presses "SAVE"
+									deletedImageList.add(mAdapter.getImageFilepath(image_position));
 
-								// delete from gridview adapter
-								mAdapter.deleteImage(image_position);
+									// delete from gridview adapter
+									mAdapter.deleteImage(image_position);
 
-								notifyDataSetChanged();
+									notifyDataSetChanged();
+									Resize();
+								}
+								else if (mode == DETAIL_ACTIVITY)
+								{
 
-								Resize();
+									// confirm delete image
+									final
+									AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
-								// TODO Delete the actual file
+									alert.setTitle("Delete this image?");
+									alert.setMessage("Are you sure?");
 
+									alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+										public void onClick(DialogInterface dialog, int whichButton)
+										{
+											// delete actual image file
+											File deleteFile = new File(mAdapter.getImageFilepath(image_position));
+											if(deleteFile.exists())
+											{
+												deleteFile.delete();
+											}
+
+											// delete from database
+											Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, mAdapter.getImageID(image_position));
+											context.getContentResolver().delete(row_uri, null, null);
+
+											// delete from gridview adapter
+											mAdapter.deleteImage(image_position);
+
+											notifyDataSetChanged();
+											Resize();
+										}
+									});
+
+									alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+										public void onClick(DialogInterface dialog, int whichButton) {
+											// Canceled.
+										}
+									});
+
+									alert.show();
+
+
+								}
 
 								break;
 

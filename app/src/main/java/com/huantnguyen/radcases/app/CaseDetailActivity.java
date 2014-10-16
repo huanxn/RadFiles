@@ -244,11 +244,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		 * represents.
 		 */
 
-		//public static final String ARG_HAS_IMAGE = "boolean_has_image";
-
 		private long selected_key_id;
-		//private static Cursor case_cursor;
-		//private static Cursor image_cursor;
 
 		private FadingActionBarHelper mFadingHelper;
 		private Bundle mArguments;
@@ -269,7 +265,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		public CaseDetailFragment()
 		{
 		}
-
 
 		@Override
 		public void onAttach(Activity activity) {
@@ -514,6 +509,9 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				if (imageCursor.getCount() > 0)  //hasImage to keep crash if FadingActionBar hasn't been done yet
 				{
+					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.imageGridview).setVisibility(View.VISIBLE);
+
 					// set image for FadingActionBar.  first image in cursor array
 					imageCursor.moveToFirst();
 
@@ -522,15 +520,15 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
 					ImageGridView imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.imageGridview), selected_key_id, imageCursor);
+					imageGridView.setMode(ImageGridView.DETAIL_ACTIVITY);
 
 					imageCursor.close();
-
-					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					// no images
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.GONE);
+					rootView.findViewById(R.id.imageGridview).setVisibility(View.GONE);
 				}
 
 				// KEYWORD_LIST
@@ -611,5 +609,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
 			getActivity().getContentResolver().update(row_uri, values, null, null);
 		}
-	}
+
+
+	}// end fragment
 }

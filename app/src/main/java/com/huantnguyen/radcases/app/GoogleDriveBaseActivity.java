@@ -133,7 +133,8 @@ public abstract class GoogleDriveBaseActivity extends NavigationDrawerActivity i
     protected void onResume() {
         super.onResume();
 
-        if (mGoogleApiClient == null) {
+        if (mGoogleApiClient == null)
+        {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(Drive.API)
                     .addScope(Drive.SCOPE_FILE)
@@ -142,7 +143,11 @@ public abstract class GoogleDriveBaseActivity extends NavigationDrawerActivity i
                     .addOnConnectionFailedListener(this)
                     .build();
         }
-        mGoogleApiClient.connect();
+
+	    if(!mGoogleApiClient.isConnecting() && !mGoogleApiClient.isConnected())
+	    {
+		    mGoogleApiClient.connect();
+	    }
 
     }
 

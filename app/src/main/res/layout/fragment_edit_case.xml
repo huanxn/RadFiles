@@ -5,12 +5,8 @@
             android:layout_height="fill_parent"
             tools:context="com.huantnguyen.radcases.app.CaseEditActivity$PlaceholderFragment">
 
-    <RelativeLayout
-        android:id="@+id/CASE_CONTAINER"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -25,6 +21,7 @@
             android:orientation="vertical"
             android:focusable="true"
             android:focusableInTouchMode="true"
+            android:id="@+id/fields_container"
             >
 
             <requestFocus/>
@@ -165,6 +162,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="0dp"
+            android:layout_below="@id/fields_container"
             android:background="@color/bg_gray">
 
             <Button
@@ -188,16 +186,6 @@
         </LinearLayout>
 
 
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/edit_ImageView_expanded"
-        android:layout_width = "fill_parent"
-        android:layout_height="500dp"
-        android:layout_gravity="center"
-        android:scaleType="centerCrop"
-        android:visibility="invisible"/>
-
-
     </RelativeLayout>
+
 </ScrollView>

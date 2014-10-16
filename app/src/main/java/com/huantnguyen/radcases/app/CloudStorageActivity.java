@@ -59,6 +59,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	// for uploading to cloud
 	private File local_file_to_cloud;
 	private String exportFilename;
+	private String exportMIMEtype;
 
 	final static String CASES_CSV_FILENAME = "cases_table.csv";
 	final static String IMAGES_CSV_FILENAME = "images_table.csv";
@@ -71,14 +72,14 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	private static File picturesDir = CaseCardListActivity.picturesDir;
 	private static File appDir  = CaseCardListActivity.appDir;             // internal app data directory
 	private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
-
 	private static File CSV_dir  = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
 
-
+	private static File backupDir;
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 	    setDrawerPosition(NavigationDrawerActivity.POS_CLOUD_STORAGE);
         //setContentView(R.layout.activity_cloud_storage);
@@ -90,6 +91,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	    dataDir = Environment.getDataDirectory();
 	    CSV_dir = new File(appDir, "/CSV/");
 	    */
+
+	    backupDir = new File(appDir, "/Backup/");
 
 
 
@@ -166,7 +169,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
-						exportFilename = value + ".zip";
+						exportFilename = value + ".7z";
+						exportMIMEtype = "application/x-7z-compressed";
 
 						// backup SQLite file
 						local_file_to_cloud = backupDB(value);
@@ -203,6 +207,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
 						exportFilename = value + ".zip";
+						exportMIMEtype = "application/zip";
 
 						// create CSV file
 						local_file_to_cloud = exportCasesCSV(value);
@@ -231,7 +236,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			case R.id.restore_button:
 				Intent restoreIntent = new Intent();
 				//restoreIntent.setType("DOWNLOADS/*.db");
-				restoreIntent.setDataAndType(Uri.parse(getApplication().getExternalFilesDir(null).getPath() + "/Backup/"), "text/db");
+				restoreIntent.setDataAndType(Uri.parse(backupDir.getPath()), "application/x-7z-compressed");
 				restoreIntent.setAction(Intent.ACTION_GET_CONTENT);
 				//intent.putExtra("image_filename", filename);
 				startActivityForResult(Intent.createChooser(restoreIntent,"Select Backup File"), REQUEST_SELECT_BACKUP_FILE);
@@ -276,6 +281,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 
 					} while(imageCursor.moveToNext());
+
+					imageCursor.close();
 				}
 
 
@@ -596,7 +603,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	/////////////////////
 
 	//importing database
-	private void restoreDB(File inFile /*restoreFilename*/)
+	private void restoreDB(File inFile)
 	{
 		// unzip image files and db files
 		try
@@ -607,7 +614,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			Toast.makeText(this, "Unable to open zip file:", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Unable to open bak file:", Toast.LENGTH_SHORT).show();
 			return;
 		}
 
@@ -669,13 +676,14 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		{
 			if (appDir.canWrite()) {
 				String  currentDBPath= "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
-				String backupDBPath  = "/Backup/" + DB_FILENAME;
 				File currentDB_file = new File(dataDir, currentDBPath);
-				File backupDB_file = new File(appDir, backupDBPath);
 
+				//String backupDBPath  = "/Backup/" + DB_FILENAME;
+				//File backupDB_file = new File(appDir, backupDBPath);
+				File backupDB_file = new File(backupDir, DB_FILENAME);
 
-				String backupDirPath  = "/Backup/";
-				File backupDir = new File(appDir, backupDirPath);
+				//String backupDirPath  = "/Backup/";
+				//File backupDir = new File(appDir, backupDirPath);
 
 				if(!backupDir.exists())
 				{
@@ -710,7 +718,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				{
 					do
 					{
-						zip_files_array = UtilClass.addArrayElement(zip_files_array, imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+						zip_files_array = UtilClass.addArrayElement(zip_files_array, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 
 					} while (imageCursor.moveToNext());
 				}
@@ -721,7 +729,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				zip_files_array = UtilClass.addArrayElement(zip_files_array, backupDB_file.getPath());
 
 				// zip image and csv files
-				String zip_filename = backupDir.getPath() + "/" + backupFilename + ".zip";
+				String zip_filename = backupDir.getPath() + "/" + backupFilename + ".7z";
 				// return the zip file
 				returnFile = UtilsFile.zip(zip_files_array, zip_filename);
 
@@ -755,6 +763,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					final DriveContents driveContents = result.getDriveContents();
 					final File inFile = local_file_to_cloud;
 					final String filename = exportFilename;
+					final String MIMEtype = exportMIMEtype;
 
 					// Perform I/O off the UI thread.
 					new Thread()
@@ -788,7 +797,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 							// setup google drive file
 							MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
 									                              .setTitle(filename)
-									                              .setMimeType("application/zip")
+									                              .setMimeType(MIMEtype)
 									                              .build();
 
 							// create a file on root folder

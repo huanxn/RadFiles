@@ -654,6 +654,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			{
 				// set up imageGridView to be able to add images later to new case
 				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview));
+				imageGridView.setMode(ImageGridView.EDIT_ACTIVITY);
 			}
 
 			super.onViewCreated(view, savedInstanceState);

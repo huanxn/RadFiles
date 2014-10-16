@@ -2,7 +2,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-<LinearLayout
+<RelativeLayout
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:layout_marginLeft="3dp"
@@ -14,6 +14,7 @@
         style="@style/cardTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:text="Title"/>
 
     <TextView
@@ -21,6 +22,7 @@
         style="@style/cardText1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/card_main_inner_title"
         android:text="text 1"/>
 
 
@@ -29,12 +31,13 @@
         style="@style/cardText2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/card_main_inner_text1"
         android:text="text 2"/>
 
 
 
 
-</LinearLayout>
+</RelativeLayout>
 
     <CheckBox
         android:id="@+id/card_star"
