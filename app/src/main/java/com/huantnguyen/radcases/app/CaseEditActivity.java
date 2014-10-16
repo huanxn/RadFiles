@@ -7,7 +7,6 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -16,7 +15,6 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -63,18 +61,21 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 	static String followup_comment;
 	static boolean followup_bool = false;
 
-	private static ImageGridView imageGridView; // Grid of images
-
-	private static final int MAX_IMAGES = CasesProvider.MAX_NUM_IMAGES;
-	//private static String [] tempImageFilename;	            // images to add if user presses "Save"
-	private static int numImages;
-	private File tempImageFile;                                 // from camera
-
-	private static int imageCounter;                            // counter for tempImageFilename, as new images are added  ***right now same as numNewImages?  //todo delete this?
+	private static ImageGridView imageGridView;                 // Grid of images. Also contains image filepaths to be saved into database
+	private File tempImageFile;                                 // new image from camera
 
 	private static Animator mCurrentAnimator;
 
 	private static boolean confirmSave = false;
+	private static boolean madeChanges = false;
+
+
+	// standard directories
+	//private static File downloadsDir = CaseCardListActivity.downloadsDir;
+	private static File picturesDir = CaseCardListActivity.picturesDir;
+	//private static File appDir  = CaseCardListActivity.appDir;             // internal app data directory
+	//private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
+	//private static File CSV_dir  = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
 
 
 	@Override
@@ -88,11 +89,6 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new EditCaseFragment()).commit();
 		}
-
-//		tempImageFilename = new String[MAX_IMAGES];
-
-		imageCounter = 0;
-		numImages = 0;
 
 		selected_date = Calendar.getInstance();
 
@@ -369,7 +365,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			{
 				//store in image table
 				imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
-				imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageGridView.getFilename(i));
+				imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageGridView.getImageFilename(i));
 				imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
 				getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
@@ -383,17 +379,18 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			}
 		}
 
-		// TODO delete old images
-		ArrayList<String> deletedImageList = imageGridView.getDeletedImageList();
-
+		// delete old images
+		ArrayList<String> deletedImageList = imageGridView.getDeletedImageList();   // contains full path of files to be deleted
+		File deleteFile;
 		for(int i = 0; i < deletedImageList.size(); i++)
 		{
-			// delete from IMAGES table
-			String [] selArgs = {String.valueOf(key_id), deletedImageList.get(i)};
+			deleteFile = new File(deletedImageList.get(i));
+
+			// delete from IMAGES table, select by case key_id and fileNAME
+			String [] selArgs = {String.valueOf(key_id), deleteFile.getName()};
 			getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ? AND " + CasesProvider.KEY_IMAGE_FILENAME + " = ?", selArgs);
 
 			// delete actual jpg File
-			File deleteFile = new File(deletedImageList.get(i));
 			if(deleteFile.exists())
 			{
 				deleteFile.delete();
@@ -490,9 +487,6 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			{
 				// show new image in grid display of key images
 				imageGridView.addImage(tempImageFile.getPath());
-
-				// Increment counter for next image captured
-				imageCounter += 1;
 			}
 			else
 			{
@@ -514,7 +508,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			// make copy of file into app pictures folder
 			File originalImageFile = new File(originalImageFilename);
 			String newImageFilename = originalImageFile.getName();
-			File newImageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), newImageFilename);
+			File newImageFile = new File(picturesDir, newImageFilename);
 
 			try
 			{
@@ -528,9 +522,6 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			//UtilClass.setPic(imageViews[imageCounter], tempImageFilename[imageCounter], UtilClass.IMAGE_THUMB_SIZE);
 
 			imageGridView.addImage(newImageFile.getPath());
-
-			// Increment counter for next image captured
-			imageCounter += 1;
 		}
 		else if(resultCode != RESULT_OK)
 		{
@@ -693,7 +684,6 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 
 				study_type = case_cursor.getString(CasesProvider.COL_STUDY_TYPE);
 				db_date_str = case_cursor.getString(CasesProvider.COL_DATE);
-//				numImages = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
 
 
 				if (patient_ID != null)
@@ -762,10 +752,12 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 				// KEY IMAGES
 				String [] image_args = {String.valueOf(selected_key_id)};
 				Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-				numImages = image_cursor.getCount();
+				//numImages = image_cursor.getCount();
 
 				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
 				imageGridView.notifyDataSetChanged();
+
+				image_cursor.close();
 
 
 				// KEYWORD_LIST
@@ -817,12 +809,12 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 				}
 				*/
 
+				case_cursor.close();
 			}
-		}
 
+		} //end populateFields
 
-
-	}
+	} // end EditCaseFragment
 
 
 }

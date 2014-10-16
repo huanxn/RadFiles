@@ -27,6 +27,8 @@ public class NavigationDrawerActivity extends Activity
 	final static protected int POS_CASE_LIST = 0;
 	final static protected int POS_CLOUD_STORAGE = 3;
 
+	private int drawerPosition = -1;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -36,6 +38,13 @@ public class NavigationDrawerActivity extends Activity
 		mTitle = getTitle();
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		mNavigationDrawerFragment.setDrawerPosition(drawerPosition);
 	}
 
 	protected void onCreate_for_FAB(Bundle savedInstanceState)
@@ -50,6 +59,7 @@ public class NavigationDrawerActivity extends Activity
 
 	public void setDrawerPosition(int position)
 	{
+		drawerPosition = position;
 		mNavigationDrawerFragment.setDrawerPosition(position);
 	}
 

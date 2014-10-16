@@ -54,7 +54,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
 		Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
 		cursor.moveToFirst();
-		String filename = cursor.getString(CasesProvider.COL_IMAGE_COUNT);
+		//String filename = cursor.getString(CasesProvider.COL_IMAGE_COUNT);
 		cursor.close();
 		//if(filename == null || filename.contentEquals(""))
 		if(!hasImage)
@@ -508,31 +508,30 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				}
 
 				// KEY IMAGES
-				if (imageCount > 0 && hasImage)  //hasImage to keep crash if FadingActionBar hasn't been done yet
+				// get all of the images linked to this case _id
+				String [] image_args = {String.valueOf(selected_key_id)};
+				Cursor imageCursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+				if (imageCursor.getCount() > 0)  //hasImage to keep crash if FadingActionBar hasn't been done yet
 				{
-
-					// get all of the images linked to this case _id
-					String [] image_args = {String.valueOf(selected_key_id)};
-					Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-
 					// set image for FadingActionBar.  first image in cursor array
-					image_cursor.moveToFirst();
-					String headerImageFilename = image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+					imageCursor.moveToFirst();
+
+					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);
 					UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
-					ImageGridView imageGridView = new ImageGridView(getActivity(),(GridView)rootView.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
+					ImageGridView imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.imageGridview), selected_key_id, imageCursor);
 
-					image_cursor.close();
+					imageCursor.close();
 
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
 				}
 				else
 				{
+					// no images
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.GONE);
 				}
-
-
 
 				// KEYWORD_LIST
 				TextView TV_key_words = (TextView) rootView.findViewById(R.id.detail_key_words);

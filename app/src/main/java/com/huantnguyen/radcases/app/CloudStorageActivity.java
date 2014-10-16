@@ -67,12 +67,12 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	final static String DB_FILENAME = "RadCases.db";
 
 	// standard directories
-	private static File downloadsDir;
-	private static File picturesDir;
-	private static File appDir;             // internal app data directory
-	private static File dataDir;            // private data directory (with SQL database)
+	private static File downloadsDir = CaseCardListActivity.downloadsDir;
+	private static File picturesDir = CaseCardListActivity.picturesDir;
+	private static File appDir  = CaseCardListActivity.appDir;             // internal app data directory
+	private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
 
-	public static File CSV_dir;            // contains created zip files with CSV files and images
+	private static File CSV_dir  = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
 
 
 
@@ -83,12 +83,13 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	    setDrawerPosition(NavigationDrawerActivity.POS_CLOUD_STORAGE);
         //setContentView(R.layout.activity_cloud_storage);
 
+	    /*
 	    downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 	    picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 		appDir = getExternalFilesDir(null);
 	    dataDir = Environment.getDataDirectory();
 	    CSV_dir = new File(appDir, "/CSV/");
-
+	    */
 
 
 
@@ -249,8 +250,34 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				break;
 
 			case R.id.fix_DB_button:
-				//todo put image data into images table
-				showMessage("Does nothing now...");
+
+				//change path to just filename
+				Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, null, null, null);
+				String path;
+				String name;
+				ContentValues updateImageValues = new ContentValues();
+
+				String row_id;
+
+				if(imageCursor.moveToFirst())
+				{
+					do
+					{
+						row_id = imageCursor.getString(CasesProvider.COL_ROWID);
+						path = imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+						name = new File(path).getName();
+
+
+						// input all columns for this case, except row_id
+						updateImageValues.clear();
+						updateImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, name);
+
+						getContentResolver().update(CasesProvider.IMAGES_URI, updateImageValues, CasesProvider.KEY_ROWID + " = ?", new String [] {row_id});
+
+
+					} while(imageCursor.moveToNext());
+				}
+
 
 				break;
 		}

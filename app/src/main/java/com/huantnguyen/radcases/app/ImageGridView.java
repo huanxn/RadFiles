@@ -1,12 +1,10 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.AlertDialog;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -65,7 +63,7 @@ public class ImageGridView
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
 				Intent imageGalleryIntent = new Intent(context, ImageGalleryActivity.class);
-				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilenames());
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilepaths());
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
 				context.startActivity(imageGalleryIntent);
 
@@ -101,7 +99,7 @@ public class ImageGridView
 								}*/
 
 								// get image row ID of deleted image, for actual delete if user presses "SAVE"
-								deletedImageList.add(mAdapter.getImageFilename(image_position));
+								deletedImageList.add(mAdapter.getImageFilepath(image_position));
 
 								// delete from gridview adapter
 								mAdapter.deleteImage(image_position);
@@ -177,7 +175,12 @@ public class ImageGridView
 		return mAdapter.getCount();
 	}
 
-	public String getFilename(int index)
+	public String getImageFilepath(int index)
+	{
+		return mAdapter.getImageFilepath(index);
+	}
+
+	public String getImageFilename(int index)
 	{
 		return mAdapter.getImageFilename(index);
 	}

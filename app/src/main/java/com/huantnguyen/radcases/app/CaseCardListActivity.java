@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,15 +58,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 	private PlaceholderFragment fragment;
 
-	/*
 	// standard directories
-	private static File downloadsDir;
-	private static File picturesDir;
-	private static File appDir;             // internal app data directory
-	private static File dataDir;            // private data directory (with SQL database)
+	public static File downloadsDir;
+	public static File picturesDir;
+	public static File appDir;             // internal app data directory
+	public static File dataDir;            // private data directory (with SQL database)
 
 	public static File CSV_dir;            // contains created zip files with CSV files and images
-	*/
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -73,14 +73,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		super.onCreate(savedInstanceState);
 //		setContentView(R.layout.activity_case_cardlist);
 
-		/*
 		downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 		picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 		appDir = getExternalFilesDir(null);
 		dataDir = Environment.getDataDirectory();
 		CSV_dir = new File(appDir, "/CSV/");
-		*/
 
+		picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+		setDrawerPosition(NavigationDrawerActivity.POS_CASE_LIST);
 
 		if (savedInstanceState == null)
 		{
@@ -120,6 +121,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 
 	}
+
 
 	//
 	// ACTION BAR MENU
@@ -505,7 +507,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 						// first image is selected thumbnail
 						if(image_cursor.moveToFirst())
 						{
-							String imageFilename = image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+							String imageFilename = picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 
 							CaseCard.MyThumbnail thumbnail = new CaseCard.MyThumbnail(getActivity(), imageFilename);
 							//You need to set true to use an external library

@@ -8,13 +8,15 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import java.io.File;
+
 /**
  * Created by Huan on 6/28/2014.
  */
 public class ImageAdapter extends BaseAdapter
 {
 	private Context mContext;
-	private String[] imageFilenames;
+	private String[] imageFilepaths;
 	private int imageSizePx;
 
 	private long[] imageIDs;
@@ -24,18 +26,18 @@ public class ImageAdapter extends BaseAdapter
 		mContext = c;
 		setImageSize(c);
 
-		imageFilenames = new String[0];     // cause memory leak in set images?
+		imageFilepaths = new String[0];     // cause memory leak in set images?
 		imageIDs = new long[0];
 	}
 
 	public int getCount()
 	{
-		return imageFilenames.length;
+		return imageFilepaths.length;
 	}
 
 	public Object getItem(int position)
 	{
-		return imageFilenames[position];
+		return imageFilepaths[position];
 	}
 
 	public long getItemId(int position)
@@ -60,7 +62,7 @@ public class ImageAdapter extends BaseAdapter
 			imageView = (ImageView) convertView;
 		}
 
-		UtilClass.setPic(imageView, imageFilenames[position], UtilClass.IMAGE_SIZE);
+		UtilClass.setPic(imageView, imageFilepaths[position], UtilClass.IMAGE_SIZE);
 
 		return imageView;
 	}
@@ -70,13 +72,13 @@ public class ImageAdapter extends BaseAdapter
 	{
 		if (cursor.moveToFirst())
 		{
-			imageFilenames = new String[cursor.getCount()];
+			imageFilepaths = new String[cursor.getCount()];
 			imageIDs = new long[cursor.getCount()];
 
 			int i = 0;
 			do
 			{
-				imageFilenames[i] = cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+				imageFilepaths[i] = CaseCardListActivity.picturesDir + "/" + cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 				imageIDs[i] = cursor.getInt(CasesProvider.COL_ROWID);
 
 				i = i + 1;
@@ -93,7 +95,7 @@ public class ImageAdapter extends BaseAdapter
 	// initial settings with no images yet
 	public void initialize()
 	{
-		imageFilenames = new String[0];
+		imageFilepaths = new String[0];
 		imageIDs = new long[0];
 	}
 
@@ -101,7 +103,7 @@ public class ImageAdapter extends BaseAdapter
 	// add temporary images to grid into string array
 	public void addImage(String newImageFilename)
 	{
-		imageFilenames = UtilClass.addArrayElement(imageFilenames, newImageFilename);
+		imageFilepaths = UtilClass.addArrayElement(imageFilepaths, newImageFilename);
 		imageIDs = UtilClass.addArrayElement(imageIDs, -1);  // temporary image, with no rowID in the database table
 
 		notifyDataSetChanged();
@@ -110,7 +112,7 @@ public class ImageAdapter extends BaseAdapter
 	// delete image from grid
 	public void deleteImage(int delete_position)
 	{
-		imageFilenames = UtilClass.deleteArrayElement(imageFilenames, delete_position);
+		imageFilepaths = UtilClass.deleteArrayElement(imageFilepaths, delete_position);
 		imageIDs = UtilClass.deleteArrayElement(imageIDs, delete_position);
 
 		notifyDataSetChanged();
@@ -132,11 +134,11 @@ public class ImageAdapter extends BaseAdapter
 	}
 
 	// get the image filename at the specified index within the string array
-	public String getImageFilename(int index)
+	public String getImageFilepath(int index)
 	{
 		if(index < getCount())
 		{
-			return imageFilenames[index];
+			return imageFilepaths[index];
 		}
 		else
 		{
@@ -144,10 +146,24 @@ public class ImageAdapter extends BaseAdapter
 		}
 	}
 
-	// get the image filename array
-	public String [] getImageFilenames()
+	// get the image filepath at the specified index within the string array
+	public String getImageFilename(int index)
 	{
-		return imageFilenames;
+		if(index < getCount())
+		{
+			return new File(imageFilepaths[index]).getName();
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+
+	// get the image filename array
+	public String [] getImageFilepaths()
+	{
+		return imageFilepaths;
 	}
 
 	// get the image ID
