@@ -544,9 +544,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 						public boolean onLongClick(Card card, View view)
 						{
 
-							return mCardArrayAdapter.startActionMode(getActivity());
+							//return mCardArrayAdapter.startActionMode(getActivity());
 
-							/*
+
 							// declared "final" for access from within alert dialog
 							final long key_id = Long.parseLong(card.getId());
 							final StickyCardArrayAdapter mAdapter = mCardArrayAdapter;
@@ -573,7 +573,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 										case 1:
 											// multichoice
 											// returns boolean
-											mAdapter.startActionMode(getActivity());
+							//				mAdapter.startActionMode(getActivity());
 
 											break;
 
@@ -600,7 +600,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 							alert.show();
 
 							return true; // not sure what this does TODO
-							*/
+
 						}
 					});
 

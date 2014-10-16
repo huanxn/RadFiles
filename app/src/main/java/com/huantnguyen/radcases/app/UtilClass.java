@@ -315,13 +315,13 @@ public class UtilClass extends Activity
 
 	/* end zoom from thumb */
 
-
 	/**
-	 * Get image
+	 * getPictureFromCamera()
+	 *
+	 * @param activity: calling activity, will return to this activity's <onActivityResult()>
+	 * @param REQUEST_IMAGE_CAPTURE: the onActivityResult() code
+	 * @return
 	 */
-	///
-	/// camera request
-	///
 	static public File getPictureFromCamera(Activity activity, int REQUEST_IMAGE_CAPTURE)
 	{
 		File imageFile = null;
@@ -338,7 +338,7 @@ public class UtilClass extends Activity
 			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 			tempFilename = "JPEG_" + timeStamp + "_";
 
-			// Get the private application storage directory
+			// Get the private application storage directory for pictures
 			File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
 			// Create the file
@@ -354,13 +354,17 @@ public class UtilClass extends Activity
 			// Continue only if the File was successfully created
 			if (imageFile != null)
 			{
+				// get uri of newly created File and pass to takePictureIntent
 				Uri mImageCaptureUri = Uri.fromFile(imageFile);
 				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
 
+				// open phone's camera and pass result to the calling activity's onActivityResult()
+				// which will then run UtilClass.CropPicture() if successful
 				activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
 			}
 		}
 
+		// returns the File of the new jpg image
 		return imageFile;
 	}
 

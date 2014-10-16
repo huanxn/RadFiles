@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -15,6 +16,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import eu.janmuller.android.simplecropimage.CropImage;
@@ -63,13 +66,11 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 	private static ImageGridView imageGridView; // Grid of images
 
 	private static final int MAX_IMAGES = CasesProvider.MAX_NUM_IMAGES;
-	private static String [] tempImageFilename;	            // images to add if user presses "Save"
+	//private static String [] tempImageFilename;	            // images to add if user presses "Save"
 	private static int numImages;
-	private File tempImageFile;
+	private File tempImageFile;                                 // from camera
+
 	private static int imageCounter;                            // counter for tempImageFilename, as new images are added  ***right now same as numNewImages?  //todo delete this?
-	private static int new_image_index;
-	private static int numNewImages;                            // counter for number of new images taken.  to be added into DB when saving changes, or deleted from file system when discarding changes
-	private static int [] deleteImages = new int[MAX_IMAGES];  // indeces of images marked for deletion if user presses "Save"
 
 	private static Animator mCurrentAnimator;
 
@@ -88,9 +89,9 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 					.add(R.id.container, new EditCaseFragment()).commit();
 		}
 
-		tempImageFilename = new String[MAX_IMAGES];
+//		tempImageFilename = new String[MAX_IMAGES];
+
 		imageCounter = 0;
-		numNewImages = 0;
 		numImages = 0;
 
 		selected_date = Calendar.getInstance();
@@ -261,13 +262,21 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 	 */
 	private void saveToDatabase()
 	{
-		ContentValues values = new ContentValues();
+		/**
+		 * CASES TABLE
+		 */
 
 		// put data into "values" for database insert/update
-		values.put(CasesProvider.KEY_PATIENT_ID, ((EditText)findViewById(R.id.edit_patient_id)).getText().toString());
-		values.put(CasesProvider.KEY_DIAGNOSIS, ((EditText)findViewById(R.id.edit_diagnosis)).getText().toString());
-		values.put(CasesProvider.KEY_FINDINGS, ((EditText)findViewById(R.id.edit_findings)).getText().toString());
+		ContentValues values = new ContentValues();
 
+		// PATIENT ID
+		values.put(CasesProvider.KEY_PATIENT_ID, ((EditText)findViewById(R.id.edit_patient_id)).getText().toString());
+
+		// DIAGNOSIS
+		values.put(CasesProvider.KEY_DIAGNOSIS, ((EditText)findViewById(R.id.edit_diagnosis)).getText().toString());
+
+		// FINDINGS
+		values.put(CasesProvider.KEY_FINDINGS, ((EditText)findViewById(R.id.edit_findings)).getText().toString());
 
 		// STUDY TYPE
 		String new_study_type = ((SpinnerCustom)findViewById(R.id.edit_study_type)).getSelectedString();
@@ -312,8 +321,13 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			values.put(CasesProvider.KEY_KEYWORDS, (String) null);
 		}
 
+		// BIOPSY
 		values.put(CasesProvider.KEY_BIOPSY, ((EditText)findViewById(R.id.edit_biopsy)).getText().toString());
+
+		// COMMENTS
 		values.put(CasesProvider.KEY_COMMENTS, ((EditText)findViewById(R.id.edit_comments)).getText().toString());
+
+		// FOLLOWUP
 		values.put(CasesProvider.KEY_FOLLOWUP_COMMENT, ((EditText)findViewById(R.id.edit_followup)).getText().toString());
 		if(followup_bool)
 			values.put(CasesProvider.KEY_FOLLOWUP, 1);
@@ -322,8 +336,9 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 
 		//values.put(CasesProvider.KEY_FAVORITE, ((EditText)findViewById(R.id.edit_favorite)).getText().toString());
 
-		// todo: just get count from image table
-		values.put(CasesProvider.KEY_IMAGE_COUNT, numImages+numNewImages);
+		// IMAGE COUNT
+		//values.put(CasesProvider.KEY_IMAGE_COUNT, numImages + newImageFiles.size());
+		values.put(CasesProvider.KEY_IMAGE_COUNT, imageGridView.getCount());
 
 		if(key_id == -1)
 		{
@@ -335,54 +350,56 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		}
 		else
 		{
-			// Update the case in the database
+			// Update the existing case in the database
 			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
 			getContentResolver().update(row_uri, values, null, null);
 		}
 
 
+		/**
+		 * IMAGES TABLE
+		 */
 		// Save image table data
 		ContentValues imageValues = new ContentValues();
 
-		for(int i = 0; i < numNewImages; i++)
+		for (int i = 0; i < imageGridView.getCount(); i++)
 		{
-			imageValues.clear();
+			// new images in imageGridView have invalid row ID (ie -1)
+			if(imageGridView.getImageID(i) == -1)
+			{
+				//store in image table
+				imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
+				imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageGridView.getFilename(i));
+				imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
-			//TODO create copy of file into app directory (probably should right after image capture)
-			//get file path
-			//store in image table
-			imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
-			imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, tempImageFilename[i]);
-			imageValues.put(CasesProvider.KEY_ORDER, numImages+i);      // set order to display images.  new files last.  //todo user reodering
+				getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+			}
+			else
+			{
+				imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
-			getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+				Uri uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, imageGridView.getImageID(i));
+				getContentResolver().update(uri, imageValues, null, null);
+			}
 		}
 
 		// TODO delete old images
+		ArrayList<String> deletedImageList = imageGridView.getDeletedImageList();
 
-		/*
-		// delete old images from array/list
-
-		File imageFile = null;
-		for loop through array
+		for(int i = 0; i < deletedImageList.size(); i++)
 		{
-			imageFile = new File(filename_array[i]);
-			imageFile.delete();
+			// delete from IMAGES table
+			String [] selArgs = {String.valueOf(key_id), deletedImageList.get(i)};
+			getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ? AND " + CasesProvider.KEY_IMAGE_FILENAME + " = ?", selArgs);
+
+			// delete actual jpg File
+			File deleteFile = new File(deletedImageList.get(i));
+			if(deleteFile.exists())
+			{
+				deleteFile.delete();
+			}
 		}
 
-		*/
-
-
-		/*
-		//for(int i = 0; i < imageCounter; i++)
-		{
-
-			imageValues.clear();
-			imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, (int)key_id);
-			imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, tempImageFilename[0]);
-			getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
-		}
-*/
 
 		// TODO add custom study type to study type table
 		// if spinner text not in table, then add
@@ -415,7 +432,6 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 							// store photo and put filename in database
 							case 0:
 								getPictureFromCamera();
-								//TODO change for multiple
 								break;
 
 							// select file from chooser
@@ -426,7 +442,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 								Intent intent = new Intent();
 								intent.setType("image/*");
 								intent.setAction(Intent.ACTION_GET_CONTENT);
-								intent.putExtra("image_filename", tempImageFilename[imageCounter]);
+								//intent.putExtra("image_filename", tempImageFilename);
 								startActivityForResult(Intent.createChooser(intent,"Select Picture"), REQUEST_SELECT_IMAGE_FROM_FILE);
 
 								break;
@@ -469,53 +485,61 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		else if(requestCode == REQUEST_CROP_IMAGE && resultCode == RESULT_OK)
 		{
 			// successful crop of new photo from the camera (called from onActivityResult(REQUEST_IMAGE_CAPTURE)->UtilClass.CropPicture())
-
-			/*
-			//Wysie_Soh: Delete the temporary file
-			File f = new File(mImageCaptureUri.getPath());
-			if (f.exists())
-			{
-				f.delete();
-			}
-			*/
-
 			String path = data.getStringExtra(CropImage.IMAGE_PATH);
 			if (path != null)
 			{
-				// set the new cropped image File name into temporary variable; for update to database after user clicks "OK" to save
-				tempImageFilename[imageCounter] = tempImageFile.getAbsolutePath();
-
 				// show new image in grid display of key images
-				imageGridView.addImage(tempImageFilename[imageCounter]);
+				imageGridView.addImage(tempImageFile.getPath());
 
 				// Increment counter for next image captured
 				imageCounter += 1;
-				numNewImages += 1;
-
 			}
 			else
 			{
 				// delete tempImageFile since crop was canceled?
+				if(tempImageFile.exists())
+				{
+					tempImageFile.delete();
+					tempImageFile = null;
+				}
 			}
 
 		}
 		else if(requestCode == REQUEST_SELECT_IMAGE_FROM_FILE && resultCode == RESULT_OK)
 		{
 			// successful selection of photo from file explorer
-
-			//todo make copy of file into app pictures folder
-			//UtilClass.copyFile(src, dst);
-
 			Uri selectedImageUri = data.getData();
-			tempImageFilename[imageCounter] = UtilClass.getFilePathFromResult(this, selectedImageUri);
+			String originalImageFilename = UtilClass.getFilePathFromResult(this, selectedImageUri);
+
+			// make copy of file into app pictures folder
+			File originalImageFile = new File(originalImageFilename);
+			String newImageFilename = originalImageFile.getName();
+			File newImageFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), newImageFilename);
+
+			try
+			{
+				UtilsFile.copyFile(newImageFile, originalImageFile);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 
 			//UtilClass.setPic(imageViews[imageCounter], tempImageFilename[imageCounter], UtilClass.IMAGE_THUMB_SIZE);
 
-			imageGridView.addImage(tempImageFilename[imageCounter]);
+			imageGridView.addImage(newImageFile.getPath());
 
 			// Increment counter for next image captured
 			imageCounter += 1;
-			numNewImages += 1;
+		}
+		else if(resultCode != RESULT_OK)
+		{
+			// delete tempImageFile if image capture was canceled
+			if(tempImageFile.exists())
+			{
+				tempImageFile.delete();
+				tempImageFile = null;
+			}
 		}
 	}
 

@@ -107,7 +107,7 @@ public class ImageAdapter extends BaseAdapter
 		notifyDataSetChanged();
 	}
 
-	// add temporary images to grid into string array
+	// delete image from grid
 	public void deleteImage(int delete_position)
 	{
 		imageFilenames = UtilClass.deleteArrayElement(imageFilenames, delete_position);
@@ -144,10 +144,23 @@ public class ImageAdapter extends BaseAdapter
 		}
 	}
 
-	// get the image filename at the specified index within the string array
+	// get the image filename array
 	public String [] getImageFilenames()
 	{
 		return imageFilenames;
+	}
+
+	// get the image ID
+	public long getImageID(int index)
+	{
+		if(index < getCount())
+		{
+			return imageIDs[index];
+		}
+		else
+		{
+			return -1;
+		}
 	}
 
 }

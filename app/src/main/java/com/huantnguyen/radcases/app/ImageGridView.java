@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import java.util.ArrayList;
+
 /**
  * Created by Huan on 9/23/2014.
  */
@@ -22,12 +24,16 @@ public class ImageGridView
 	private long case_key_id;
 	private ImageAdapter mAdapter;
 
+	private ArrayList<String> deletedImageList;
+
 	// Constructor for ImageGridView without any intial images
 	public ImageGridView(Context ctx, GridView gView)
 	{
 		context = ctx;
 		gridView = gView;
 		case_key_id = -1;
+
+		deletedImageList = new ArrayList<String>();
 
 		mAdapter = new ImageAdapter(context);
 		gridView.setAdapter(mAdapter);
@@ -41,6 +47,8 @@ public class ImageGridView
 		context = ctx;
 		gridView = gView;
 		case_key_id = _id;
+
+		deletedImageList = new ArrayList<String>();
 
 		mAdapter = new ImageAdapter(context);
 		gridView.setAdapter(mAdapter);
@@ -82,6 +90,7 @@ public class ImageGridView
 							// Delete the photo.
 							case 0:
 
+								/*
 								// if image_key_id = -1, then it is a temporary image, not in database
 								if(image_key_id != -1)
 								{
@@ -89,24 +98,15 @@ public class ImageGridView
 									Uri image_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_key_id);
 									context.getContentResolver().delete(image_row_uri, null, null);
 
-								}
+								}*/
+
+								// get image row ID of deleted image, for actual delete if user presses "SAVE"
+								deletedImageList.add(mAdapter.getImageFilename(image_position));
 
 								// delete from gridview adapter
 								mAdapter.deleteImage(image_position);
+
 								notifyDataSetChanged();
-
-								// TODO if delete last image, change HAS_IMAGE to false
-								if(mAdapter.getCount()==0)
-								{
-									// Update the CASES table, with image count decremented by 1
-									//ContentValues case_values = new ContentValues();
-									//case_values.put(CasesProvider.KEY_IMAGE_COUNT, numImages--);
-
-
-									//Uri case_row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_key_id);
-									//context.getContentResolver().update(case_row_uri, case_values, null, null);
-								}
-
 
 								Resize();
 
@@ -170,6 +170,26 @@ public class ImageGridView
 		mAdapter.addImage(newImage);
 		notifyDataSetChanged();
 		Resize();
+	}
+
+	public int getCount()
+	{
+		return mAdapter.getCount();
+	}
+
+	public String getFilename(int index)
+	{
+		return mAdapter.getImageFilename(index);
+	}
+
+	public long getImageID(int index)
+	{
+		return mAdapter.getImageID(index);
+	}
+
+	public ArrayList<String> getDeletedImageList()
+	{
+		return deletedImageList;
 	}
 
 }
