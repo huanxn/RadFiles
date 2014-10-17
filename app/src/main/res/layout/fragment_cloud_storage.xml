@@ -9,47 +9,63 @@
     tools:context="com.huantnguyen.radcases.app.CloudStorageActivity$CloudStorageFragment">
 
 
+    <TextView
+        style="@style/sectionHeader"
+        android:layout_alignParentTop="true"
+        android:id="@+id/backup_header"
+        android:text="DATABASE"
+        />
     <Button
         android:id="@+id/backup_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:text="test backup"
-        android:onClick="onClick_Button">
+        android:text="Backup"
+        android:onClick="onClick_Button"
+        android:layout_below="@id/backup_header">
         </Button>
+
+    <Button
+        android:id="@+id/restore_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="Restore"
+        android:onClick="onClick_Button"
+        android:layout_below="@id/backup_button">
+    </Button>
+
+
+    <TextView
+        style="@style/sectionHeader"
+        android:id="@+id/export_header"
+        android:text="Export CSV"
+        android:layout_below="@id/restore_button"
+        />
+
+
     <Button
         android:id="@+id/exportCSV_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="test exportCSV"
         android:onClick="onClick_Button"
-        android:layout_toRightOf="@id/backup_button">
+        android:layout_below="@id/export_header">
     </Button>
 
-
-    <Button
-        android:id="@+id/restore_button"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:text="test restore"
-        android:onClick="onClick_Button"
-        android:layout_below="@id/backup_button">
-    </Button>
     <Button
         android:id="@+id/importCSV_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="test importCSV"
         android:onClick="onClick_Button"
-        android:layout_toRightOf="@id/restore_button"
-        android:layout_alignBottom="@id/restore_button">
+        android:layout_below="@id/exportCSV_button">
     </Button>
 
     <Button
         android:id="@+id/fix_DB_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:text="fix DB: images table"
+        android:text="debug"
         android:onClick="onClick_Button"
-        android:layout_below="@id/restore_button">
+        android:layout_below="@id/importCSV_button">
     </Button>
 </RelativeLayout>

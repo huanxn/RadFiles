@@ -234,7 +234,7 @@ public class CasesProvider extends ContentProvider
 			"create table " + SECTION_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
 					+ KEY_SECTION + " integer," // COL_VALUE
-					+ KEY_ORDER + " integer"  //reference to keyword_list table
+					+ KEY_ORDER + " integer"
 					+ ");";
 
 	// to generate list of available Key Words

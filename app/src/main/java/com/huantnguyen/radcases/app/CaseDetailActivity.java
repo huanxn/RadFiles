@@ -37,8 +37,8 @@ import static android.view.View.GONE;
 public class CaseDetailActivity extends NavigationDrawerActivity
 {
 
-	private CaseDetailFragment fragment;
-	private long key_id;
+	private CaseDetailFragment fragment = null;
+	private long key_id = -1;
 
 	public static final String ARG_HAS_IMAGE = "com.huantnguyen.radcases.ARG_HAS_IMAGE";
 
@@ -50,13 +50,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		key_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
 		hasImage = getIntent().getBooleanExtra(ARG_HAS_IMAGE, false);
 
-		// get db row of clicked case
-		Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-		Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
-		cursor.moveToFirst();
-		//String filename = cursor.getString(CasesProvider.COL_IMAGE_COUNT);
-		cursor.close();
-		//if(filename == null || filename.contentEquals(""))
 		if(!hasImage)
 		{
 			// set back to normal theme
@@ -90,6 +83,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		//
 		if (savedInstanceState == null)
 		{
+
+			if(fragment != null)
+			{
+				getFragmentManager().beginTransaction().remove(fragment).commit();
+			}
+
 			// Create the detail fragment and add it to the activity
 			// using a fragment transaction.
 
@@ -104,6 +103,81 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					.commit();
 
 		}
+	}
+
+	/*
+	public void loadActivity(Bundle savedInstanceState)
+	{
+		boolean hasImage;
+
+		String [] image_args = {String.valueOf(key_id)};
+		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
+
+		if(imageCursor.getCount() == 0)
+		{
+			// set back to normal theme
+			setTheme(R.style.AppTheme);
+			super.onCreate(savedInstanceState);
+
+			hasImage = false;
+		}
+		else
+		{
+			// translucent and overlying action bar theme set in manifest XML
+
+			// for FadingActionBar, add extra top margin to navigation drawer to compensate for transparent overlying action bar
+			super.onCreate_for_FAB(savedInstanceState);
+
+			hasImage = true;
+		}
+
+		//super.onCreate(savedInstanceState);
+		//setContentView(R.layout.activity_case_detail);
+
+
+		// TODO fix icon instead of drawer icon
+		// Show the Up button in the action bar.
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+
+		// savedInstanceState is non-null when there is fragment state
+		// saved from previous configurations of this activity
+		// (e.g. when rotating the screen from portrait to landscape).
+		// In this case, the fragment will automatically be re-added
+		// to its container so we don't need to manually add it.
+		// For more information, see the Fragments API guide at:
+		//
+		// http://developer.android.com/guide/components/fragments.html
+		//
+		if (savedInstanceState == null)
+		{
+
+			if(fragment != null)
+			{
+				getFragmentManager().beginTransaction().remove(fragment).commit();
+			}
+
+			// Create the detail fragment and add it to the activity
+			// using a fragment transaction.
+
+			Bundle arguments = new Bundle();
+			arguments.putLong(CaseCardListActivity.ARG_KEY_ID,
+					                 getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1));
+			arguments.putBoolean(ARG_HAS_IMAGE, hasImage);
+			fragment = new CaseDetailFragment();
+			fragment.setArguments(arguments);
+			getFragmentManager().beginTransaction()
+					.add(R.id.container, fragment)
+					.commit();
+
+		}
+	}
+
+*/
+
+	//todo change to just do headerview update
+	public void reloadHeaderView()
+	{
+		fragment.populateFields();
 	}
 
 	// ACTION MENU
@@ -366,6 +440,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				String key_words = case_cursor.getString(CasesProvider.COL_KEYWORDS);
 				String biopsy = case_cursor.getString(CasesProvider.COL_BIOPSY);
 				String followup = case_cursor.getString(CasesProvider.COL_FOLLOWUP_COMMENT);
+				int thumbnail = 0;
+				String thumbnailString = case_cursor.getString(CasesProvider.COL_THUMBNAIL);
+				if(thumbnailString != null && !thumbnailString.isEmpty())
+					thumbnail = Integer.parseInt(thumbnailString);
+
 				boolean followup_bool;
 				if(case_cursor.getInt(CasesProvider.COL_FOLLOWUP)==1)
 					followup_bool=true;
@@ -374,8 +453,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				String study_type = case_cursor.getString(CasesProvider.COL_STUDY_TYPE);
 				String date_str = case_cursor.getString(CasesProvider.COL_DATE);
-				String[] imageFilename = new String[CasesProvider.MAX_NUM_IMAGES];
-				int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
+				//String[] imageFilename = new String[CasesProvider.MAX_NUM_IMAGES];
+				//int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
 
 				// set global variable isStarred for Activity action bar menu toggle
 				favorite = case_cursor.getInt(CasesProvider.COL_FAVORITE);
@@ -507,13 +586,17 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				String [] image_args = {String.valueOf(selected_key_id)};
 				Cursor imageCursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 
-				if (imageCursor.getCount() > 0)  //hasImage to keep crash if FadingActionBar hasn't been done yet
+				if (imageCursor.getCount() > 0 && imageCursor.moveToFirst())  //hasImage to keep crash if FadingActionBar hasn't been done yet
 				{
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.imageGridview).setVisibility(View.VISIBLE);
 
 					// set image for FadingActionBar.  first image in cursor array
-					imageCursor.moveToFirst();
+					if(thumbnail < imageCursor.getCount())
+					{
+						imageCursor.move(thumbnail);
+					}
+
 
 					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);

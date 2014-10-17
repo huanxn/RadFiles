@@ -256,6 +256,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 			case R.id.fix_DB_button:
 
+				/*
 				//change path to just filename
 				Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, null, null, null);
 				String path;
@@ -284,6 +285,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 					imageCursor.close();
 				}
+				*/
+				showMessage("does nothing right now");
 
 
 				break;

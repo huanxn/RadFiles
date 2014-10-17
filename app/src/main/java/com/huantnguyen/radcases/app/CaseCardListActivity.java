@@ -418,7 +418,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 					String key_words = case_cursor.getString(CasesProvider.COL_KEYWORDS);
 					int favorite = case_cursor.getInt(CasesProvider.COL_FAVORITE);
 
-					int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
+					int thumbnail = 0;
+					String thumbnailString = case_cursor.getString(CasesProvider.COL_THUMBNAIL);
+					if(thumbnailString != null && !thumbnailString.isEmpty())
+						thumbnail = Integer.parseInt(thumbnailString);
+
+					//int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
 
 					// Create a Card
 					CaseCard case_card = new CaseCard(getActivity());
@@ -499,24 +504,27 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 					if(favorite == 1)
 						case_card.setStar(true);
 
-					// set card thumbnail image
-					if (imageCount > 0)
+
+					// get images for this case
+					String[] image_args = {String.valueOf(key_id)};
+					Cursor image_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+					if(image_cursor.getCount() > 0 && image_cursor.moveToFirst())
 					{
-						// get images for this case
-						String[] image_args = {String.valueOf(key_id)};
-						Cursor image_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-						// first image is selected thumbnail
-						if(image_cursor.moveToFirst())
+						if(thumbnail < image_cursor.getCount())
 						{
-							String imageFilename = picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-
-							CaseCard.MyThumbnail thumbnail = new CaseCard.MyThumbnail(getActivity(), imageFilename);
-							//You need to set true to use an external library
-							thumbnail.setExternalUsage(true);
-
-							case_card.addCardThumbnail(thumbnail);
+							image_cursor.move(thumbnail);
 						}
+						String imageFilename = picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+
+						CaseCard.MyThumbnail cardThumbnail = new CaseCard.MyThumbnail(getActivity(), imageFilename);
+						//You need to set true to use an external library
+						cardThumbnail.setExternalUsage(true);
+
+						case_card.addCardThumbnail(cardThumbnail);
+
 					}
+					image_cursor.close();
 
 					// set the OnClickListener: opens the case detail activity, passes key_id and has_image arguments
 					case_card.setOnClickListener(new Card.OnCardClickListener()
@@ -533,6 +541,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 							}
 							else
 							{
+								// fading action bar
 								detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, true);
 							}
 

@@ -1,7 +1,9 @@
 package com.huantnguyen.radcases.app;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,7 +22,7 @@ import java.util.ArrayList;
  */
 public class ImageGridView
 {
-	private Context context;
+	private Activity activity;
 	private GridView gridView;
 	private long case_key_id;
 	private ImageAdapter mAdapter;
@@ -32,31 +34,33 @@ public class ImageGridView
 
 	private int mode = EDIT_ACTIVITY;
 
+	private int thumbnail = 0;
+
 	// Constructor for ImageGridView without any intial images
-	public ImageGridView(Context ctx, GridView gView)
+	public ImageGridView(Activity activity, GridView gView)
 	{
-		context = ctx;
+		this.activity = activity;
 		gridView = gView;
 		case_key_id = -1;
 
 		deletedImageList = new ArrayList<String>();
 
-		mAdapter = new ImageAdapter(context);
+		mAdapter = new ImageAdapter(activity);
 		gridView.setAdapter(mAdapter);
 
 		SetClickListeners();
 
 	}
 	// Constructor for ImageGridView, set up with images
-	public ImageGridView(Context ctx, GridView gView, long _id, Cursor image_cursor)
+	public ImageGridView(Activity activity, GridView gView, long _id, Cursor image_cursor)
 	{
-		context = ctx;
+		this.activity = activity;
 		gridView = gView;
 		case_key_id = _id;
 
 		deletedImageList = new ArrayList<String>();
 
-		mAdapter = new ImageAdapter(context);
+		mAdapter = new ImageAdapter(activity);
 		gridView.setAdapter(mAdapter);
 
 		mAdapter.setImages(image_cursor);
@@ -75,10 +79,10 @@ public class ImageGridView
 		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
-				Intent imageGalleryIntent = new Intent(context, ImageGalleryActivity.class);
+				Intent imageGalleryIntent = new Intent(activity, ImageGalleryActivity.class);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilepaths());
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
-				context.startActivity(imageGalleryIntent);
+				activity.startActivity(imageGalleryIntent);
 
 			}
 		});
@@ -88,8 +92,10 @@ public class ImageGridView
 			{
 				// Delete image
 				//final long image_key_id = id;
+				final long case_id = case_key_id;
 				final int image_position = position;
 				final Context context = parent.getContext();
+				final Activity act = activity;
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
 				CharSequence[] imageSources = {"Delete Image", "Set Thumbnail", "Cancel"};
@@ -102,16 +108,6 @@ public class ImageGridView
 							// Delete the photo.
 							case 0:
 
-								/*
-								// if image_key_id = -1, then it is a temporary image, not in database
-								if(image_key_id != -1)
-								{
-									// delete from IMAGES table by unique row id
-									Uri image_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_key_id);
-									context.getContentResolver().delete(image_row_uri, null, null);
-
-								}*/
-
 								if (mode == EDIT_ACTIVITY)
 								{
 									// get image row ID of deleted image, for actual delete if user presses "SAVE"
@@ -122,12 +118,21 @@ public class ImageGridView
 
 									notifyDataSetChanged();
 									Resize();
+
+									// adjust thumbnail index or reset to first image
+									if(thumbnail > image_position)
+									{
+										thumbnail = thumbnail - 1;
+									}
+									else if(thumbnail == image_position)
+									{
+										thumbnail = 0;
+									}
 								}
 								else if (mode == DETAIL_ACTIVITY)
 								{
 
 									// confirm delete image
-									final
 									AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
 									alert.setTitle("Delete this image?");
@@ -152,6 +157,19 @@ public class ImageGridView
 
 											notifyDataSetChanged();
 											Resize();
+
+											// adjust thumbnail index or reset to first image
+											if(thumbnail > image_position)
+											{
+												thumbnail = thumbnail - 1;
+											}
+											else if(thumbnail == image_position)
+											{
+												thumbnail = 0;
+											}
+
+											//((CaseDetailActivity)act).reloadHeaderView();
+											act.setResult(CaseCardListActivity.RESULT_EDITED);
 										}
 									});
 
@@ -170,7 +188,20 @@ public class ImageGridView
 
 							// Set thumbnail
 							case 1:
-								//TODO set thumbnail
+								thumbnail = image_position;
+
+								ContentValues values = new ContentValues();
+								values.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
+								Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_id);
+								context.getContentResolver().update(row_uri, values, null, null);
+
+								if(mode == DETAIL_ACTIVITY)
+								{
+									((CaseDetailActivity)act).reloadHeaderView();
+								}
+
+								act.setResult(CaseCardListActivity.RESULT_EDITED);
+
 								break;
 
 							// Cancel.  Do Nothing.
@@ -248,6 +279,11 @@ public class ImageGridView
 	public ArrayList<String> getDeletedImageList()
 	{
 		return deletedImageList;
+	}
+
+	public int getThumbnail()
+	{
+		return thumbnail;
 	}
 
 }

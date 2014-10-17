@@ -32,7 +32,7 @@ import android.widget.Toast;
  */
 public class SpinnerCustom extends Spinner // implements DialogInterface.OnMultiChoiceClickListener
 {
-	private int selected_position;                      // current selected position in the spinner list
+	private int selected_position = -1;                      // current selected position in the spinner list
 
 	private int custom_position;                        // position in list, which is at the end
 	private String custom_alert_title;                  // alert dialog title
@@ -281,8 +281,10 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 			// item created, set position
 			selected_position = spinnerArrayAdapter.getPosition(selection);
 			previous_position = selected_position;
-			setSelection(selected_position);
 		}
+
+		setSelection(selected_position);
+
 
 		return;
 	}

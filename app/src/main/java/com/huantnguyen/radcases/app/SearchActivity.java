@@ -159,7 +159,12 @@ public class SearchActivity extends Activity implements SearchView.OnQueryTextLi
 				String key_words = case_cursor.getString(CasesProvider.COL_KEYWORDS);
 				int favorite = case_cursor.getInt(CasesProvider.COL_FAVORITE);
 
-				int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
+				// int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
+
+				int thumbnail = 0;
+				String thumbnailString = case_cursor.getString(CasesProvider.COL_THUMBNAIL);
+				if(thumbnailString != null && !thumbnailString.isEmpty())
+					thumbnail = Integer.parseInt(thumbnailString);
 
 				// Create a Card
 				CaseCard case_card = new CaseCard(this);
@@ -199,23 +204,26 @@ public class SearchActivity extends Activity implements SearchView.OnQueryTextLi
 					case_card.setStar(true);
 
 				// set card thumbnail image
-				if (imageCount > 0)
+
+				// get images for this case
+				String[] image_args = {String.valueOf(key_id)};
+				Cursor image_cursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+				// first image is selected thumbnail
+				if(image_cursor.getCount() > 0 && image_cursor.moveToFirst())
 				{
-					// get images for this case
-					String[] image_args = {String.valueOf(key_id)};
-					Cursor image_cursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-					// first image is selected thumbnail
-					if(image_cursor.moveToFirst())
+					if(thumbnail < image_cursor.getCount())
 					{
-						String imageFilename = image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-
-						CaseCard.MyThumbnail thumbnail = new CaseCard.MyThumbnail(this, imageFilename);
-						//You need to set true to use an external library
-						thumbnail.setExternalUsage(true);
-
-						case_card.addCardThumbnail(thumbnail);
+						image_cursor.move(thumbnail);
 					}
+					String imageFilename = CaseCardListActivity.picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+
+					CaseCard.MyThumbnail cardThumbnail = new CaseCard.MyThumbnail(this, imageFilename);
+					//You need to set true to use an external library
+					cardThumbnail.setExternalUsage(true);
+
+					case_card.addCardThumbnail(cardThumbnail);
 				}
+
 
 				// set the OnClickListener: opens the case detail activity, passes key_id and has_image arguments
 				case_card.setOnClickListener(new Card.OnCardClickListener()

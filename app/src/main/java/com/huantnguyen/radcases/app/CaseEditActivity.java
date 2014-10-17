@@ -332,6 +332,8 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 
 		//values.put(CasesProvider.KEY_FAVORITE, ((EditText)findViewById(R.id.edit_favorite)).getText().toString());
 
+		values.put(CasesProvider.KEY_THUMBNAIL, imageGridView.getThumbnail());
+
 		// IMAGE COUNT
 		//values.put(CasesProvider.KEY_IMAGE_COUNT, numImages + newImageFiles.size());
 		values.put(CasesProvider.KEY_IMAGE_COUNT, imageGridView.getCount());

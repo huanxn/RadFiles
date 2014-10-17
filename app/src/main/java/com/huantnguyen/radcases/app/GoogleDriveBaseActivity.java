@@ -64,8 +64,8 @@ public abstract class GoogleDriveBaseActivity extends NavigationDrawerActivity i
     /**
      * Request code for auto Google Play Services error resolution.
      */
-    protected static final int REQUEST_CODE_RESOLUTION = 1;
-	protected static final int COMPLETE_AUTHORIZATION_REQUEST_CODE = 2;
+    protected static final int REQUEST_CODE_RESOLUTION = 91;
+	protected static final int COMPLETE_AUTHORIZATION_REQUEST_CODE = 92;
 	protected static final String DIALOG_ERROR = "DIALOG_ERROR";
 	protected static final String STATE_RESOLVING_ERROR = "STATE_RESOLVING_ERROR";
 
@@ -224,7 +224,6 @@ public abstract class GoogleDriveBaseActivity extends NavigationDrawerActivity i
     public void onConnectionFailed(ConnectionResult result)
     {
         Log.i(TAG, "GoogleApiClient connection failed: " + result.toString());
-	    showMessage("GoogleApiClient connection failed: " + result.toString());
 
 	    if (result.hasResolution())
 	    {
