@@ -175,9 +175,9 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 */
 
 	//todo change to just do headerview update
-	public void reloadHeaderView()
+	public void reloadHeaderView(int thumbnail)
 	{
-		fragment.populateFields();
+		fragment.populateHeader(thumbnail);
 	}
 
 	// ACTION MENU
@@ -408,6 +408,29 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			populateFields();
 		}
 
+		public void populateHeader(int thumbnail)
+		{
+			View rootView = getView();
+
+			String [] image_args = {String.valueOf(key_id)};
+			Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+			if (imageCursor.getCount() > 0 && imageCursor.moveToFirst())
+			{
+				// set image for FadingActionBar.  first image in cursor array
+				if(thumbnail < imageCursor.getCount())
+				{
+					imageCursor.move(thumbnail);
+				}
+
+				String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+				ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);
+				UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+
+				imageCursor.close();
+			}
+		}
+
 		public void populateFields()
 		{
 
@@ -596,7 +619,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					{
 						imageCursor.move(thumbnail);
 					}
-
 
 					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);

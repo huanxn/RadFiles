@@ -168,7 +168,10 @@ public class ImageGridView
 												thumbnail = 0;
 											}
 
-											//((CaseDetailActivity)act).reloadHeaderView();
+											if (mode == DETAIL_ACTIVITY)
+											{
+												((CaseDetailActivity) act).reloadHeaderView(thumbnail);
+											}
 											act.setResult(CaseCardListActivity.RESULT_EDITED);
 										}
 									});
@@ -188,19 +191,23 @@ public class ImageGridView
 
 							// Set thumbnail
 							case 1:
-								thumbnail = image_position;
-
-								ContentValues values = new ContentValues();
-								values.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
-								Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_id);
-								context.getContentResolver().update(row_uri, values, null, null);
-
-								if(mode == DETAIL_ACTIVITY)
+								// if thumbnail changed
+								if(thumbnail != image_position)
 								{
-									((CaseDetailActivity)act).reloadHeaderView();
-								}
+									thumbnail = image_position;
 
-								act.setResult(CaseCardListActivity.RESULT_EDITED);
+									ContentValues values = new ContentValues();
+									values.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
+									Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_id);
+									context.getContentResolver().update(row_uri, values, null, null);
+
+									if (mode == DETAIL_ACTIVITY)
+									{
+										((CaseDetailActivity) act).reloadHeaderView(thumbnail);
+									}
+
+									act.setResult(CaseCardListActivity.RESULT_EDITED);
+								}
 
 								break;
 

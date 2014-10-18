@@ -29,6 +29,9 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -276,7 +279,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 
 		// STUDY TYPE
 		String new_study_type = ((SpinnerCustom)findViewById(R.id.edit_study_type)).getSelectedString();
-		if (new_study_type != null)
+		if (new_study_type != null && !new_study_type.isEmpty())
 		{
 			values.put(CasesProvider.KEY_STUDY_TYPE, new_study_type);
 		}
@@ -286,7 +289,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		}
 
 		// STUDY DATE
-		if (db_date_str != null)
+		if (db_date_str != null && !db_date_str.isEmpty())
 		{
 			values.put(CasesProvider.KEY_DATE, db_date_str);
 		}
@@ -383,7 +386,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 
 		// delete old images
 		ArrayList<String> deletedImageList = imageGridView.getDeletedImageList();   // contains full path of files to be deleted
-		File deleteFile;
+		File deleteFile = null;
 		for(int i = 0; i < deletedImageList.size(); i++)
 		{
 			deleteFile = new File(deletedImageList.get(i));
@@ -393,7 +396,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ? AND " + CasesProvider.KEY_IMAGE_FILENAME + " = ?", selArgs);
 
 			// delete actual jpg File
-			if(deleteFile.exists())
+			if(deleteFile != null && deleteFile.exists())
 			{
 				deleteFile.delete();
 			}
@@ -505,34 +508,58 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 		{
 			// successful selection of photo from file explorer
 			Uri selectedImageUri = data.getData();
-			String originalImageFilename = UtilClass.getFilePathFromResult(this, selectedImageUri);
+			//String originalImageFilename = UtilClass.getFilePathFromResult(this, selectedImageUri);
 
 			// make copy of file into app pictures folder
-			File originalImageFile = new File(originalImageFilename);
-			String newImageFilename = originalImageFile.getName();
-			File newImageFile = new File(picturesDir, newImageFilename);
-
+			//File originalImageFile = new File(originalImageFilename);
+			//String newImageFilename = originalImageFile.getName();
+			File newImageFile = null;
 			try
 			{
-				UtilsFile.copyFile(newImageFile, originalImageFile);
+				newImageFile = File.createTempFile(key_id + "_", ".jpg", picturesDir);
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
+				UtilClass.showMessage(this, "Unable to create file.");
 			}
 
-			//UtilClass.setPic(imageViews[imageCounter], tempImageFilename[imageCounter], UtilClass.IMAGE_THUMB_SIZE);
+			FileOutputStream outputStream = null;
+			FileInputStream inputStream = null;
+			try
+			{
+				// the selected local or cloud image file
+				inputStream = (FileInputStream)getContentResolver().openInputStream(selectedImageUri);
+
+				// new local file
+				outputStream = new FileOutputStream(newImageFile);
+
+				// copy backup file contents to local file
+				UtilsFile.copyFile(outputStream, inputStream);
+			}
+			catch (FileNotFoundException e)
+			{
+				e.printStackTrace();
+				UtilClass.showMessage(this, "File not found.");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				UtilClass.showMessage(this, "File IO exception.");
+			}
 
 			imageGridView.addImage(newImageFile.getPath());
 		}
 		else if(resultCode != RESULT_OK)
 		{
 			// delete tempImageFile if image capture was canceled
-			if(tempImageFile.exists())
+			if(tempImageFile != null && tempImageFile.exists())
 			{
 				tempImageFile.delete();
 				tempImageFile = null;
 			}
+
+			UtilClass.showMessage(this, "Canceled");
 		}
 	}
 

@@ -260,7 +260,14 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 	// returns the String value of currently selected list item
 	public String getSelectedString()
 	{
-		return spinnerArrayAdapter.getItem(selected_position);
+		if(selected_position != -1)
+		{
+			return spinnerArrayAdapter.getItem(selected_position);
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	// sets the current selection by inputed String
