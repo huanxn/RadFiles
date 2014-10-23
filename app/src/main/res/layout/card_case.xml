@@ -1,53 +1,69 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+<?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                        xmlns:card_view="http://schemas.android.com/apk/res-auto"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout_marginLeft="3dp"
-              android:layout_marginRight="3dp"
-              android:orientation="vertical">
+              android:orientation="horizontal"
+              android:layout_margin="5dp"
+              card_view:cardCornerRadius="5dp"
+              android:id="@+id/case_card_view">
 
-    <TextView
-        android:id="@+id/card_main_inner_title"
-        style="@style/cardTitle"
+
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:text="Title"/>
+        android:layout_height="match_parent"
+        android:layout_marginLeft="3dp"
+        android:layout_marginRight="3dp"
+        >
 
-    <TextView
-        android:id="@+id/card_main_inner_text1"
-        style="@style/cardText1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/card_main_inner_title"
-        android:text="text 1"/>
+        <ImageView
+            android:layout_width="@dimen/card_thumbnail_width"
+            android:layout_height="@dimen/card_thumbnail_height"
+            android:id="@+id/card_thumbnail"
+            />
+
+        <TextView
+            android:id="@+id/card_main_inner_title"
+            style="@style/cardTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:text="Title"/>
+
+        <TextView
+            android:id="@+id/card_main_inner_text1"
+            style="@style/cardText1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_main_inner_title"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:text="text 1"/>
 
 
-    <TextView
-        android:id="@+id/card_main_inner_text2"
-        style="@style/cardText2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/card_main_inner_text1"
-        android:text="text 2"/>
+        <TextView
+            android:id="@+id/card_main_inner_text2"
+            style="@style/cardText2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_main_inner_text1"
+            android:layout_toRightOf="@id/card_thumbnail"
+            android:text="text 2"/>
+
+        <CheckBox
+            android:id="@+id/card_star"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:visibility="visible"
+            android:contentDescription="star"
+            style="?android:attr/starStyle" />
 
 
+    </RelativeLayout>
 
 
-</RelativeLayout>
-
-    <CheckBox
-        android:id="@+id/card_star"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:visibility="visible"
-        android:contentDescription="star"
-        style="?android:attr/starStyle" />
-
-</RelativeLayout>
+</android.support.v7.widget.CardView>

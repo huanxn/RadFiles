@@ -12,6 +12,9 @@ import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -240,6 +243,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	 */
 	public static class PlaceholderFragment extends Fragment
 	{
+		// Layout
+		private RecyclerView mRecyclerView;
+		private CaseCardAdapter mAdapter;
+
 		View rootView;
 		Activity mActivity;
 
@@ -251,6 +258,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			rootView = inflater.inflate(R.layout.activity_case_cardlist, container, false);
+
+			mRecyclerView = (RecyclerView)rootView.findViewById(R.id.cards_list);
+			LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+			layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+			mRecyclerView.setLayoutManager(layoutManager);
+			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+			mAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
+			mRecyclerView.setAdapter(mAdapter);
 
 			populateCards();
 
@@ -394,7 +410,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			case_cursor = new MergeCursor(case_cursor_array);
 			// TODO how to close this cursor?
 
-
+			mAdapter.loadCases(case_cursor);
+/*
 			ArrayList<Card> cards = new ArrayList<Card>();
 			final StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(getActivity(), cards);
 
@@ -620,22 +637,24 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 				} while (case_cursor.moveToNext());
 			}
-
+*/
+/*
 			//StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(getActivity(), cards);
 			StickyCardListView listView = (StickyCardListView) rootView.findViewById(R.id.myList);
 
 			if (listView != null)
 			{
-		/*
-			SwingBottomInAnimationAdapter animCardArrayAdapter = new SwingBottomInAnimationAdapter(mCardArrayAdapter);
-			animCardArrayAdapter.setAbsListView((listView);
-			listView.setExternalAdapter(animCardArrayAdapter, mCardArrayAdapter);
-*/
+
+			//SwingBottomInAnimationAdapter animCardArrayAdapter = new SwingBottomInAnimationAdapter(mCardArrayAdapter);
+			//animCardArrayAdapter.setAbsListView((listView);
+			//listView.setExternalAdapter(animCardArrayAdapter, mCardArrayAdapter);
+
 				listView.setAdapter(mCardArrayAdapter);
 				listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 			}
-
+*/
 			case_cursor.close();
+
 		}
 	}
 }

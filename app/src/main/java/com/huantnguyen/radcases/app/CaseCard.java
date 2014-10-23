@@ -37,7 +37,7 @@ public class CaseCard extends Card
 	 * @param context
 	 */
 	public CaseCard(Context context) {
-		this(context, R.layout.card_case);
+		this(context, R.layout.card_case_kitkat);
 	}
 
 	/**

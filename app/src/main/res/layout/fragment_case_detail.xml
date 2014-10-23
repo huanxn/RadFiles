@@ -25,7 +25,7 @@
         <TextView
             android:id="@+id/CaseInfoLabel"
             style="@style/sectionHeader"
-            android:text="Diagnosis"/>
+            android:text="Diagnosis" />
 
         <TextView
             android:id="@+id/detail_case_info1"

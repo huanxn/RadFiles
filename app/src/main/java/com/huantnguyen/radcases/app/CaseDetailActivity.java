@@ -45,10 +45,16 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		boolean hasImage;
+		boolean hasImage = false;
 
 		key_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
-		hasImage = getIntent().getBooleanExtra(ARG_HAS_IMAGE, false);
+		//hasImage = getIntent().getBooleanExtra(ARG_HAS_IMAGE, false);
+
+		String [] image_args = {String.valueOf(key_id)};
+		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
+
+		if (imageCursor.getCount() > 0)
+			hasImage = true;
 
 		if(!hasImage)
 		{

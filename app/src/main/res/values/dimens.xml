@@ -14,8 +14,9 @@
 
     <!-- CardsLib custom settings -->
     <!-- Thumbnail -->
-    <dimen name="card_thumbnail_width">100dp</dimen>
-    <dimen name="card_thumbnail_height">100dp</dimen>
+    <dimen name="card_thumbnail_width">125dp</dimen>
+    <dimen name="card_thumbnail_height">125dp</dimen>
+
     <dimen name="navigation_drawer_width">240dp</dimen>
 
 </resources>
