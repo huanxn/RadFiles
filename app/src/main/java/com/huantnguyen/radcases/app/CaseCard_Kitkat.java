@@ -14,7 +14,7 @@ import it.gmariotti.cardslib.library.internal.CardThumbnail;
 /**
  * Created by Huan on 6/21/2014.
  */
-public class CaseCard extends Card
+public class CaseCard_Kitkat extends Card
 {
 
 	protected TextView mTitle_view;
@@ -36,7 +36,7 @@ public class CaseCard extends Card
 	 * Constructor with a custom inner layout
 	 * @param context
 	 */
-	public CaseCard(Context context) {
+	public CaseCard_Kitkat(Context context) {
 		this(context, R.layout.card_case_kitkat);
 	}
 
@@ -45,7 +45,7 @@ public class CaseCard extends Card
 	 * @param context
 	 * @param innerLayout
 	 */
-	public CaseCard(Context context, int innerLayout) {
+	public CaseCard_Kitkat(Context context, int innerLayout) {
 		super(context, innerLayout);
 		init();
 	}

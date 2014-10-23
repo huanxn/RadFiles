@@ -482,7 +482,9 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			// successful capture of new photo from camera (called from UtilClass method)
 			// replaces tempImageFile with the new cropped image
 			// if successful, return to onActivityResult(REQUEST_CROP_IMAGE)
+			
 			UtilClass.CropPicture(this, tempImageFile, REQUEST_CROP_IMAGE);
+
 		}
 		else if(requestCode == REQUEST_CROP_IMAGE && resultCode == RESULT_OK)
 		{

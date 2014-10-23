@@ -15,6 +15,10 @@
         android:name="com.huantnguyen.radcases.app/eu.janmuller.android.simplecropimage"
         android:required="true" />
 
+    <uses-library
+        android:name="com.huantnguyen.radcases.app/com.android.camera"
+        android:required="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -109,6 +113,7 @@
             android:value=".SearchActivity" />
 
         <activity android:name="eu.janmuller.android.simplecropimage.CropImage" />
+
         <activity
             android:name=".CloudStorageActivity"
             android:label="@string/title_activity_export" >

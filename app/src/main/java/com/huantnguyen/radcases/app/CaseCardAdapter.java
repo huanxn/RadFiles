@@ -137,7 +137,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	}
 
 	@Override
-	public int getItemCount() {
+	public int getItemCount()
+	{
 		return caseList == null ? 0 : caseList.size();
 	}
 

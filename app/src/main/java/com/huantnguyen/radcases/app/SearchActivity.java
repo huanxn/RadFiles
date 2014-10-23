@@ -167,7 +167,7 @@ public class SearchActivity extends Activity implements SearchView.OnQueryTextLi
 					thumbnail = Integer.parseInt(thumbnailString);
 
 				// Create a Card
-				CaseCard case_card = new CaseCard(this);
+				CaseCard_Kitkat case_card = new CaseCard_Kitkat(this);
 
 				// Set unique id, will be passed to detail activity
 				case_card.setId(Integer.toString(key_id));
@@ -217,7 +217,7 @@ public class SearchActivity extends Activity implements SearchView.OnQueryTextLi
 					}
 					String imageFilename = CaseCardListActivity.picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 
-					CaseCard.MyThumbnail cardThumbnail = new CaseCard.MyThumbnail(this, imageFilename);
+					CaseCard_Kitkat.MyThumbnail cardThumbnail = new CaseCard_Kitkat.MyThumbnail(this, imageFilename);
 					//You need to set true to use an external library
 					cardThumbnail.setExternalUsage(true);
 

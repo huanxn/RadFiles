@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/RadCases.iml" filepath="$PROJECT_DIR$/RadCases.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/libs/simple-crop-image-lib/simple-crop-image-lib.iml" filepath="$PROJECT_DIR$/app/libs/simple-crop-image-lib/simple-crop-image-lib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/libs/sticky-headers-recyclerview/sticky-headers-recyclerview.iml" filepath="$PROJECT_DIR$/app/libs/sticky-headers-recyclerview/sticky-headers-recyclerview.iml" />
     </modules>
   </component>
 </project>

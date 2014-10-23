@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
 import it.gmariotti.cardslib.library.internal.CardArrayMultiChoiceAdapter;
 import it.gmariotti.cardslib.library.view.CardListView;
 import it.gmariotti.cardslib.library.view.CardView;
@@ -99,7 +98,7 @@ public class StickyCardArrayAdapter extends CardArrayMultiChoiceAdapter implemen
 		holder_list[position] = holder;
 
 		//set header text
-		CaseCard card = (CaseCard)cards.get(position);
+		CaseCard_Kitkat card = (CaseCard_Kitkat)cards.get(position);
 
 		String headerText = card.getGroupHeader();
 
@@ -151,7 +150,7 @@ public class StickyCardArrayAdapter extends CardArrayMultiChoiceAdapter implemen
 	public long getHeaderId(int position)
 	{
 
-		CaseCard card = (CaseCard)cards.get(position);
+		CaseCard_Kitkat card = (CaseCard_Kitkat)cards.get(position);
 		return card.getGroup();
 	}
 

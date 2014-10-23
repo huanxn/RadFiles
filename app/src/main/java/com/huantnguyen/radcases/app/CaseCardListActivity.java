@@ -26,6 +26,11 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import com.eowise.recyclerview.stickyheaders.HeaderPosition;
+import com.eowise.recyclerview.stickyheaders.StickyHeadersAdapter;
+import com.eowise.recyclerview.stickyheaders.StickyHeadersBuilder;
+import com.eowise.recyclerview.stickyheaders.StickyHeadersItemDecoration;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -246,6 +251,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		// Layout
 		private RecyclerView mRecyclerView;
 		private CaseCardAdapter mAdapter;
+		private ListHeaderAdapter mHeaderAdapter;
 
 		View rootView;
 		Activity mActivity;
@@ -257,16 +263,31 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
+			// inflate the activity layout
 			rootView = inflater.inflate(R.layout.activity_case_cardlist, container, false);
 
+			// Find RecyclerView
 			mRecyclerView = (RecyclerView)rootView.findViewById(R.id.cards_list);
-			LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-			layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-			mRecyclerView.setLayoutManager(layoutManager);
+
+			// Setup RecyclerView
+			mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
 			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
+			// Setup CaseCardAdapter
 			mAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
 			mRecyclerView.setAdapter(mAdapter);
+
+			/*
+			mHeaderAdapter = new ListHeaderAdapter();
+			// Build item decoration and add it to the RecyclerView
+			StickyHeadersItemDecoration decoration = new StickyHeadersBuilder()
+					                                         .setAdapter(mAdapter)
+					                                         .setRecyclerView(mRecyclerView)
+					                                         .setStickyHeadersAdapter(mHeaderAdapter, HeaderPosition.OVERLAY)     // Decoration position relative to a item
+					                                         .build();
+
+			mRecyclerView.addItemDecoration(decoration);
+			*/
 
 			populateCards();
 
@@ -315,7 +336,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 							// store the section name in the group_header array
 							if(mSection != null && !mSection.isEmpty())
+							{
 								group_header[i] = mSection;
+
+							}
 							else
 							{
 								// shouldn't ever go here
@@ -334,7 +358,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 						case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " IS NULL OR " + CasesProvider.KEY_SECTION + " = ?", new String[] {""}, CasesProvider.KEY_DATE + " DESC", null);
 						case_count_in_group[i] = case_cursor_array[i].getCount();
 						group_header[i] = EMPTY_FIELD_GROUP_HEADER;
-
 					}
 
 					section_cursor.close();
@@ -373,6 +396,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 					case_count_in_group = new int[1];
 					case_count_in_group[0] = case_cursor_array[0].getCount();
+
 					break;
 				case FILTER_FOLLOWUP:
 					case_cursor_array = new Cursor[1];
@@ -383,6 +407,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 					case_count_in_group = new int[1];
 					case_count_in_group[0] = case_cursor_array[0].getCount();
+
 					break;
 				case FILTER_FAVORITE:
 					case_cursor_array = new Cursor[1];
@@ -393,6 +418,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 					case_count_in_group = new int[1];
 					case_count_in_group[0] = case_cursor_array[0].getCount();
+
 					break;
 				default:
 					case_cursor_array = new Cursor[1];
@@ -403,12 +429,29 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 					case_count_in_group = new int[1];
 					case_count_in_group[0] = case_cursor_array[0].getCount();
+
 					break;
 
 			}
 
 			case_cursor = new MergeCursor(case_cursor_array);
 			// TODO how to close this cursor?
+/*
+			List<String> headerList = new ArrayList<String>();
+			List<Long> headerID = new ArrayList<Long>();
+
+			for (int g = 0; g < group_header.length; g++)
+			{
+				for(int i = 0; i < case_count_in_group[g]; i ++)
+				{
+					headerList.add(group_header[g]);
+					headerID.add((long)g);
+
+				}
+			}
+
+			mHeaderAdapter.setHeaderList(headerList, headerID);
+*/
 
 			mAdapter.loadCases(case_cursor);
 /*
@@ -443,7 +486,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 					//int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
 
 					// Create a Card
-					CaseCard case_card = new CaseCard(getActivity());
+					CaseCard_Kitkat case_card = new CaseCard_Kitkat(getActivity());
 
 					// Set unique id, will be passed to detail activity
 					case_card.setId(Integer.toString(key_id));
@@ -534,7 +577,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 						}
 						String imageFilename = picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 
-						CaseCard.MyThumbnail cardThumbnail = new CaseCard.MyThumbnail(getActivity(), imageFilename);
+						CaseCard_Kitkat.MyThumbnail cardThumbnail = new CaseCard_Kitkat.MyThumbnail(getActivity(), imageFilename);
 						//You need to set true to use an external library
 						cardThumbnail.setExternalUsage(true);
 

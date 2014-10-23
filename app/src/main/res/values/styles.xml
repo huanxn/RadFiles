@@ -27,7 +27,7 @@
     </style>
 
 
-    <style name="stickySectionHeader"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
+    <style name="stickyListHeader"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
         <item name="android:drawableBottom">@drawable/list_section_divider</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:layout_width">match_parent</item>

@@ -38,9 +38,15 @@ dependencies {
     compile 'com.viewpagerindicator:library:2.4.1@aar'
     compile 'com.etsy.android.grid:library:1.0.5'
  //   compile 'com.syncthemall:dropbox-java-sdk:1.5.3.2'
+
     compile 'se.emilsjolander:stickylistheaders:2.4.1'
+    compile 'com.eowise:recyclerview-stickyheaders:0.3.0@aar'
+
+
  //   compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':app:libs:simple-crop-image-lib')
+    compile project(':app:libs:sticky-headers-recyclerview')
+ //   compile project(':app:libs:CropImage')
     
     //Core card library
     

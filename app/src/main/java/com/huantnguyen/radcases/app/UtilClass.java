@@ -79,6 +79,12 @@ public class UtilClass extends Activity
 	 */
 	static public void setPic(ImageView mImageView, String mCurrentPhotoPath, int size)
 	{
+		if(mCurrentPhotoPath== null || mCurrentPhotoPath.isEmpty())
+		{
+			mImageView.setImageBitmap(null);
+			return;
+		}
+
 		// Get the dimensions of the View
 		int targetW = mImageView.getWidth();
 		int targetH = mImageView.getHeight();

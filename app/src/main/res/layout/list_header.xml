@@ -3,13 +3,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/stickylist_header"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        style="@style/stickyListHeader"
+              android:layout_height="wrap_content">
 
+    <TextView
+        android:id="@+id/header"
+        style="@style/stickyListHeader"
         />
 
 </LinearLayout>
