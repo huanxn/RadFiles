@@ -170,7 +170,7 @@ public class CaseCard_Kitkat extends Card
 		return groupHeader;
 	}
 
-	// group id for StickyCardListView
+	// group id for StickyCardListView_Kitkat
 	public void setGroup(int group)
 	{
 		filter_group = group;

@@ -86,7 +86,6 @@
     <orderEntry type="library" exported="" name="appcompat-v7-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
     <orderEntry type="module" module-name="simple-crop-image-lib" exported="" />
-    <orderEntry type="module" module-name="sticky-headers-recyclerview" exported="" />
   </component>
 </module>
 

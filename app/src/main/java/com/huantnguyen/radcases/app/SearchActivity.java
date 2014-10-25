@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
-public class SearchActivity extends Activity implements SearchView.OnQueryTextListener
+public class SearchActivity extends ActionBarActivity implements SearchView.OnQueryTextListener
 {
 	String query;
 
@@ -252,9 +253,9 @@ public class SearchActivity extends Activity implements SearchView.OnQueryTextLi
 			} while (case_cursor.moveToNext());
 		}
 
-		StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(this, cards);
+		StickyCardArrayAdapter_Kitkat mCardArrayAdapter = new StickyCardArrayAdapter_Kitkat(this, cards);
 
-		StickyCardListView listView = (StickyCardListView) this.findViewById(R.id.mySearchList);
+		StickyCardListView_Kitkat listView = (StickyCardListView_Kitkat) this.findViewById(R.id.mySearchList);
 		if (listView != null)
 		{
 			listView.setAdapter(mCardArrayAdapter);

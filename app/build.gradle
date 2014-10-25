@@ -45,7 +45,7 @@ dependencies {
 
  //   compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':app:libs:simple-crop-image-lib')
-    compile project(':app:libs:sticky-headers-recyclerview')
+ //   compile project(':app:libs:sticky-headers-recyclerview')
  //   compile project(':app:libs:CropImage')
     
     //Core card library

@@ -22,20 +22,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
-
-import com.eowise.recyclerview.stickyheaders.HeaderPosition;
-import com.eowise.recyclerview.stickyheaders.StickyHeadersAdapter;
-import com.eowise.recyclerview.stickyheaders.StickyHeadersBuilder;
-import com.eowise.recyclerview.stickyheaders.StickyHeadersItemDecoration;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
+
+//import com.timehop.stickyheadersrecyclerview.*;
+
 
 /**
  * Created by Huan on 6/12/2014.
@@ -127,7 +124,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			// set the saved filter/spinner state
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
 		}
-
 
 	}
 
@@ -251,7 +247,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		// Layout
 		private RecyclerView mRecyclerView;
 		private CaseCardAdapter mAdapter;
-		private ListHeaderAdapter mHeaderAdapter;
 
 		View rootView;
 		Activity mActivity;
@@ -275,19 +270,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 			// Setup CaseCardAdapter
 			mAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
+
 			mRecyclerView.setAdapter(mAdapter);
 
-			/*
-			mHeaderAdapter = new ListHeaderAdapter();
-			// Build item decoration and add it to the RecyclerView
-			StickyHeadersItemDecoration decoration = new StickyHeadersBuilder()
-					                                         .setAdapter(mAdapter)
-					                                         .setRecyclerView(mRecyclerView)
-					                                         .setStickyHeadersAdapter(mHeaderAdapter, HeaderPosition.OVERLAY)     // Decoration position relative to a item
-					                                         .build();
-
-			mRecyclerView.addItemDecoration(decoration);
-			*/
+			//sticky headers
+			// type2
+			StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(mAdapter);
+			//mRecyclerView.addItemDecoration(new DividerDecoration(this));
+			mRecyclerView.addItemDecoration(headersDecor);
 
 			populateCards();
 
@@ -436,7 +426,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 			case_cursor = new MergeCursor(case_cursor_array);
 			// TODO how to close this cursor?
-/*
+
+
+			// set the headers for StickyRecyclerHeaders
 			List<String> headerList = new ArrayList<String>();
 			List<Long> headerID = new ArrayList<Long>();
 
@@ -445,18 +437,17 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 				for(int i = 0; i < case_count_in_group[g]; i ++)
 				{
 					headerList.add(group_header[g]);
-					headerID.add((long)g);
+					//headerID.add((long)g);
+					headerID.add((long)group_header[g].hashCode());
 
 				}
 			}
 
-			mHeaderAdapter.setHeaderList(headerList, headerID);
-*/
-
+			mAdapter.setHeaderList(headerList, headerID);
 			mAdapter.loadCases(case_cursor);
 /*
 			ArrayList<Card> cards = new ArrayList<Card>();
-			final StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(getActivity(), cards);
+			final StickyCardArrayAdapter_Kitkat mCardArrayAdapter = new StickyCardArrayAdapter_Kitkat(getActivity(), cards);
 
 			// loop through case cursor and put info into cards
 			if (case_cursor.moveToFirst())
@@ -621,7 +612,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 							// declared "final" for access from within alert dialog
 							final long key_id = Long.parseLong(card.getId());
-							final StickyCardArrayAdapter mAdapter = mCardArrayAdapter;
+							final StickyCardArrayAdapter_Kitkat mAdapter = mCardArrayAdapter;
 
 							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 							CharSequence[] imageSources = {"Edit", "MultiChoice", "Share", "Cancel"};
@@ -682,8 +673,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			}
 */
 /*
-			//StickyCardArrayAdapter mCardArrayAdapter = new StickyCardArrayAdapter(getActivity(), cards);
-			StickyCardListView listView = (StickyCardListView) rootView.findViewById(R.id.myList);
+			//StickyCardArrayAdapter_Kitkat mCardArrayAdapter = new StickyCardArrayAdapter_Kitkat(getActivity(), cards);
+			StickyCardListView_Kitkat listView = (StickyCardListView_Kitkat) rootView.findViewById(R.id.myList);
 
 			if (listView != null)
 			{

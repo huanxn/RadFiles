@@ -7,7 +7,7 @@
               android:background="@color/bg_gray">
 
     <!-- <it.gmariotti.cardslib.library.view.CardListView-->
-    <com.huantnguyen.radcases.app.StickyCardListView
+    <com.huantnguyen.radcases.app.StickyCardListView_Kitkat
         android:id="@+id/mySearchList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

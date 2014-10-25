@@ -41,7 +41,7 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersListView;
 /**
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class StickyCardListView extends StickyListHeadersListView implements CardView.OnExpandListAnimatorListener{
+public class StickyCardListView_Kitkat extends StickyListHeadersListView implements CardView.OnExpandListAnimatorListener{
 
     protected static String TAG = "CardListView";
 
@@ -74,17 +74,17 @@ public class StickyCardListView extends StickyListHeadersListView implements Car
     // Constructors
     //--------------------------------------------------------------------------
 
-    public StickyCardListView(Context context) {
+    public StickyCardListView_Kitkat(Context context) {
         super(context);
         init(null, 0);
     }
 
-    public StickyCardListView(Context context, AttributeSet attrs) {
+    public StickyCardListView_Kitkat(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(attrs, 0);
     }
 
-    public StickyCardListView(Context context, AttributeSet attrs, int defStyle) {
+    public StickyCardListView_Kitkat(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         init(attrs, defStyle);
     }
@@ -144,8 +144,8 @@ public class StickyCardListView extends StickyListHeadersListView implements Car
      */
     @Override
     public void setAdapter(StickyListHeadersAdapter adapter) {
-        if (adapter instanceof StickyCardArrayAdapter) {
-            setAdapter((StickyCardArrayAdapter) adapter);
+        if (adapter instanceof StickyCardArrayAdapter_Kitkat) {
+            setAdapter((StickyCardArrayAdapter_Kitkat) adapter);
         } else {
             Log.e(TAG, "You are using a generic adapter. Pay attention: your adapter has to call cardArrayAdapter#getView method");
             super.setAdapter(adapter);
@@ -157,7 +157,7 @@ public class StickyCardListView extends StickyListHeadersListView implements Car
      *
      * @param adapter {@link CardArrayAdapter}
      */
-    public void setAdapter(StickyCardArrayAdapter adapter) {
+    public void setAdapter(StickyCardArrayAdapter_Kitkat adapter) {
         super.setAdapter(adapter);
 
         //Set Layout used by items
@@ -195,7 +195,7 @@ public class StickyCardListView extends StickyListHeadersListView implements Car
          * @param cardView        cardView
          * @param listView        listView
          */
-        public static void animateCollapsing(final View expandingLayout, final CardView cardView, final StickyCardListView listView) {
+        public static void animateCollapsing(final View expandingLayout, final CardView cardView, final StickyCardListView_Kitkat listView) {
             int origHeight = expandingLayout.getHeight();
 
             ValueAnimator animator = createHeightAnimator(expandingLayout, origHeight, 0);
@@ -224,7 +224,7 @@ public class StickyCardListView extends StickyListHeadersListView implements Car
          * @param cardView        cardView
          * @param listView        listView
          */
-        public static void animateExpanding(final View expandingLayout, final CardView cardView, final StickyCardListView listView) {
+        public static void animateExpanding(final View expandingLayout, final CardView cardView, final StickyCardListView_Kitkat listView) {
             /* Update the layout so the extra content becomes visible.*/
             expandingLayout.setVisibility(View.VISIBLE);
 
@@ -267,7 +267,7 @@ public class StickyCardListView extends StickyListHeadersListView implements Car
             animator.start();
         }
 
-        private static View findDirectChild(final View view, final StickyCardListView listView) {
+        private static View findDirectChild(final View view, final StickyCardListView_Kitkat listView) {
             View result = view;
             View parent = (View) result.getParent();
             while (parent != listView) {
@@ -298,7 +298,7 @@ public class StickyCardListView extends StickyListHeadersListView implements Car
          *
          * @param listView
          */
-        public static void notifyAdapter(StickyCardListView listView) {
+        public static void notifyAdapter(StickyCardListView_Kitkat listView) {
 
             if (listView.mAdapter != null) {
                 listView.mAdapter.notifyDataSetChanged();

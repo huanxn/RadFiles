@@ -16,7 +16,7 @@
 
 
     <!-- <it.gmariotti.cardslib.library.view.CardListView-->
-    <com.huantnguyen.radcases.app.StickyCardListView
+    <com.huantnguyen.radcases.app.StickyCardListView_Kitkat
         android:id="@+id/myList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

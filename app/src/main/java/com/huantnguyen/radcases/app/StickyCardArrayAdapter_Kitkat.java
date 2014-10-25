@@ -42,13 +42,13 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 /**
  * @author Gabriele Mariotti (gabri.mariotti@gmail.com)
  */
-public class StickyCardArrayAdapter extends CardArrayMultiChoiceAdapter implements StickyListHeadersAdapter
+public class StickyCardArrayAdapter_Kitkat extends CardArrayMultiChoiceAdapter implements StickyListHeadersAdapter
 {
 
 	/**
 	 * {@link CardListView}
 	 */
-	protected StickyCardListView mCardListView;
+	protected StickyCardListView_Kitkat mCardListView;
 	private LayoutInflater inflater;
 	private HeaderViewHolder[] holder_list;
 	List<Card> cards;
@@ -64,7 +64,7 @@ public class StickyCardArrayAdapter extends CardArrayMultiChoiceAdapter implemen
 	 * @param context The current context.
 	 * @param cards   The cards to represent in the ListView.
 	 */
-	public StickyCardArrayAdapter(Context context, List<Card> cards)
+	public StickyCardArrayAdapter_Kitkat(Context context, List<Card> cards)
 	{
 
 		super(context, cards);
@@ -160,7 +160,7 @@ public class StickyCardArrayAdapter extends CardArrayMultiChoiceAdapter implemen
 	 *
 	 * @param cardListView cardListView
 	 */
-	public void setCardListView(StickyCardListView cardListView)
+	public void setCardListView(StickyCardListView_Kitkat cardListView)
 	{
 		this.mCardListView = cardListView;
 	}

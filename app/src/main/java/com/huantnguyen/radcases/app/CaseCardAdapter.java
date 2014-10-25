@@ -20,7 +20,7 @@ import java.util.List;
  * Created by Huan on 10/21/2014.
  */
 
-public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener
+public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHolder> implements StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder>, View.OnClickListener, View.OnLongClickListener
 {
 
 	private List<Case> caseList;
@@ -39,6 +39,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		this.card_layout_id = card_layout;
 		this.activity = activity;
+
+		setHasStableIds(true);
 	}
 
 	public void loadCases(Cursor cursor)
@@ -97,6 +99,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		}
 
+
 		notifyDataSetChanged();
 	}
 
@@ -148,6 +151,11 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		return caseList.get(position).key_id;
 	}
 
+	public Case getItem(int position)
+	{
+		return caseList.get(position);
+	}
+
 	@Override
 	public void onClick(View view)
 	{
@@ -166,6 +174,38 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
 	}
+
+	// StickyRecyclerHeadersAdapter
+	private List<Long> header_id;
+	private List<String> header;
+
+	public void setHeaderList(List<String> text, List<Long> IDs)
+	{
+		header = text;
+		header_id = IDs;
+	}
+
+	@Override
+	public RecyclerView.ViewHolder onCreateHeaderViewHolder(ViewGroup parent)
+	{
+		View view = LayoutInflater.from(parent.getContext())
+				            .inflate(R.layout.sticky_header, parent, false);
+		return new RecyclerView.ViewHolder(view) { };
+	}
+
+	@Override
+	public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int position)
+	{
+		TextView textView = (TextView) holder.itemView;
+		//textView.setText(String.valueOf(getItem(position)));
+		textView.setText(header.get(position));
+	}
+	@Override
+	public long getHeaderId(int position) {
+		//return getItem(position).hashCode();
+		return header_id.get(position);
+	}
+
 
 	@Override
 	public boolean onLongClick(View view)

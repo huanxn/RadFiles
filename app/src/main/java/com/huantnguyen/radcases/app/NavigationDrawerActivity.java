@@ -5,12 +5,13 @@ import android.app.Activity;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 
 
-public class NavigationDrawerActivity extends Activity
+public class NavigationDrawerActivity extends ActionBarActivity
 		implements NavigationDrawerFragment.NavigationDrawerCallbacks
 {
 

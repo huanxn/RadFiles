@@ -15,6 +15,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -40,7 +41,7 @@ import java.util.Calendar;
 
 import eu.janmuller.android.simplecropimage.CropImage;
 
-public class CaseEditActivity extends Activity implements DatePickerDialog.OnDateSetListener
+public class CaseEditActivity extends ActionBarActivity implements DatePickerDialog.OnDateSetListener
 {
 	static Cursor selected_row_cursor;
 	static long key_id;
@@ -482,7 +483,7 @@ public class CaseEditActivity extends Activity implements DatePickerDialog.OnDat
 			// successful capture of new photo from camera (called from UtilClass method)
 			// replaces tempImageFile with the new cropped image
 			// if successful, return to onActivityResult(REQUEST_CROP_IMAGE)
-			
+
 			UtilClass.CropPicture(this, tempImageFile, REQUEST_CROP_IMAGE);
 
 		}

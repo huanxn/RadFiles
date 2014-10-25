@@ -5,8 +5,8 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="horizontal"
-              android:layout_margin="5dp"
-              card_view:cardCornerRadius="5dp"
+              android:layout_margin="2dp"
+              card_view:cardCornerRadius="4dp"
               android:id="@+id/case_card_view">
 
 
