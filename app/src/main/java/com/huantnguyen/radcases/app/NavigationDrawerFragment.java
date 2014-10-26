@@ -2,15 +2,17 @@ package com.huantnguyen.radcases.app;
 
 
 import android.app.Activity;
-import android.app.ActionBar;
 import android.app.Fragment;
-import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,7 +29,8 @@ import android.widget.Toast;
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerFragment extends Fragment
+{
 
 	/**
 	 * Remember the position of the selected item.
@@ -62,7 +65,8 @@ public class NavigationDrawerFragment extends Fragment {
 	}
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 
 		// Read in the flag indicating whether or not the user has demonstrated awareness of the
@@ -80,7 +84,8 @@ public class NavigationDrawerFragment extends Fragment {
 	}
 
 	@Override
-	public void onActivityCreated (Bundle savedInstanceState) {
+	public void onActivityCreated (Bundle savedInstanceState)
+	{
 		super.onActivityCreated(savedInstanceState);
 		// Indicate that this fragment would like to influence the set of actions in the action bar.
 		setHasOptionsMenu(true);
@@ -88,8 +93,8 @@ public class NavigationDrawerFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState) {
-
+	                         Bundle savedInstanceState)
+	{
 		mDrawerListView = (ListView) inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
 
 		/*
@@ -104,7 +109,8 @@ public class NavigationDrawerFragment extends Fragment {
 				selectItem(position);
 			}
 		});
-		mDrawerListView.setAdapter(new ArrayAdapter<String>(getActionBar().getThemedContext(),
+
+		mDrawerListView.setAdapter(new ArrayAdapter<String>(getActivity().getApplicationContext(),
 				                                            android.R.layout.simple_list_item_activated_1,
 				                                            android.R.id.text1,
 				                                            getResources().getStringArray(R.array.nav_drawer_array)
@@ -123,7 +129,8 @@ public class NavigationDrawerFragment extends Fragment {
 	 * @param fragmentId   The android:id of this fragment in its activity's layout.
 	 * @param drawerLayout The DrawerLayout containing this fragment's UI.
 	 */
-	public void setUp(int fragmentId, DrawerLayout drawerLayout) {
+	public void setUp(int fragmentId, DrawerLayout drawerLayout)
+	{
 		mFragmentContainerView = getActivity().findViewById(fragmentId);
 		mDrawerLayout = drawerLayout;
 
@@ -131,7 +138,7 @@ public class NavigationDrawerFragment extends Fragment {
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		// set up the drawer's list view with items and click listener
 
-		ActionBar actionBar = getActionBar();
+		ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setHomeButtonEnabled(true);
 
@@ -140,7 +147,7 @@ public class NavigationDrawerFragment extends Fragment {
 		mDrawerToggle = new ActionBarDrawerToggle(
 				                                         getActivity(),                    /* host Activity */
 				                                         mDrawerLayout,                    /* DrawerLayout object */
-				                                         R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
+				                                         //R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
 				                                         R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
 				                                         R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
 		) {
@@ -282,14 +289,14 @@ public class NavigationDrawerFragment extends Fragment {
 	 * 'context', rather than just what's in the current screen.
 	 */
 	private void showGlobalContextActionBar() {
-		ActionBar actionBar = getActionBar();
+		android.support.v7.app.ActionBar actionBar = getActionBar();
 		actionBar.setDisplayShowTitleEnabled(true);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 		actionBar.setTitle(R.string.app_name);
 	}
 
 	private ActionBar getActionBar() {
-		return getActivity().getActionBar();
+		return ((ActionBarActivity)getActivity()).getSupportActionBar();
 	}
 
 	/**
@@ -301,4 +308,5 @@ public class NavigationDrawerFragment extends Fragment {
 		 */
 		void onNavigationDrawerItemSelected(int position);
 	}
+
 }

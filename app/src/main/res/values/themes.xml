@@ -1,29 +1,44 @@
 <resources>
 
     <!-- extend one of the Theme.AppCompat themes -->
-    <style name="MaterialTheme.Light" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="MaterialTheme.Light" parent="MaterialTheme.Light.Base"/>
+    <style name="MaterialTheme.Light.Base" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- customize the color palette -->
         <item name="colorPrimary">@color/md_blue_grey_500</item>
         <item name="colorPrimaryDark">@color/md_blue_grey_700</item>
         <item name="colorAccent">@color/md_light_blue_200</item>
     </style>
 
+    <!-- extend one of the Theme.AppCompat themes -->
+    <style name="MaterialTheme.Light.TranslucentActionBar" parent="MaterialTheme.Light.TranslucentActionBar.Base"/>
+    <style name="MaterialTheme.Light.TranslucentActionBar.Base" parent="MaterialTheme.Light.Base">
+
+        <item name="android:actionBarStyle">@style/Widget.ActionBar.Transparent</item>
+        <item name="actionBarStyle">@style/Widget.ActionBar.Transparent</item>
+
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="windowActionBarOverlay">true</item>
+
+        <item name="android:windowContentOverlay">@null</item>
+
+    </style>
+
 
     <!--<item name="android:windowContentOverlay">@android:drawable/</item>-->
-    <style name="AppTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
+    <style name="HoloTheme" parent="@android:style/Theme.Holo.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/Widget.ActionBar</item>
         <item name="android:windowActionBarOverlay">false</item>
 
     </style>
 
-    <style name="AppTheme.TranslucentActionBar">
+    <style name="HoloTheme.TranslucentActionBar">
         <item name="android:actionBarStyle">@style/Widget.ActionBar.Transparent</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>
 
     <style name="AppTheme.Light.TranslucentActionBar" parent="@android:style/Theme.Holo.Light">
-        <item name="android:actionBarStyle">@style/Widget.Light.ActionBar.Transparent</item>
+        <item name="android:actionBarStyle">@style/Widget.ActionBar.Transparent</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowContentOverlay">@null</item>
     </style>

@@ -1,7 +1,6 @@
 package com.huantnguyen.radcases.app;
 
 import android.animation.Animator;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.ContentUris;
@@ -10,6 +9,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,7 +22,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.manuelpeinado.fadingactionbar.FadingActionBarHelper;
+import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import static android.view.View.GONE;
 
@@ -59,7 +61,10 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		if(!hasImage)
 		{
 			// set back to normal theme
-			setTheme(R.style.AppTheme);
+			//setTheme(R.style.AppTheme);
+
+			// Material theme
+			setTheme(R.style.MaterialTheme_Light);
 			super.onCreate(savedInstanceState);
 		}
 		else
@@ -76,7 +81,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		// TODO fix icon instead of drawer icon
 		// Show the Up button in the action bar.
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity
@@ -327,9 +332,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		private long selected_key_id;
 
 		private FadingActionBarHelper mFadingHelper;
+		private View headerView; //fadingactionbar
+		//private ImageView headerImageView;
+
 		private Bundle mArguments;
 
-		private View headerView;
 		private boolean hasImage;
 
 		private int favorite; // for action menu toggle in CaseDetail Activity (not in this fragment)
@@ -387,6 +394,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			{
 				//FadingActionBar
 				view = headerView = mFadingHelper.createView(inflater);
+				//headerImageView = (ImageView)getActivity().findViewById(R.id.toolbar_image);
+				//view = inflater.inflate(R.layout.fragment_case_detail, container, false);
 			}
 			else
 			{
@@ -510,7 +519,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					mTitle = "Case Details";
 				}
 
-				ActionBar actionBar = getActivity().getActionBar();
+				ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
 				actionBar.setTitle(mTitle);
 
 				// Case Information (DIAGNOSIS and FINDINGS)
@@ -626,6 +635,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 						imageCursor.move(thumbnail);
 					}
 
+					// fading action bar
 					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);
 					UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);

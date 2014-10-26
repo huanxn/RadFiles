@@ -63,7 +63,7 @@
             android:name="com.huantnguyen.radcases.app.CaseDetailActivity"
             android:label="@string/title_case_detail"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity"
-            android:theme="@style/AppTheme.TranslucentActionBar" >
+            android:theme="@style/MaterialTheme.Light.TranslucentActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
@@ -88,7 +88,7 @@
             android:name=".ImageGalleryActivity"
             android:label="Key Images"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity"
-            android:theme="@style/AppTheme.TranslucentActionBar" >
+            android:theme="@style/MaterialTheme.Light.TranslucentActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />

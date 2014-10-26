@@ -1,8 +1,6 @@
 package com.huantnguyen.radcases.app;
 
 import android.animation.Animator;
-import android.app.ActionBar;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.DialogFragment;
@@ -15,6 +13,7 @@ import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -123,8 +122,9 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		key_words_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
 		section_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
 
-		getActionBar().setDisplayHomeAsUpEnabled(false);
-		ActionBar actionBar = getActionBar();
+
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(false);
 		actionBar.setTitle("Save");
 		actionBar.setIcon(R.drawable.ic_action_accept);
 

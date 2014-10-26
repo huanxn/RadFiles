@@ -27,6 +27,10 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	private int card_layout_id;
 	private Activity activity;
 
+	// StickyRecyclerHeadersAdapter
+	private List<Long> header_id;
+	private List<String> header;
+
 	public CaseCardAdapter(Activity activity, Cursor caseCursor, int card_layout)
 	{
 
@@ -175,9 +179,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
 	}
 
-	// StickyRecyclerHeadersAdapter
-	private List<Long> header_id;
-	private List<String> header;
+
 
 	public void setHeaderList(List<String> text, List<Long> IDs)
 	{
@@ -196,14 +198,24 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int position)
 	{
-		TextView textView = (TextView) holder.itemView;
-		//textView.setText(String.valueOf(getItem(position)));
-		textView.setText(header.get(position));
+		if(position < header.size())
+		{
+			TextView textView = (TextView) holder.itemView;
+			//textView.setText(String.valueOf(getItem(position)));
+			textView.setText(header.get(position));
+		}
 	}
 	@Override
 	public long getHeaderId(int position) {
 		//return getItem(position).hashCode();
-		return header_id.get(position);
+		if(position < header_id.size())
+		{
+			return header_id.get(position);
+		}
+		else
+		{
+			return -1; // TODO detect invalid number?
+		}
 	}
 
 

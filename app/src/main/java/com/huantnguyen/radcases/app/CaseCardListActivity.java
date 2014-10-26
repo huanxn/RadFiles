@@ -99,12 +99,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			// Set up the Action Bar dropdown spinner list
 			// used for sorting the cases per user selected criteria
 			//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
-			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getActionBar().getThemedContext(), R.layout.spinner_actionbar, "Cases", getResources().getStringArray(R.array.actionbar_sort_list));
+			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_actionbar, "Cases", getResources().getStringArray(R.array.actionbar_sort_list));
 			((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			ActionBar actionBar = getActionBar();
+			android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 			actionBar.setDisplayShowTitleEnabled(false);
 			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-			actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new ActionBar.OnNavigationListener()
+			actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new android.support.v7.app.ActionBar.OnNavigationListener()
 			{
 				//String[] strings = getResources().getStringArray(R.array.action_list);
 
@@ -139,6 +139,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.case_list, menu);
 
+		/*
 		// TODO add searchable code here
 		// Get the SearchView and set the searchable configuration
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -147,6 +148,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setIconifiedByDefault(true);
 
+*/
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -204,8 +206,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 				{
 					// refresh cards
 					//caseFilterMode = FILTER_RECENT;
-					ActionBar actionBar = getActionBar();
-					actionBar.setSelectedNavigationItem(FILTER_RECENT);
+					getSupportActionBar().setSelectedNavigationItem(FILTER_RECENT);
 					fragment.populateCards();
 				}
 				break;
@@ -220,7 +221,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	@Override
 	public void restoreActionBar()
 	{
-		ActionBar actionBar = getActionBar();
+		android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 	}
@@ -235,7 +236,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	protected void onSaveInstanceState(Bundle outState)
 	{
 		super.onSaveInstanceState(outState);
-		outState.putInt(CURRENT_SPINNER_STATE, getActionBar().getSelectedNavigationIndex());
+		outState.putInt(CURRENT_SPINNER_STATE, getSupportActionBar().getSelectedNavigationIndex());
 	}
 
 
@@ -443,8 +444,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 				}
 			}
 
-			mAdapter.setHeaderList(headerList, headerID);
 			mAdapter.loadCases(case_cursor);
+			mAdapter.setHeaderList(headerList, headerID);
 /*
 			ArrayList<Card> cards = new ArrayList<Card>();
 			final StickyCardArrayAdapter_Kitkat mCardArrayAdapter = new StickyCardArrayAdapter_Kitkat(getActivity(), cards);
