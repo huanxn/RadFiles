@@ -10,8 +10,8 @@
     <color name="dark_gray_text">#3D3D3D</color>
     <color name="gray_text">#9D9D9D</color>
 
-    <color name="colorPrimary">@color/md_blue_grey_500</color>
-    <color name="colorPrimaryDark">@color/md_blue_grey_700</color>
+    <color name="colorPrimary">@color/md_blue_grey_600</color>
+    <color name="colorPrimaryDark">@color/md_blue_grey_800</color>
     <color name="colorAccent">@color/md_light_blue_200</color>
 
     <color name="actionbar_background_top">#3c3c3d</color>

@@ -367,7 +367,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				//int actionBarBg = mArguments != null ? mArguments.getInt(ARG_ACTION_BG_RES) : R.drawable.ab_background_light;
 
 				mFadingHelper = new FadingActionBarHelper()
-						                .actionBarBackground(R.drawable.ab_background_gray)
+						                .actionBarBackground(R.drawable.ab_background_dark)
 						                //.actionBarBackground(R.drawable.ab_background_blue)
 						                .headerLayout(R.layout.activity_case_detail_header)
 						                .contentLayout(R.layout.fragment_case_detail)
@@ -395,7 +395,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				//FadingActionBar
 				view = headerView = mFadingHelper.createView(inflater);
 				//headerImageView = (ImageView)getActivity().findViewById(R.id.toolbar_image);
-				//view = inflater.inflate(R.layout.fragment_case_detail, container, false);
 			}
 			else
 			{

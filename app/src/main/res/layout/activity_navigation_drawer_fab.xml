@@ -5,7 +5,8 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.huantnguyen.radcases.app.NavigationDrawerActivity">
+    tools:context="com.huantnguyen.radcases.app.NavigationDrawerActivity"
+    >
 
     <!--android:fitsSystemWindows="true"-->
 
@@ -28,7 +29,7 @@
               android:layout_width="@dimen/navigation_drawer_width"
               android:layout_height="match_parent"
               android:layout_gravity="start|bottom"
-              android:layout_marginTop="?android:attr/actionBarSize"
+              android:layout_marginTop="?attr/actionBarSize"
               android:name="com.huantnguyen.radcases.app.NavigationDrawerFragment"
         />
 
