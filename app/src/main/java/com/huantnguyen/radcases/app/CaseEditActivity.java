@@ -85,7 +85,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_edit_case);
+		setContentView(R.layout.activity_case_edit);
 
 		if (savedInstanceState == null)
 		{
@@ -653,7 +653,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			View rootView = inflater.inflate(R.layout.fragment_edit_case, container, false);
+			View rootView = inflater.inflate(R.layout.fragment_case_edit, container, false);
 
 			((EditText) rootView.findViewById(R.id.edit_patient_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
 

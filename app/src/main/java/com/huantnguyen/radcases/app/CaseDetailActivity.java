@@ -38,11 +38,12 @@ import static android.view.View.GONE;
  */
 public class CaseDetailActivity extends NavigationDrawerActivity
 {
-
 	private CaseDetailFragment fragment = null;
 	private long key_id = -1;
 
 	public static final String ARG_HAS_IMAGE = "com.huantnguyen.radcases.ARG_HAS_IMAGE";
+
+	static final int REQUEST_EDIT_CASE = 1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -81,7 +82,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		// TODO fix icon instead of drawer icon
 		// Show the Up button in the action bar.
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity
@@ -115,75 +116,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		}
 	}
-
-	/*
-	public void loadActivity(Bundle savedInstanceState)
-	{
-		boolean hasImage;
-
-		String [] image_args = {String.valueOf(key_id)};
-		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
-
-		if(imageCursor.getCount() == 0)
-		{
-			// set back to normal theme
-			setTheme(R.style.AppTheme);
-			super.onCreate(savedInstanceState);
-
-			hasImage = false;
-		}
-		else
-		{
-			// translucent and overlying action bar theme set in manifest XML
-
-			// for FadingActionBar, add extra top margin to navigation drawer to compensate for transparent overlying action bar
-			super.onCreate_for_FAB(savedInstanceState);
-
-			hasImage = true;
-		}
-
-		//super.onCreate(savedInstanceState);
-		//setContentView(R.layout.activity_case_detail);
-
-
-		// TODO fix icon instead of drawer icon
-		// Show the Up button in the action bar.
-		getActionBar().setDisplayHomeAsUpEnabled(true);
-
-		// savedInstanceState is non-null when there is fragment state
-		// saved from previous configurations of this activity
-		// (e.g. when rotating the screen from portrait to landscape).
-		// In this case, the fragment will automatically be re-added
-		// to its container so we don't need to manually add it.
-		// For more information, see the Fragments API guide at:
-		//
-		// http://developer.android.com/guide/components/fragments.html
-		//
-		if (savedInstanceState == null)
-		{
-
-			if(fragment != null)
-			{
-				getFragmentManager().beginTransaction().remove(fragment).commit();
-			}
-
-			// Create the detail fragment and add it to the activity
-			// using a fragment transaction.
-
-			Bundle arguments = new Bundle();
-			arguments.putLong(CaseCardListActivity.ARG_KEY_ID,
-					                 getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1));
-			arguments.putBoolean(ARG_HAS_IMAGE, hasImage);
-			fragment = new CaseDetailFragment();
-			fragment.setArguments(arguments);
-			getFragmentManager().beginTransaction()
-					.add(R.id.container, fragment)
-					.commit();
-
-		}
-	}
-
-*/
 
 	//todo change to just do headerview update
 	public void reloadHeaderView(int thumbnail)
@@ -207,8 +139,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		return super.onCreateOptionsMenu(menu);
 	}
-
-	static final int REQUEST_EDIT_CASE = 1;
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
@@ -328,7 +258,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		 * The fragment argument representing the item ID that this fragment
 		 * represents.
 		 */
-
 		private long selected_key_id;
 
 		private FadingActionBarHelper mFadingHelper;
@@ -343,7 +272,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		// Hold a reference to the current animator,
 		// so that it can be canceled mid-way.
-		private Animator mCurrentAnimator;
+		//private Animator mCurrentAnimator;
 
 		/**
 		 * Mandatory empty constructor for the fragment manager to instantiate the

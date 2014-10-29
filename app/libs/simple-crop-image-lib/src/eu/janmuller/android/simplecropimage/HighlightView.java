@@ -96,6 +96,7 @@ class HighlightView {
                         width / 2,
                         Path.Direction.CW);
 				mOutlinePaint.setColor(0xFFEF04D6);
+
                 
 		canvas.clipPath(path, Region.Op.DIFFERENCE);
             	canvas.drawRect(viewDrawingRect,
@@ -125,7 +126,8 @@ class HighlightView {
 
                 path.addRect(new RectF(mDrawRect), Path.Direction.CW);
             
-		mOutlinePaint.setColor(0xFFFF8A00);    
+		//mOutlinePaint.setColor(0xFFFF8A00);
+	        mOutlinePaint.setColor(0xFF81d4fa);
 
             }
             

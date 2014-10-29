@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -251,9 +252,16 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	}
 
 	@Override
+	/**
+	 * SearchView
+	 * searches on query string with each change in character
+	 *  - also triggers on NavigationDrawer open and close! TODO fix
+	 */
 	public boolean onQueryTextChange(String s)
 	{
-		fragment.doSearch(s);
+		if(!searchView.isIconified())
+			fragment.doSearch(s);
+
 		return true;
 	}
 
@@ -327,6 +335,16 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(mCardAdapter);
 			//mRecyclerView.addItemDecoration(new DividerDecoration(this));
 			mRecyclerView.addItemDecoration(headersDecor);
+
+			mRecyclerView.setOnTouchListener(new View.OnTouchListener()
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event)
+				{
+					UtilClass.hideKeyboard(getActivity());
+					return false;
+				}
+			});
 
 			populateCards();
 
