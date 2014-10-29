@@ -1,6 +1,5 @@
 package com.huantnguyen.radcases.app;
 
-//import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.SearchManager;
@@ -22,16 +21,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-//import com.timehop.stickyheadersrecyclerview.*;
 
 
 /**
@@ -51,7 +46,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	private static final String EMPTY_FIELD_GROUP_HEADER = "Unspecified";
 
-	// intent results
+	// intent request codes
+	final static int REQUEST_CASE_DETAILS = 1;
+	final static int REQUEST_ADD_CASE = 2;
+
+	// intent result codes
 	public final static int RESULT_NOCHANGE = 0;
 	public final static int RESULT_EDITED = 1;
 	public final static int RESULT_DELETED = 2;
@@ -61,6 +60,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	// saved state argument for action bar spinner
 	private static final String CURRENT_SPINNER_STATE = "spinner_state";
+
+	// search view
+	private SearchView searchView;
+	private MenuItem searchItem;
 
 	private PlaceholderFragment fragment;
 
@@ -142,15 +145,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 		// Get the SearchView and set the searchable configuration
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		MenuItem searchItem = menu.findItem(R.id.menu_search);
-		SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+		searchItem = menu.findItem(R.id.menu_search);
+		searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
 		searchView.setOnQueryTextListener(this);
 		searchView.setOnCloseListener(this);
 
 		// Assumes current activity is the searchable activity
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setIconifiedByDefault(true);
-
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -181,33 +183,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				return super.onOptionsItemSelected(item);
 		}
 	}
-
-/*
-	/////////////SEARCH
-	public void onNewIntent(Intent intent)
-	{
-		setIntent(intent);
-		handleIntent(intent);
-	}
-
-	// Get the intent, verify the action and get the query
-	private void handleIntent(Intent intent)
-	{
-		if (Intent.ACTION_SEARCH.equals(intent.getAction()))
-		{
-			String query;
-			query = intent.getStringExtra(SearchManager.QUERY);
-			fragment.doSearch(query);
-
-		}
-	}
-
-*/
-	/////////////SEARCH
-
-	final static int REQUEST_CASE_DETAILS = 1;
-	final static int REQUEST_ADD_CASE = 2;
-
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -269,7 +244,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	@Override
 	public boolean onQueryTextSubmit(String s)
 	{
-		Toast.makeText(this, s, Toast.LENGTH_LONG).show();
 		UtilClass.hideKeyboard(this);
 
 		//true if the query has been handled by the listener, false to let the SearchView perform the default action.
@@ -284,10 +258,34 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	}
 
 	@Override
+	// SearchView.OnCloseListener
 	public boolean onClose()
 	{
 		fragment.populateCards();
 		return false;
+	}
+
+	@Override
+	/**
+	 * override the back button
+	 * prevent back button from closing app if searchView is open
+	 */
+	public void onBackPressed()
+	{
+		if (searchView != null && !searchView.isIconified())
+		{
+			searchView.setIconified(true);
+
+			// if still open (only cleared text)
+			if (!searchView.isIconified())
+			{
+				searchView.setIconified(true);
+			}
+		}
+		else
+		{
+			super.onBackPressed();
+		}
 	}
 
 	/**
@@ -343,6 +341,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 		/**
 		 * populateCards
+		 *
 		 */
 		private void populateCards()
 		{
@@ -350,8 +349,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			MergeCursor case_cursor;
 
 			Cursor [] case_cursor_array;
-			String [] group_header; //name of header
-			int [] case_count_in_group; //number of cases in each filter group
 
 			// set the headers for StickyRecyclerHeaders
 			List<String> headerList = new ArrayList<String>();
@@ -509,252 +506,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			mCardAdapter.loadCases(case_cursor);
 			mCardAdapter.setHeaderList(headerList, headerIdList);
-/*
-			ArrayList<Card> cards = new ArrayList<Card>();
-			final StickyCardArrayAdapter_Kitkat mCardArrayAdapter = new StickyCardArrayAdapter_Kitkat(getActivity(), cards);
 
-			// loop through case cursor and put info into cards
-			if (case_cursor.moveToFirst())
-			{
-				int case_counter = 0;
-				int group_counter = 0;
-
-				String prior_str = "";
-
-				do
-				{
-					int key_id = case_cursor.getInt(CasesProvider.COL_ROWID);
-					String patient_id = case_cursor.getString(CasesProvider.COL_PATIENT_ID);
-					String diagnosis = case_cursor.getString(CasesProvider.COL_DIAGNOSIS);
-					String findings = case_cursor.getString(CasesProvider.COL_FINDINGS);
-					String section = case_cursor.getString(CasesProvider.COL_SECTION);
-					String study_type = case_cursor.getString(CasesProvider.COL_STUDY_TYPE);
-					String db_date_str = case_cursor.getString(CasesProvider.COL_DATE);
-					String key_words = case_cursor.getString(CasesProvider.COL_KEYWORDS);
-					int favorite = case_cursor.getInt(CasesProvider.COL_FAVORITE);
-
-					int thumbnail = 0;
-					String thumbnailString = case_cursor.getString(CasesProvider.COL_THUMBNAIL);
-					if(thumbnailString != null && !thumbnailString.isEmpty())
-						thumbnail = Integer.parseInt(thumbnailString);
-
-					//int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
-
-					// Create a Card
-					CaseCard_Kitkat case_card = new CaseCard_Kitkat(getActivity());
-
-					// Set unique id, will be passed to detail activity
-					case_card.setId(Integer.toString(key_id));
-
-					// Create a CardHeader
-					//CardHeader header = new CardHeader(this);
-					// Add Header to card
-					//header.setTitle(patient_id);
-					//card.addCardHeader(header);
-
-
-					// Set card info: Title, Text1, Text2
-					case_card.setTitle(patient_id);
-					if(diagnosis != null && !diagnosis.isEmpty())
-					{
-						case_card.setText1(diagnosis);
-					}
-					else if(findings != null && !findings.isEmpty())
-					{
-						case_card.setText1(findings);
-					}
-
-					case_card.setText2(key_words);
-
-
-					// set the StickyCard List group
-					switch(caseFilterMode)
-					{
-						case FILTER_SECTION:
-
-							// find next non-empty group
-							while(case_counter >= case_count_in_group[group_counter])
-							{
-								group_counter += 1;
-								case_counter = 0;
-							}
-
-							case_card.setGroup(group_counter);
-							case_counter += 1;
-
-							case_card.setGroupHeader(group_header[group_counter]);
-							break;
-
-						case FILTER_STUDYDATE:
-
-							if(db_date_str != null && !db_date_str.isEmpty())
-							{
-								String new_str = UtilClass.convertDateString(db_date_str, "yyyy-MM-dd", "MMMM yyyy");
-								case_card.setGroupHeader(new_str);
-
-								// if different date, then put in next filter group
-								if (!new_str.contentEquals(prior_str))
-									group_counter += 1;
-								case_card.setGroup(group_counter);
-
-								// for next iteration check
-								prior_str = new_str;
-							}
-							else
-							{
-								case_card.setGroupHeader(EMPTY_FIELD_GROUP_HEADER);
-							}
-
-							break;
-
-						// TODO  other filter types
-
-						default:
-							case_card.setGroupHeader(group_header[group_counter]);
-							break;
-
-					}
-
-					// set star
-					if(favorite == 1)
-						case_card.setStar(true);
-
-
-					// get images for this case
-					String[] image_args = {String.valueOf(key_id)};
-					Cursor image_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-
-					if(image_cursor.getCount() > 0 && image_cursor.moveToFirst())
-					{
-						if(thumbnail < image_cursor.getCount())
-						{
-							image_cursor.move(thumbnail);
-						}
-						String imageFilename = picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-
-						CaseCard_Kitkat.MyThumbnail cardThumbnail = new CaseCard_Kitkat.MyThumbnail(getActivity(), imageFilename);
-						//You need to set true to use an external library
-						cardThumbnail.setExternalUsage(true);
-
-						case_card.addCardThumbnail(cardThumbnail);
-
-					}
-					image_cursor.close();
-
-					// set the OnClickListener: opens the case detail activity, passes key_id and has_image arguments
-					case_card.setOnClickListener(new Card.OnCardClickListener()
-					{
-						@Override
-						public void onClick(Card card, View view)
-						{
-							Intent detailIntent = new Intent(view.getContext(), CaseDetailActivity.class);
-							detailIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, Long.parseLong(card.getId()));
-
-							if (card.getCardThumbnail() == null)
-							{
-								detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, false);
-							}
-							else
-							{
-								// fading action bar
-								detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, true);
-							}
-
-							mActivity.startActivityForResult(detailIntent, REQUEST_CASE_DETAILS);
-						}
-					});
-
-					// set the OnLongClickListener: opens alert dialog
-					case_card.setOnLongClickListener(new Card.OnLongCardClickListener()
-					{
-						@Override
-						public boolean onLongClick(Card card, View view)
-						{
-
-							//return mCardArrayAdapter.startActionMode(getActivity());
-
-
-							// declared "final" for access from within alert dialog
-							final long key_id = Long.parseLong(card.getId());
-							final StickyCardArrayAdapter_Kitkat mCardAdapter = mCardArrayAdapter;
-
-							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-							CharSequence[] imageSources = {"Edit", "MultiChoice", "Share", "Cancel"};
-							builder.setItems(imageSources, new DialogInterface.OnClickListener()
-							{
-								public void onClick(DialogInterface dialog, int index)
-								{
-									switch (index)
-									{
-										// Edit Case
-										case 0:
-											// open CaseEditActivity, giving the CASE key_id argument
-											Intent intent = new Intent(getActivity(), CaseEditActivity.class);
-											intent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
-
-											mActivity.startActivityForResult(intent, CaseDetailActivity.REQUEST_EDIT_CASE);
-
-											break;
-
-										// multichoice
-										case 1:
-											// multichoice
-											// returns boolean
-							//				mCardAdapter.startActionMode(getActivity());
-
-											break;
-
-										// Share Case
-										case 2:
-											String exportFilename = "test";
-											List<Long> caseList = new ArrayList<Long>();
-											caseList.add(key_id);
-
-											File exportFile = UtilClass.exportCasesCSV(getActivity(), exportFilename, caseList);
-
-											UtilClass.showMessage(getActivity(), "Exported case to " + exportFile.getPath());
-											break;
-
-										// Cancel.  Do Nothing.
-										case 3:
-											break;
-
-									}
-								}
-							});
-
-							AlertDialog alert = builder.create();
-							alert.show();
-
-							return true; // not sure what this does TODO
-
-						}
-					});
-
-					cards.add(case_card);
-
-				} while (case_cursor.moveToNext());
-			}
-*/
-/*
-			//StickyCardArrayAdapter_Kitkat mCardArrayAdapter = new StickyCardArrayAdapter_Kitkat(getActivity(), cards);
-			StickyCardListView_Kitkat listView = (StickyCardListView_Kitkat) rootView.findViewById(R.id.myList);
-
-			if (listView != null)
-			{
-
-			//SwingBottomInAnimationAdapter animCardArrayAdapter = new SwingBottomInAnimationAdapter(mCardArrayAdapter);
-			//animCardArrayAdapter.setAbsListView((listView);
-			//listView.setExternalAdapter(animCardArrayAdapter, mCardArrayAdapter);
-
-				listView.setAdapter(mCardArrayAdapter);
-				listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-			}
-*/
 			case_cursor.close();
 
 		}
 
+		/**
+		 * doSearch
+		 * @param queryStr
+		 */
 		private void doSearch(String queryStr)
 		{
 			boolean noResults = true;

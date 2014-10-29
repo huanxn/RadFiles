@@ -1,3 +1,2 @@
 include ':app'
 include 'app:libs:simple-crop-image-lib'
-//include 'app:libs:sticky-headers-recyclerview'

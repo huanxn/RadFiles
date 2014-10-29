@@ -14,18 +14,4 @@
         android:scrollbars="vertical"
         />
 
-
-    <!-- <it.gmariotti.cardslib.library.view.CardListView-->
-    <com.huantnguyen.radcases.app.StickyCardListView_Kitkat
-        android:id="@+id/myList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingTop="0dp"
-        android:paddingBottom="0dp"
-        android:paddingLeft="0dp"
-        android:paddingRight="0dp"
-        card:list_card_layout_resourceID="@layout/list_card_thumbnail_layout"
-        style="@style/list_card.thumbnail"/>
-
-
 </LinearLayout>
