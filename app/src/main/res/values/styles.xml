@@ -1,7 +1,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:popupBackground">?android:attr/colorPrimary</item>
     </style>
 
     <style name="Widget.ActionBar.Transparent">
