@@ -24,6 +24,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -753,6 +754,18 @@ public class UtilClass extends Activity
 		alert.show();
 	}
 */
+
+	public static void hideKeyboard(Activity activity)
+	{
+		InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+		// check if no view has focus:
+		View view = activity.getCurrentFocus();
+		if (view != null) {
+			inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+		}
+	}
+
 
 	/**
 	 * Creates zip file of images and CSV of database rows of select cases

@@ -1,17 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.huantnguyen.radcases.app.ImageGalleryActivity">
+      tools:context="com.huantnguyen.radcases.app.ImageGalleryActivity"
+      xmlns:radcases="http://schemas.android.com/apk/res-auto">
 
-    <!-- Edit this case, should appear as action button -->
     <item
         android:id="@+id/menu_camera"
         android:icon="@drawable/ic_action_camera"
-        android:showAsAction="ifRoom"
+        radcases:showAsAction="ifRoom"
         android:title="@string/action_camera"/>
 
     <item
         android:id="@+id/menu_settings"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        radcases:showAsAction="never"
         android:title="@string/action_settings"/>
 </menu>

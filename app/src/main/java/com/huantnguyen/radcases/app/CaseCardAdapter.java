@@ -28,7 +28,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	private Activity activity;
 
 	// StickyRecyclerHeadersAdapter
-	private List<Integer> header_id;    // if different than previous (ie in a different group), then it will display it's header
+	//private List<Integer> header_id;    // if different than previous (ie in a different group), then it will display it's header
 	private List<String> header;
 
 	public CaseCardAdapter(Activity activity, Cursor caseCursor, int card_layout)
@@ -94,13 +94,14 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				}
 				image_cursor.close();
 
-
-
-
 				caseList.add(new_case);
 
 			} while(cursor.moveToNext());
 
+		}
+		else
+		{
+			caseList.clear();
 		}
 
 
@@ -117,8 +118,6 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		holder.cardView.setTag(holder);
 		//holder.cardView.setTag(i);
-
-
 
 		return holder;
 	}
@@ -185,11 +184,19 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	{
 		if(header != null)
 			header.clear();
-		if(header_id != null)
-			header_id.clear();
 
 		header = text;
-		header_id = IDs;
+		//header_id = IDs;
+
+		notifyDataSetChanged();
+	}
+
+	public void setHeaderList(List<String> text)
+	{
+		if(header != null)
+			header.clear();
+
+		header = text;
 
 		notifyDataSetChanged();
 	}
@@ -215,7 +222,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public long getHeaderId(int position) {
 		//return getItem(position).hashCode();
-		if(position < header_id.size())
+		if(position < header.size())
 		{
 			//return header_id.get(position);
 			return header.get(position).hashCode();

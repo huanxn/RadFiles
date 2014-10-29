@@ -1,22 +1,29 @@
 package com.huantnguyen.radcases.app;
 
-import android.app.ActionBar;
+//import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
@@ -30,7 +37,7 @@ import java.util.List;
 /**
  * Created by Huan on 6/12/2014.
  */
-public class CaseCardListActivity extends NavigationDrawerActivity
+public class CaseCardListActivity extends NavigationDrawerActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener
 {
 	// Spinner sort/filter
 	private static int defaultFilterMode = 0;  //todo get from shared preferences
@@ -94,7 +101,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
 			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_actionbar, "Cases", getResources().getStringArray(R.array.actionbar_sort_list));
 			((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+			ActionBar actionBar = getSupportActionBar();
 			actionBar.setDisplayShowTitleEnabled(false);
 			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 			actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new android.support.v7.app.ActionBar.OnNavigationListener()
@@ -132,16 +139,19 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.case_list, menu);
 
-		/*
-		// TODO add searchable code here
+
 		// Get the SearchView and set the searchable configuration
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+		MenuItem searchItem = menu.findItem(R.id.menu_search);
+		SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+		searchView.setOnQueryTextListener(this);
+		searchView.setOnCloseListener(this);
+
 		// Assumes current activity is the searchable activity
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setIconifiedByDefault(true);
 
-*/
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -153,7 +163,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		{
 			case R.id.menu_search:
 				// TODO check this onSearchRequested
-				onSearchRequested();
+				//onSearchRequested();
 				return true;
 
 			case R.id.menu_addnew:
@@ -171,6 +181,29 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 				return super.onOptionsItemSelected(item);
 		}
 	}
+
+/*
+	/////////////SEARCH
+	public void onNewIntent(Intent intent)
+	{
+		setIntent(intent);
+		handleIntent(intent);
+	}
+
+	// Get the intent, verify the action and get the query
+	private void handleIntent(Intent intent)
+	{
+		if (Intent.ACTION_SEARCH.equals(intent.getAction()))
+		{
+			String query;
+			query = intent.getStringExtra(SearchManager.QUERY);
+			fragment.doSearch(query);
+
+		}
+	}
+
+*/
+	/////////////SEARCH
 
 	final static int REQUEST_CASE_DETAILS = 1;
 	final static int REQUEST_ADD_CASE = 2;
@@ -214,7 +247,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	@Override
 	public void restoreActionBar()
 	{
-		android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 	}
@@ -232,6 +265,30 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 		outState.putInt(CURRENT_SPINNER_STATE, getSupportActionBar().getSelectedNavigationIndex());
 	}
 
+	// SearchView.OnQueryTextListener
+	@Override
+	public boolean onQueryTextSubmit(String s)
+	{
+		Toast.makeText(this, s, Toast.LENGTH_LONG).show();
+		UtilClass.hideKeyboard(this);
+
+		//true if the query has been handled by the listener, false to let the SearchView perform the default action.
+		return false;
+	}
+
+	@Override
+	public boolean onQueryTextChange(String s)
+	{
+		fragment.doSearch(s);
+		return true;
+	}
+
+	@Override
+	public boolean onClose()
+	{
+		fragment.populateCards();
+		return false;
+	}
 
 	/**
 	 * Placeholder fragment
@@ -240,7 +297,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 	{
 		// Layout
 		private RecyclerView mRecyclerView;
-		private CaseCardAdapter mAdapter;
+		private CaseCardAdapter mCardAdapter;
 
 		View rootView;
 		Activity mActivity;
@@ -263,13 +320,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
 			// Setup CaseCardAdapter
-			mAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
+			mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
 
-			mRecyclerView.setAdapter(mAdapter);
+			mRecyclerView.setAdapter(mCardAdapter);
 
 			//sticky headers
 			// type2
-			StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(mAdapter);
+			StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(mCardAdapter);
 			//mRecyclerView.addItemDecoration(new DividerDecoration(this));
 			mRecyclerView.addItemDecoration(headersDecor);
 
@@ -298,7 +355,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 			// set the headers for StickyRecyclerHeaders
 			List<String> headerList = new ArrayList<String>();
-			List<Integer> headerID = new ArrayList<Integer>();
+			List<Integer> headerIdList = new ArrayList<Integer>();
 
 			switch(caseFilterMode)
 			{
@@ -322,13 +379,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 							String mSection = section_cursor.getString(CasesProvider.COL_VALUE);
 
 							// find all cases with this KEY_SECTION
-							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " LIKE ?", new String[] {"%"+ mSection +"%"}, CasesProvider.KEY_DATE + " DESC", null);
+							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " LIKE ?", new String[]{"%" + mSection + "%"}, CasesProvider.KEY_DATE + " DESC", null);
 
 							// set KEY_SECTION as headers in each list position in headerList, with same IDs
 							for(int c = 0; c < case_cursor_array[i].getCount(); c++)
 							{
 								headerList.add(mSection);
-								headerID.add(i);
+								headerIdList.add(i);
 							}
 
 							i = i + 1;
@@ -339,7 +396,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 						for(int c = 0; c < case_cursor_array[i].getCount(); c++)
 						{
 							headerList.add(EMPTY_FIELD_GROUP_HEADER);
-							headerID.add(i);
+							headerIdList.add(i);
 						}
 
 					}
@@ -355,7 +412,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("Recent");
-						headerID.add(0);
+						headerIdList.add(0);
 					}
 
 					break;
@@ -386,7 +443,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 								{
 									group_counter += 1;
 								}
-								headerID.add(group_counter);
+								headerIdList.add(group_counter);
 
 								// update prior_str for next iteration check
 								prior_str = new_date_str;
@@ -405,8 +462,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
-						headerList.add("KEYWORDS");
-						headerID.add(0);
+						headerList.add("Key Words");
+						headerIdList.add(0);
 					}
 
 					break;
@@ -416,8 +473,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
-						headerList.add("followup");
-						headerID.add(0);
+						headerList.add("Followup");
+						headerIdList.add(0);
 					}
 
 					break;
@@ -428,7 +485,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("Favorites");
-						headerID.add(0);
+						headerIdList.add(0);
 					}
 
 					break;
@@ -439,7 +496,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("My Cases");
-						headerID.add(0);
+						headerIdList.add(0);
 					}
 
 					break;
@@ -450,22 +507,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 			// TODO how to close this cursor?
 
 
-
-/*
-			for (int g = 0; g < group_header.length; g++)
-			{
-				for(int i = 0; i < case_count_in_group[g]; i ++)
-				{
-					headerList.add(group_header[g]);
-					//headerID.add((long)g);
-					headerID.add(group_header[g].hashCode());
-
-				}
-			}
-			*/
-
-			mAdapter.loadCases(case_cursor);
-			mAdapter.setHeaderList(headerList, headerID);
+			mCardAdapter.loadCases(case_cursor);
+			mCardAdapter.setHeaderList(headerList, headerIdList);
 /*
 			ArrayList<Card> cards = new ArrayList<Card>();
 			final StickyCardArrayAdapter_Kitkat mCardArrayAdapter = new StickyCardArrayAdapter_Kitkat(getActivity(), cards);
@@ -633,7 +676,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 
 							// declared "final" for access from within alert dialog
 							final long key_id = Long.parseLong(card.getId());
-							final StickyCardArrayAdapter_Kitkat mAdapter = mCardArrayAdapter;
+							final StickyCardArrayAdapter_Kitkat mCardAdapter = mCardArrayAdapter;
 
 							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 							CharSequence[] imageSources = {"Edit", "MultiChoice", "Share", "Cancel"};
@@ -657,7 +700,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 										case 1:
 											// multichoice
 											// returns boolean
-							//				mAdapter.startActionMode(getActivity());
+							//				mCardAdapter.startActionMode(getActivity());
 
 											break;
 
@@ -708,6 +751,62 @@ public class CaseCardListActivity extends NavigationDrawerActivity
 				listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
 			}
 */
+			case_cursor.close();
+
+		}
+
+		private void doSearch(String queryStr)
+		{
+			boolean noResults = true;
+
+			if(queryStr.isEmpty())
+			{
+				mCardAdapter.loadCases(null);
+				return;
+			}
+
+			String wildQuery = "%" + queryStr + "%";
+			String[] selArgs = {wildQuery};
+
+			String selection = "";
+
+
+			MergeCursor case_cursor; // merge into one cursor for StickyCard List
+
+			String [] search_categories = getResources().getStringArray(R.array.search_categories_array);
+			Cursor [] case_cursor_array = new Cursor[search_categories.length];
+
+			// set the headers for StickyRecyclerHeaders
+			List<String> headerList = new ArrayList<String>();
+			List<Integer> headerIdList = new ArrayList<Integer>();
+
+			// do searches of each relevant text field
+			case_cursor_array[0] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_PATIENT_ID + " LIKE ? ", selArgs, CasesProvider.KEY_DATE + " DESC");
+			case_cursor_array[1] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_DIAGNOSIS + " LIKE ? ", selArgs, CasesProvider.KEY_DIAGNOSIS);
+			case_cursor_array[2] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FINDINGS + " LIKE ? ", selArgs, CasesProvider.KEY_FINDINGS);
+			case_cursor_array[3] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ? ", selArgs, CasesProvider.KEY_KEYWORDS);
+			case_cursor_array[4] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " LIKE ? ", selArgs, CasesProvider.KEY_STUDY_TYPE);
+			case_cursor_array[5] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_COMMENTS + " LIKE ? ", selArgs, CasesProvider.KEY_COMMENTS);
+
+			// merge cursors into one list
+			case_cursor = new MergeCursor(case_cursor_array);
+
+			// add search header for each case
+			for(int i = 0; i < case_cursor_array.length; i++)
+			{
+				for(int c = 0; c < case_cursor_array[i].getCount(); c++)
+				{
+					headerList.add(search_categories[i]);
+				}
+			}
+
+			//if(case_cursor.getCount() > 0)
+			{
+				// populate cards and set headers
+				mCardAdapter.loadCases(case_cursor);
+				mCardAdapter.setHeaderList(headerList);
+			}
+
 			case_cursor.close();
 
 		}

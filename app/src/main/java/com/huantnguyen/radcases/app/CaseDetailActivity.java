@@ -368,7 +368,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				mFadingHelper = new FadingActionBarHelper()
 						                .actionBarBackground(R.drawable.ab_background_dark)
-						                //.actionBarBackground(R.drawable.ab_background_blue)
 						                .headerLayout(R.layout.activity_case_detail_header)
 						                .contentLayout(R.layout.fragment_case_detail)
 				;
@@ -394,7 +393,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			{
 				//FadingActionBar
 				view = headerView = mFadingHelper.createView(inflater);
-				//headerImageView = (ImageView)getActivity().findViewById(R.id.toolbar_image);
+				//view.findViewById(R.id.detail_container).setMinimumHeight((int)UtilClass.getDisplayHeight(getActivity()));
 			}
 			else
 			{
@@ -418,7 +417,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			super.onResume();
 
 
-			// if added image, need to redo FadingActionBar
+			// if added image, need to redo FadingActionBar TODO
 			populateFields();
 		}
 

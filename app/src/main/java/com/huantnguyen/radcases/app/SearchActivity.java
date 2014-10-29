@@ -1,33 +1,58 @@
 package com.huantnguyen.radcases.app;
 
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.SearchView;
+//import android.widget.SearchView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
 
 public class SearchActivity extends ActionBarActivity implements SearchView.OnQueryTextListener
 {
 	String query;
+	private RecyclerView mRecyclerView;
+	private CaseCardAdapter mCardAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
-		//this.setOnQueryTextListener(this);
 
-		setContentView(R.layout.activity_search);
+		//setContentView(R.layout.activity_search);
+		setContentView(R.layout.activity_case_cardlist);
+
+		// Find RecyclerView
+		mRecyclerView = (RecyclerView)findViewById(R.id.cards_list);
+
+		// Setup RecyclerView
+		mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+		mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+		// Setup CaseCardAdapter
+		mCardAdapter = new CaseCardAdapter(this, null, R.layout.card_case);
+
+		mRecyclerView.setAdapter(mCardAdapter);
+
+		// Setup Stickyheaders
+		StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(mCardAdapter);
+		mRecyclerView.addItemDecoration(headersDecor);
+
 		handleIntent(getIntent());
 	}
 
@@ -51,37 +76,28 @@ public class SearchActivity extends ActionBarActivity implements SearchView.OnQu
 
 	private void doSearch(String queryStr)
 	{
+		boolean noResults = true;
+
+		if(queryStr.isEmpty())
+		{
+			mCardAdapter.loadCases(null);
+			return;
+		}
+
 		String wildQuery = "%" + queryStr + "%";
 		String[] selArgs = {wildQuery};
 
 		String selection = "";
 
-		boolean noResults = true;
-
-/*
-		// ALL_KEYS[0] is unique key_id
-		for (int i = 1; i < CasesProvider.ALL_KEYS.length; i++)
-		{
-			selection = selection + CasesProvider.ALL_KEYS[i] + " LIKE ? ";
-
-			if (i < CasesProvider.ALL_KEYS.length - 1)
-			{
-				selection = selection + " OR ";
-
-				selArgs = UtilClass.addArrayElement(selArgs, wildQuery);
-			}
-		}
-		*/
 
 		MergeCursor case_cursor; // merge into one cursor for StickyCard List
 
-		Cursor [] case_cursor_array; // cursor array to be merged
-		String [] group_header; //name of header
-		int [] case_count_in_group; //number of cases in each filter group
+		String [] search_categories = getResources().getStringArray(R.array.search_categories_array);
+		Cursor [] case_cursor_array = new Cursor[search_categories.length];
 
-		case_cursor_array = new Cursor[6];
-		group_header = new String[6];
-		case_count_in_group = new int[6];
+		// set the headers for StickyRecyclerHeaders
+		List<String> headerList = new ArrayList<String>();
+		List<Integer> headerIdList = new ArrayList<Integer>();
 
 		// do searches of each relevant text field
 		case_cursor_array[0] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_PATIENT_ID + " LIKE ? ", selArgs, CasesProvider.KEY_DATE + " DESC");
@@ -91,22 +107,30 @@ public class SearchActivity extends ActionBarActivity implements SearchView.OnQu
 		case_cursor_array[4] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " LIKE ? ", selArgs, CasesProvider.KEY_STUDY_TYPE);
 		case_cursor_array[5] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_COMMENTS + " LIKE ? ", selArgs, CasesProvider.KEY_COMMENTS);
 
-		// set group headers
-		group_header[0] = "Patient ID";
-		group_header[1] = "Diagnosis";
-		group_header[2] = "Findings";
-		group_header[3] = "Key Words";
-		group_header[4] = "Study Type";
-		group_header[5] = "Comments";
-
-		// set group counts
-		for(int i = 0; i < 6; i++)
-			case_count_in_group[i] = case_cursor_array[i].getCount();
-
+		// merge cursors into one list
 		case_cursor = new MergeCursor(case_cursor_array);
-		// TODO how to close this cursor?
 
-		populateCards(case_cursor, group_header, case_count_in_group);
+		// add search header for each case
+		for(int i = 0; i < case_cursor_array.length; i++)
+		{
+			for(int c = 0; c < case_cursor_array[i].getCount(); c++)
+			{
+				headerList.add(search_categories[i]);
+			}
+		}
+
+		//if(case_cursor.getCount() > 0)
+		{
+			// populate cards and set headers
+			mCardAdapter.loadCases(case_cursor);
+			mCardAdapter.setHeaderList(headerList);
+		}
+
+		case_cursor.close();
+
+
+
+//		populateCards(case_cursor, group_header, case_count_in_group);
 
 	}
 
@@ -118,21 +142,24 @@ public class SearchActivity extends ActionBarActivity implements SearchView.OnQu
 
 		// Inflate the menu items for use in the action bar
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.case_list, menu);
+		inflater.inflate(R.menu.search, menu);
 
 		// Get the SearchView and set the searchable configuration
 		SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-		SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+		MenuItem searchItem = menu.findItem(R.id.menu_search);
+		android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) MenuItemCompat.getActionView(searchItem);
+		searchView.setOnQueryTextListener(this);
 
 		// Assumes current activity is the searchable activity
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
 
 		// show the query string in the expanded search box
 		searchView.setQuery(query, false);
 		//searchView.setPressed(true);
 		//searchView.setHovered(true);
+
 		searchView.setIconifiedByDefault(false); //TODO fix this as it doesn't look the same
+		//		searchView.setIconifiedByDefault(true);
 
 
 		return super.onCreateOptionsMenu(menu);

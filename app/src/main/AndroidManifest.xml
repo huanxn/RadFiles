@@ -48,9 +48,13 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
         </activity>
 
         <!-- Database -->
@@ -94,7 +98,9 @@
                 android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />
         </activity>
 
+
         <!-- this is the searchable activity; it performs searches -->
+        <!-- now performed in CaseCardListActivity
         <activity
             android:name="com.huantnguyen.radcases.app.SearchActivity"
             android:label="@string/title_activity_search" >
@@ -106,12 +112,14 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
+        -->
 
         <!-- enable the search dialog to send searches to SearchableActivity -->
         <meta-data
             android:name="android.app.default_searchable"
-            android:value=".SearchActivity" />
+            android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
 
+        <!-- libs simple-crop-image-lib: crop image from camera picture -->
         <activity android:name="eu.janmuller.android.simplecropimage.CropImage" />
 
         <activity
@@ -130,6 +138,7 @@
             android:name="com.huantnguyen.radcases.app.NavigationDrawerActivity"
             android:label="@string/title_activity_navigation_drawer" >
         </activity>
+
     </application>
 
 </manifest>

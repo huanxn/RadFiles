@@ -124,8 +124,8 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 
 
 		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayHomeAsUpEnabled(false);
 		actionBar.setTitle("Save");
+		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setIcon(R.drawable.ic_action_accept);
 
 
@@ -753,7 +753,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 
 				// STUDY DATE
 				// date picker in a button
-				if (db_date_str != null)
+				if (db_date_str != null && !db_date_str.isEmpty())
 				{
 					SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd");
 					SimpleDateFormat display_sdf = new SimpleDateFormat("MMMM d, yyyy");

@@ -59,7 +59,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
 
-
     <string-array name="nav_drawer_array">
         <item>Interesting Cases</item>
         <item>Procedure Log</item>
@@ -68,6 +67,17 @@
         <item>Manage Lists</item>
         <item>Settings</item>
         <item>Help</item>
+    </string-array>
+
+
+    <!-- Search category headers -->
+    <string-array name="search_categories_array">
+        <item>Patient ID</item>
+        <item>Diagnosis</item>
+        <item>Findings</item>
+        <item>Key Words</item>
+        <item>Study Type</item>
+        <item>Comments</item>
     </string-array>
 
 
