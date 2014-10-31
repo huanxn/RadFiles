@@ -1,5 +1,6 @@
 package com.huantnguyen.radcases.app;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,26 +32,43 @@ public class SpinnerActionBar extends ArrayAdapter<String>
 		listItems = Arrays.copyOf(objects, objects.length);
 	}
 
-	/*
+/*
 	@Override
 	public View getDropDownView(int position, View convertView, ViewGroup parent) {
 		// TODO Auto-generated method stub
-		return getCustomView(position, convertView, parent);
-	}
-	*/
+		//return getCustomView(position, convertView, parent);
 
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
-		// TODO Auto-generated method stub
-		return getCustomView(position, convertView, parent);
-	}
 
-	public View getCustomView(int position, View convertView,ViewGroup parent) {
+
 		LayoutInflater inflater =
 				( LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 
+		//layout for spinner popup
+
+		if (convertView==null)
+		{
+			convertView = inflater.inflate(R.layout.spinner_popup, null);
+		}
+
+		return convertView;
+	}
+*/
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent)
+	{
+		// TODO Auto-generated method stub
+		return getCustomView(position, convertView, parent);
+	}
+
+	public View getCustomView(int position, View convertView,ViewGroup parent)
+	{
+		LayoutInflater inflater =
+				( LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
 		ViewHolder holder;
+
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.spinner_actionbar, null);
 			holder = new ViewHolder();

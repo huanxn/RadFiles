@@ -685,7 +685,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			else
 			{
 				// set up imageGridView to be able to add images later to new case
-				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview));
+				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.key_image));
 				imageGridView.setMode(ImageGridView.EDIT_ACTIVITY);
 			}
 
@@ -787,7 +787,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 				//numImages = image_cursor.getCount();
 
-				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.imageGridview), selected_key_id, image_cursor);
+				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.key_image), selected_key_id, image_cursor);
 				imageGridView.notifyDataSetChanged();
 
 				image_cursor.close();

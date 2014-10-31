@@ -85,7 +85,7 @@ public class ImageGalleryActivity extends Activity {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_keyimage_gallery);
-		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.view_pager);
+		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.key_image);
 		TouchImageAdapter mAdapter = new TouchImageAdapter();
 
 		if(case_id == -1)   //error getting case id in intent extra

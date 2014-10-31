@@ -12,18 +12,46 @@
     <!-- Action Bar Spinner -->
     <style name = "spinner_actionBar_title">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name = "android:layout_marginTop">-2dp</item>
-        <item name="android:textColor">@color/bg_white</item>
+        <item name="android:layout_marginTop">-2dp</item>
+        <item name="android:textColor">?attr/actionMenuTextColor</item>
     </style>
 
     <style name = "spinner_actionBar_subtitle">
         <item name = "android:textSize">12dp</item>
         <item name = "android:layout_marginTop">-2dp</item>
         <item name = "android:paddingLeft">1dp</item>
-        <item name="android:textColor">@color/bg_white</item>
+        <item name="android:textColor">?attr/actionMenuTextColor</item>
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <style name="mySpinnerStyle" parent="android:Widget.ListView.DropDown">
+        <item name="android:divider">?attr/colorPrimary</item>
+        <item name="android:dividerHeight">1dp</item>
+        <!--<item name="android:listChoiceBackgroundIndicator">@android:drawable/list_selector_background</item>-->
+
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">marquee</item>
+
+        <!--
+        <item name="android:background">?attr/colorPrimaryDark</item>
+        <item name="android:textColor">?attr/actionMenuTextColor</item>
+        <item name="android:textColorPrimary">?attr/actionMenuTextColor</item>
+        -->
+
+    </style>
+
+    <!--
+    <style name="myPopupMenuStyle" parent="android:Widget.PopupMenu">
+        <item name="android:divider">?attr/colorAccent</item>
+        <item name="android:dividerHeight">1dp</item>
+        <item name="android:listChoiceBackgroundIndicator">@android:drawable/list_selector_background</item>
+
+        <item name="android:background">?attr/colorPrimaryDark</item>
+        <item name="android:textColor">?attr/actionMenuTextColor</item>
+        <item name="android:textColorPrimary">?attr/actionMenuTextColor</item>
+
+    </style>
+    -->
 
     <style name="stickyListHeader"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
 <!--        <item name="android:drawableBottom">@drawable/list_section_divider</item> -->

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- api 21 themes -->
+
 <resources>
 
     <!-- extend from parent defined in values/themes.xml -->
@@ -15,6 +17,9 @@
         <item name="android:windowSharedElementExitTransition">@android:transition/move</item>
 
         <item name="android:popupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
+
+        <item name="textAppearanceLargePopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large</item>
+        <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small</item>
     </style>
 
 

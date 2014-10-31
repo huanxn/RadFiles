@@ -1,6 +1,5 @@
 package com.huantnguyen.radcases.app;
 
-import android.animation.Animator;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.ContentUris;
@@ -11,7 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -554,7 +552,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				if (imageCursor.getCount() > 0 && imageCursor.moveToFirst())  //hasImage to keep crash if FadingActionBar hasn't been done yet
 				{
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
-					rootView.findViewById(R.id.imageGridview).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.key_image).setVisibility(View.VISIBLE);
 
 					// set image for FadingActionBar.  first image in cursor array
 					if(thumbnail < imageCursor.getCount())
@@ -567,7 +565,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);
 					UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
-					ImageGridView imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.imageGridview), selected_key_id, imageCursor);
+					ImageGridView imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);
 					imageGridView.setMode(ImageGridView.DETAIL_ACTIVITY);
 
 					imageCursor.close();
@@ -576,7 +574,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					// no images
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.GONE);
-					rootView.findViewById(R.id.imageGridview).setVisibility(View.GONE);
+					rootView.findViewById(R.id.key_image).setVisibility(View.GONE);
 				}
 
 				// KEYWORD_LIST

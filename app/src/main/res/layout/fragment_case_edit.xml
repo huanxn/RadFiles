@@ -148,7 +148,7 @@
                 android:text="Key Images"/>
 
             <GridView
-                android:id="@+id/imageGridview"
+                android:id="@+id/key_image"
                 style="@style/imageGridView"
                 />
 

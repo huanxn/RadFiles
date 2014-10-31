@@ -10,9 +10,12 @@
     <color name="dark_gray_text">#3D3D3D</color>
     <color name="gray_text">#9D9D9D</color>
 
-    <color name="colorPrimary">@color/md_blue_grey_700</color>
-    <color name="colorPrimaryDark">@color/md_blue_grey_900</color>
-    <color name="colorAccent">@color/md_light_blue_200</color>
+    <color name="default_colorPrimary">@color/md_blue_grey_700</color>
+    <color name="default_colorPrimaryDark">@color/md_blue_grey_900</color>
+    <color name="default_colorAccent">@color/md_light_blue_200</color>
+
+
+    <color name="default_actionMenuTextColor">@color/md_grey_50</color>
 
     <color name="actionbar_background_top">#3c3c3d</color>
     <color name="actionbar_background_bottom">#1c1c1c</color>
