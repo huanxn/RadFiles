@@ -14,6 +14,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -83,6 +84,7 @@ public class UtilClass extends Activity
 		if(mCurrentPhotoPath== null || mCurrentPhotoPath.isEmpty())
 		{
 			mImageView.setImageBitmap(null);
+			mImageView.setBackgroundColor(Color.BLACK);
 			return;
 		}
 

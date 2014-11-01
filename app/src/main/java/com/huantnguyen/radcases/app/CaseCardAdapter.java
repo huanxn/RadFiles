@@ -1,9 +1,9 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 	private List<Case> caseList;
 	private int card_layout_id;
-	private Activity activity;
+	private NavigationDrawerActivity activity;
 
 	// StickyRecyclerHeadersAdapter
 	//private List<Integer> header_id;    // if different than previous (ie in a different group), then it will display it's header
@@ -42,7 +41,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 
 		this.card_layout_id = card_layout;
-		this.activity = activity;
+		this.activity = (NavigationDrawerActivity)activity;
 
 		setHasStableIds(true);
 	}
@@ -113,6 +112,42 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		View v = LayoutInflater.from(viewGroup.getContext()).inflate(card_layout_id, viewGroup, false);
 
 		ViewHolder holder = new ViewHolder(v);
+
+		/*
+		holder.thumbnail.setOnClickListener(new View.OnClickListener()
+		{
+			@Override
+			public void onClick(View view)
+			{
+				UtilClass.showMessage(activity, "TEST CLICK THUMBNAIL");
+
+				CaseCardListActivity caseCardListActivity = (CaseCardListActivity) activity;
+				ActionMode mActionMode = caseCardListActivity.getActionMode();
+
+				if(mActionMode == null)
+				{
+					caseCardListActivity.mActionMode = caseCardListActivity.startSupportActionMode(caseCardListActivity.mActionModeCallback);
+				}
+
+				if(view.isSelected())
+				{
+					view.setSelected(false);
+					view.setBackgroundColor(0x00000000);
+				}
+				else
+				{
+					view.setSelected(true);
+					view.setBackgroundColor(0xffb3e5fc);
+				}
+
+				//UtilClass.setPic((ImageView)view, )
+
+				return;
+
+			}
+		});
+				 */
+
 		holder.cardView.setOnClickListener(CaseCardAdapter.this);
 		holder.cardView.setOnLongClickListener(CaseCardAdapter.this);
 
@@ -131,9 +166,9 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 			viewHolder.key_id = mCase.key_id;
 
-			viewHolder.title.setText(mCase.patient_id);
-			viewHolder.text1.setText(mCase.diagnosis);
-			viewHolder.text2.setText(mCase.findings);
+			viewHolder.card_title.setText(mCase.patient_id);
+			viewHolder.card_text1.setText(mCase.diagnosis);
+			viewHolder.card_text2.setText(mCase.findings);
 			//viewHolder.thumbnail.setImageDrawable(activity.getDrawable(country.getImageResourceId(mContext)));
 		//	if(mCase.thumbnail_filename != null && !mCase.thumbnail_filename.isEmpty())
 			{
@@ -162,6 +197,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public void onClick(View view)
 	{
+		CardView cardView = (CardView)view;
 		ViewHolder holder = (ViewHolder) view.getTag();
 
 		//int position = (Integer)view.getTag();
@@ -169,16 +205,97 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 //			Toast.makeText(activity, String.valueOf(holder.key_id), Toast.LENGTH_SHORT).show();
 
-		Intent detailIntent = new Intent(view.getContext(), CaseDetailActivity.class);
-		detailIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, holder.key_id);
+		if(activity.mActionMode == null)
+		{
+			// open detail view for clicked case
+			Intent detailIntent = new Intent(view.getContext(), CaseDetailActivity.class);
+			detailIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, holder.key_id);
 
+			// activity options
+			//ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, Pair.create((View) holder.card_text1, "DetailCaseInfo1" ));
 
-		detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, false);
+			detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, false);
 
-		activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+			//activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS, options.toBundle());
+			activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+		}
+		else
+		{
+			// contextual action bar is open
+
+			if(cardView.isSelected())
+			{
+				cardView.setSelected(false);
+				//view.setBackgroundColor(0x00000000);
+				cardView.setCardElevation(4);
+				cardView.setMaxCardElevation(4);
+				holder.card_title.setTextColor(Color.CYAN);
+
+				((CaseCardListActivity)activity).removeFromMultiselectList(holder.key_id);
+			}
+			else
+			{
+				cardView.setSelected(true);
+				//view.setBackgroundColor(0xffb3e5fc);
+				cardView.setMaxCardElevation(20);
+				cardView.setCardElevation(20);
+				holder.card_title.setTextColor(Color.RED);
+
+				((CaseCardListActivity)activity).addToMultiselectList(holder.key_id);
+			}
+
+			activity.mActionMode.setTitle(((CaseCardListActivity)activity).getMultiselectCount() + " selected");
+		}
 	}
 
 
+	@Override
+	public boolean onLongClick(View view)
+	{
+		CardView cardView = (CardView)view;
+		ViewHolder holder = (ViewHolder) view.getTag();
+
+		int backgroundColor = 0xffb3e5fc;
+
+		if(activity.mActionMode == null)
+		{
+			// open contextual menu
+			activity.mActionMode = activity.startSupportActionMode(activity.mActionModeCallback);
+			cardView.setSelected(true);
+			cardView.setMaxCardElevation(20);
+			cardView.setCardElevation(20);
+			holder.card_title.setTextColor(Color.RED);
+
+			((CaseCardListActivity)activity).addToMultiselectList(holder.key_id);
+			activity.mActionMode.setTitle(((CaseCardListActivity)activity).getMultiselectCount() + " selected");
+
+
+	//		view.setBackgroundColor(0xffb3e5fc);
+			//RoundRectDrawable backgroundDrawable = new RoundRectDrawable(backgroundColor, cardView.getRadius());
+			//cardView.setBackgroundDrawable(backgroundDrawable);
+
+
+
+			return true;
+		}
+		else
+		{
+			// close contextual menu
+			activity.mActionMode.finish();
+
+			return true;
+		}
+	}
+
+	/**
+	 * Stickyheaders
+	 */
+
+	/**
+	 * setHeaderLiest
+	 * @param text: headers for each item in list
+	 * @param IDs
+	 */
 
 	public void setHeaderList(List<String> text, List<Integer> IDs)
 	{
@@ -233,21 +350,17 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		}
 	}
 
-
-	@Override
-	public boolean onLongClick(View view)
-	{
-		return false;
-	}
-
+	/**
+	 *
+	 */
 	public static class ViewHolder extends RecyclerView.ViewHolder
 	{
 		private long key_id;
 		public CardView cardView;
 
-		public TextView title;
-		public TextView text1;
-		public TextView text2;
+		public TextView card_title;
+		public TextView card_text1;
+		public TextView card_text2;
 		public ImageView thumbnail;
 
 		public ViewHolder(View itemView) {
@@ -255,10 +368,10 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 			cardView = (CardView) itemView.findViewById(R.id.case_card_view);
 
-			title = (TextView) itemView.findViewById(R.id.card_main_inner_title);
-			text1 = (TextView) itemView.findViewById(R.id.card_main_inner_text1);
-			text2 = (TextView) itemView.findViewById(R.id.card_main_inner_text2);
-			thumbnail = (ImageView) itemView.findViewById(R.id.card_thumbnail);
+			card_title = (TextView) itemView.findViewById(R.id.patient_id);
+			card_text1 = (TextView) itemView.findViewById(R.id.case_info1);
+			card_text2 = (TextView) itemView.findViewById(R.id.case_info2);
+			thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
 		}
 	}
 }

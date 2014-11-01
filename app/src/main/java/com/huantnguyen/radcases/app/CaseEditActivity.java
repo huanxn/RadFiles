@@ -19,6 +19,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -26,6 +27,7 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -656,6 +658,17 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			View rootView = inflater.inflate(R.layout.fragment_case_edit, container, false);
 
 			((EditText) rootView.findViewById(R.id.edit_patient_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
+
+			// hide soft keyboard if click off keyboard
+			((ScrollView) rootView.findViewById(R.id.edit_scrollview)).setOnTouchListener(new View.OnTouchListener()
+			{
+				@Override
+				public boolean onTouch(View v, MotionEvent event)
+				{
+					UtilClass.hideKeyboard(getActivity());
+					return false;
+				}
+			});
 
 			return rootView;
 		}

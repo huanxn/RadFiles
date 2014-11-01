@@ -6,6 +6,7 @@ import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,6 +21,12 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	 * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
 	 */
 	private NavigationDrawerFragment mNavigationDrawerFragment;
+
+	/**
+	 * Contextual action mode
+	 */
+	public ActionMode mActionMode = null;
+	public ActionMode.Callback mActionModeCallback = null;
 
 	/**
 	 * Used to store the last screen title. For use in {@link #restoreActionBar()}.

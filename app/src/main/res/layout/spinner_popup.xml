@@ -1,5 +1,6 @@
 <!-- spinner dropdown list's popup menu style -->
 <!-- divider style set in styles.xml -->
+    <!-- bug:selected item not highlighted -->
 <CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/text1"
     style="?android:attr/spinnerDropDownItemStyle"
@@ -10,7 +11,8 @@
     android:background="?attr/colorPrimaryDark"
     android:textColor="?attr/actionMenuTextColor"
 
-    android:textIsSelectable="true"
 
+    android:foreground="?android:attr/selectableItemBackground"
     android:textColorHighlight="@color/default_colorAccent"
+
     />

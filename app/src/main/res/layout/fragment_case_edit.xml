@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            tools:context="com.huantnguyen.radcases.app.CaseEditActivity$PlaceholderFragment">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <ScrollView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/edit_scrollview"
+                android:layout_above="@+id/buttonBar"
+                tools:context="com.huantnguyen.radcases.app.CaseEditActivity$PlaceholderFragment">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -152,40 +152,38 @@
                 style="@style/imageGridView"
                 />
 
-
         </LinearLayout>
 
-        <!-- BUTTON BAR -->
-        <LinearLayout
-            android:id="@+id/buttonBar"
-            style="?android:buttonBarStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="0dp"
-            android:layout_below="@id/fields_container"
-            android:background="@color/bg_gray">
+    </ScrollView>
 
-            <Button
-                android:id="@+id/cancelButton"
-                style="?android:buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="onClick_Button"
-                android:text="@string/button_discard"/>
+    <!-- BUTTON BAR -->
+    <LinearLayout
+    android:id="@+id/buttonBar"
+    style="?android:buttonBarStyle"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="0dp"
+    android:background="@color/md_grey_300"
+    android:layout_alignParentBottom="true">
+    <!--android:layout_below="@id/fields_container"-->
 
-
-            <Button
-                android:id="@+id/doneButton"
-                style="?android:buttonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="onClick_Button"
-                android:text="@string/button_save"/>
-        </LinearLayout>
+    <Button
+        android:id="@+id/cancelButton"
+        style="?android:buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:onClick="onClick_Button"
+        android:text="@string/button_discard"/>
 
 
-    </RelativeLayout>
-
-</ScrollView>
+    <Button
+        android:id="@+id/doneButton"
+        style="?android:buttonBarButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:onClick="onClick_Button"
+        android:text="@string/button_save"/>
+    </LinearLayout>
+</RelativeLayout>

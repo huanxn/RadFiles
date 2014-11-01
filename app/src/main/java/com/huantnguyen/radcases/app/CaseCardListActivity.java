@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -65,6 +66,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	// search view
 	private SearchView searchView;
 	private MenuItem searchItem;
+
+	private List<Long> multiselectList;
+
+	// contextual action bar mode
+	//public ActionMode.Callback mActionModeCallback;
+	//public static ActionMode mActionMode = null;
 
 	private PlaceholderFragment fragment;
 
@@ -129,6 +136,59 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			// set the saved filter/spinner state
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
 		}
+
+
+		// for contextual menu
+		setActionModeCallback();
+		multiselectList = new ArrayList<Long>();
+
+		/////////
+		/*
+		mActionModeCallback = new ActionMode.Callback() {
+
+			// Called when the action mode is created; startActionMode() was called
+			@Override
+			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+				// Inflate a menu resource providing context menu items
+				MenuInflater inflater = mode.getMenuInflater();
+				inflater.inflate(R.menu.case_list_contextual, menu);
+				return true;
+			}
+
+			// Called each time the action mode is shown. Always called after onCreateActionMode, but
+			// may be called multiple times if the mode is invalidated.
+			@Override
+			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+				return false; // Return false if nothing is done
+			}
+
+			// Called when the user selects a contextual menu item
+			@Override
+			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+				switch (item.getItemId()) {
+					case R.id.menu_share:
+						UtilClass.showMessage(getApplication(), "TEST SHARE");
+						mode.finish(); // Action picked, so close the CAB
+						return true;
+
+					case R.id.menu_delete:
+						UtilClass.showMessage(getApplicationContext(), "TEST DELETE");
+						mode.finish(); // Action picked, so close the CAB
+						return true;
+
+					default:
+						return false;
+				}
+			}
+
+			// Called when the user exits the action mode
+			@Override
+			public void onDestroyActionMode(ActionMode mode) {
+				mActionMode = null;
+			}
+		};
+	*/
+		/////////
 
 	}
 
@@ -298,6 +358,83 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	}
 
 	/**
+	 * Contextual Menu
+	 */
+	private void setActionModeCallback()
+	{
+		mActionModeCallback = new ActionMode.Callback()
+		{
+
+			// Called when the action mode is created; startActionMode() was called
+			@Override
+			public boolean onCreateActionMode(ActionMode mode, Menu menu)
+			{
+				// Inflate a menu resource providing context menu items
+				MenuInflater inflater = mode.getMenuInflater();
+				inflater.inflate(R.menu.case_list_contextual, menu);
+				return true;
+			}
+
+			// Called each time the action mode is shown. Always called after onCreateActionMode, but
+			// may be called multiple times if the mode is invalidated.
+			@Override
+			public boolean onPrepareActionMode(ActionMode mode, Menu menu)
+			{
+				return false; // Return false if nothing is done
+			}
+
+			// Called when the user selects a contextual menu item
+			@Override
+			public boolean onActionItemClicked(ActionMode mode, MenuItem item)
+			{
+				switch (item.getItemId())
+				{
+					case R.id.menu_share:
+						UtilClass.showMessage(getApplicationContext(), "TEST SHARE");
+						mode.finish(); // Action picked, so close the CAB
+						return true;
+
+					case R.id.menu_delete:
+						UtilClass.showMessage(getApplicationContext(), "TEST DELETE");
+						mode.finish(); // Action picked, so close the CAB
+						return true;
+
+					default:
+						return false;
+				}
+			}
+
+			// Called when the user exits the action mode
+			@Override
+			public void onDestroyActionMode(ActionMode mode)
+			{
+				mActionMode = null;
+			}
+		};
+	}
+
+	public void addToMultiselectList(long key_id)
+	{
+		if(!multiselectList.contains(key_id))
+			multiselectList.add(key_id);
+	}
+	public void removeFromMultiselectList(long key_id)
+	{
+		if(multiselectList.contains(key_id))
+			multiselectList.remove(key_id);
+	}
+
+	public void clearMultiselectList()
+	{
+		multiselectList.clear();
+	}
+
+	public int getMultiselectCount()
+	{
+		return multiselectList.size();
+	}
+
+	/**
 	 * Placeholder fragment
 	 */
 	public static class PlaceholderFragment extends Fragment
@@ -357,6 +494,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			super.onAttach(activity);
 			mActivity = activity;
 		}
+
+
+
 
 		/**
 		 * populateCards

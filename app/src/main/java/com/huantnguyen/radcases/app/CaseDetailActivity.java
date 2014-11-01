@@ -364,7 +364,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				}
 
 				String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-				ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);
+				ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
 				UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
 				imageCursor.close();
@@ -448,7 +448,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				actionBar.setTitle(mTitle);
 
 				// Case Information (DIAGNOSIS and FINDINGS)
-				TextView TV_case_info1 = (TextView) rootView.findViewById(R.id.detail_case_info1);
+				TextView TV_case_info1 = (TextView) rootView.findViewById(R.id.case_info1);
 				TextView TV_case_info2 = (TextView) rootView.findViewById(R.id.detail_case_info2);
 
 				if(diagnosis != null && !diagnosis.isEmpty())
@@ -562,7 +562,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 					// fading action bar
 					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.image_header);
+					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
 					UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
 					ImageGridView imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);

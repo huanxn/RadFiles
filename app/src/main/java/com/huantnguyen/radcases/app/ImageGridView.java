@@ -222,7 +222,7 @@ public class ImageGridView
 				AlertDialog alert = builder.create();
 				alert.show();
 
-				return false;
+				return true;
 			}
 		});
 	}

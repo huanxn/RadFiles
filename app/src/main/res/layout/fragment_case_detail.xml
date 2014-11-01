@@ -30,7 +30,7 @@
             android:text="Diagnosis" />
 
         <TextView
-            android:id="@+id/detail_case_info1"
+            android:id="@+id/case_info1"
             style="@style/sectionText"
             android:text="detail_case_info1"/>
 
