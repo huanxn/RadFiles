@@ -17,6 +17,8 @@
 
     <color name="default_actionMenuTextColor">@color/md_grey_50</color>
 
+    <color name="default_card_background">@color/md_grey_50</color>
+
     <color name="actionbar_background_top">#3c3c3d</color>
     <color name="actionbar_background_bottom">#1c1c1c</color>
     <color name="actionbar_background_start">#1c1c1c</color>

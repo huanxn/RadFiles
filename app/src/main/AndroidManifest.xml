@@ -121,6 +121,18 @@
             <intent-filter>
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="file" />
+                <data android:mimeType="application/zip" />
+                <data android:pathPattern=".*\\.zip" />
+                <data android:host="*" />
+            </intent-filter>
+
+
         </activity>
 
         <activity

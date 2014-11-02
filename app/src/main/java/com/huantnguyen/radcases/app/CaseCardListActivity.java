@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
@@ -36,6 +37,8 @@ import java.util.List;
  */
 public class CaseCardListActivity extends NavigationDrawerActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener
 {
+	private static Activity activity;
+
 	// Spinner sort/filter
 	private static int defaultFilterMode = 0;  //todo get from shared preferences
 	private static int caseFilterMode = defaultFilterMode;
@@ -69,6 +72,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	private List<Long> multiselectList;
 
+	public static CaseCardAdapter mCardAdapter;
+
 	// contextual action bar mode
 	//public ActionMode.Callback mActionModeCallback;
 	//public static ActionMode mActionMode = null;
@@ -89,6 +94,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	{
 		super.onCreate(savedInstanceState);
 //		setContentView(R.layout.activity_case_cardlist);
+
+		activity = this;
 
 		downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 		picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
@@ -391,6 +398,30 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				{
 					case R.id.menu_share:
 						UtilClass.showMessage(getApplicationContext(), "TEST SHARE");
+						File shareFile = null;
+
+						if(!multiselectList.isEmpty())
+						{
+							shareFile = UtilClass.exportCasesCSV(activity, "TEST_share_file", multiselectList);
+							Uri uriShareFile = Uri.fromFile(shareFile);
+
+							Intent shareIntent = new Intent(Intent.ACTION_SEND);
+							shareIntent.setType("message/rfc822");
+							shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
+							shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
+							shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadCases Android app!");
+							shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
+
+
+							//shareIntent.setData(Uri.parse("mailto:")); // or just "mailto:" for blank
+							//shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
+							try {
+								startActivity(Intent.createChooser(shareIntent, "Send mail..."));
+							} catch (android.content.ActivityNotFoundException ex) {
+								Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+							}
+						}
+
 						mode.finish(); // Action picked, so close the CAB
 						return true;
 
@@ -409,6 +440,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			public void onDestroyActionMode(ActionMode mode)
 			{
 				mActionMode = null;
+
+				// clear list of key_id
+				multiselectList.clear();
+
+				// clear list of selected cards to highlight
+				if(mCardAdapter != null)
+				{
+					mCardAdapter.clearSelected();
+				}
 			}
 		};
 	}
@@ -443,6 +483,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		private RecyclerView mRecyclerView;
 		private CaseCardAdapter mCardAdapter;
 
+
 		View rootView;
 		Activity mActivity;
 
@@ -464,7 +505,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
 			// Setup CaseCardAdapter
-			mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
+			mCardAdapter = ((CaseCardListActivity)mActivity).mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
 
 			mRecyclerView.setAdapter(mCardAdapter);
 

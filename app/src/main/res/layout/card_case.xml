@@ -5,7 +5,9 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="horizontal"
+
               android:layout_margin="2dp"
+
               card_view:cardCornerRadius="4dp"
               android:foreground="?android:attr/selectableItemBackground"
               android:id="@+id/case_card_view">
@@ -13,17 +15,15 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp"
-        android:layout_marginTop="3dp"
-        android:layout_marginBottom="3dp"
+        android:layout_height="@dimen/card_thumbnail_height"
+        android:id="@+id/container"
         >
 
         <ImageView
             android:layout_width="@dimen/card_thumbnail_width"
             android:layout_height="@dimen/card_thumbnail_height"
             android:id="@+id/thumbnail"
+            android:layout_alignParentRight="true"
             />
 
         <TextView
@@ -32,7 +32,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_toRightOf="@id/thumbnail"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/thumbnail"
             android:text="Title"/>
 
         <TextView
@@ -41,7 +42,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/patient_id"
-            android:layout_toRightOf="@id/thumbnail"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/thumbnail"
             android:text="text 1"/>
 
 
@@ -54,6 +56,7 @@
             android:layout_toRightOf="@id/thumbnail"
             android:text="text 2"/>
 
+        <!--
         <CheckBox
             android:id="@+id/card_star"
             android:layout_alignParentBottom="true"
@@ -64,7 +67,7 @@
             android:visibility="visible"
             android:contentDescription="star"
             style="?android:attr/starStyle" />
-
+-->
 
     </RelativeLayout>
 

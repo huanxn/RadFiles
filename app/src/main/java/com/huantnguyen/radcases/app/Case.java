@@ -25,4 +25,6 @@ public class Case
 	String thumbnail_filename;
 
 
+	public boolean isSelected = false;
+
 }

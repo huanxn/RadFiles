@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -158,6 +159,9 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	}
 
 	@Override
+	/**
+	 * redraws when cards scroll into view
+	 */
 	public void onBindViewHolder(ViewHolder viewHolder, int i)
 	{
 		if(caseList != null)
@@ -170,9 +174,36 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			viewHolder.card_text1.setText(mCase.diagnosis);
 			viewHolder.card_text2.setText(mCase.findings);
 			//viewHolder.thumbnail.setImageDrawable(activity.getDrawable(country.getImageResourceId(mContext)));
-		//	if(mCase.thumbnail_filename != null && !mCase.thumbnail_filename.isEmpty())
+
+			/*
+			if(mCase.thumbnail_filename != null && !mCase.thumbnail_filename.isEmpty())
 			{
+				viewHolder.thumbnail.setVisibility(View.VISIBLE);
 				UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE);
+			}
+			else
+			{
+				viewHolder.thumbnail.setVisibility(View.GONE);
+			}
+			*/
+			UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE);
+
+			if(activity.mActionMode == null || !mCase.isSelected)
+			{
+				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_card_background));
+
+				/*
+				cardView.setMaxCardElevation(20);
+				cardView.setCardElevation(20);
+				*/
+			}
+			else if(mCase.isSelected)
+			{
+				//viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.attr.colorAccent));
+
+				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_colorAccent));
+
+				//viewHolder.cardView.setBackgroundColor(activity.getResources().getColor(R.color.default_colorAccent));
 			}
 		}
 	}
@@ -197,13 +228,9 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public void onClick(View view)
 	{
-		CardView cardView = (CardView)view;
 		ViewHolder holder = (ViewHolder) view.getTag();
 
-		//int position = (Integer)view.getTag();
-		//Toast.makeText(activity, String.valueOf(caseList.get(position).key_id), Toast.LENGTH_SHORT).show();
-
-//			Toast.makeText(activity, String.valueOf(holder.key_id), Toast.LENGTH_SHORT).show();
+		Case mCase = caseList.get(holder.getPosition());
 
 		if(activity.mActionMode == null)
 		{
@@ -222,29 +249,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		else
 		{
 			// contextual action bar is open
+			toggleSelected(mCase, holder.container);
 
-			if(cardView.isSelected())
-			{
-				cardView.setSelected(false);
-				//view.setBackgroundColor(0x00000000);
-				cardView.setCardElevation(4);
-				cardView.setMaxCardElevation(4);
-				holder.card_title.setTextColor(Color.CYAN);
-
-				((CaseCardListActivity)activity).removeFromMultiselectList(holder.key_id);
-			}
-			else
-			{
-				cardView.setSelected(true);
-				//view.setBackgroundColor(0xffb3e5fc);
-				cardView.setMaxCardElevation(20);
-				cardView.setCardElevation(20);
-				holder.card_title.setTextColor(Color.RED);
-
-				((CaseCardListActivity)activity).addToMultiselectList(holder.key_id);
-			}
-
-			activity.mActionMode.setTitle(((CaseCardListActivity)activity).getMultiselectCount() + " selected");
 		}
 	}
 
@@ -252,39 +258,60 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public boolean onLongClick(View view)
 	{
-		CardView cardView = (CardView)view;
 		ViewHolder holder = (ViewHolder) view.getTag();
-
-		int backgroundColor = 0xffb3e5fc;
+		Case mCase = caseList.get(holder.getPosition());
 
 		if(activity.mActionMode == null)
 		{
 			// open contextual menu
 			activity.mActionMode = activity.startSupportActionMode(activity.mActionModeCallback);
-			cardView.setSelected(true);
-			cardView.setMaxCardElevation(20);
-			cardView.setCardElevation(20);
-			holder.card_title.setTextColor(Color.RED);
-
-			((CaseCardListActivity)activity).addToMultiselectList(holder.key_id);
-			activity.mActionMode.setTitle(((CaseCardListActivity)activity).getMultiselectCount() + " selected");
-
-
-	//		view.setBackgroundColor(0xffb3e5fc);
-			//RoundRectDrawable backgroundDrawable = new RoundRectDrawable(backgroundColor, cardView.getRadius());
-			//cardView.setBackgroundDrawable(backgroundDrawable);
-
-
-
-			return true;
 		}
 		else
 		{
 			// close contextual menu
-			activity.mActionMode.finish();
-
-			return true;
+			//activity.mActionMode.finish();
 		}
+
+		toggleSelected(mCase, holder.container);
+
+		return true;
+	}
+
+	private void toggleSelected(Case mCase, View highlight)
+	{
+	//	int backgroundColor = 0xffb3e5fc;
+
+		if(mCase.isSelected)
+		{
+			mCase.isSelected = false;
+			((CaseCardListActivity)activity).removeFromMultiselectList(mCase.key_id);
+		}
+		else
+		{
+			mCase.isSelected = true;
+			((CaseCardListActivity)activity).addToMultiselectList(mCase.key_id);
+
+			//API21
+			//highlight.setBackgroundColor(activity.getTheme().getResources().getColor(R.attr.colorAccent));
+			//cardview-highlight.setBackgroundColor(activity.getResources().getColor(R.color.default_colorAccent));
+		}
+
+		activity.mActionMode.setTitle(((CaseCardListActivity) activity).getMultiselectCount() + " selected");
+
+		notifyDataSetChanged();
+	}
+
+	public void clearSelected()
+	{
+		for(Case mCase : caseList)
+		{
+			//if(clearList.contains(mCase.key_id))
+			{
+				mCase.isSelected = false;
+			}
+		}
+
+		notifyDataSetChanged();
 	}
 
 	/**
@@ -357,6 +384,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	{
 		private long key_id;
 		public CardView cardView;
+		public View container;
 
 		public TextView card_title;
 		public TextView card_text1;
@@ -367,6 +395,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			super(itemView);
 
 			cardView = (CardView) itemView.findViewById(R.id.case_card_view);
+
+			container = itemView.findViewById(R.id.container);
 
 			card_title = (TextView) itemView.findViewById(R.id.patient_id);
 			card_text1 = (TextView) itemView.findViewById(R.id.case_info1);

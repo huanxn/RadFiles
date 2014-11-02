@@ -84,7 +84,7 @@ public class UtilClass extends Activity
 		if(mCurrentPhotoPath== null || mCurrentPhotoPath.isEmpty())
 		{
 			mImageView.setImageBitmap(null);
-			mImageView.setBackgroundColor(Color.BLACK);
+			mImageView.setVisibility(View.GONE);
 			return;
 		}
 
@@ -789,7 +789,7 @@ public class UtilClass extends Activity
 		// CSV subdirectory within internal app data directory
 		//File CSV_dir = new File(activity.getApplication().getExternalFilesDir(null), "/CSV/");
 
-		/*
+
 		// create CSV dir if doesn't already exist
 		if(!CSV_dir.exists())
 		{
@@ -802,7 +802,7 @@ public class UtilClass extends Activity
 				showMessage(activity, "Unable to create directory: " + CSV_dir.getPath());
 			}
 		}
-*/
+
 		try
 		{
 			casesCSV = new File(CSV_dir.getPath(), CloudStorageActivity.CASES_CSV_FILENAME);
@@ -850,7 +850,8 @@ public class UtilClass extends Activity
 			if(selectedCaseList == null)
 			{
 				// get all cases
-				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+				//caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+				return null;
 			}
 			else
 			{
@@ -859,15 +860,32 @@ public class UtilClass extends Activity
 				int j=0;
 				String[] selectionArgs;
 				selectionArgs = new String[selectedCaseList.size()];
+
+				String selection = CasesProvider.KEY_ROWID + " = ?";
+
 				for(Long case_id : selectedCaseList)
 				{
-					selectionArgs[j++] = String.valueOf(case_id);
+					if(j>0)
+						selection += " OR " + CasesProvider.KEY_ROWID + " = ?";
+
+					selectionArgs[j] = String.valueOf(case_id);
+
+					j++;
+
+
+					/*
+					if(selArgs.isEmpty())
+						selArgs = String.valueOf(case_id);
+					else
+						selArgs += " OR " + String.valueOf(case_id);
+						*/
 				}
 
-				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_ROWID + " = ?", selectionArgs, null);
+				//caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_ROWID + " = ?", selectionArgs, null);
+				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, selection, selectionArgs, null);
 			}
 
-			if (caseCursor.moveToFirst())
+			if (caseCursor != null && caseCursor.moveToFirst())
 			{
 				casesOut.write(csvHeader);
 				//	outputStream.write(csvHeader.getBytes());
