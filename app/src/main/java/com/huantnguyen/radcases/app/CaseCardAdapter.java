@@ -186,11 +186,20 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				viewHolder.thumbnail.setVisibility(View.GONE);
 			}
 			*/
-			UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE);
+			if(UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE))
+			{
+				viewHolder.thumbnail.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				viewHolder.thumbnail.setVisibility(View.GONE);
+			}
 
 			if(activity.mActionMode == null || !mCase.isSelected)
 			{
+				// clear color highlight of unselected items
 				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_card_background));
+				viewHolder.thumbnail.setColorFilter(0x00000000);
 
 				/*
 				cardView.setMaxCardElevation(20);
@@ -201,9 +210,9 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			{
 				//viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.attr.colorAccent));
 
-				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_colorAccent));
-
-				//viewHolder.cardView.setBackgroundColor(activity.getResources().getColor(R.color.default_colorAccent));
+				// color highlight the selected items
+				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_colorSelected));
+				viewHolder.thumbnail.setColorFilter(activity.getResources().getColor(R.color.default_colorSelected));
 			}
 		}
 	}

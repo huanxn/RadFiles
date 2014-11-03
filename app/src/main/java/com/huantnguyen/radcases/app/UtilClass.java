@@ -53,7 +53,7 @@ public class UtilClass extends Activity
 {
 
 	public static final int IMAGE_SIZE = 500;
-	public static final int IMAGE_THUMB_SIZE = 150;
+	public static final int IMAGE_THUMB_SIZE = 125;
 	public static final int IMAGE_GRID_SIZE = 330;
 
 	public static final String TAG = "UtilClass";
@@ -78,14 +78,15 @@ public class UtilClass extends Activity
 	 * @param mImageView: Layout ImageView that will display the picture
 	 * @param mCurrentPhotoPath: full file path of image to be displayed
 	 * @param size: scale down size of displayed picture (square)
+	 * @return boolean: false if no image is set
 	 */
-	static public void setPic(ImageView mImageView, String mCurrentPhotoPath, int size)
+
+	static public boolean setPic(ImageView mImageView, String mCurrentPhotoPath, int size)
 	{
 		if(mCurrentPhotoPath== null || mCurrentPhotoPath.isEmpty())
 		{
 			mImageView.setImageBitmap(null);
-			mImageView.setVisibility(View.GONE);
-			return;
+			return false;
 		}
 
 		// Get the dimensions of the View
@@ -114,6 +115,8 @@ public class UtilClass extends Activity
 
 		Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
 		mImageView.setImageBitmap(bitmap);
+
+		return true;
 	}
 
 	static public Bitmap getBitmapFromFile(String mCurrentPhotoPath, int size)

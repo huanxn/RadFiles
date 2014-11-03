@@ -14,6 +14,8 @@
     <color name="default_colorPrimaryDark">@color/md_blue_grey_900</color>
     <color name="default_colorAccent">@color/md_light_blue_200</color>
 
+    <color name="default_colorSelected">#AAb3e5fc</color> <!-- translucent md_light_blue_100 -->
+
 
     <color name="default_actionMenuTextColor">@color/md_grey_50</color>
 
