@@ -65,6 +65,14 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	final static String IMAGES_CSV_FILENAME = "images_table.csv";
 	final static String STUDIES_CSV_FILENAME = "studies_table.csv";
 
+	// Database: backup and restore
+	final static String RDB_MIMETYPE = "application/x-7z-compressed";
+	final static String RDB_EXTENSION = ".rdb";
+
+	// CSV: import and export select cases
+	final static String RCS_MIMETYPE = "application/zip";
+	final static String RCS_EXTENSION = ".rcs";
+
 	final static String DB_FILENAME = "RadCases.db";
 
 	// standard directories
@@ -169,8 +177,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
-						exportFilename = value + ".7z";
-						exportMIMEtype = "application/x-7z-compressed";
+						exportFilename = value + RDB_EXTENSION;
+						exportMIMEtype = RDB_MIMETYPE;
 
 						// backup SQLite file
 						local_file_to_cloud = backupDB(value);
@@ -206,8 +214,9 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String value = input.getText().toString();
-						exportFilename = value + ".zip";
-						exportMIMEtype = "application/zip";
+						exportFilename = value + RCS_EXTENSION;
+						//exportMIMEtype = "application/zip";
+						exportMIMEtype = RCS_MIMETYPE;
 
 						// create CSV file
 						local_file_to_cloud = exportCasesCSV(value);
@@ -236,7 +245,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			case R.id.restore_button:
 				Intent restoreIntent = new Intent();
 				//restoreIntent.setType("DOWNLOADS/*.db");
-				restoreIntent.setDataAndType(Uri.parse(backupDir.getPath()), "application/x-7z-compressed");
+				restoreIntent.setDataAndType(Uri.parse(backupDir.getPath()), RDB_MIMETYPE);
 				restoreIntent.setAction(Intent.ACTION_GET_CONTENT);
 				//intent.putExtra("image_filename", filename);
 				startActivityForResult(Intent.createChooser(restoreIntent,"Select Backup File"), REQUEST_SELECT_BACKUP_FILE);
@@ -247,7 +256,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 				Intent importIntent = new Intent();
 				//importIntent.setType("DOWNLOADS/*.csv");
-				importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "application/zip");
+				//importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "application/zip");
+				importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), RCS_MIMETYPE);
 				importIntent.setAction(Intent.ACTION_GET_CONTENT);
 				//intent.putExtra("image_filename", filename);
 				startActivityForResult(Intent.createChooser(importIntent,"Select Cases File"), REQUEST_SELECT_CSV_FILE);
@@ -441,167 +451,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	}
 
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch (requestCode)
-		{
-			// Restore DB
-			case REQUEST_SELECT_BACKUP_FILE:
-				if (resultCode == RESULT_OK)
-				{
-					String restoreFilename;
-
-					// Get the Uri of the selected file
-					Uri uri = data.getData();
-					//String filename = data.getStringExtra()
-					Log.d(TAG, "File Uri: " + uri.toString());
-					// Get the path
-				//	String path = FileUtils.getPath(this, uri);
-					restoreFilename = uri.getPath();
-					Log.d(TAG, "File Uri: " + restoreFilename);
-
-					// copy drive file uri content to new local file
-
-					// create new local file
-					File tempRestoreFile = null;
-					try
-					{
-						tempRestoreFile = File.createTempFile("RadCases", ".zip", downloadsDir);
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						showMessage("Unable to create temporary file.");
-					}
-
-					FileOutputStream outputStream = null;
-					FileInputStream inputStream = null;
-					try
-					{
-						// Google Drive file
-						inputStream = (FileInputStream)getContentResolver().openInputStream(uri);
-
-						// new local file
-						outputStream = new FileOutputStream(tempRestoreFile);
-
-						// copy backup file contents to local file
-						UtilsFile.copyFile(outputStream, inputStream);
-					}
-					catch (FileNotFoundException e)
-					{
-						e.printStackTrace();
-						showMessage("local file not found");
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						showMessage("Copy backup to Google Drive: IO exception");
-						showMessage("cannot open input stream from selected uri");
-					}
-
-				//	Log.d(TAG, "File Path: " + path);
-					// Get the file instance
-					// File file = new File(path);
-					// Initiate the upload
-
-					//File restoreFile = new File(restoreFilename);
-					//importCasesCSV(restoreFile);
-
-					restoreDB(tempRestoreFile);
-
-					// delete the temporary file
-					tempRestoreFile.delete();
-
-				}
-				break;
-
-			// Import CSV
-			case REQUEST_SELECT_CSV_FILE:
-				if (resultCode == RESULT_OK)
-				{
-					String CSV_filename;
-
-					// Get the Uri of the selected file
-					Uri uri = data.getData();
-					//String filename = data.getStringExtra()
-					Log.d(TAG, "File Uri: " + uri.toString());
-					// Get the path
-					//	String path = FileUtils.getPath(this, uri);
-					CSV_filename = uri.getPath();
-					Log.d(TAG, "File Uri: " + CSV_filename);
-
-					// copy drive file uri content to new local file
-
-					// create new local file
-					File tempCSV_File = null;
-					try
-					{
-						tempCSV_File = File.createTempFile("RadCases", ".zip", downloadsDir);
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						showMessage("Unable to create temporary file.");
-					}
-
-					FileOutputStream outputStream = null;
-					FileInputStream inputStream = null;
-					try
-					{
-						// Google Drive file
-						inputStream = (FileInputStream)getContentResolver().openInputStream(uri);
-
-						// new local file
-						outputStream = new FileOutputStream(tempCSV_File);
-
-						// copy backup file contents to local file
-						UtilsFile.copyFile(outputStream, inputStream);
-					}
-					catch (FileNotFoundException e)
-					{
-						e.printStackTrace();
-						showMessage("local CSV file not found");
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						showMessage("Copy CSV to Google Drive: IO exception");
-						showMessage("cannot open input stream from selected uri");
-					}
-
-					// process file: unzip images, add csv info to database
-					importCasesCSV(tempCSV_File);
-
-					// delete the temporary file
-					tempCSV_File.delete();
-				}
-				break;
-
-			case REQUEST_CREATE_GOOGLE_DRIVE_FILE:
-				if (resultCode == RESULT_OK) {
-					driveId = (DriveId) data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
-
-					/*
-					if(GOOGLE_DRIVE_FOLDER_ID == null)
-					{
-					//	DriveFolder driveFolder = Drive.DriveApi.getFolder(getGoogleApiClient(), driveId);
-
-						GOOGLE_DRIVE_FOLDER_ID = Drive.DriveApi.getAppFolder(getGoogleApiClient()).getDriveId();
-					}
-					*/
-
-					//showMessage("File created with ID: " + driveId);
-				}
-				//finish();
-				break;
-
-			default:
-				super.onActivityResult(requestCode, resultCode, data);
-				break;
-		}
-
-	}
-
 
 	/////////////////////
 
@@ -732,7 +581,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				zip_files_array = UtilClass.addArrayElement(zip_files_array, backupDB_file.getPath());
 
 				// zip image and csv files
-				String zip_filename = backupDir.getPath() + "/" + backupFilename + ".7z";
+				String zip_filename = backupDir.getPath() + "/" + backupFilename + RDB_EXTENSION;
 				// return the zip file
 				returnFile = UtilsFile.zip(zip_files_array, zip_filename);
 
@@ -749,6 +598,167 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 		// success
 		return returnFile;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode)
+		{
+			// Restore DB
+			case REQUEST_SELECT_BACKUP_FILE:
+				if (resultCode == RESULT_OK)
+				{
+					String restoreFilename;
+
+					// Get the Uri of the selected file
+					Uri uri = data.getData();
+					//String filename = data.getStringExtra()
+					Log.d(TAG, "File Uri: " + uri.toString());
+					// Get the path
+					//	String path = FileUtils.getPath(this, uri);
+					restoreFilename = uri.getPath();
+					Log.d(TAG, "File Uri: " + restoreFilename);
+
+					// copy drive file uri content to new local file
+
+					// create new local file
+					File tempRestoreFile = null;
+					try
+					{
+						tempRestoreFile = File.createTempFile("RadCases", ".zip", downloadsDir);
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Unable to create temporary file.");
+					}
+
+					FileOutputStream outputStream = null;
+					FileInputStream inputStream = null;
+					try
+					{
+						// Google Drive file
+						inputStream = (FileInputStream)getContentResolver().openInputStream(uri);
+
+						// new local file
+						outputStream = new FileOutputStream(tempRestoreFile);
+
+						// copy backup file contents to local file
+						UtilsFile.copyFile(outputStream, inputStream);
+					}
+					catch (FileNotFoundException e)
+					{
+						e.printStackTrace();
+						showMessage("local file not found");
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Copy backup to Google Drive: IO exception");
+						showMessage("cannot open input stream from selected uri");
+					}
+
+					//	Log.d(TAG, "File Path: " + path);
+					// Get the file instance
+					// File file = new File(path);
+					// Initiate the upload
+
+					//File restoreFile = new File(restoreFilename);
+					//importCasesCSV(restoreFile);
+
+					restoreDB(tempRestoreFile);
+
+					// delete the temporary file
+					tempRestoreFile.delete();
+
+				}
+				break;
+
+			// Import CSV
+			case REQUEST_SELECT_CSV_FILE:
+				if (resultCode == RESULT_OK)
+				{
+					String CSV_filename;
+
+					// Get the Uri of the selected file
+					Uri uri = data.getData();
+					//String filename = data.getStringExtra()
+					Log.d(TAG, "File Uri: " + uri.toString());
+					// Get the path
+					//	String path = FileUtils.getPath(this, uri);
+					CSV_filename = uri.getPath();
+					Log.d(TAG, "File Uri: " + CSV_filename);
+
+					// copy drive file uri content to new local file
+
+					// create new local file
+					File tempCSV_File = null;
+					try
+					{
+						tempCSV_File = File.createTempFile("RadCases", ".zip", downloadsDir);
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Unable to create temporary file.");
+					}
+
+					FileOutputStream outputStream = null;
+					FileInputStream inputStream = null;
+					try
+					{
+						// Google Drive file
+						inputStream = (FileInputStream)getContentResolver().openInputStream(uri);
+
+						// new local file
+						outputStream = new FileOutputStream(tempCSV_File);
+
+						// copy backup file contents to local file
+						UtilsFile.copyFile(outputStream, inputStream);
+					}
+					catch (FileNotFoundException e)
+					{
+						e.printStackTrace();
+						showMessage("local CSV file not found");
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+						showMessage("Copy CSV to Google Drive: IO exception");
+						showMessage("cannot open input stream from selected uri");
+					}
+
+					// process file: unzip images, add csv info to database
+					importCasesCSV(tempCSV_File);
+
+					// delete the temporary file
+					tempCSV_File.delete();
+				}
+				break;
+
+			case REQUEST_CREATE_GOOGLE_DRIVE_FILE:
+				if (resultCode == RESULT_OK) {
+					driveId = (DriveId) data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
+
+					/*
+					if(GOOGLE_DRIVE_FOLDER_ID == null)
+					{
+					//	DriveFolder driveFolder = Drive.DriveApi.getFolder(getGoogleApiClient(), driveId);
+
+						GOOGLE_DRIVE_FOLDER_ID = Drive.DriveApi.getAppFolder(getGoogleApiClient()).getDriveId();
+					}
+					*/
+
+					//showMessage("File created with ID: " + driveId);
+				}
+				//finish();
+				break;
+
+			default:
+				super.onActivityResult(requestCode, resultCode, data);
+				break;
+		}
+
 	}
 
 
@@ -862,6 +872,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	     }
 	 };
 */
+
+
 
 	/////////////
 	// copy from google drive

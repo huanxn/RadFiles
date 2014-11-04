@@ -305,7 +305,10 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			//cardview-highlight.setBackgroundColor(activity.getResources().getColor(R.color.default_colorAccent));
 		}
 
-		activity.mActionMode.setTitle(((CaseCardListActivity) activity).getMultiselectCount() + " selected");
+		if( ((CaseCardListActivity) activity).getMultiselectCount() <= 0 )
+			activity.mActionMode.finish();
+		else
+			activity.mActionMode.setTitle(((CaseCardListActivity) activity).getMultiselectCount() + " selected");
 
 		notifyDataSetChanged();
 	}

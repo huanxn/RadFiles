@@ -689,6 +689,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			key_words_spinner.setItems(key_words_cursor, CasesProvider.COL_VALUE);
 
 			// Fetch and display data
+			// Fetch and display data
 			if (selected_row_cursor != null)
 			{
 				selected_row_cursor.moveToFirst();

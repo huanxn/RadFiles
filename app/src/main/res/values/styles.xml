@@ -1,6 +1,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Widget.ActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    <style name="Widget.ActionBar" parent="@style/Widget.AppCompat.Light.ActionBar">
     </style>
 
     <style name="Widget.ActionBar.Transparent">

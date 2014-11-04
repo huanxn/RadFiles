@@ -853,8 +853,8 @@ public class UtilClass extends Activity
 			if(selectedCaseList == null)
 			{
 				// get all cases
-				//caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
-				return null;
+				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+				//return null;
 			}
 			else
 			{
@@ -949,7 +949,7 @@ public class UtilClass extends Activity
 			imagesOut.close();
 
 			// zip image and csv files
-			String zip_filename = CSV_dir.getPath() + "/" + filename + ".zip";
+			String zip_filename = CSV_dir.getPath() + "/" + filename + CloudStorageActivity.RCS_EXTENSION;
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesCSV.getPath());
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, imagesCSV.getPath());
 

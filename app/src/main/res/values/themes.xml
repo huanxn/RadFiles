@@ -4,8 +4,6 @@
     <style name="MaterialTheme.Light" parent="MaterialTheme.Light.Base"/>
     <style name="MaterialTheme.Light.Base" parent="Theme.AppCompat.Light.DarkActionBar">
 
-        <item name="android:actionBarStyle">@style/Widget.ActionBar</item>
-
         <!-- customize the color palette -->
         <item name="colorPrimary">@color/default_colorPrimary</item>
         <item name="colorPrimaryDark">@color/default_colorPrimaryDark</item>
