@@ -43,10 +43,13 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 	static final int REQUEST_EDIT_CASE = 1;
 
+	private Intent starterIntent; // to recreate Activity if theme/style/fadingactionbar changes due to add/removal of images/header
+	boolean hasImage;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		boolean hasImage = false;
+		starterIntent = getIntent();
 
 		key_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
 		//hasImage = getIntent().getBooleanExtra(ARG_HAS_IMAGE, false);
@@ -55,23 +58,19 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
 
 		if (imageCursor.getCount() > 0)
-			hasImage = true;
-
-		if(!hasImage)
 		{
-			// set back to normal theme
-			//setTheme(R.style.AppTheme);
-
-			// Material theme
-			setTheme(R.style.MaterialTheme_Light);
-			super.onCreate(savedInstanceState);
+			hasImage = true;
+			// FadingActionBar
+			// translucent and overlying action bar theme set as default for this CaseDetailActivity in manifest XML
+			super.onCreate_for_FAB(savedInstanceState);
 		}
 		else
 		{
-			// translucent and overlying action bar theme set in manifest XML
+			hasImage = false;
 
-			// for FadingActionBar, add extra top margin to navigation drawer to compensate for transparent overlying action bar
-			super.onCreate_for_FAB(savedInstanceState);
+			// Set back to normal theme
+			setTheme(R.style.MaterialTheme_Light);
+			super.onCreate(savedInstanceState);
 		}
 
 		//super.onCreate(savedInstanceState);
@@ -237,7 +236,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				break;
 
 			default:
-
 				break;
 		}
 
@@ -257,6 +255,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		 * represents.
 		 */
 		private long selected_key_id;
+		private Activity activity;
 
 		private FadingActionBarHelper mFadingHelper;
 		private View headerView; //fadingactionbar
@@ -283,6 +282,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		@Override
 		public void onAttach(Activity activity) {
 			super.onAttach(activity);
+
+			this.activity = activity;
 
 			mArguments = getArguments();
 			hasImage = mArguments.getBoolean(ARG_HAS_IMAGE);
@@ -348,12 +349,26 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			populateFields();
 		}
 
+		/**
+		 * //todo use the at the beginning of populate fields?
+		 * @param thumbnail
+		 */
 		public void populateHeader(int thumbnail)
 		{
 			View rootView = getView();
 
 			String [] image_args = {String.valueOf(key_id)};
 			Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+			if ((hasImage == false && imageCursor.getCount() > 0) || hasImage == true && imageCursor.getCount() == 0)
+			{
+				// reload activity theme
+				activity.setResult(CaseCardListActivity.RESULT_EDITED);
+				activity.startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+
+				finish();
+				return;
+			}
 
 			if (imageCursor.getCount() > 0 && imageCursor.moveToFirst())
 			{
@@ -385,6 +400,17 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			else    //TODO show error message (no selected key id from listview)
 			{
 				selected_key_id = -1;
+				return;
+			}
+
+			String [] image_args = {String.valueOf(selected_key_id)};
+			Cursor imageCursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+			if ((hasImage == false && imageCursor.getCount() > 0) || hasImage == true && imageCursor.getCount() == 0)
+			{
+				activity.startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+				activity.setResult(CaseCardListActivity.RESULT_EDITED);
+				finish();
 				return;
 			}
 
@@ -546,10 +572,10 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				// KEY IMAGES
 				// get all of the images linked to this case _id
-				String [] image_args = {String.valueOf(selected_key_id)};
-				Cursor imageCursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+				//String [] image_args = {String.valueOf(selected_key_id)};
+				//Cursor imageCursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 
-				if (imageCursor.getCount() > 0 && imageCursor.moveToFirst())  //hasImage to keep crash if FadingActionBar hasn't been done yet
+				if (imageCursor != null && imageCursor.getCount() > 0 && imageCursor.moveToFirst())  //hasImage to keep crash if FadingActionBar hasn't been done yet
 				{
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.key_image).setVisibility(View.VISIBLE);
@@ -655,7 +681,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
 			getActivity().getContentResolver().update(row_uri, values, null, null);
 		}
-
 
 	}// end fragment
 }

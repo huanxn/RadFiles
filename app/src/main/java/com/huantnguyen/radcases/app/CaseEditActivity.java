@@ -199,7 +199,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
                 return true;
 
 			case R.id.menu_camera:
-				choosePicture(item.getActionView());
+				choosePictureAlertDialog(item.getActionView());
 				return true;
 
 			case R.id.menu_delete:
@@ -420,7 +420,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	 * opens alert dialog to choose from file/gallery or take a photo with camera intent
 	 * @param view
 	 */
-	public void choosePicture(View view)
+	public void choosePictureAlertDialog(View view)
 	{
 
 		// Alert dialog to choose either to take a new photo with camera, or select existing picture from file storage

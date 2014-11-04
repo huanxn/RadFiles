@@ -122,59 +122,37 @@
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
             </intent-filter>
 
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="file" />
-                <data android:scheme="content" />
-                <data android:mimeType="application/x-7z-compressed" />
-                <data android:pathPattern=".*\\.rdb" />
-                <data android:host="*" />
+                <data android:mimeType="application/octet-stream" android:host="*" android:pathPattern=".*\\.rdb" />
             </intent-filter>
+
+            <!-- google drive -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="file"
-                 android:pathPattern=".*\\.rcs"
-                 android:host="*" />
+                <data android:mimeType="application/x-7z-compressed" android:host="*" android:pathPattern=".*\\.rdb" />
             </intent-filter>
+
+
+            <!-- gmail attachment -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="content"
-                      android:pathPattern=".*\\.rcs"
-                      android:host="*" />
+                <data android:mimeType="application/octet-stream" android:host="*" android:pathPattern=".*\\.rcs" />
             </intent-filter>
+
+            <!-- google drive -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http"
-                      android:pathPattern=".*\\.rcs"
-                      android:host="*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https"
-                      android:pathPattern=".*\\.rcs"
-                      android:host="*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="application/zip" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="text/plain" />
+                <data android:mimeType="application/zip" android:host="*" android:pathPattern=".*\\.rcs" />
             </intent-filter>
 
 
