@@ -6,7 +6,9 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -15,8 +17,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -657,7 +661,15 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			}
 
 			case_cursor.close();
-		}
+
+			/*
+			//UtilClass.showMessage(activity, String.valueOf(UtilClass.getDisplayHeight(getActivity())));
+			UtilClass.showMessage(activity, String.valueOf(findViewById(R.id.detail_container).getHeight()));
+
+			findViewById(R.id.detail_container).setMinimumHeight((int)UtilClass.getDisplayHeight(getActivity()));
+			*/
+
+		}// end populateFields
 
 		public boolean isStarred()
 		{
@@ -681,6 +693,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
 			getActivity().getContentResolver().update(row_uri, values, null, null);
 		}
+
 
 	}// end fragment
 }

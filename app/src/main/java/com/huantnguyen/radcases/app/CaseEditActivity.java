@@ -28,7 +28,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ScrollView;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -108,7 +107,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			// AddData to database
 			// no key_id passed from the parent activity
 
-			Toast.makeText(this, "Add data", Toast.LENGTH_SHORT).show();
+			//Toast.makeText(this, "Add data", Toast.LENGTH_SHORT).show();
 			// possibly implement AddNewActivity code
 			// default date shown in calendar for new case is the current day (today)
 		}
@@ -203,7 +202,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				return true;
 
 			case R.id.menu_delete:
-				Toast.makeText(this, "debug: delete " + key_id, Toast.LENGTH_SHORT).show();
+				//Toast.makeText(this, "debug: delete " + key_id, Toast.LENGTH_SHORT).show();
 
 				// opens alert dialog to confirm delete
 				// delete from CASES, IMAGES, and image files

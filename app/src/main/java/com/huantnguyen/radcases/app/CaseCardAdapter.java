@@ -258,7 +258,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		else
 		{
 			// contextual action bar is open
-			toggleSelected(mCase, holder.container);
+			toggleSelected(mCase);
 
 		}
 	}
@@ -281,12 +281,12 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			//activity.mActionMode.finish();
 		}
 
-		toggleSelected(mCase, holder.container);
+		toggleSelected(mCase);
 
 		return true;
 	}
 
-	private void toggleSelected(Case mCase, View highlight)
+	private void toggleSelected(Case mCase)
 	{
 	//	int backgroundColor = 0xffb3e5fc;
 
