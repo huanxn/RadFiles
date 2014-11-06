@@ -35,6 +35,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 
 	final static protected int POS_CASE_LIST = 0;
 	final static protected int POS_CLOUD_STORAGE = 3;
+	final static protected int POS_MANAGE_LISTS = 4;
 
 	private int drawerPosition = -1;
 
@@ -107,6 +108,13 @@ public class NavigationDrawerActivity extends ActionBarActivity
 			case POS_CLOUD_STORAGE:
 			{
 				Intent intent = new Intent(this, CloudStorageActivity.class);
+				startActivity(intent);
+				break;
+			}
+			// Manage Lists
+			case POS_MANAGE_LISTS:
+			{
+				Intent intent = new Intent(this, ManageListsActivity.class);
 				startActivity(intent);
 				break;
 			}

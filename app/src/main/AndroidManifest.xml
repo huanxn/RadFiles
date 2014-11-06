@@ -7,14 +7,14 @@
         android:required="false" />
 
     <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="20"/>
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="20" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <uses-library
         android:name="com.huantnguyen.radcases.app/eu.janmuller.android.simplecropimage"
         android:required="true" />
-
     <uses-library
         android:name="com.huantnguyen.radcases.app/com.android.camera"
         android:required="true" />
@@ -44,22 +44,20 @@
 
         <activity
             android:name="com.huantnguyen.radcases.app.CaseCardListActivity"
-            android:label="@string/app_name">
-
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
-
             <intent-filter>
-                <action android:name="com.google.android.gms.actions.SEARCH_ACTION"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-            </intent-filter>
+                <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
 
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
 
         <!-- Database -->
@@ -78,7 +76,7 @@
                 android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
         </activity>
         <activity
-            android:name=".CaseAddActivity"
+            android:name="com.huantnguyen.radcases.app.CaseAddActivity"
             android:label="@string/title_activity_add_case"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity" >
             <meta-data
@@ -86,7 +84,7 @@
                 android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
         </activity>
         <activity
-            android:name=".CaseEditActivity"
+            android:name="com.huantnguyen.radcases.app.CaseEditActivity"
             android:label="@string/title_activity_edit_case"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity" >
             <meta-data
@@ -94,7 +92,7 @@
                 android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />
         </activity>
         <activity
-            android:name=".ImageGalleryActivity"
+            android:name="com.huantnguyen.radcases.app.ImageGalleryActivity"
             android:label="Key Images"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity"
             android:theme="@style/MaterialTheme.Light.TranslucentActionBar" >
@@ -110,9 +108,8 @@
 
         <!-- libs simple-crop-image-lib: crop image from camera picture -->
         <activity android:name="eu.janmuller.android.simplecropimage.CropImage" />
-
         <activity
-            android:name=".CloudStorageActivity"
+            android:name="com.huantnguyen.radcases.app.CloudStorageActivity"
             android:label="@string/title_activity_export" >
             <meta-data
                 android:name="com.google.android.apps.drive.APP_ID"
@@ -121,48 +118,69 @@
             <intent-filter>
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
             </intent-filter>
-
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="application/octet-stream" android:host="*" android:pathPattern=".*\\.rdb" />
+
+                <data
+                    android:host="*"
+                    android:mimeType="application/octet-stream"
+                    android:pathPattern=".*\\.rdb" />
             </intent-filter>
 
             <!-- google drive -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="application/x-7z-compressed" android:host="*" android:pathPattern=".*\\.rdb" />
-            </intent-filter>
 
+                <data
+                    android:host="*"
+                    android:mimeType="application/x-7z-compressed"
+                    android:pathPattern=".*\\.rdb" />
+            </intent-filter>
 
             <!-- gmail attachment -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="application/octet-stream" android:host="*" android:pathPattern=".*\\.rcs" />
+
+                <data
+                    android:host="*"
+                    android:mimeType="application/octet-stream"
+                    android:pathPattern=".*\\.rcs" />
             </intent-filter>
 
             <!-- google drive -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:mimeType="application/zip" android:host="*" android:pathPattern=".*\\.rcs" />
+
+                <data
+                    android:host="*"
+                    android:mimeType="application/zip"
+                    android:pathPattern=".*\\.rcs" />
             </intent-filter>
-
-
         </activity>
-
         <activity
             android:name="com.huantnguyen.radcases.app.NavigationDrawerActivity"
             android:label="@string/title_activity_navigation_drawer" >
         </activity>
-
+        <activity
+            android:name="com.huantnguyen.radcases.app.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
+        <activity
+            android:name="com.huantnguyen.radcases.app.ManageListsActivity"
+            android:label="@string/title_activity_manage_lists" >
+        </activity>
     </application>
 
 </manifest>

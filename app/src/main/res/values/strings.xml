@@ -36,7 +36,6 @@
     <string name="Ultrasound">Ultrasound</string>
     <string name="Nuclear">Nuclear</string>
     <string name="MSK">MSK</string>
-
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_google_drive_create_file">GoogleDriveCreateFile</string>
 
@@ -52,9 +51,6 @@
 
     <!-- Navigation Drawer Strings -->
     <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
-    <string name="title_section1">Section 1</string>
-    <string name="title_section2">Section 2</string>
-    <string name="title_section3">Section 3</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
@@ -69,7 +65,6 @@
         <item>Help</item>
     </string-array>
 
-
     <!-- Search category headers -->
     <string-array name="search_categories_array">
         <item>Patient ID</item>
@@ -79,6 +74,21 @@
         <item>Study Type</item>
         <item>Comments</item>
     </string-array>
+
+    <!-- Manage Lists: tab titles -->
+    <string-array name="list_tab_titles_array">
+        <item>Key Words</item>
+        <item>Study Types</item>
+        <item>Sections</item>
+    </string-array>
+
+    <string name="tab_title1">Key words</string>
+    <string name="tab_title2">Study Types</string>
+    <string name="tab_title3">Sections</string>
+
+    <string name="title_activity_manage_lists">My Lists</string>
+
+
 
 
 </resources>

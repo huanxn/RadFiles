@@ -43,7 +43,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 
 	private int custom_position;                        // position in list, which is at the end
 	private String custom_alert_title;                  // alert dialog title
-	static final private String CUSTOM_TEXT = "CUSTOM"; // test in spinner list
+	static final private String CUSTOM_TEXT = "Custom..."; // test in spinner list
 	private int previous_position;                      // in case canceled custom input, revert back to previous
 
     ArrayAdapter<String> _proxyAdapter;
@@ -198,7 +198,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 	{
 		List<String> stringList = new ArrayList<String>();
 
-		if(cursor.moveToFirst())
+		if(cursor != null && cursor.moveToFirst())
 		{
 			do
 			{
