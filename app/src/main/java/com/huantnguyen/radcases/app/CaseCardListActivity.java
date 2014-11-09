@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -70,13 +71,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	private SearchView searchView;
 	private MenuItem searchItem;
 
-	private List<Long> multiselectList;
+	//private List<Long> multiselectList;
 
 	public static CaseCardAdapter mCardAdapter;
-
-	// contextual action bar mode
-	//public ActionMode.Callback mActionModeCallback;
-	//public static ActionMode mActionMode = null;
 
 	private PlaceholderFragment fragment;
 
@@ -143,11 +140,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			// set the saved filter/spinner state
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
 		}
-
-
-		// for contextual menu
-		setActionModeCallback();
-		multiselectList = new ArrayList<Long>();
 
 		/////////
 		/*
@@ -364,95 +356,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 	}
 
-	/**
-	 * Contextual Menu
-	 */
-	private void setActionModeCallback()
-	{
-		mActionModeCallback = new ActionMode.Callback()
-		{
 
-			// Called when the action mode is created; startActionMode() was called
-			@Override
-			public boolean onCreateActionMode(ActionMode mode, Menu menu)
-			{
-				// Inflate a menu resource providing context menu items
-				MenuInflater inflater = mode.getMenuInflater();
-				inflater.inflate(R.menu.case_list_contextual, menu);
-				return true;
-			}
-
-			// Called each time the action mode is shown. Always called after onCreateActionMode, but
-			// may be called multiple times if the mode is invalidated.
-			@Override
-			public boolean onPrepareActionMode(ActionMode mode, Menu menu)
-			{
-				return false; // Return false if nothing is done
-			}
-
-			// Called when the user selects a contextual menu item
-			@Override
-			public boolean onActionItemClicked(ActionMode mode, MenuItem item)
-			{
-				switch (item.getItemId())
-				{
-					case R.id.menu_share:
-						UtilClass.showMessage(getApplicationContext(), "TEST SHARE");
-						File shareFile = null;
-
-						if(!multiselectList.isEmpty())
-						{
-							shareFile = UtilClass.exportCasesCSV(activity, "TEST_share_file", multiselectList);
-							Uri uriShareFile = Uri.fromFile(shareFile);
-
-							Intent shareIntent = new Intent(Intent.ACTION_SEND);
-							shareIntent.setType("message/rfc822");
-							shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
-							shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
-							shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadCases Android app!");
-							shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
-
-
-							//shareIntent.setData(Uri.parse("mailto:")); // or just "mailto:" for blank
-							//shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
-							try {
-								startActivity(Intent.createChooser(shareIntent, "Send mail..."));
-							} catch (android.content.ActivityNotFoundException ex) {
-								Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-							}
-						}
-
-						mode.finish(); // Action picked, so close the CAB
-						return true;
-
-					case R.id.menu_delete:
-						UtilClass.showMessage(getApplicationContext(), "TEST DELETE");
-						mode.finish(); // Action picked, so close the CAB
-						return true;
-
-					default:
-						return false;
-				}
-			}
-
-			// Called when the user exits the action mode
-			@Override
-			public void onDestroyActionMode(ActionMode mode)
-			{
-				mActionMode = null;
-
-				// clear list of key_id
-				multiselectList.clear();
-
-				// clear list of selected cards to highlight
-				if(mCardAdapter != null)
-				{
-					mCardAdapter.clearSelected();
-				}
-			}
-		};
-	}
-
+/*
 	public void addToMultiselectList(long key_id)
 	{
 		if(!multiselectList.contains(key_id))
@@ -473,7 +378,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	{
 		return multiselectList.size();
 	}
-
+*/
 	/**
 	 * Placeholder fragment
 	 */
@@ -483,9 +388,16 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		private RecyclerView mRecyclerView;
 		private CaseCardAdapter mCardAdapter;
 
+		private static View.OnClickListener cardOnClickListener;
+		private static View.OnLongClickListener cardOnLongClickListener;
+
+		/**
+		 * Contextual action mode
+		 */
+		public ActionMode.Callback mActionModeCallback = null;
 
 		View rootView;
-		Activity mActivity;
+		CaseCardListActivity mActivity;
 
 		public PlaceholderFragment()
 		{
@@ -506,6 +418,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			// Setup CaseCardAdapter
 			mCardAdapter = ((CaseCardListActivity)mActivity).mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
+
+			// contextual menu
+			setActionModeCallback();
+			mCardAdapter.setActionModeCallback(mActionModeCallback);
+
+			// click listeners
+			setCardClickListeners();
+			mCardAdapter.setOnClickListeners(cardOnClickListener, cardOnLongClickListener);
 
 			mRecyclerView.setAdapter(mCardAdapter);
 
@@ -533,10 +453,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		@Override
 		public void onAttach(Activity activity) {
 			super.onAttach(activity);
-			mActivity = activity;
+			mActivity = (CaseCardListActivity)activity;
 		}
-
-
 
 
 		/**
@@ -770,5 +688,163 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			case_cursor.close();
 
 		}
-	}
+
+		/**
+		 * Contextual Menu
+		 */
+		private void setActionModeCallback()
+		{
+			mActionModeCallback = new ActionMode.Callback()
+			{
+				// Called when the action mode is created; startActionMode() was called
+				@Override
+				public boolean onCreateActionMode(ActionMode mode, Menu menu)
+				{
+					// Inflate a menu resource providing context menu items
+					MenuInflater inflater = mode.getMenuInflater();
+					inflater.inflate(R.menu.case_list_contextual, menu);
+					return true;
+				}
+
+				// Called each time the action mode is shown. Always called after onCreateActionMode, but
+				// may be called multiple times if the mode is invalidated.
+				@Override
+				public boolean onPrepareActionMode(ActionMode mode, Menu menu)
+				{
+					return false; // Return false if nothing is done
+				}
+
+				// Called when the user selects a contextual menu item
+				@Override
+				public boolean onActionItemClicked(ActionMode mode, MenuItem item)
+				{
+					switch (item.getItemId())
+					{
+						case R.id.menu_share:
+							File shareFile = null;
+
+							if(!mCardAdapter.getMultiselectList().isEmpty())
+							{
+								shareFile = UtilClass.exportCasesCSV(activity, "TEST_share_file", mCardAdapter.getMultiselectList());
+								Uri uriShareFile = Uri.fromFile(shareFile);
+
+								Intent shareIntent = new Intent(Intent.ACTION_SEND);
+								shareIntent.setType("message/rfc822");
+								shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
+								shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
+								shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadCases Android app!");
+								shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
+
+
+								//shareIntent.setData(Uri.parse("mailto:")); // or just "mailto:" for blank
+								//shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
+								try
+								{
+									if(mCardAdapter.getMultiselectList().size() == 1)
+										startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " case..."));
+									else
+										startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " cases..."));
+								}
+								catch (android.content.ActivityNotFoundException ex)
+								{
+									Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+								}
+							}
+
+							mode.finish(); // Action picked, so close the CAB
+							return true;
+
+						case R.id.menu_delete:
+							UtilClass.showMessage(getActivity(), "TEST DELETE");
+							mode.finish(); // Action picked, so close the CAB
+							return true;
+
+						default:
+							return false;
+					}
+				}
+
+				// Called when the user exits the action mode
+				@Override
+				public void onDestroyActionMode(ActionMode mode)
+				{
+					mCardAdapter.setActionMode(null);
+
+					// clear list of key_id
+					//mCardAdapter.getMultiselectList().clear();
+
+					// clear list of selected cards to highlight
+					if(mCardAdapter != null)
+					{
+						mCardAdapter.clearSelected();
+					}
+				}
+			};
+		}
+
+		/**
+		 * Click listeners
+		 */
+		private void setCardClickListeners()
+		{
+			final CaseCardAdapter mAdapter = mCardAdapter;
+			cardOnClickListener = new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View view)
+				{
+					CaseCardAdapter.ViewHolder holder = (CaseCardAdapter.ViewHolder) view.getTag();
+
+					Case mCase = mAdapter.caseList.get(holder.getPosition());
+
+					if (mAdapter.mActionMode == null)
+					{
+						// open detail view for clicked case
+						Intent detailIntent = new Intent(view.getContext(), CaseDetailActivity.class);
+						detailIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, holder.key_id);
+
+						// activity options
+						//ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, Pair.create((View) holder.card_text1, "DetailCaseInfo1" ));
+
+						detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, false);
+
+						//activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS, options.toBundle());
+						activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+					}
+					else
+					{
+						// contextual action bar is open
+						mAdapter.toggleSelected(mCase);
+
+					}
+				}
+			};
+
+			cardOnLongClickListener = new View.OnLongClickListener()
+			{
+				@Override
+				public boolean onLongClick(View view)
+				{
+					CaseCardAdapter.ViewHolder holder = (CaseCardAdapter.ViewHolder) view.getTag();
+					Case mCase = mAdapter.caseList.get(holder.getPosition());
+
+					if(mAdapter.mActionMode == null)
+					{
+						// open contextual menu
+						mAdapter.mActionMode = ((ActionBarActivity)activity).startSupportActionMode(mActionModeCallback);
+					}
+					else
+					{
+						// close contextual menu
+						//activity.mActionMode.finish();
+					}
+
+					mAdapter.toggleSelected(mCase);
+
+					return true;
+				}
+			};
+		}
+
+	} // end fragment
 }

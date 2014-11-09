@@ -1,13 +1,14 @@
 package com.huantnguyen.radcases.app;
 
+import android.content.Context;
 import android.net.Uri;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -103,6 +104,48 @@ public class UtilsFile
 		}
 		in.close();
 		out.close();
+	}
+
+	static public File makeLocalFile(Context context, File downloadsDir, Uri uri) throws IOException
+	{
+		// create new local file
+		File outFile = null;
+		try
+		{
+			outFile = File.createTempFile("import", ".rcs", downloadsDir);
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			UtilClass.showMessage(context, "Unable to create temporary file.");
+		}
+
+		FileOutputStream outputStream = null;
+		FileInputStream inputStream = null;
+		try
+		{
+			// Google Drive file
+			inputStream = (FileInputStream)context.getContentResolver().openInputStream(uri);
+
+			// new local file
+			outputStream = new FileOutputStream(outFile);
+
+			// copy backup file contents to local file
+			UtilsFile.copyFile(outputStream, inputStream);
+		}
+		catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+			UtilClass.showMessage(context, "local file not found");
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			UtilClass.showMessage(context, "Copy backup to Google Drive: IO exception");
+			UtilClass.showMessage(context, "cannot open input stream from selected uri");
+		}
+
+		return outFile;
 	}
 
 	/**

@@ -108,16 +108,19 @@
 
         <!-- libs simple-crop-image-lib: crop image from camera picture -->
         <activity android:name="eu.janmuller.android.simplecropimage.CropImage" />
+
         <activity
-            android:name="com.huantnguyen.radcases.app.CloudStorageActivity"
-            android:label="@string/title_activity_export" >
+            android:name="com.huantnguyen.radcases.app.CaseImport"
+            android:label="Rad Import"
+            android:parentActivityName="com.huantnguyen.radcases.app.CloudStorageActivity" >
             <meta-data
-                android:name="com.google.android.apps.drive.APP_ID"
-                android:value="id=895901757508" />
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.huantnguyen.radcases.app.CaseStorageActivity" />
 
             <intent-filter>
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -168,19 +171,33 @@
                     android:mimeType="application/zip"
                     android:pathPattern=".*\\.rcs" />
             </intent-filter>
+
         </activity>
+
+        <activity
+            android:name="com.huantnguyen.radcases.app.CloudStorageActivity"
+            android:label="@string/title_activity_cloud_storage" >
+            <meta-data
+                android:name="com.google.android.apps.drive.APP_ID"
+                android:value="id=895901757508" />
+
+        </activity>
+
         <activity
             android:name="com.huantnguyen.radcases.app.NavigationDrawerActivity"
             android:label="@string/title_activity_navigation_drawer" >
         </activity>
+
         <activity
             android:name="com.huantnguyen.radcases.app.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+
         <activity
             android:name="com.huantnguyen.radcases.app.ManageListsActivity"
             android:label="@string/title_activity_manage_lists" >
         </activity>
+
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package com.huantnguyen.radcases.app;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ContentValues;
@@ -11,10 +12,14 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -31,6 +36,8 @@ import com.google.android.gms.drive.OpenFileActivityBuilder;
 
 import com.google.android.gms.drive.DriveApi.DriveIdResult;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,15 +49,22 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
+//import eu.janmuller.android.simplecropimage.ImageViewTouchBase;
 
 
 public class CloudStorageActivity extends GoogleDriveBaseActivity
 {
 	String TAG = "CloudStorageActivity";
 
-	private CloudStorageFragment fragment;
+	private Fragment fragment;
 
+	final static String ARG_IMPORT_STREAM = "com.huan.t.nguyen.radcases.ARG_IMPORT_STREAM";
 
 	final static int REQUEST_SELECT_BACKUP_FILE = 0;
 	final static int REQUEST_SELECT_CSV_FILE = 1;
@@ -109,7 +123,34 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		    // Create the detail fragment and add it to the activity
 		    // using a fragment transaction.
 
-		    fragment = new CloudStorageFragment();
+		    // Get intent, action and MIME type
+		    Intent intent = getIntent();
+		    String action = intent.getAction();
+		    String type = intent.getType();
+/*
+		    if (Intent.ACTION_VIEW.equals(action) && type != null)
+		    {
+			    fragment = new ImportFragment();
+			    getSupportActionBar().setTitle("Rad Import");
+
+			    if (type.equals("application/zip") || type.equals("**") || type.equals("application/octet-stream") )
+			    {
+				    Uri import_uri = intent.getData();
+
+				    Bundle arguments = new Bundle();
+				    //arguments.putParcelable(ARG_IMPORT_STREAM, intent.getParcelableExtra(Intent.EXTRA_STREAM)); //(ARG_IMPORT_URI, import_uri, null););
+				    arguments.putString(ARG_IMPORT_STREAM, import_uri.toString()); //(ARG_IMPORT_URI, import_uri, null););
+				    //arguments.putBoolean(ARG_HAS_IMAGE, hasImage);
+				    fragment.setArguments(arguments);
+			    }
+		    }
+		    else
+*/		    {
+			    // Handle other intents, such as being started from the home screen
+			    fragment = new CloudStorageFragment();
+			    getSupportActionBar().setTitle("Rad Backup");
+		    }
+
 
 		    getFragmentManager().beginTransaction()
 				    .add(R.id.container, fragment)
@@ -296,7 +337,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					imageCursor.close();
 				}
 				*/
-				showMessage("does nothing right now");
+				UtilClass.showMessage(this, "does nothing right now");
 
 
 				break;
@@ -310,6 +351,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	}
 
 
+	/*
 	public void importCasesCSV(File inFile)
 	{
 		BufferedReader br = null;
@@ -449,6 +491,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		tempCasesCSV.delete();
 		tempImagesCSV.delete();
 	}
+	*/
 
 
 
@@ -630,7 +673,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					catch (IOException e)
 					{
 						e.printStackTrace();
-						showMessage("Unable to create temporary file.");
+						UtilClass.showMessage(this, "Unable to create temporary file.");
 					}
 
 					FileOutputStream outputStream = null;
@@ -649,13 +692,13 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					catch (FileNotFoundException e)
 					{
 						e.printStackTrace();
-						showMessage("local file not found");
+						UtilClass.showMessage(this, "local file not found");
 					}
 					catch (IOException e)
 					{
 						e.printStackTrace();
-						showMessage("Copy backup to Google Drive: IO exception");
-						showMessage("cannot open input stream from selected uri");
+						UtilClass.showMessage(this, "Copy backup to Google Drive: IO exception");
+						UtilClass.showMessage(this, "cannot open input stream from selected uri");
 					}
 
 					//	Log.d(TAG, "File Path: " + path);
@@ -700,7 +743,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					catch (IOException e)
 					{
 						e.printStackTrace();
-						showMessage("Unable to create temporary file.");
+						UtilClass.showMessage(this, "Unable to create temporary file.");
 					}
 
 					FileOutputStream outputStream = null;
@@ -719,17 +762,17 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					catch (FileNotFoundException e)
 					{
 						e.printStackTrace();
-						showMessage("local CSV file not found");
+						UtilClass.showMessage(this, "local CSV file not found");
 					}
 					catch (IOException e)
 					{
 						e.printStackTrace();
-						showMessage("Copy CSV to Google Drive: IO exception");
-						showMessage("cannot open input stream from selected uri");
+						UtilClass.showMessage(this, "Copy CSV to Google Drive: IO exception");
+						UtilClass.showMessage(this, "cannot open input stream from selected uri");
 					}
 
 					// process file: unzip images, add csv info to database
-					importCasesCSV(tempCSV_File);
+					UtilClass.importCasesCSV(this, tempCSV_File);
 
 					// delete the temporary file
 					tempCSV_File.delete();
@@ -749,7 +792,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					}
 					*/
 
-					//showMessage("File created with ID: " + driveId);
 				}
 				//finish();
 				break;
@@ -769,7 +811,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				public void onResult(DriveApi.DriveContentsResult result)
 				{
 					if (!result.getStatus().isSuccess()) {
-						showMessage("Error while trying to create new file contents");
+						UtilClass.showMessage(getApplicationContext(), "Error while trying to create new file contents");
 						return;
 					}
 
@@ -796,12 +838,12 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 							catch (FileNotFoundException e)
 							{
 								e.printStackTrace();
-								showMessage("local file not found");
+								UtilClass.showMessage(getApplicationContext(), "local file not found");
 							}
 							catch (IOException e)
 							{
 								e.printStackTrace();
-								showMessage("Copy file to Google Drive: IO exception");
+								UtilClass.showMessage(getApplicationContext(), "Copy file to Google Drive: IO exception");
 							}
 
 
@@ -859,22 +901,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				}
 			};
 
-	/*
-	final private ResultCallback<DriveFolder.DriveFileResult> fileCallback = new ResultCallback<DriveFolder.DriveFileResult>()
-	 {
-	     @Override
-	     public void onResult(DriveFolder.DriveFileResult result) {
-	         if (!result.getStatus().isSuccess()) {
-	             showMessage("Error while trying to create the file");
-	             return;
-	         }
-	         showMessage("Created a file with content: " + result.getDriveFile().getDriveId());
-	     }
-	 };
-*/
-
-
-
 	/////////////
 	// copy from google drive
 
@@ -925,10 +951,10 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
 			if (result == null) {
-				showMessage("Error while reading from the file");
+				UtilClass.showMessage(getApplicationContext(), "Error while reading from the file");
 				return;
 			}
-			showMessage("File contents: " + result);
+			UtilClass.showMessage(getApplicationContext(), "File contents: " + result);
 		}
 	}
 
@@ -939,7 +965,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		@Override
 		public void onResult(DriveIdResult result) {
 			if (!result.getStatus().isSuccess()) {
-				showMessage("Cannot find DriveId. Are you authorized to view this file?");
+				UtilClass.showMessage(getApplicationContext(), "Cannot find DriveId. Are you authorized to view this file?");
 				return;
 			}
 			DriveFile file = Drive.DriveApi.getFile(getGoogleApiClient(), result.getDriveId());
@@ -978,10 +1004,10 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		@Override
 		protected void onPostExecute(Boolean result) {
 			if (!result) {
-				showMessage("Error while editing contents");
+				UtilClass.showMessage(getApplicationContext(), "Error while editing contents");
 				return;
 			}
-			showMessage("Successfully edited contents");
+			UtilClass.showMessage(getApplicationContext(), "Successfully edited contents");
 		}
 	}
 ///////////////
@@ -1004,4 +1030,181 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			return rootView;
 		}
 	}
+
+	/*
+	public static class ImportFragment extends Fragment
+	{
+		Activity mActivity;
+
+		RecyclerView mRecyclerView;
+		CaseCardAdapter mCardAdapter;
+
+		public ImportFragment()
+		{
+		}
+
+		@Override
+		public void onAttach(Activity activity)
+		{
+			super.onAttach(activity);
+			this.mActivity = activity;
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+		{
+			View rootView = inflater.inflate(R.layout.fragment_import, container, false);
+
+			// Find RecyclerView
+			mRecyclerView = (RecyclerView)rootView.findViewById(R.id.cards_list);
+
+			// Setup RecyclerView
+			mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+			// Setup CaseCardAdapter
+			mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
+
+			mRecyclerView.setAdapter(mCardAdapter);
+
+			Bundle mArguments = getArguments();
+			Uri import_uri = Uri.parse(mArguments.getString(ARG_IMPORT_STREAM));
+
+			try
+			{
+				File importFile = UtilsFile.makeLocalFile(getActivity(), downloadsDir, import_uri);
+				mCardAdapter.loadCaseList(getImportedCases(importFile));
+				importFile.delete();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+
+			return rootView;
+		}
+
+		public List<Case> getImportedCases(File inFile)
+		{
+			if(inFile == null)
+			{
+				return null;
+			}
+
+			BufferedReader br = null;
+			String line;
+
+			List<Case> importCaseList = new ArrayList<Case>();
+
+
+			// unzip image files and csv files
+			try
+			{
+				// unzip files to android pictures directory
+				UtilsFile.unzip(inFile.getPath(),picturesDir.getPath());
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				Toast.makeText(getActivity(), "Unable to open zip file:", Toast.LENGTH_SHORT).show();
+				return null;
+			}
+
+			File tempCasesCSV = null;
+			File tempImagesCSV = null;
+			try
+			{
+				// open existing files that should have been unzipped
+				tempCasesCSV = new File(picturesDir, CASES_CSV_FILENAME);
+				tempImagesCSV = new File(picturesDir, IMAGES_CSV_FILENAME);
+
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				Toast.makeText(getActivity(), "Unable to copy CSV file", Toast.LENGTH_SHORT).show();
+				return null;
+			}
+
+
+			//////////////////parent ids will change in new database!!!!
+			// IMAGES TABLE
+			try
+			{
+				br = new BufferedReader(new FileReader(tempImagesCSV));
+
+
+				//br.readLine(); // no header
+
+				while ( (line=br.readLine()) != null)
+				{
+					String[] values = line.split(",");
+
+					// input all columns for this case, except row_id
+//					insertImageValues.clear();
+//					insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, values[1]);
+//					insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, values[2]);
+//					insertImageValues.put(CasesProvider.KEY_ORDER, values[3]);
+
+					// insert the set of case info into the DB cases table
+//					rowUri = getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+				}
+				br.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				Toast.makeText(this, "Unable to open Images CSV file", Toast.LENGTH_SHORT).show();
+				return;
+			}
+
+			// CASES TABLE
+			try
+			{
+				br = new BufferedReader(new FileReader(tempCasesCSV));
+
+				br.readLine(); // header
+
+				while ( (line=br.readLine()) != null)
+				{
+					line = line.substring(1, line.length()-1);  // trim the double-quotes off
+					String[] values = line.split("\",\"");
+					//insertCaseValues.clear();
+
+					Case mCase = new Case();
+
+					long old_case_id = Long.valueOf(values[0]);
+
+					mCase.patient_id = values[1];
+					mCase.diagnosis = values[2];
+					mCase.findings = values[4];
+
+					importCaseList.add(mCase);
+
+
+					// get parent key information
+	//				parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+
+					// change parent_key link in IMAGES table
+
+				}
+				br.close();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				Toast.makeText(getActivity(), "Unable to open Cases CSV file", Toast.LENGTH_SHORT).show();
+				return null;
+			}
+
+			Toast.makeText(getActivity(), "Imported cases", Toast.LENGTH_SHORT).show();
+
+			tempCasesCSV.delete();
+			tempImagesCSV.delete();
+
+			return importCaseList;
+		}
+
+	} //end fragment
+			*/
 }

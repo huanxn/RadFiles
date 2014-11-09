@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,8 +33,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.drive.Drive;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
@@ -969,6 +972,147 @@ public class UtilClass extends Activity
 		}
 
 		return returnFile;
+	}
+
+	/**
+	 *
+	 * @param activity
+	 * @param inFile
+	 */
+	public static void importCasesCSV(Activity activity, File inFile)
+	{
+		BufferedReader br = null;
+		String line;
+		Uri rowUri = null;
+		int parent_id;
+		int imageCount = 0;
+
+		// unzip image files and csv files
+		try
+		{
+			// unzip image files to android pictures directory
+			UtilsFile.unzip(inFile.getPath(),picturesDir.getPath());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Toast.makeText(activity, "Unable to open zip file:", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		File tempCasesCSV = null;
+		File tempImagesCSV = null;
+		try
+		{
+			// open existing files that should have been unzipped
+			tempCasesCSV = new File(picturesDir, CloudStorageActivity.CASES_CSV_FILENAME);
+			tempImagesCSV = new File(picturesDir, CloudStorageActivity.IMAGES_CSV_FILENAME);
+
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Toast.makeText(activity, "Unable to copy CSV file", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		//////////////////parent ids will change in new database!!!!
+		// IMAGES TABLE
+		try
+		{
+			br = new BufferedReader(new FileReader(tempImagesCSV));
+
+			ContentValues insertImageValues = new ContentValues();
+
+			//br.readLine(); // no header
+
+			while ( (line=br.readLine()) != null)
+			{
+				String[] values = line.split(",");
+
+				// input all columns for this case, except row_id
+				insertImageValues.clear();
+				insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, values[1]);
+				insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, values[2]);
+				insertImageValues.put(CasesProvider.KEY_ORDER, values[3]);
+
+				// insert the set of case info into the DB cases table
+				rowUri = activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+			}
+			br.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Toast.makeText(activity, "Unable to open Images CSV file", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		// CASES TABLE
+		try
+		{
+			br = new BufferedReader(new FileReader(tempCasesCSV));
+
+			ContentValues insertCaseValues = new ContentValues();
+
+			// If successfully opened file, clear old database: delete all rows from CASES tables in the database
+			// todo change this to just add to existing database
+			//getContentResolver().delete(CasesProvider.CASES_URI, null, null);
+
+			br.readLine(); // header
+
+			while ( (line=br.readLine()) != null)
+			{
+				line = line.substring(1, line.length()-1);  // trim the double-quotes off
+				String[] values = line.split("\",\"");
+				insertCaseValues.clear();
+
+				long old_case_id = Long.valueOf(values[0]);
+
+				// input all columns for this case, except row_id
+				for (int i = 1; i < CasesProvider.ALL_KEYS.length; i++)
+				{
+					if(i>=values.length) // the rest of fields are blank
+						break;
+
+					insertCaseValues.put(CasesProvider.ALL_KEYS[i], values[i]);
+
+					if(CasesProvider.ALL_KEYS[i].contentEquals(CasesProvider.KEY_IMAGE_COUNT))
+						imageCount = Integer.valueOf(values[i]);
+				}
+
+				// insert the set of case info into the DB cases table
+				rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
+
+
+				// get parent key information
+				parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+
+				// change parent_key link in IMAGES table
+				if(imageCount > 0)
+				{
+					ContentValues updateImageValues = new ContentValues();
+					updateImageValues.clear();
+
+					// replace with new parent_id obtained from newly inserted case row
+					updateImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, parent_id);
+					activity.getContentResolver().update(CasesProvider.IMAGES_URI, updateImageValues, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String [] {String.valueOf(old_case_id)});
+				}
+
+			}
+			br.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Toast.makeText(activity, "Unable to open Cases CSV file", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		Toast.makeText(activity, "Imported cases", Toast.LENGTH_SHORT).show();
+
+		tempCasesCSV.delete();
+		tempImagesCSV.delete();
 	}
 
 }

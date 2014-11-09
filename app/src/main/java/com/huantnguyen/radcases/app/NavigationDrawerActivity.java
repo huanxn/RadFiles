@@ -3,7 +3,14 @@ package com.huantnguyen.radcases.app;
 import android.app.Activity;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.content.ContentUris;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
@@ -11,6 +18,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 
 public class NavigationDrawerActivity extends ActionBarActivity
@@ -23,12 +35,6 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	private NavigationDrawerFragment mNavigationDrawerFragment;
 
 	/**
-	 * Contextual action mode
-	 */
-	public ActionMode mActionMode = null;
-	public ActionMode.Callback mActionModeCallback = null;
-
-	/**
 	 * Used to store the last screen title. For use in {@link #restoreActionBar()}.
 	 */
 	protected CharSequence mTitle;
@@ -36,6 +42,8 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	final static protected int POS_CASE_LIST = 0;
 	final static protected int POS_CLOUD_STORAGE = 3;
 	final static protected int POS_MANAGE_LISTS = 4;
+	final static protected int POS_SETTINGS = 5;
+	final static protected int POS_HELP = 6;
 
 	private int drawerPosition = -1;
 
@@ -116,6 +124,41 @@ public class NavigationDrawerActivity extends ActionBarActivity
 			{
 				Intent intent = new Intent(this, ManageListsActivity.class);
 				startActivity(intent);
+				break;
+			}
+			// Manage Lists
+			case POS_SETTINGS:
+			{
+				Intent intent = new Intent(this, SettingsActivity.class);
+				startActivity(intent);
+				break;
+			}
+			// Manage Lists
+			case POS_HELP:
+			{
+				// info alert
+
+				String buildDate = null;
+				try{
+					ApplicationInfo ai = getPackageManager().getApplicationInfo(getPackageName(), 0);
+					ZipFile zf = new ZipFile(ai.sourceDir);
+					ZipEntry ze = zf.getEntry("classes.dex");
+					long time = ze.getTime();
+					buildDate = SimpleDateFormat.getInstance().format(new java.util.Date(time));
+					zf.close();
+
+					AlertDialog.Builder builder = new AlertDialog.Builder(this);
+					builder.setMessage(buildDate).setTitle("Build Date");
+					AlertDialog alert = builder.create();
+					alert.show();
+
+				}catch(Exception e){
+					UtilClass.showMessage(getApplicationContext(), e.getMessage());
+				}
+
+				setDrawerPosition(POS_CASE_LIST);
+
+				////
 				break;
 			}
 			default:

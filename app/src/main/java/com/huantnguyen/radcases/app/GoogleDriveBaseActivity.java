@@ -251,13 +251,6 @@ public abstract class GoogleDriveBaseActivity extends NavigationDrawerActivity i
     }
 
     /**
-     * Shows a toast message.
-     */
-    public void showMessage(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
-    }
-
-    /**
      * Getter for the {@code GoogleApiClient}.
      */
     public GoogleApiClient getGoogleApiClient() {

@@ -3,14 +3,14 @@ package com.huantnguyen.radcases.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Color;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -20,16 +20,27 @@ import java.util.List;
  * Created by Huan on 10/21/2014.
  */
 
-public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHolder> implements StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder>, View.OnClickListener, View.OnLongClickListener
+public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHolder> implements StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder>
 {
 
-	private List<Case> caseList;
+	public List<Case> caseList;
 	private int card_layout_id;
-	private NavigationDrawerActivity activity;
+	private Activity activity;
 
 	// StickyRecyclerHeadersAdapter
 	//private List<Integer> header_id;    // if different than previous (ie in a different group), then it will display it's header
 	private List<String> header;
+
+	// contextual action mode set in activity
+	private ActionMode.Callback mActionModeCallback = null;
+	public ActionMode mActionMode = null;
+
+	// contextual multi-select list
+	private List<Long> multiselectList;
+
+	// click listeners set in activity
+	private View.OnClickListener mOnClickListener;
+	private View.OnLongClickListener mOnLongClickListener;
 
 	public CaseCardAdapter(Activity activity, Cursor caseCursor, int card_layout)
 	{
@@ -42,7 +53,9 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 
 		this.card_layout_id = card_layout;
-		this.activity = (NavigationDrawerActivity)activity;
+		this.activity = activity;
+
+		multiselectList = new ArrayList<Long>();
 
 		setHasStableIds(true);
 	}
@@ -108,6 +121,34 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		notifyDataSetChanged();
 	}
 
+	public void loadCaseList(List<Case> inputCases)
+	{
+		// loop through case cursor and put info into cards
+		if (inputCases != null && !inputCases.isEmpty())
+		{
+			caseList = inputCases;
+		}
+		else
+		{
+			caseList.clear();
+		}
+
+		notifyDataSetChanged();
+	}
+
+	public void setActionModeCallback(ActionMode.Callback actionModeCallback)
+	{
+		if(actionModeCallback != null)
+		{
+			mActionModeCallback = actionModeCallback;
+		}
+	}
+
+	public void setActionMode(ActionMode actionMode)
+	{
+		mActionMode = actionMode;
+	}
+
 	@Override
 	public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
 		View v = LayoutInflater.from(viewGroup.getContext()).inflate(card_layout_id, viewGroup, false);
@@ -149,8 +190,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		});
 				 */
 
-		holder.cardView.setOnClickListener(CaseCardAdapter.this);
-		holder.cardView.setOnLongClickListener(CaseCardAdapter.this);
+		holder.cardView.setOnClickListener(mOnClickListener);
+		holder.cardView.setOnLongClickListener(mOnLongClickListener);
 
 		holder.cardView.setTag(holder);
 		//holder.cardView.setTag(i);
@@ -195,7 +236,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				viewHolder.thumbnail.setVisibility(View.GONE);
 			}
 
-			if(activity.mActionMode == null || !mCase.isSelected)
+			if(mActionMode == null || !mCase.isSelected)
 			{
 				// clear color highlight of unselected items
 				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_card_background));
@@ -234,6 +275,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		return caseList.get(position);
 	}
 
+	/*
 	@Override
 	public void onClick(View view)
 	{
@@ -241,7 +283,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		Case mCase = caseList.get(holder.getPosition());
 
-		if(activity.mActionMode == null)
+		if(mActionMode == null)
 		{
 			// open detail view for clicked case
 			Intent detailIntent = new Intent(view.getContext(), CaseDetailActivity.class);
@@ -270,10 +312,10 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		ViewHolder holder = (ViewHolder) view.getTag();
 		Case mCase = caseList.get(holder.getPosition());
 
-		if(activity.mActionMode == null)
+		if(mActionMode == null)
 		{
 			// open contextual menu
-			activity.mActionMode = activity.startSupportActionMode(activity.mActionModeCallback);
+			mActionMode = ((ActionBarActivity)activity).startSupportActionMode(mActionModeCallback);
 		}
 		else
 		{
@@ -285,30 +327,31 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		return true;
 	}
+	*/
 
-	private void toggleSelected(Case mCase)
+	public void toggleSelected(Case mCase)
 	{
 	//	int backgroundColor = 0xffb3e5fc;
 
 		if(mCase.isSelected)
 		{
 			mCase.isSelected = false;
-			((CaseCardListActivity)activity).removeFromMultiselectList(mCase.key_id);
+			removeFromMultiselectList(mCase.key_id);
 		}
 		else
 		{
 			mCase.isSelected = true;
-			((CaseCardListActivity)activity).addToMultiselectList(mCase.key_id);
+			addToMultiselectList(mCase.key_id);
 
 			//API21
 			//highlight.setBackgroundColor(activity.getTheme().getResources().getColor(R.attr.colorAccent));
 			//cardview-highlight.setBackgroundColor(activity.getResources().getColor(R.color.default_colorAccent));
 		}
 
-		if( ((CaseCardListActivity) activity).getMultiselectCount() <= 0 )
-			activity.mActionMode.finish();
+		if( multiselectList.size() <= 0 )
+			mActionMode.finish();
 		else
-			activity.mActionMode.setTitle(((CaseCardListActivity) activity).getMultiselectCount() + " selected");
+			mActionMode.setTitle(multiselectList.size() + " selected");
 
 		notifyDataSetChanged();
 	}
@@ -323,8 +366,37 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			}
 		}
 
+		multiselectList.clear();
+
 		notifyDataSetChanged();
 	}
+
+	public void addToMultiselectList(long key_id)
+	{
+		if(!multiselectList.contains(key_id))
+			multiselectList.add(key_id);
+	}
+	public void removeFromMultiselectList(long key_id)
+	{
+		if(multiselectList.contains(key_id))
+			multiselectList.remove(key_id);
+	}
+/*
+	public void clearMultiselectList()
+	{
+		multiselectList.clear();
+	}
+*/
+	public List<Long> getMultiselectList()
+	{
+		return multiselectList;
+	}
+
+	/*
+	public int getMultiselectCount()
+	{
+		return multiselectList.size();
+	}*/
 
 	/**
 	 * Stickyheaders
@@ -389,12 +461,18 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		}
 	}
 
+	public void setOnClickListeners(View.OnClickListener cardOnClickListener, View.OnLongClickListener cardOnLongClickListener)
+	{
+		mOnClickListener = cardOnClickListener;
+		mOnLongClickListener = cardOnLongClickListener;
+	}
+
 	/**
 	 *
 	 */
 	public static class ViewHolder extends RecyclerView.ViewHolder
 	{
-		private long key_id;
+		public long key_id;
 		public CardView cardView;
 		public View container;
 

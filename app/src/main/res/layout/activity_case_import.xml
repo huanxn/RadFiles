@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                tools:context="com.huantnguyen.radcases.app.CloudStorageActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/cards_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:layout_above="@+id/buttonBar"
+        />
+
+    <!-- BUTTON BAR -->
+    <LinearLayout
+        android:id="@+id/buttonBar"
+        style="?android:buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        android:background="@color/md_grey_300"
+        android:layout_alignParentBottom="true">
+        <!--android:layout_below="@id/fields_container"-->
+
+        <Button
+            android:id="@+id/cancelButton"
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onClick_Button"
+            android:text="@string/button_discard"/>
+
+
+        <Button
+            android:id="@+id/importButton"
+            style="?android:buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="onClick_Button"
+            android:text="Import All"/>
+    </LinearLayout>
+
+</RelativeLayout>

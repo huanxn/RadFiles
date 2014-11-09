@@ -18,7 +18,7 @@
     <string name="title_activity_add_case">Add Case</string>
     <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
     <string name="title_activity_edit_case">Edit Case</string>
-    <string name="title_activity_export">Cloud Storage</string>
+    <string name="title_activity_cloud_storage">Rad Files: Import</string>
 
     <!-- Text Field Prompt Strings -->
     <string name="patient_id_prompt">Patient MRN</string>
@@ -85,10 +85,8 @@
     <string name="tab_title1">Key words</string>
     <string name="tab_title2">Study Types</string>
     <string name="tab_title3">Sections</string>
-
     <string name="title_activity_manage_lists">My Lists</string>
-
-
-
+    <string name="title_activity_import">ImportActivity</string>
+    <string name="title_activity_case_import">CaseImport</string>
 
 </resources>

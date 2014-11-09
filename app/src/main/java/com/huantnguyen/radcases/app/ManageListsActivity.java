@@ -30,6 +30,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		setDrawerPosition(NavigationDrawerActivity.POS_MANAGE_LISTS);
 		//setContentView(R.layout.activity_case_detail);
 
 		if (savedInstanceState == null)
