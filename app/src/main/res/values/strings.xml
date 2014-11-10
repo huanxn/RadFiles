@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Rad Cases</string>
+    <string name="app_name">RAD Files</string>
 
     <!-- Action Bar -->
     <string name="action_settings">Settings</string>
@@ -18,7 +18,10 @@
     <string name="title_activity_add_case">Add Case</string>
     <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
     <string name="title_activity_edit_case">Edit Case</string>
-    <string name="title_activity_cloud_storage">Rad Files: Import</string>
+    <string name="title_activity_cloud_storage">RAD Backup</string>
+    <string name="title_activity_case_card_list">CaseCardList</string>
+    <string name="title_activity_manage_lists">RAD Lists</string>
+    <string name="title_activity_case_import">RAD Import</string>
 
     <!-- Text Field Prompt Strings -->
     <string name="patient_id_prompt">Patient MRN</string>
@@ -57,12 +60,12 @@
 
     <string-array name="nav_drawer_array">
         <item>Interesting Cases</item>
-        <item>Procedure Log</item>
-        <item>Favorites</item>
-        <item>Cloud Storage</item>
+        <item>*Procedure Log</item>
+        <item>*Favorites</item>
+        <item>Backup Data</item>
         <item>Manage Lists</item>
-        <item>Settings</item>
-        <item>Help</item>
+        <item>*Settings</item>
+        <item>*Help</item>
     </string-array>
 
     <!-- Search category headers -->
@@ -85,8 +88,6 @@
     <string name="tab_title1">Key words</string>
     <string name="tab_title2">Study Types</string>
     <string name="tab_title3">Sections</string>
-    <string name="title_activity_manage_lists">My Lists</string>
-    <string name="title_activity_import">ImportActivity</string>
-    <string name="title_activity_case_import">CaseImport</string>
+
 
 </resources>

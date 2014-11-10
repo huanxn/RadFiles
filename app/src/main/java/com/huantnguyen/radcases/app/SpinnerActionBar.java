@@ -2,6 +2,7 @@ package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
 import android.content.Context;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +20,10 @@ public class SpinnerActionBar extends ArrayAdapter<String>
 	// CUSTOM SPINNER ADAPTER
 	private Context mContext;
 	private int mLayoutID;
-	private String mTitle;
+	private SpannableString mTitle;
 	private String[] listItems;
 
-	public SpinnerActionBar(Context context, int textViewResourceId, String title,
+	public SpinnerActionBar(Context context, int textViewResourceId, SpannableString title,
 	                        String[] objects) {
 		super(context, textViewResourceId, objects);
 
@@ -74,7 +75,6 @@ public class SpinnerActionBar extends ArrayAdapter<String>
 			holder = new ViewHolder();
 			holder.txt01 = (TextView) convertView.findViewById(R.id.title);
 			holder.txt02 = (TextView) convertView.findViewById(R.id.subtitle);
-
 
 			holder.txt01.setText(mTitle);
 

@@ -13,6 +13,8 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -291,11 +293,17 @@ public class NavigationDrawerFragment extends Fragment
 	 * Per the navigation drawer design guidelines, updates the action bar to show the global app
 	 * 'context', rather than just what's in the current screen.
 	 */
-	private void showGlobalContextActionBar() {
+	private void showGlobalContextActionBar()
+	{
 		android.support.v7.app.ActionBar actionBar = getActionBar();
 		actionBar.setDisplayShowTitleEnabled(true);
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-		actionBar.setTitle(R.string.app_name);
+
+		SpannableString mTitle = new SpannableString("RAD Files");
+		mTitle.setSpan(new TypefaceSpan(getActivity(), "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		mTitle.setSpan(new TypefaceSpan(getActivity(), "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		actionBar.setTitle(mTitle);
 	}
 
 	private ActionBar getActionBar() {

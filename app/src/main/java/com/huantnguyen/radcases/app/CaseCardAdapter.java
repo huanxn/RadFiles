@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	public List<Case> caseList;
 	private int card_layout_id;
 	private Activity activity;
+
+	private File imageDir = CaseCardListActivity.picturesDir;
 
 	// StickyRecyclerHeadersAdapter
 	//private List<Integer> header_id;    // if different than previous (ie in a different group), then it will display it's header
@@ -88,7 +91,6 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				if (thumbnailString != null && !thumbnailString.isEmpty())
 					new_case.thumbnail = Integer.parseInt(thumbnailString);
 
-
 				// get images for this case
 				String[] image_args = {String.valueOf(new_case.key_id)};
 				Cursor image_cursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
@@ -99,7 +101,9 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 					{
 						image_cursor.move(new_case.thumbnail);
 					}
-					new_case.thumbnail_filename = CaseCardListActivity.picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+
+					//new_case.thumbnail_filename = CaseCardListActivity.picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+					new_case.thumbnail_filename = imageDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 				}
 				else
 				{
@@ -407,17 +411,17 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	 * @param text: headers for each item in list
 	 * @param IDs
 	 */
-
+/*
 	public void setHeaderList(List<String> text, List<Integer> IDs)
 	{
 		if(header != null)
 			header.clear();
 
 		header = text;
-		//header_id = IDs;
 
 		notifyDataSetChanged();
 	}
+	*/
 
 	public void setHeaderList(List<String> text)
 	{

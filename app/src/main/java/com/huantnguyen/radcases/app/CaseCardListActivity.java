@@ -18,6 +18,8 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -82,7 +84,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	public static File picturesDir;
 	public static File appDir;             // internal app data directory
 	public static File dataDir;            // private data directory (with SQL database)
-
 	public static File CSV_dir;            // contains created zip files with CSV files and images
 
 
@@ -100,8 +101,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		dataDir = Environment.getDataDirectory();
 		CSV_dir = new File(appDir, "/CSV/");
 
-		picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
 		setDrawerPosition(NavigationDrawerActivity.POS_CASE_LIST);
 
 		if (savedInstanceState == null)
@@ -111,10 +110,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					.add(R.id.container, fragment)
 					.commit();
 
+			SpannableString mTitle = new SpannableString("RAD Cases");
+			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
 			// Set up the Action Bar dropdown spinner list
 			// used for sorting the cases per user selected criteria
 			//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
-			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_actionbar, "Cases", getResources().getStringArray(R.array.actionbar_sort_list));
+			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_actionbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
 			//((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
 			ActionBar actionBar = getSupportActionBar();
@@ -140,55 +143,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			// set the saved filter/spinner state
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
 		}
-
-		/////////
-		/*
-		mActionModeCallback = new ActionMode.Callback() {
-
-			// Called when the action mode is created; startActionMode() was called
-			@Override
-			public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-				// Inflate a menu resource providing context menu items
-				MenuInflater inflater = mode.getMenuInflater();
-				inflater.inflate(R.menu.case_list_contextual, menu);
-				return true;
-			}
-
-			// Called each time the action mode is shown. Always called after onCreateActionMode, but
-			// may be called multiple times if the mode is invalidated.
-			@Override
-			public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-				return false; // Return false if nothing is done
-			}
-
-			// Called when the user selects a contextual menu item
-			@Override
-			public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-				switch (item.getItemId()) {
-					case R.id.menu_share:
-						UtilClass.showMessage(getApplication(), "TEST SHARE");
-						mode.finish(); // Action picked, so close the CAB
-						return true;
-
-					case R.id.menu_delete:
-						UtilClass.showMessage(getApplicationContext(), "TEST DELETE");
-						mode.finish(); // Action picked, so close the CAB
-						return true;
-
-					default:
-						return false;
-				}
-			}
-
-			// Called when the user exits the action mode
-			@Override
-			public void onDestroyActionMode(ActionMode mode) {
-				mActionMode = null;
-			}
-		};
-	*/
-		/////////
-
 	}
 
 
@@ -356,29 +310,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 	}
 
-
-/*
-	public void addToMultiselectList(long key_id)
-	{
-		if(!multiselectList.contains(key_id))
-			multiselectList.add(key_id);
-	}
-	public void removeFromMultiselectList(long key_id)
-	{
-		if(multiselectList.contains(key_id))
-			multiselectList.remove(key_id);
-	}
-
-	public void clearMultiselectList()
-	{
-		multiselectList.clear();
-	}
-
-	public int getMultiselectCount()
-	{
-		return multiselectList.size();
-	}
-*/
 	/**
 	 * Placeholder fragment
 	 */
@@ -470,6 +401,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			// set the headers for StickyRecyclerHeaders
 			List<String> headerList = new ArrayList<String>();
+
+			//todo: delete-- don't use this anymore
 			List<Integer> headerIdList = new ArrayList<Integer>();
 
 			switch(caseFilterMode)
@@ -623,7 +556,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 
 			mCardAdapter.loadCases(case_cursor);
-			mCardAdapter.setHeaderList(headerList, headerIdList);
+			mCardAdapter.setHeaderList(headerList);
 
 			case_cursor.close();
 
@@ -847,4 +780,5 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 
 	} // end fragment
+
 }

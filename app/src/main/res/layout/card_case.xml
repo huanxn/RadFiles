@@ -26,59 +26,59 @@
             android:layout_alignParentRight="true"
             />
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/card_thumbnail_height"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_toLeftOf="@id/thumbnail"
-        >
-
-        <TextView
-            android:id="@+id/patient_id"
-            style="@style/cardTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="marquee"
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/card_thumbnail_height"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:text="Title"/>
+            android:layout_toLeftOf="@id/thumbnail"
+            >
 
-        <TextView
-            android:id="@+id/case_info1"
-            style="@style/cardText1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:layout_below="@id/patient_id"
-            android:layout_alignParentLeft="true"
-            android:text="text 1"/>
+            <TextView
+                android:id="@+id/patient_id"
+                style="@style/cardTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:text="Title"/>
+
+            <TextView
+                android:id="@+id/case_info1"
+                style="@style/cardText1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:layout_below="@id/patient_id"
+                android:layout_alignParentLeft="true"
+                android:text="text 1"/>
 
 
-        <TextView
-            android:id="@+id/case_info2"
-            style="@style/cardText2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="marquee"
-            android:layout_below="@id/case_info1"
-            android:layout_alignParentLeft="true"
-            android:text="text 2"/>
+            <TextView
+                android:id="@+id/case_info2"
+                style="@style/cardText2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:layout_below="@id/case_info1"
+                android:layout_alignParentLeft="true"
+                android:text="text 2"/>
 
-        <!--
-        <CheckBox
-            android:id="@+id/card_star"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:visibility="visible"
-            android:contentDescription="star"
-            style="?android:attr/starStyle" />
--->
+            <!--
+            <CheckBox
+                android:id="@+id/card_star"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:visibility="visible"
+                android:contentDescription="star"
+                style="?android:attr/starStyle" />
+    -->
 
-    </RelativeLayout>
+        </RelativeLayout>
     </RelativeLayout>
 
 

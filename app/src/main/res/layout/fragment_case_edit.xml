@@ -64,7 +64,6 @@
             <TextView
                 android:id="@+id/StudyLabel"
                 style="@style/sectionHeader"
-                android:layout_height="@dimen/text_box_height"
                 android:text="Studies"/>
 
             <com.huantnguyen.radcases.app.SpinnerCustom
@@ -77,7 +76,7 @@
                 style="?android:attr/spinnerStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="11dp"
+                android:paddingLeft="10dip"
                 android:textSize="@dimen/standardTextSize"
                 android:hint="@string/date_prompt"
                 android:onClick="onClick_showDatePicker"/>
@@ -93,6 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:textSize="@dimen/standardTextSize"
+                android:inputType="textCapWords"
                 android:prompt="@string/keyWords_prompt"/>
 
             <!-- BIOPSY -->

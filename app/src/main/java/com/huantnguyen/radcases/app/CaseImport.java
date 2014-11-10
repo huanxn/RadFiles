@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,13 +35,7 @@ public class CaseImport extends ActionBarActivity
 	CaseCardAdapter mCardAdapter;
 
 	// standard directories
-	private static File downloadsDir = CaseCardListActivity.downloadsDir;
-	private static File picturesDir = CaseCardListActivity.picturesDir;
-	private static File appDir  = CaseCardListActivity.appDir;             // internal app data directory
-	private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
-	private static File CSV_dir  = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
-
-	private static File backupDir;
+	private static File downloadsDir = UtilClass.getDownloadsDir();
 
 	final static String CASES_CSV_FILENAME = "cases_table.csv";
 	final static String IMAGES_CSV_FILENAME = "images_table.csv";
@@ -52,6 +47,22 @@ public class CaseImport extends ActionBarActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_case_import);
+
+	    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+	    // Set an OnMenuItemClickListener to handle menu item clicks
+	    toolbar.setOnMenuItemClickListener(
+			                                      new Toolbar.OnMenuItemClickListener() {
+				                                      @Override
+				                                      public boolean onMenuItemClick(MenuItem item) {
+					                                      // Handle the menu item
+					                                      return true;
+				                                      }
+			                                      });
+
+	    // Inflate a menu to be displayed in the toolbar
+	    toolbar.inflateMenu(R.menu.case_import);
+
 
 	    // Find RecyclerView
 	    mRecyclerView = (RecyclerView)findViewById(R.id.cards_list);
@@ -163,7 +174,7 @@ public class CaseImport extends ActionBarActivity
 		try
 		{
 			// unzip files to android pictures directory
-			UtilsFile.unzip(inFile.getPath(),picturesDir.getPath());
+			UtilsFile.unzip(inFile.getPath(), getCacheDir().getAbsolutePath());
 		}
 		catch (IOException e)
 		{
@@ -177,8 +188,8 @@ public class CaseImport extends ActionBarActivity
 		try
 		{
 			// open existing files that should have been unzipped
-			tempCasesCSV = new File(picturesDir, CASES_CSV_FILENAME);
-			tempImagesCSV = new File(picturesDir, IMAGES_CSV_FILENAME);
+			tempCasesCSV = new File(getCacheDir(), CASES_CSV_FILENAME);
+			tempImagesCSV = new File(getCacheDir(), IMAGES_CSV_FILENAME);
 
 		}
 		catch (Exception e)
@@ -224,7 +235,6 @@ public class CaseImport extends ActionBarActivity
 		try
 		{
 			br = new BufferedReader(new FileReader(tempCasesCSV));
-
 			br.readLine(); // header
 
 			while ( (line=br.readLine()) != null)
@@ -237,48 +247,51 @@ public class CaseImport extends ActionBarActivity
 
 				long old_case_id = Long.valueOf(values[0]);
 
-				mCase.patient_id = values[1];
-				mCase.diagnosis = values[2];
-				mCase.findings = values[4];
+				mCase.key_id = -1;  // temporary case
+				mCase.patient_id = values[CasesProvider.COL_PATIENT_ID];
+				mCase.diagnosis = values[CasesProvider.COL_DIAGNOSIS];
+				mCase.findings = values[CasesProvider.COL_FINDINGS];
+				mCase.thumbnail = Integer.valueOf(values[CasesProvider.COL_THUMBNAIL]);
+				////
+				// IMAGES TABLE
+				try
+				{
+					BufferedReader image_br = new BufferedReader(new FileReader(tempImagesCSV));
+					String image_line;
+
+
+					//br.readLine(); // no header
+
+					while ( (image_line=image_br.readLine()) != null)
+					{
+						String[] image_values = image_line.split(",");
+
+						if(Long.valueOf(image_values[CasesProvider.COL_IMAGE_PARENT_CASE_ID]) == old_case_id && Integer.valueOf(image_values[CasesProvider.COL_IMAGE_ORDER]) == mCase.thumbnail)
+						{
+							mCase.thumbnail_filename = getCacheDir().getAbsolutePath() + "/" +  image_values[CasesProvider.COL_IMAGE_FILENAME];
+							break;
+						}
+						/*
+						// input all columns for this case, except row_id
+						insertImageValues.clear();
+						insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, image_values[1]);
+						insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, image_values[2]);
+						insertImageValues.put(CasesProvider.KEY_ORDER, image_values[3]);
+
+						// insert the set of case info into the DB cases table
+						rowUri = getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+						*/
+					}
+					image_br.close();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					Toast.makeText(this, "Unable to open Images CSV file", Toast.LENGTH_SHORT).show();
+				}
+				////
 
 				importCaseList.add(mCase);
-
-					/*
-					// input all columns for this case, except row_id
-					for (int i = 1; i < CasesProvider.ALL_KEYS.length; i++)
-					{
-						if(i>=values.length) // the rest of fields are blank
-							break;
-
-						insertCaseValues.put(CasesProvider.ALL_KEYS[i], values[i]);
-
-
-						if(CasesProvider.ALL_KEYS[i].contentEquals(CasesProvider.KEY_IMAGE_COUNT))
-							imageCount = Integer.valueOf(values[i]);
-					}
-
-					// insert the set of case info into the DB cases table
-					rowUri = getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
-					*/
-
-
-
-
-/*
-					// get parent key information
-					parent_id = Integer.valueOf(rowUri.getLastPathSegment());
-
-					// change parent_key link in IMAGES table
-					if(imageCount > 0)
-					{
-						ContentValues updateImageValues = new ContentValues();
-						updateImageValues.clear();
-
-						// replace with new parent_id obtained from newly inserted case row
-						updateImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, parent_id);
-						getContentResolver().update(CasesProvider.IMAGES_URI, updateImageValues, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String [] {String.valueOf(old_case_id)});
-					}
-*/
 			}
 			br.close();
 		}

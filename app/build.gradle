@@ -39,6 +39,8 @@ dependencies {
     compile 'com.android.support:support-v13:+'
 
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
+
+    compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'
     //
     
     

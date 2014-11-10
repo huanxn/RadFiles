@@ -22,7 +22,13 @@
 
     </style>
 
-    <!-- extend one of the MaterialTheme base themes -->
+    <!-- No appcompat actionbar.  ie custom toolbar defined -->
+    <style name="MaterialTheme.Light.NoActionBar" parent="MaterialTheme.Light.Base">
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <!-- translucent fading action bar: extend one of the MaterialTheme base themes -->
     <style name="MaterialTheme.Light.TranslucentActionBar" parent="MaterialTheme.Light.TranslucentActionBar.Base"/>
     <style name="MaterialTheme.Light.TranslucentActionBar.Base" parent="MaterialTheme.Light.Base">
 

@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
@@ -37,7 +39,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	/**
 	 * Used to store the last screen title. For use in {@link #restoreActionBar()}.
 	 */
-	protected CharSequence mTitle;
+	protected SpannableString mTitle;
 
 	final static protected int POS_CASE_LIST = 0;
 	final static protected int POS_CLOUD_STORAGE = 3;
@@ -59,19 +61,19 @@ public class NavigationDrawerActivity extends ActionBarActivity
 			setSupportActionBar(toolbar);
 		}
 */
-
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-		mTitle = getTitle();
+		mTitle = new SpannableString(getTitle());
+
+		if((mTitle.subSequence(0,3)).toString().equals("RAD"))
+		{
+			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
 	}
 
-	@Override
-	protected void onResume()
-	{
-		super.onResume();
-		mNavigationDrawerFragment.setDrawerPosition(drawerPosition);
-	}
 
 	protected void onCreate_for_FAB(Bundle savedInstanceState)
 	{
@@ -88,9 +90,16 @@ public class NavigationDrawerActivity extends ActionBarActivity
 */
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-		mTitle = getTitle();
+		mTitle = new SpannableString(getTitle());
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+	}
+
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		mNavigationDrawerFragment.setDrawerPosition(drawerPosition);
 	}
 
 	public void setDrawerPosition(int position)
@@ -202,5 +211,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+
 
 }

@@ -1115,4 +1115,33 @@ public class UtilClass extends Activity
 		tempImagesCSV.delete();
 	}
 
+
+
+	// FILE DIRECTORIES
+	public static File getDownloadsDir()
+	{
+		return CaseCardListActivity.downloadsDir;
+	}
+
+	public static File getPicturesDir()
+	{
+		return CaseCardListActivity.picturesDir;
+	}
+
+	public static File getAppDir()
+	{
+		return CaseCardListActivity.appDir;
+	}
+
+	public static File getDataDir()
+	{
+		return CaseCardListActivity.dataDir;
+	}
+
+	public static File getCSVDir()
+	{
+		return CaseCardListActivity.CSV_dir;
+	}
+
+
 }

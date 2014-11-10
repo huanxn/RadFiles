@@ -1,9 +1,52 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+<android.support.v7.widget.Toolbar
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:minHeight="?attr/actionBarSize"
+    android:background="?attr/colorPrimary" >
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <com.devspark.robototextview.widget.RobotoTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/toolbarText"
+            android:text="RAD"
+            android:gravity="center"
+            app:fontFamily="roboto"
+            app:textWeight="bold"
+            app:textStyle="italic"
+
+            android:id="@+id/toolbar_title" />
+
+        <com.devspark.robototextview.widget.RobotoTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/toolbarText"
+            android:text=" Import"
+            android:gravity="center"
+            app:fontFamily="roboto"
+            app:textWeight="medium"
+            android:id="@+id/toolbar_title2" />
+    </LinearLayout>
+
+</android.support.v7.widget.Toolbar>
+
+<RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="@dimen/activity_vertical_margin"
                 tools:context="com.huantnguyen.radcases.app.CloudStorageActivity">
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/cards_list"
@@ -45,3 +88,4 @@
     </LinearLayout>
 
 </RelativeLayout>
+</LinearLayout>

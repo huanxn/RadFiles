@@ -2,6 +2,7 @@ package com.huantnguyen.radcases.app;
 
 import android.content.Context;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -23,22 +24,6 @@ import java.util.zip.ZipOutputStream;
  */
 public class UtilsFile
 {
-/*
-	// standard directories
-	private static File downloadsDir;
-	private static File picturesDir;
-	private static File appDir;             // internal app data directory
-	private static File dataDir;            // private data directory (with SQL database)
-
-	public static File CSV_dir;            // contains created zip files with CSV files and images
-
-	public static final File downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-	public static final File picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-	public static final File appDir = getApplication().getExternalFilesDir(null);
-	public static final File dataDir = Environment.getDataDirectory();
-	public static final File CSV_dir = new File(appDir, "/CSV/");
-	*/
-
 	public static final String TAG = "UtilsFile";
 
 	/**
