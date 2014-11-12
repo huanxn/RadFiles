@@ -53,6 +53,14 @@
     <!-- A really bright Holo shade of gray -->
     <color name="holo_gray_bright">#33CCCCCC</color>
 
+    <integer-array name="Progress_bar_colors">
+        <item>@color/holo_blue_dark</item>
+        <item>@color/holo_orange_dark</item>
+        <item>@color/holo_green_dark</item>
+        <item>@color/holo_purple</item>
+        <item>@color/holo_red_dark</item>
+    </integer-array>
+
 
 
     <!-- google's material design colours from

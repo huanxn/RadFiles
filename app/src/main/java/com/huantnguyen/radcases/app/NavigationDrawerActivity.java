@@ -64,7 +64,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mTitle = new SpannableString(getTitle());
 
-		if((mTitle.subSequence(0,3)).toString().equals("RAD"))
+	//	if((mTitle.subSequence(0,3)).toString().equals("RAD"))
 		{
 			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

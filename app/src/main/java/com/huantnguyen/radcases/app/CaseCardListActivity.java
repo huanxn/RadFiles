@@ -181,6 +181,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			case R.id.menu_search:
 				// TODO check this onSearchRequested
 				//onSearchRequested();
+				restoreActionBar();
 				return true;
 
 			case R.id.menu_addnew:
@@ -268,8 +269,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	@Override
 	/**
 	 * SearchView
-	 * searches on query string with each change in character
-	 *  - also triggers on NavigationDrawer open and close! TODO fix
+	 * searches on query string with each change in character, only when search bar is open
+	 *  - also triggers on NavigationDrawer open and close.
 	 */
 	public boolean onQueryTextChange(String s)
 	{
@@ -283,6 +284,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	// SearchView.OnCloseListener
 	public boolean onClose()
 	{
+		// repopulate full list
 		fragment.populateCards();
 		return false;
 	}

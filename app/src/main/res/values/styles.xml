@@ -28,6 +28,10 @@
         <item name="android:divider">?attr/colorPrimary</item>
         <item name="android:dividerHeight">1dp</item>
         <!--<item name="android:listChoiceBackgroundIndicator">@android:drawable/list_selector_background</item>-->
+        <item name="android:listChoiceBackgroundIndicator">?android:attr/selectableItemBackground</item>
+        <item name="android:selectableItemBackground">?android:attr/selectableItemBackground</item>
+
+        <item name="android:listSelector">?android:attr/selectableItemBackground</item>
 
         <item name="android:singleLine">true</item>
         <item name="android:ellipsize">marquee</item>
@@ -125,11 +129,17 @@
 
     <style name="listSortable">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:textSize">@dimen/largeTextSize</item>
+        <item name="android:layout_height">@dimen/list_item_height</item>
+        <item name="android:textSize">20sp</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingTop">10dip</item>
+        <item name="android:paddingBottom">10dip</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
+        <item name="android:textColor">@color/dark_gray_text</item>
+        <item name="android:clickable">true</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="imageGridView">
@@ -141,6 +151,8 @@
         <item name="android:stretchMode">columnWidth</item>
         <item name="android:gravity">center</item>
         <item name="android:adjustViewBounds">true</item>
+        <item name="android:clickable">true</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="spinner">
@@ -188,6 +200,20 @@
     <style name="toolbarText">
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">?attr/actionMenuTextColor</item>
+    </style>
+
+    <style name="GNowProgressBar" parent="SmoothProgressBar">
+        <item name="spb_stroke_separator_length">8dp</item>
+        <item name="spb_sections_count">2</item>
+        <item name="spb_speed">1.7</item>
+        <item name="spb_progressiveStart_speed">2</item>
+        <item name="spb_progressiveStop_speed">3.4</item>
+        <item name="spb_interpolator">spb_interpolator_acceleratedecelerate</item>
+        <item name="spb_mirror_mode">true</item>
+        <item name="spb_reversed">true</item>
+        <item name="spb_colors">@array/Progress_bar_colors</item>
+        <item name="spb_progressiveStart_activated">false</item>
+        <item name="spb_generate_background_with_colors">false</item>
     </style>
 
 </resources>

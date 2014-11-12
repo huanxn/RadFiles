@@ -41,6 +41,8 @@ dependencies {
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
 
     compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'
+
+    compile 'com.github.castorflex.smoothprogressbar:library:1.0.0'
     //
     
     

@@ -24,7 +24,7 @@
             android:text="RAD"
             android:gravity="center"
             app:fontFamily="roboto"
-            app:textWeight="bold"
+            app:textWeight="ultra_bold"
             app:textStyle="italic"
 
             android:id="@+id/toolbar_title" />
@@ -35,8 +35,9 @@
             style="@style/toolbarText"
             android:text=" Import"
             android:gravity="center"
-            app:fontFamily="roboto"
-            app:textWeight="medium"
+            app:fontFamily="roboto_condensed"
+            app:textWeight="bold"
+            app:textStyle="normal"
             android:id="@+id/toolbar_title2" />
     </LinearLayout>
 

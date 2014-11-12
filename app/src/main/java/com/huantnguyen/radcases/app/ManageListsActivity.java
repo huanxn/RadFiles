@@ -233,7 +233,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						break;
 				}
 
-				ManageListsAdapter mListAdapter = new ManageListsAdapter(listCursor);
+				ManageListsAdapter mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
 				mRecyclerView.setAdapter(mListAdapter);
 
 				return rootView;

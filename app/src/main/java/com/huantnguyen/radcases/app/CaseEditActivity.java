@@ -55,7 +55,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	static Cursor study_types_cursor;
 	static String study_type;
 	static Calendar selected_date;
-	static String db_date_str;
+	static String db_date_str = null;
 
 	static Cursor key_words_cursor;
 	static Cursor section_cursor;
@@ -291,8 +291,10 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		}
 
 		// STUDY DATE
-		if (db_date_str != null && !db_date_str.isEmpty())
+		String new_date_str = ((Button)findViewById(R.id.edit_date)).getText().toString();
+		if (new_date_str != null && !new_date_str.isEmpty())
 		{
+			// displayed date format in new_date_str button is different than db_date_str
 			values.put(CasesProvider.KEY_DATE, db_date_str);
 		}
 		else

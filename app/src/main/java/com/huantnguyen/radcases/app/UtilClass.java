@@ -75,6 +75,10 @@ public class UtilClass extends Activity
 	{
 		Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 	}
+	public static void showMessage(Context context, int message)
+	{
+		Toast.makeText(context, String.valueOf(message), Toast.LENGTH_LONG).show();
+	}
 
 	/**
 	 * Sets ImageView picture from file

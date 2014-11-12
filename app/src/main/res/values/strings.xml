@@ -19,7 +19,7 @@
     <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
     <string name="title_activity_edit_case">Edit Case</string>
     <string name="title_activity_cloud_storage">RAD Backup</string>
-    <string name="title_activity_case_card_list">CaseCardList</string>
+    <string name="title_activity_case_card_list">RAD Files</string>
     <string name="title_activity_manage_lists">RAD Lists</string>
     <string name="title_activity_case_import">RAD Import</string>
 

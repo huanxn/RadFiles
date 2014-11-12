@@ -485,7 +485,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		public TextView card_text2;
 		public ImageView thumbnail;
 
-		public ViewHolder(View itemView) {
+		public ViewHolder(View itemView)
+		{
 			super(itemView);
 
 			cardView = (CardView) itemView.findViewById(R.id.case_card_view);
