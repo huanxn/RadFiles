@@ -9,15 +9,13 @@
         <item name="colorPrimaryDark">@color/default_colorPrimaryDark</item>
         <item name="colorAccent">@color/default_colorAccent</item>
 
-        <item name="actionMenuTextColor">@color/default_actionMenuTextColor</item>
+        <item name="colorControlNormal">@color/default_colorControlNormal</item>
+        <item name="colorControlActivated">@color/default_colorControlHighlight</item>
+        <item name="colorControlHighlight">@color/default_colorControlHighlight</item>
 
-        <item name="android:windowBackground">@color/bg_gray</item>
+        <item name="actionMenuTextColor">@color/white_text</item>
 
-        <!--<item name="android:popupBackground">@drawable/ab_background_dark</item> not being used?-->
-        <!--<item name="popupMenuStyle">@style/myPopupMenuStyle</item>-->`
-        <item name="android:actionDropDownStyle">@style/mySpinnerStyle</item>
-        <item name="android:dropDownListViewStyle">@style/mySpinnerStyle</item>
-        <item name="dropDownListViewStyle">@style/mySpinnerStyle</item> <!-- -->
+        <item name="android:windowBackground">@color/default_background_light_grey</item>
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small</item>

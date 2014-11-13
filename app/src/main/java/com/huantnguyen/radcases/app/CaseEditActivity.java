@@ -332,7 +332,8 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 
 		// FOLLOWUP
 		values.put(CasesProvider.KEY_FOLLOWUP_COMMENT, ((EditText)findViewById(R.id.edit_followup)).getText().toString());
-		if(followup_bool)
+
+		if(((CheckBox)findViewById(R.id.checkbox_followup)).isChecked())
 			values.put(CasesProvider.KEY_FOLLOWUP, 1);
 		else
 			values.put(CasesProvider.KEY_FOLLOWUP, 0);

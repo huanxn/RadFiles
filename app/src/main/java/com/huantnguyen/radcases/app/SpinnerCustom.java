@@ -15,6 +15,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -170,7 +171,16 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 						}
 					});
 
-					alert.show();
+					AlertDialog dialog = alert.create();
+					// Show keyboard
+					dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+						@Override
+						public void onShow(DialogInterface dialog) {
+							InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+							imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+						}
+					});
+					dialog.show();
 				}
 				else
 				{

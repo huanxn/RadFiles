@@ -24,8 +24,9 @@
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <!-- i decided to not use.....-->
     <style name="mySpinnerStyle" parent="android:Widget.ListView.DropDown">
-        <item name="android:divider">?attr/colorPrimary</item>
+
         <item name="android:dividerHeight">1dp</item>
         <!--<item name="android:listChoiceBackgroundIndicator">@android:drawable/list_selector_background</item>-->
         <item name="android:listChoiceBackgroundIndicator">?android:attr/selectableItemBackground</item>
@@ -63,12 +64,12 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/text_box_height</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/bg_white</item>
+        <item name="android:textColor">@color/white_text</item>
         <item name="android:textSize">@dimen/largeTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
         <item name="android:paddingTop">0dip</item>
-        <item name="android:background">@color/secondary</item>
+        <item name="android:background">@color/default_colorHeaderText</item>
     </style>
 
 
@@ -78,7 +79,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/text_box_height</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/primary</item>
+        <item name="android:textColor">@color/default_colorHeaderText</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
@@ -104,7 +105,7 @@
         <item name="android:paddingLeft">10dip</item>
         <item name="android:paddingBottom">8dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">@color/gray_text</item>
+        <item name="android:textColor">@color/light_grey_text</item>
     </style>
 
     <style name="sectionEditText">
@@ -137,7 +138,7 @@
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
-        <item name="android:textColor">@color/dark_gray_text</item>
+        <item name="android:textColor">@color/dark_grey_text</item>
         <item name="android:clickable">true</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
@@ -152,7 +153,6 @@
         <item name="android:gravity">center</item>
         <item name="android:adjustViewBounds">true</item>
         <item name="android:clickable">true</item>
-        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="spinner">
@@ -169,7 +169,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/text_box_height</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/primary</item>
+        <item name="android:textColor">@color/default_colorHeaderText</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dp</item>
@@ -184,7 +184,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">@color/dark_gray_text</item>
+        <item name="android:textColor">@color/dark_grey_text</item>
     </style>
 
     <style name="cardText2">
@@ -194,7 +194,7 @@
     <item name="android:textSize">12sp</item>
     <item name="android:paddingLeft">8dip</item>
     <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-    <item name="android:textColor">@color/gray_text</item>
+    <item name="android:textColor">@color/light_grey_text</item>
     </style>
 
     <style name="toolbarText">

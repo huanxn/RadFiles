@@ -27,6 +27,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.database.Cursor;
 import android.util.AttributeSet;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -80,7 +81,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
      * {@inheritDoc}
      */
     @Override
-    public void onClick(DialogInterface dialog, int which, boolean isChecked)
+    public void onClick(DialogInterface dialogInterface, int which, boolean isChecked)
     {
         if (_selection != null)
         {
@@ -135,10 +136,21 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 				        //selected_position = previous_position;
 				        //adapter.setSelection(previous_position);
 
+				        //TODO uncheck custom box on cancel
+
 			        }
 		        });
 
-		        alert.show();
+		        AlertDialog dialog = alert.create();
+		        // Show keyboard
+		        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+			        @Override
+			        public void onShow(DialogInterface dialog) {
+				        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+				        imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+			        }
+		        });
+		        dialog.show();
 	        }
         }
         else

@@ -119,8 +119,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 //			tabs.setTextColor(activity.getResources().getColor(R.attr.actionMenuTextColor));
 
 			// TODO get from attr
-			tabs.setIndicatorColor(activity.getResources().getColor(R.color.default_actionMenuTextColor));
-			tabs.setIndicatorColor(activity.getResources().getColor(R.color.default_actionMenuTextColor));
+			tabs.setIndicatorColor(activity.getResources().getColor(R.color.white_text));
+			tabs.setIndicatorColor(activity.getResources().getColor(R.color.white_text));
 			tabs.setShouldExpand(true);
 
 
