@@ -59,6 +59,13 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		key_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
 		//hasImage = getIntent().getBooleanExtra(ARG_HAS_IMAGE, false);
 
+		if(key_id == -1)
+		{
+			UtilClass.showMessage(this, "debug: CaseDetail key_id = -1");
+			finish();
+			return;
+		}
+
 		String [] image_args = {String.valueOf(key_id)};
 		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
 
@@ -241,6 +248,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				break;
 
 			default:
+				UtilClass.showMessage(this, "casedetail onActivityResult debug test");
 				break;
 		}
 

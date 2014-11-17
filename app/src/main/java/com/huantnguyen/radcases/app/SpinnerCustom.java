@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -141,7 +142,10 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 
 					// Set an EditText view to get user input
 					final EditText input = new EditText(context);
-					//input.requestFocus();
+					input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+					//input.setHighlightColor(context.getResources().getColor(R.color.default_colorControlHighlight));
+					input.setHighlightColor(UtilClass.get_attr(context, R.attr.colorControlHighlight));
+
 					alert.setView(input);
 
 					alert.setPositiveButton("Ok", new DialogInterface.OnClickListener()

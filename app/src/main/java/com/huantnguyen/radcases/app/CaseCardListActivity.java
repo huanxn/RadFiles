@@ -227,6 +227,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					fragment.populateCards();
 				}
 				break;
+
+			default:
+				UtilClass.showMessage(this, "debug: CaseCardListActivity onActivityResult");
+				break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
@@ -405,7 +409,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			List<String> headerList = new ArrayList<String>();
 
 			//todo: delete-- don't use this anymore
-			List<Integer> headerIdList = new ArrayList<Integer>();
+			//List<Integer> headerIdList = new ArrayList<Integer>();
 
 			switch(caseFilterMode)
 			{
@@ -435,7 +439,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 							for(int c = 0; c < case_cursor_array[i].getCount(); c++)
 							{
 								headerList.add(mSection);
-								headerIdList.add(i);
+								//headerIdList.add(i);
 							}
 
 							i = i + 1;
@@ -446,7 +450,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						for(int c = 0; c < case_cursor_array[i].getCount(); c++)
 						{
 							headerList.add(EMPTY_FIELD_GROUP_HEADER);
-							headerIdList.add(i);
+							//headerIdList.add(i);
 						}
 
 					}
@@ -462,7 +466,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("Recent");
-						headerIdList.add(0);
+						//headerIdList.add(0);
 					}
 
 					break;
@@ -493,7 +497,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 								{
 									group_counter += 1;
 								}
-								headerIdList.add(group_counter);
+								//headerIdList.add(group_counter);
 
 								// update prior_str for next iteration check
 								prior_str = new_date_str;
@@ -513,7 +517,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("Key Words");
-						headerIdList.add(0);
+						//headerIdList.add(0);
 					}
 
 					break;
@@ -524,7 +528,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("Followup");
-						headerIdList.add(0);
+						//headerIdList.add(0);
 					}
 
 					break;
@@ -535,7 +539,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("Favorites");
-						headerIdList.add(0);
+						//headerIdList.add(0);
 					}
 
 					break;
@@ -546,7 +550,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("My Cases");
-						headerIdList.add(0);
+						//headerIdList.add(0);
 					}
 
 					break;

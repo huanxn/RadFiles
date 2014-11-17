@@ -89,6 +89,8 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		// Set an EditText view to get user input
 		final EditText input = new EditText(activity);
 		input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+		//input.setHighlightColor(activity.getResources().getColor(R.color.default_colorControlHighlight));
+		input.setHighlightColor(UtilClass.get_attr(activity, R.attr.colorControlHighlight));
 
 		final int position = holder.getPosition();
 

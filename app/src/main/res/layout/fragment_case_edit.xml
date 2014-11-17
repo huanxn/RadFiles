@@ -30,6 +30,7 @@
             <TextView
                 android:id="@+id/CaseInfoLabel"
                 style="@style/sectionHeader"
+                android:paddingLeft="2dp"
                 android:text="Case Information"/>
 
             <EditText
@@ -42,7 +43,7 @@
                 android:id="@+id/edit_diagnosis"
                 style="@style/sectionEditText"
                 android:hint="Diagnosis"
-                android:inputType="textCapWords"/>
+                android:inputType="textCapWords|textNoSuggestions"/>
 
             <EditText
                 android:id="@+id/edit_findings"
@@ -53,22 +54,24 @@
             <TextView
                 android:id="@+id/SectionLabel"
                 style="@style/sectionHeader"
+                android:paddingLeft="2dp"
                 android:text="Radiology Section"/>
 
             <com.huantnguyen.radcases.app.SpinnerMultiSelect
                 android:id="@+id/edit_section"
-                style="@style/spinner"
+                style="@style/customSpinnerStyle"
                 android:prompt="@string/section_prompt"/>
 
             <!-- STUDIES -->
             <TextView
                 android:id="@+id/StudyLabel"
                 style="@style/sectionHeader"
+                android:paddingLeft="2dp"
                 android:text="Studies"/>
 
             <com.huantnguyen.radcases.app.SpinnerCustom
                 android:id="@+id/edit_study_type"
-                style="@style/spinner"
+                style="@style/customSpinnerStyle"
                 android:prompt="@string/studyType_prompt"/>
 
             <Button
@@ -76,8 +79,9 @@
                 style="?android:attr/spinnerStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="10dip"
+                android:paddingLeft="8dip"
                 android:textSize="@dimen/standardTextSize"
+                android:textColor="@color/dark_grey_text"
                 android:hint="@string/date_prompt"
                 android:onClick="onClick_showDatePicker"/>
 
@@ -85,20 +89,19 @@
             <TextView
                 android:id="@+id/KeyWordsLabel"
                 style="@style/sectionHeader"
-                android:text="KEY WORDS"/>
+                android:paddingLeft="2dp"
+                android:text="Key Words"/>
 
             <com.huantnguyen.radcases.app.SpinnerMultiSelect
+                style="@style/customSpinnerStyle"
                 android:id="@+id/edit_key_words"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:textSize="@dimen/standardTextSize"
-                android:inputType="textCapWords"
                 android:prompt="@string/keyWords_prompt"/>
 
             <!-- BIOPSY -->
             <TextView
                 android:id="@+id/BiopsyLabel"
                 style="@style/sectionHeader"
+                android:paddingLeft="2dp"
                 android:text="Biopsy"/>
 
             <EditText
@@ -111,6 +114,7 @@
             <TextView
                 android:id="@+id/FollowupLabel"
                 style="@style/sectionHeader"
+                android:paddingLeft="2dp"
                 android:text="Follow Up"/>
 
             <LinearLayout
@@ -133,6 +137,7 @@
             <TextView
                 android:id="@+id/CommentsLabel"
                 style="@style/sectionHeader"
+                android:paddingLeft="2dp"
                 android:text="Comments"/>
 
             <EditText
@@ -145,6 +150,8 @@
             <TextView
                 android:id="@+id/ImagesLabel"
                 style="@style/sectionHeader"
+                android:paddingLeft="2dp"
+
                 android:text="Key Images"/>
 
             <GridView
@@ -163,7 +170,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="0dp"
-    android:background="@color/md_grey_300"
+    android:background="@color/default_button_background"
     android:layout_alignParentBottom="true">
     <!--android:layout_below="@id/fields_container"-->
 

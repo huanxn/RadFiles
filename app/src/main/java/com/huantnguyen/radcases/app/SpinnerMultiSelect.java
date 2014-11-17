@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.database.Cursor;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -105,6 +106,11 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 
 		        // Set an EditText view to get user input
 		        final EditText input = new EditText(context);
+		        input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_WORDS | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+
+		        // doesn't work....  todo fix
+		        input.setHighlightColor(UtilClass.get_attr(context, R.attr.colorControlHighlight));
+
 		        //input.requestFocus();
 		        alert.setView(input);
 

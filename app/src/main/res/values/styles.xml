@@ -94,6 +94,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">10dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/dark_grey_text</item>
     </style>
 
     <style name="sectionText2">
@@ -112,10 +113,11 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
-        <item name="android:gravity">center_vertical</item>
+        <item name="android:gravity">bottom</item>
         <item name="android:paddingLeft">10dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:inputType">textCapSentences</item>
+        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:inputType">textCapSentences|textNoSuggestions</item>
     </style>
 
     <style name="sectionSearch">
@@ -155,10 +157,12 @@
         <item name="android:clickable">true</item>
     </style>
 
-    <style name="spinner">
+    <style name="customSpinnerStyle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">48dp</item>
+        <item name="android:textColor">@color/dark_grey_text</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:inputType">textCapWords</item>
     </style>
 

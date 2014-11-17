@@ -1120,6 +1120,16 @@ public class UtilClass extends Activity
 	}
 
 
+	// attr values
+	public static int get_attr(Context context, int value)
+	{
+		Resources.Theme theme = context.getTheme();
+		TypedValue typedValue = new TypedValue();
+
+		theme.resolveAttribute(value, typedValue, true);
+
+		return typedValue.data;
+	}
 
 	// FILE DIRECTORIES
 	public static File getDownloadsDir()

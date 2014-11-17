@@ -220,17 +220,6 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			viewHolder.card_text2.setText(mCase.findings);
 			//viewHolder.thumbnail.setImageDrawable(activity.getDrawable(country.getImageResourceId(mContext)));
 
-			/*
-			if(mCase.thumbnail_filename != null && !mCase.thumbnail_filename.isEmpty())
-			{
-				viewHolder.thumbnail.setVisibility(View.VISIBLE);
-				UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE);
-			}
-			else
-			{
-				viewHolder.thumbnail.setVisibility(View.GONE);
-			}
-			*/
 			if(UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE))
 			{
 				viewHolder.thumbnail.setVisibility(View.VISIBLE);
@@ -258,6 +247,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				// color highlight the selected items
 				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_colorSelected));
 				viewHolder.thumbnail.setColorFilter(activity.getResources().getColor(R.color.default_colorSelected));
+				//viewHolder.thumbnail.setColorFilter(UtilClass.get_attr(activity, R.attr.colorControlHighlight)); // too opaque
 			}
 		}
 	}

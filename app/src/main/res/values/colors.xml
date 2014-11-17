@@ -5,7 +5,7 @@
     <color name="dark_grey_text">@color/md_grey_800</color>
     <color name="light_grey_text">@color/md_grey_500</color>
     <color name="white_text">@color/md_grey_50</color>
-    <color name="default_colorHeaderText">@color/md_light_blue_800</color>
+    <color name="default_colorHeaderText">@color/md_light_blue_700</color>
 
     <!-- Theme Colors -->
     <color name="default_colorPrimary">@color/md_blue_grey_700</color>
@@ -21,6 +21,9 @@
     <color name="default_card_background">@color/md_grey_50</color>
     <color name="default_background">@color/md_grey_200</color> <!-- for card list background -->
     <color name="default_background_light_grey">@color/md_grey_100</color>
+
+    <!-- Button Color -->
+    <color name="default_button_background">@color/md_grey_300</color>
 
     <!-- A light Holo shade of blue -->
     <color name="holo_blue_light">#ff33b5e5</color>

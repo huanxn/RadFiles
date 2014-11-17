@@ -104,7 +104,7 @@
             android:hint="Reason for followup"
             />
 
-
+        <!-- COMMENTS -->
         <TextView
             android:id="@+id/CommentsLabel"
             style="@style/sectionHeader"
@@ -120,7 +120,7 @@
         <TextView
             android:id="@+id/ImagesLabel"
             style="@style/sectionHeader"
-            android:text="Key Images"/>
+            android:text="Images"/>
 
         <GridView
             android:id="@+id/key_image"
