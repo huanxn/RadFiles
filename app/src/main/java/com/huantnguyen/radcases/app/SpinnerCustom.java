@@ -9,6 +9,7 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.text.InputType;
@@ -38,7 +39,7 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 
 	private int custom_position;                        // position in list, which is at the end
 	private String custom_alert_title;                  // alert dialog title
-	static final private String CUSTOM_TEXT = "CUSTOM"; // test in spinner list
+	static final private String CUSTOM_TEXT = "Custom..."; // test in spinner list
 	private int previous_position;                      // in case canceled custom input, revert back to previous
 
 	private Context context;
@@ -264,7 +265,11 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 				// set default text prompt and color
 				//TODO set text font/style to match
 				v.setText(getPrompt());
-				v.setTextColor(Color.GRAY);
+
+				// get hint color
+				final ColorStateList colors = new EditText(context).getHintTextColors();
+				//v.setTextColor(context.getResources().getColor(R.color.light_grey_text));
+				v.setTextColor(colors);
 				return v;
 			}
 			return obj.getView(position, convertView, parent);

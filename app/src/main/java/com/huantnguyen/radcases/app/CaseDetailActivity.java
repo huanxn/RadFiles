@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -461,16 +462,18 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				// set global variable isStarred for Activity action bar menu toggle
 				favorite = case_cursor.getInt(CasesProvider.COL_FAVORITE);
 
-				/*
+
 				// ACTION BAR Title
 				// mTitle declared in super NavigationDrawerActivity, and used to restore the same title after nav drawer is closed
 				if(patient_id != null && !patient_id.isEmpty())
 				{
-					mTitle = patient_id;
+					mTitle = new SpannableString(patient_id);
+					mTitle.setSpan(new TypefaceSpan(getActivity(), "RobotoCondensed-Bold.ttf"), 0, mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 					//if(section != null && !section.isEmpty())
 					//	actionBar.setSubtitle(section);
 				}
+				/*
 				else if(section != null && !section.isEmpty())
 				{
 					mTitle = section + " Case";
@@ -485,7 +488,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				}
 				*/
 
-				mTitle = new SpannableString("");
+				else
+					mTitle = new SpannableString("");
 
 				ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
 				actionBar.setTitle(mTitle);

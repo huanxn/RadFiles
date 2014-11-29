@@ -140,8 +140,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 		else
 		{
+			SpannableString mTitle = new SpannableString("RAD debug" +
+					                                             "");
+			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
 			// set the saved filter/spinner state
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
+			UtilClass.showMessage(this, "OnCreate savedInstanceState != null: filterMode " + caseFilterMode);
+			//fragment.populateCards();
 		}
 	}
 

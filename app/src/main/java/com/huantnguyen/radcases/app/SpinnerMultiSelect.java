@@ -48,9 +48,12 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 	static final private String CUSTOM_TEXT = "Custom..."; // test in spinner list
 	private int previous_position;                      // in case canceled custom input, revert back to previous
 
+	private String hint = "";
+
     ArrayAdapter<String> _proxyAdapter;
     
    	Context context;
+
     /**
      * Constructor for use when instantiating directly.
      * @param context
@@ -60,7 +63,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
         super(context);
 	    this.context = context;
         
-        _proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
+        //_proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
+	    _proxyAdapter = new ArrayAdapter<String>(context, R.layout.spinner_multiselect);
         super.setAdapter(_proxyAdapter);
     }
 
@@ -73,10 +77,42 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
     {
         super(context, attrs);
 	    this.context = context;
-        
-        _proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
+
+        //_proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
+	    _proxyAdapter = new ArrayAdapter<String>(context, R.layout.spinner_multiselect);
         super.setAdapter(_proxyAdapter);
+
     }
+
+	public void showText()
+	{
+		String sb = buildSelectedItemString();
+
+		if(sb == null || sb.isEmpty())
+		{
+			_proxyAdapter = new ArrayAdapter<String>(context, R.layout.spinner_multiselect);
+			super.setAdapter(_proxyAdapter);
+
+			_proxyAdapter.clear();
+			_proxyAdapter.add(String.valueOf(getPrompt()));
+
+			/*
+			// get hint color
+			final ColorStateList colors = new EditText(context).getHintTextColors();
+			//v.setTextColor(context.getResources().getColor(R.color.light_grey_text));
+			this.setTextColor(colors);
+			*/
+		}
+		else
+		{
+			_proxyAdapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item);
+			super.setAdapter(_proxyAdapter);
+
+			_proxyAdapter.clear();
+			_proxyAdapter.add(sb);
+			setSelection(0);
+		}
+	}
 
     /**
      * {@inheritDoc}
@@ -90,9 +126,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 	        {
 		        _selection[which] = isChecked;
 
-                _proxyAdapter.clear();
-                _proxyAdapter.add(buildSelectedItemString());
-		        setSelection(0);
+                showText();
 	        }
 	        else if (which == _selection.length-1) // add custom
 	        {
@@ -130,9 +164,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 				        // save position for future
 				        //previous_position = selected_position;
 
-				        _proxyAdapter.clear();
-				        _proxyAdapter.add(buildSelectedItemString());
-				        setSelection(0);
+				        showText();
 			        }
 		        });
 
@@ -181,11 +213,13 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
      * SpinnerMultiSelect does not support setting an adapter. This will throw an exception.
      * @param adapter
      */
+
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
         throw new RuntimeException("setAdapter is not supported by SpinnerMultiSelect.");
     }
-    
+
+
     /**
      * Sets the options for this spinner.
      * @param items
@@ -230,6 +264,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 		_selection = new boolean[_items.length];
 
 		Arrays.fill(_selection, false);
+
+		showText();
 	}
     
     /**
@@ -271,7 +307,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 	        }
         }
 
-	    _proxyAdapter.add(buildSelectedItemString());
+	    //_proxyAdapter.add(buildSelectedItemString());
+	    showText();
     }
     
     /**
@@ -333,7 +370,8 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
      * Builds the string for display in the spinner.
      * @return comma-separated list of selected items
      */
-    private String buildSelectedItemString() {
+    private String buildSelectedItemString()
+    {
         StringBuilder sb = new StringBuilder();
         boolean foundOne = false;
 
@@ -361,4 +399,104 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 		result[org.length] = added;
 		return result;
 	}
+
+	/*
+	@Override
+	public void setAdapter(SpinnerAdapter orig)
+	{
+		final SpinnerAdapter adapter = newProxy(orig);
+
+		super.setAdapter(adapter);
+
+		try
+		{
+			final Method m = AdapterView.class.getDeclaredMethod("setNextSelectedPositionInt", int.class);
+			m.setAccessible(true);
+			m.invoke(this, -1);
+
+			final Method n = AdapterView.class.getDeclaredMethod("setSelectedPositionInt", int.class);
+			n.setAccessible(true);
+			n.invoke(this, -1);
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+
+	protected SpinnerAdapter newProxy(SpinnerAdapter obj)
+	{
+		return (SpinnerAdapter) java.lang.reflect.Proxy.newProxyInstance(
+				                                                                obj.getClass().getClassLoader(),
+				                                                                new Class[]{SpinnerAdapter.class},
+				                                                                new SpinnerAdapterProxy(obj));
+	}
+	*/
+	
+	/**
+	 * Intercepts getView() to display the prompt if no items selected
+	 */
+	/*
+	protected class SpinnerAdapterProxy implements InvocationHandler
+	{
+
+		protected SpinnerAdapter obj;
+		protected Method getView;
+
+
+		protected SpinnerAdapterProxy(SpinnerAdapter obj)
+		{
+			this.obj = obj;
+			try
+			{
+				this.getView = SpinnerAdapter.class.getMethod("getView", int.class, View.class, ViewGroup.class);
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		public Object invoke(Object proxy, Method m, Object[] args) throws Throwable
+		{
+			try
+			{
+				return m.equals(getView) &&
+						       (Integer) (args[0]) < 0 ?
+						       getView((Integer) args[0], (View) args[1], (ViewGroup) args[2]) :
+						       m.invoke(obj, args);
+			}
+			catch (InvocationTargetException e)
+			{
+				throw e.getTargetException();
+			}
+			catch (Exception e)
+			{
+				throw new RuntimeException(e);
+			}
+		}
+
+		protected View getView(int position, View convertView, ViewGroup parent)
+				throws IllegalAccessException
+		{
+
+			if (buildSelectedItemString().isEmpty())
+			{
+				final TextView v = (TextView) ((LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(android.R.layout.simple_spinner_item, parent, false);
+
+				// set default text prompt and color
+				//TODO set text font/style to match
+				v.setText(getPrompt());
+
+				// get hint color
+				final ColorStateList colors = new EditText(context).getHintTextColors();
+				//v.setTextColor(context.getResources().getColor(R.color.light_grey_text));
+				v.setTextColor(colors);
+				return v;
+			}
+			return obj.getView(position, convertView, parent);
+		}
+	}
+	*/
 }
