@@ -25,7 +25,7 @@
 
     <!-- Text Field Prompt Strings -->
     <string name="patient_id_prompt">Patient MRN</string>
-    <string name="section_prompt">Choose section</string>
+    <string name="section_prompt">Choose sections</string>
     <string name="studyType_prompt">Study type</string>
     <string name="keyWords_prompt">Choose key words</string>
     <string name="date_prompt">Study date</string>
