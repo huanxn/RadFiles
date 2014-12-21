@@ -69,21 +69,42 @@
                 android:paddingLeft="2dp"
                 android:text="Studies"/>
 
-            <com.huantnguyen.radcases.app.SpinnerCustom
-                android:id="@+id/edit_study_type"
-                style="@style/customSpinnerStyle"
-                android:prompt="@string/studyType_prompt"/>
-
-            <Button
-                android:id="@+id/edit_date"
-                style="?android:attr/spinnerStyle"
+            <LinearLayout
+                android:id="@+id/study_types_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="8dip"
-                android:textSize="@dimen/standardTextSize"
-                android:textColor="@color/dark_grey_text"
-                android:hint="@string/date_prompt"
-                android:onClick="onClick_showDatePicker"/>
+                android:orientation="vertical">
+
+                <com.huantnguyen.radcases.app.SpinnerCustom
+                    android:id="@+id/edit_study_type"
+                    style="@style/customSpinnerStyle"
+                    android:prompt="@string/studyType_prompt"/>
+
+                <Button
+                    android:id="@+id/edit_date"
+                    style="?android:attr/spinnerStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="8dip"
+                    android:textSize="@dimen/standardTextSize"
+                    android:textColor="@color/dark_grey_text"
+                    android:hint="@string/date_prompt"
+                    android:onClick="onClick_showDatePicker"/>
+
+
+            </LinearLayout>
+
+            <!--
+            <Button
+                android:id="@+id/add_new_study_button"
+                android:layout_width="match_parent"
+                style="?android:buttonBarButtonStyle"
+                android:layout_height="@dimen/text_box_height"
+                android:text="Add new"
+                android:gravity="left|center_vertical"
+                android:textColor="@color/light_grey_text"
+                android:onClick="onClick_Button"/>
+            -->
 
             <!-- KEY WORDS -->
             <TextView

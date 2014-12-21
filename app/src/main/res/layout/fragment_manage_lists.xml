@@ -5,7 +5,7 @@
 
     tools:context="com.huantnguyen.radcases.app.ManageListsActivity.ViewPagerFragment">
 
-    <android.support.v7.widget.RecyclerView
+    <com.huantnguyen.radcases.app.ReorderRecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

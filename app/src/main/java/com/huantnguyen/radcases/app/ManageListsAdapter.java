@@ -22,9 +22,10 @@ import java.util.List;
 /**
  * Created by Huan on 11/5/2014.
  */
-public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.ViewHolder> implements View.OnClickListener {
+public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<ManageListsAdapter.ViewHolder> /*RecyclerView.Adapter<ManageListsAdapter.ViewHolder>*/ implements View.OnClickListener {
 	private Activity activity;
 	private List<String> itemList;
+	private List<Integer> keyList;
 	private final String ADD_CUSTOM_TEXT = "Add new...";
 
 	// Provide a suitable constructor (depends on the kind of dataset)
@@ -32,12 +33,14 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 	{
 		this.activity = activity;
 		itemList = new ArrayList<String>();
+		keyList = new ArrayList<Integer>();
 
 		if(cursor != null && cursor.moveToFirst())
 		{
 			do
 			{
 				itemList.add(cursor.getString(CasesProvider.COL_VALUE));
+				keyList.add(cursor.getInt(CasesProvider.COL_ROWID));
 
 			} while(cursor.moveToNext());
 		}
@@ -80,6 +83,27 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 	}
 
 	@Override
+	public long getItemId(int position) {
+		return itemList.get(position).hashCode();
+	}
+
+	public List<String> getList()
+	{
+		return itemList;
+	}
+
+	public String getItem(int position)
+	{
+		return itemList.get(position);
+	}
+
+	public int getKey(int position)
+	{
+		return keyList.get(position);
+	}
+
+
+	@Override
 	public void onClick(View view)
 	{
 		final ViewHolder holder = (ViewHolder) view.getTag();
@@ -120,9 +144,15 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 				if(position == itemList.size()-1)
 				{
 					itemList.add(ADD_CUSTOM_TEXT);
+					notifyItemInserted(position);
+				}
+				else
+				{
+					notifyItemChanged(position);
 				}
 
-				notifyDataSetChanged();
+				//notifyDataSetChanged();
+
 			}
 		});
 
@@ -145,6 +175,24 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 
 	}
 
+	@Override
+	public void swapElements(int fromIndex, int toIndex)
+	{
+		// don't change position of last item (add new custom item)
+		if(fromIndex >= itemList.size()-1 || toIndex >= itemList.size()-1)
+			return;
+
+		String temp = itemList.get(fromIndex);
+		itemList.set(fromIndex, itemList.get(toIndex));
+		itemList.set(toIndex, temp);
+
+		int temp_key = keyList.get(fromIndex);
+		keyList.set(fromIndex, keyList.get(toIndex));
+		keyList.set(toIndex, temp_key);
+
+		//notifyDataSetChanged();
+		notifyItemMoved(fromIndex, toIndex);
+	}
 
 
 	// Provide a reference to the views for each data item

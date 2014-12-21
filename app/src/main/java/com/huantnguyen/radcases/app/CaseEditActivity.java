@@ -27,6 +27,8 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import java.io.File;
@@ -237,6 +239,41 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				saveToDatabase();
 				finish();
 				break;
+
+			/*
+			case R.id.add_new_study_button:
+				UtilClass.showMessage(this, "add new");
+				LinearLayout linearLayout = (LinearLayout)findViewById(R.id.study_types_container);
+
+
+
+				RelativeLayout editStudyTypeLayout = (RelativeLayout) getLayoutInflater().inflate(R.layout.edit_study_type, null);
+
+				SpinnerCustom editStudyType = (SpinnerCustom)editStudyTypeLayout.findViewById(R.id.edit_study_type);
+				Button editStudyDate = (Button) editStudyTypeLayout.findViewById(R.id.edit_date);
+
+				editStudyType.setPrompt("Study type");
+				editStudyType.setItems(study_types_cursor, CasesProvider.COL_VALUE, "Custom study type");
+
+				linearLayout.addView(editStudyTypeLayout);
+
+				*/
+				/*
+				SpinnerCustom study_type_spinner = new SpinnerCustom(this);
+				study_type_spinner.setPrompt("Study type");
+				study_type_spinner.setItems(study_types_cursor, CasesProvider.COL_VALUE, "Custom study type");
+
+				linearLayout.removeView(findViewById(R.id.add_new_study_button));
+				linearLayout.addView(study_type_spinner);
+				*/
+
+				/*
+				android:id="@+id/edit_study_type"
+				style="@style/customSpinnerStyle"
+				android:prompt="@string/studyType_prompt"/>
+				*/
+
+			//	break;
 		}
 	}
 
@@ -574,9 +611,11 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	// Button to show datePicker
 	public void onClick_showDatePicker(View v)
 	{
-		DialogFragment datePicker = DatePickerFragment.newInstance(selected_date.get(Calendar.YEAR), selected_date.get(Calendar.MONTH), selected_date.get(Calendar.DAY_OF_MONTH));
+		//DialogFragment datePicker = DatePickerFragment.newInstance(selected_date.get(Calendar.YEAR), selected_date.get(Calendar.MONTH), selected_date.get(Calendar.DAY_OF_MONTH));
+		//datePicker.show(this.getFragmentManager(), "datePicker");
 
-		datePicker.show(this.getFragmentManager(), "datePicker");
+
+		new DatePickerDialog(this, this, selected_date.get(Calendar.YEAR), selected_date.get(Calendar.MONTH), selected_date.get(Calendar.DAY_OF_MONTH)).show();
 	}
 
 	/*
@@ -595,6 +634,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		String displayDate = display_sdf.format(selected_date.getTime());
 
 		Button date_button = (Button) findViewById(R.id.edit_date);
+		//Button date_button = (Button) view;
 		date_button.setText(displayDate);
 
 		// set date string for in static string to put into database

@@ -5,7 +5,10 @@ import java.util.Locale;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -17,6 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.astuetz.PagerSlidingTabStrip;
 
@@ -212,28 +216,130 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
 				mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-				// Setup CaseCardAdapter
+				// Setup list to be placed in adapter
 				Cursor listCursor;
+				final Uri tableURI;
+				final String tableKEY;
+
 				switch(getArguments().getInt(ARG_SECTION_NUMBER))
 				{
 					case 0:
-						listCursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+						tableURI = CasesProvider.KEYWORD_LIST_URI;
+						tableKEY = CasesProvider.KEY_KEYWORDS;
 						break;
 
 					case 1:
-						listCursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+						tableURI = CasesProvider.STUDYTYPE_LIST_URI;
+						tableKEY = CasesProvider.KEY_STUDY_TYPE;
 						break;
 
 					case 2:
-						listCursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+						tableURI = CasesProvider.SECTION_LIST_URI;
+						tableKEY = CasesProvider.KEY_SECTION;
 						break;
 
 					default:
-						listCursor = null;
+						tableURI = null;
+						tableKEY = null;
 						break;
 				}
+				if(tableURI != null)
+				{
+					listCursor = getContentResolver().query(tableURI, null, null, null, CasesProvider.KEY_ORDER);
+				}
+				else
+				{
+					listCursor = null;
+				}
 
-				ManageListsAdapter mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
+				final ManageListsAdapter mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
+				mListAdapter.setHasStableIds(true);
+				mListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
+				{
+					@Override
+					public void onChanged()
+					{
+						super.onChanged();
+						UtilClass.showMessage(getActivity(), "test data changed");
+					}
+
+					@Override
+					public void onItemRangeChanged(int positionStart, int itemCount)
+					{
+						super.onItemRangeChanged(positionStart, itemCount);
+						UtilClass.showMessage(getActivity(), "item Changed: position: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
+
+						// changed item text
+						String newItemString = mListAdapter.getItem(positionStart);
+
+						// put data into "values" for database insert/update
+						ContentValues values = new ContentValues();
+
+						values.put(tableKEY, newItemString);
+						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));
+						getContentResolver().update(row_uri, values, null, null);
+
+					}
+
+					@Override
+					public void onItemRangeInserted(int positionStart, int itemCount)
+					{
+						super.onItemRangeInserted(positionStart, itemCount);
+						UtilClass.showMessage(getActivity(), "onItemRangeInserted: positionStart: " + positionStart + ", itemCount: " + itemCount);
+
+						// insert into database
+						// get key
+
+					}
+
+					@Override
+					public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount)
+					{
+						// don't move last position (add new custom item)
+					//	if(fromPosition >= mListAdapter.getList().size()-1 || toPosition >= mListAdapter.getList().size()-1)
+					//		return;
+
+						super.onItemRangeMoved(fromPosition, toPosition, itemCount);
+						//UtilClass.showMessage(getActivity(), "onItemRangeMoved: fromPosition: " + fromPosition + ", toPosition: " + toPosition + ", itemCount: " + itemCount);
+
+						ContentValues values = new ContentValues();
+
+						// update KEY_ORDER for all rows between swapped list items
+						int start;
+						int end;
+						if(fromPosition < toPosition)
+						{
+							start = fromPosition;
+							end = toPosition;
+						}
+						else
+						{
+							start = toPosition;
+							end = fromPosition;
+						}
+						for(int i = start; i <= end; i++)
+						{
+							values.clear();
+							values.put(CasesProvider.KEY_ORDER, i);
+							Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(i));
+							getContentResolver().update(row_uri, values, null, null);
+
+							//UtilClass.showMessage(getActivity(), "item moved: Position: " + i + ", item: " + mListAdapter.getItem(i));
+						}
+
+					}
+
+					@Override
+					public void onItemRangeRemoved(int positionStart, int itemCount)
+					{
+						super.onItemRangeRemoved(positionStart, itemCount);
+						UtilClass.showMessage(getActivity(), "onItemRangeRemoved: positionStart: " + positionStart + ", itemCount: " + itemCount);
+
+						// delete from database
+
+					}
+
+				});
 				mRecyclerView.setAdapter(mListAdapter);
 
 				return rootView;

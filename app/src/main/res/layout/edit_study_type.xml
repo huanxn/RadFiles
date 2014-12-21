@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+
+
+    <ImageButton
+        android:id="@+id/removeButton"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_close_grey600_24dp"/>
+
+        <com.huantnguyen.radcases.app.SpinnerDateButton
+            android:id="@+id/edit_date"
+            style="?android:attr/spinnerStyle"
+
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:paddingLeft="8dip"
+            android:textSize="@dimen/standardTextSize"
+            android:textColor="@color/dark_grey_text"
+            android:hint="@string/date_prompt"
+            android:layout_toLeftOf="@id/removeButton"
+
+            />
+
+    <com.huantnguyen.radcases.app.SpinnerCustom
+        android:id="@+id/edit_study_type"
+        style="@style/customSpinnerStyle"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@id/edit_date"
+        android:prompt="@string/studyType_prompt"
+        />
+
+
+
+
+
+</RelativeLayout>
+
+    <!--android:selectableItemBackground="?android:attr/selectableItemBackground"-->

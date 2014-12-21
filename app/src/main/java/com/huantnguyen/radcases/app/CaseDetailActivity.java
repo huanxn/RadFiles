@@ -103,7 +103,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		//
 		// http://developer.android.com/guide/components/fragments.html
 		//
-		if (savedInstanceState == null)
+		//if (savedInstanceState == null)
 		{
 
 			if(fragment != null)

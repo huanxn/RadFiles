@@ -25,4 +25,5 @@
           android:layout_height="wrap_content"
           android:ellipsize="marquee"
           android:textAlignment="inherit"
-        android:textColor="@color/light_grey_text"/>
+        android:textColor="@color/light_grey_text"
+    />

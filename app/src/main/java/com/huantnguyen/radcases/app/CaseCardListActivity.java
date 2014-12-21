@@ -140,15 +140,53 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 		else
 		{
+			/*
 			SpannableString mTitle = new SpannableString("RAD debug" +
 					                                             "");
 			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
+
 			// set the saved filter/spinner state
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
 			UtilClass.showMessage(this, "OnCreate savedInstanceState != null: filterMode " + caseFilterMode);
 			//fragment.populateCards();
+			*/
+
+			// todo change to get stored data
+
+			fragment = new PlaceholderFragment();
+			getFragmentManager().beginTransaction()
+					.add(R.id.container, fragment)
+					.commit();
+
+			SpannableString mTitle = new SpannableString("RAD Cases");
+			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+			// Set up the Action Bar dropdown spinner list
+			// used for sorting the cases per user selected criteria
+			//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
+			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_actionbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
+			//((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
+			ActionBar actionBar = getSupportActionBar();
+			actionBar.setDisplayShowTitleEnabled(false);
+			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+			actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new android.support.v7.app.ActionBar.OnNavigationListener()
+			{
+				//String[] strings = getResources().getStringArray(R.array.action_list);
+
+				@Override
+				public boolean onNavigationItemSelected(int itemPosition, long itemId)
+				{
+					// when item position changes, then repopulate cards using the new criteria
+					caseFilterMode = itemPosition;
+					fragment.populateCards();
+
+					return false;
+				}
+			});
 		}
 	}
 

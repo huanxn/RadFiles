@@ -3,14 +3,15 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="distributionType" value="LOCAL" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="C:\Program Files\Android\Android Studio\gradle\gradle-2.2.1" />
         <option name="modules">
           <set>
-            <option value="C:\Users\Huan\AndroidStudioProjects\RadCases" />
-            <option value="C:\Users\Huan\AndroidStudioProjects\RadCases\app" />
-            <option value="C:\Users\Huan\AndroidStudioProjects\RadCases\app\libs" />
-            <option value="C:\Users\Huan\AndroidStudioProjects\RadCases\app\libs\simple-crop-image-lib" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/app/libs" />
+            <option value="$PROJECT_DIR$/app/libs/simple-crop-image-lib" />
           </set>
         </option>
       </GradleProjectSettings>
