@@ -57,7 +57,7 @@ public class ReorderRecyclerView extends RecyclerView {
 	private int downY;
 	private int totalOffsetY, totalOffsetX;
 
-	private static final int SCALE_FACTOR = 1;
+	private static final int SCALE_FACTOR = 0;
 
 	private BitmapDrawable hoverCell;
 	private Rect hoverCellOriginalBounds;
@@ -147,8 +147,8 @@ public class ReorderRecyclerView extends RecyclerView {
 				int pointerIndex = event.findPointerIndex(activePointerId);
 
 				int deltaY = (int) event.getY(pointerIndex)- downY;
-				int deltaX = (int) event.getX(pointerIndex)- downX;
-				deltaX = 0;
+				//int deltaX = (int) event.getX(pointerIndex)- downX;
+				int deltaX = 0;
 
 				if (cellIsMobile) {
 					hoverCellCurrentBounds.offsetTo(hoverCellOriginalBounds.left + deltaX + totalOffsetX,

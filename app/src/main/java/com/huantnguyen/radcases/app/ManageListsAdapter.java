@@ -2,7 +2,6 @@ package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
@@ -11,9 +10,10 @@ import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -27,6 +27,8 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 	private List<String> itemList;
 	private List<Integer> keyList;
 	private final String ADD_CUSTOM_TEXT = "Add new...";
+
+	private int visible_discard_position;
 
 	// Provide a suitable constructor (depends on the kind of dataset)
 	public ManageListsAdapter(Activity activity, Cursor cursor)
@@ -54,13 +56,12 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 	public ManageListsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
 	                                               int viewType) {
 		// create a new view
-		TextView v = (TextView)LayoutInflater.from(parent.getContext()).inflate(R.layout.list_sortable, parent, false);
+		View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_sortable, parent, false);
+		//TextView v = (TextView)LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_sortable, parent, false);
 		// set the view's size, margins, paddings and layout parameters
-		ViewHolder holder = new ViewHolder(v);
+		ViewHolder holder = new ViewHolder(view);
 
 		holder.mTextView.setTag(holder);
-
-
 
 		return holder;
 	}
@@ -74,6 +75,17 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 		holder.mTextView.setClickable(true);
 
 		holder.mTextView.setOnClickListener(this);
+
+		//if(holder.mTextView.equals(ADD_CUSTOM_TEXT))
+		if(position >= itemList.size()-1)
+		{
+			//holder.mHandle.setImageDrawable(activity.getDrawable(R.drawable.ic_plus_circle_grey600_18dp));
+			holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.huantnguyen.radcases.app:drawable/ic_plus_circle_grey600_18dp", null, null));
+		}
+		else
+		{
+			holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.huantnguyen.radcases.app:drawable/ic_menu_grey600_18dp", null, null));
+		}
 	}
 
 	// Return the size of your dataset (invoked by the layout manager)
@@ -102,6 +114,12 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 		return keyList.get(position);
 	}
 
+	public void setKey(int position, int key_id)
+	{
+		if(position < keyList.size())
+			keyList.set(position, key_id);
+	}
+
 
 	@Override
 	public void onClick(View view)
@@ -124,6 +142,10 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 
 			// show current text in the edit box
 			input.setText(holder.mTextView.getText());
+
+			// show delete item button
+			holder.mDiscardButton.setVisibility(View.VISIBLE);
+			visible_discard_position = holder.getPosition();
 		}
 		else
 		{
@@ -144,6 +166,7 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 				if(position == itemList.size()-1)
 				{
 					itemList.add(ADD_CUSTOM_TEXT);
+					keyList.add(-1);
 					notifyItemInserted(position);
 				}
 				else
@@ -201,11 +224,16 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 	public static class ViewHolder extends RecyclerView.ViewHolder
 	{
 		// each data item is just a string in this case
+		public ImageView mHandle;
 		public TextView mTextView;
-		public ViewHolder(TextView v)
+		public ImageButton mDiscardButton;
+
+		public ViewHolder(View v)
 		{
 			super(v);
-			mTextView = v;
+			mHandle = (ImageView) v.findViewById(R.id.handle);
+			mTextView = (TextView) v.findViewById(R.id.item_text);
+			mDiscardButton = (ImageButton) v.findViewById(R.id.discard_button);
 		}
 	}
 

@@ -59,12 +59,15 @@
         android:layout_below="@id/exportCSV_button">
     </Button>
 
+
     <Button
         android:id="@+id/fix_DB_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="debug"
         android:onClick="onClick_Button"
+        android:visibility="invisible"
         android:layout_below="@id/importCSV_button">
     </Button>
+
 </RelativeLayout>

@@ -285,10 +285,23 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 					public void onItemRangeInserted(int positionStart, int itemCount)
 					{
 						super.onItemRangeInserted(positionStart, itemCount);
-						UtilClass.showMessage(getActivity(), "onItemRangeInserted: positionStart: " + positionStart + ", itemCount: " + itemCount);
+						UtilClass.showMessage(getActivity(), "onItemRangeInserted: positionStart: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
 
-						// insert into database
-						// get key
+						// new item text
+						String newItemString = mListAdapter.getItem(positionStart);
+
+						// put data into "values" for database insert/update
+						ContentValues values = new ContentValues();
+						values.put(tableKEY, newItemString);
+
+						// Add a new list item into the database
+						Uri new_item_uri = getContentResolver().insert(tableURI, values);
+
+						// get the key_id of the new case
+						long key_id = ContentUris.parseId(new_item_uri);
+
+						// set key
+						mListAdapter.setKey(positionStart, (int)key_id);
 
 					}
 

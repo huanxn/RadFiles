@@ -1,9 +1,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.huantnguyen.radcases.app.ManageListsActivity" >
-    
+    tools:context="com.huantnguyen.radcases.app.ManageListsActivity"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/action_add_item"
+          android:title="Add new item"
+          android:icon="@drawable/ic_plus_circle_white_36dp"
+          android:orderInCategory="1"
+          app:showAsAction="ifRoom" />
+
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"
-        android:showAsAction="never" />
+        app:showAsAction="never" />
 </menu>
