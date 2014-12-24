@@ -1,9 +1,9 @@
 package com.huantnguyen.radcases.app;
 
 import android.animation.Animator;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -22,13 +22,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 
 import java.io.File;
@@ -83,17 +83,45 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	//private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
 	//private static File CSV_dir  = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
 
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_case_edit);
+		final View activityRootView = findViewById(R.id.container);
 
 		if (savedInstanceState == null)
 		{
+			final EditCaseFragment fragment = new EditCaseFragment();
+
+			if(fragment != null)
+			{
+				getFragmentManager().beginTransaction().remove(fragment).commit();
+			}
+
 			getFragmentManager().beginTransaction()
-					.add(R.id.container, new EditCaseFragment()).commit();
+					.add(R.id.container, fragment).commit();
+
+			// hide bottom buttonbar if keyboard open
+			//final View activityRootView = activityRootView;
+			    activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+				@Override
+				public void onGlobalLayout()
+				{
+					int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
+					LinearLayout buttonBar = (LinearLayout) fragment.rootView.findViewById(R.id.buttonBar);
+
+					if (heightDiff > 400)  // if more than 400 pixels, its probably a keyboard...
+					{
+						buttonBar.setVisibility(View.GONE);
+					}
+					else
+					{
+						buttonBar.setVisibility(View.VISIBLE);
+					}
+				}
+			});
+
 		}
 
 		selected_date = Calendar.getInstance();
@@ -690,6 +718,9 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		private SpinnerMultiSelect key_words_spinner;
 		private SpinnerMultiSelect section_spinner;
 
+		private Activity activity;
+		private View rootView;
+
 		public EditCaseFragment()
 		{
 		}
@@ -697,12 +728,12 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			View rootView = inflater.inflate(R.layout.fragment_case_edit, container, false);
+			final View view = inflater.inflate(R.layout.fragment_case_edit, container, false);
 
-			((EditText) rootView.findViewById(R.id.edit_patient_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
+			((EditText) view.findViewById(R.id.edit_patient_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
 
 			// hide soft keyboard if click off keyboard
-			((ScrollView) rootView.findViewById(R.id.edit_scrollview)).setOnTouchListener(new View.OnTouchListener()
+			((ScrollView) view.findViewById(R.id.edit_scrollview)).setOnTouchListener(new View.OnTouchListener()
 			{
 				@Override
 				public boolean onTouch(View v, MotionEvent event)
@@ -712,7 +743,16 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				}
 			});
 
-			return rootView;
+			rootView = view;
+			return view;
+		}
+
+
+		@Override
+		public void onAttach(Activity activity)
+		{
+			super.onAttach(activity);
+			this.activity = activity;
 		}
 
 		@Override

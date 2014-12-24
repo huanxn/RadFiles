@@ -709,7 +709,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 							if(!mCardAdapter.getMultiselectList().isEmpty())
 							{
-								shareFile = UtilClass.exportCasesCSV(activity, "TEST_share_file", mCardAdapter.getMultiselectList());
+								shareFile = UtilClass.exportCasesJSON(activity, "TEST_share_file", mCardAdapter.getMultiselectList());
 								Uri uriShareFile = Uri.fromFile(shareFile);
 
 								Intent shareIntent = new Intent(Intent.ACTION_SEND);

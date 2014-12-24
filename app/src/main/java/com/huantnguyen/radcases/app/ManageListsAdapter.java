@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,13 +23,15 @@ import java.util.List;
 /**
  * Created by Huan on 11/5/2014.
  */
-public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<ManageListsAdapter.ViewHolder> /*RecyclerView.Adapter<ManageListsAdapter.ViewHolder>*/ implements View.OnClickListener {
+public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<ManageListsAdapter.ViewHolder> /*RecyclerView.Adapter<ManageListsAdapter.ViewHolder>*/ implements View.OnClickListener, View.OnLongClickListener{
 	private Activity activity;
 	private List<String> itemList;
 	private List<Integer> keyList;
 	private final String ADD_CUSTOM_TEXT = "Add new...";
 
-	private int visible_discard_position;
+	private int visible_discard_position = -1;
+
+	private ImageButton discard_button = null;
 
 	// Provide a suitable constructor (depends on the kind of dataset)
 	public ManageListsAdapter(Activity activity, Cursor cursor)
@@ -75,6 +78,22 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 		holder.mTextView.setClickable(true);
 
 		holder.mTextView.setOnClickListener(this);
+		holder.mTextView.setOnLongClickListener(this);
+
+		holder.mDiscardButton.setOnClickListener(new View.OnClickListener()
+		{
+
+			@Override
+			public void onClick(View view)
+			{
+				// delete item from database and from Lists in ManageListsActivity
+				notifyItemRemoved(visible_discard_position);
+
+				// reset
+				visible_discard_position = -1;
+			}
+
+		});
 
 		//if(holder.mTextView.equals(ADD_CUSTOM_TEXT))
 		if(position >= itemList.size()-1)
@@ -86,6 +105,36 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 		{
 			holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.huantnguyen.radcases.app:drawable/ic_menu_grey600_18dp", null, null));
 		}
+
+		if(position == visible_discard_position)
+		{
+			showDiscardButton(holder);
+		}
+		else
+		{
+			holder.mDiscardButton.setVisibility(View.INVISIBLE);
+		}
+	}
+
+	private void showDiscardButton(ViewHolder holder)
+	{
+		visible_discard_position = holder.getPosition();
+
+		// hide old button
+		if(discard_button != null)
+		{
+			discard_button.setVisibility(View.INVISIBLE);
+		}
+
+		// show new button
+		discard_button = holder.mDiscardButton;
+		discard_button.setVisibility(View.VISIBLE);
+	}
+
+	public void removeItem(int position)
+	{
+		itemList.remove(position);
+		keyList.remove(position);
 	}
 
 	// Return the size of your dataset (invoked by the layout manager)
@@ -144,8 +193,7 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 			input.setText(holder.mTextView.getText());
 
 			// show delete item button
-			holder.mDiscardButton.setVisibility(View.VISIBLE);
-			visible_discard_position = holder.getPosition();
+			showDiscardButton(holder);
 		}
 		else
 		{
@@ -167,6 +215,8 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 				{
 					itemList.add(ADD_CUSTOM_TEXT);
 					keyList.add(-1);
+
+					// add item to database and set key_id in ManageListsActivity
 					notifyItemInserted(position);
 				}
 				else
@@ -196,6 +246,42 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 		});
 		dialog.show();
 
+	}
+
+	@Override
+	public boolean onLongClick(View view)
+	{
+		final ViewHolder holder = (ViewHolder) view.getTag();
+
+		final int position = holder.getPosition();
+
+		if(holder.getPosition() < itemList.size()-1)
+		{
+			// show delete item button
+			showDiscardButton(holder);
+		}
+
+		/*
+		if(position == visible_discard_position)
+		{
+			// hide old button
+			if(discard_button != null)
+			{
+				discard_button.setVisibility(View.INVISIBLE);
+			}
+
+			// show new button
+			discard_button = holder.mDiscardButton;
+			discard_button.setVisibility(View.VISIBLE);
+			//holder.mDiscardButton.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			discard_button.setVisibility(View.INVISIBLE);
+		}
+*/
+
+		return true;
 	}
 
 	@Override

@@ -1,6 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.huantnguyen.radcases.app.CaseImport" >
-    
+    tools:context="com.huantnguyen.radcases.app.CaseImport"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <!-- Settings, should always be in the overflow
+    <item android:title="@string/action_settings" app:showAsAction="never" android:id="@+id/menu_settings"/>
+    -->
 
 </menu>

@@ -47,13 +47,11 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 	public CaseCardAdapter(Activity activity, Cursor caseCursor, int card_layout)
 	{
-
 		caseList = new ArrayList<Case>();
 		if(caseCursor != null)
 		{
 			loadCases(caseCursor);
 		}
-
 
 		this.card_layout_id = card_layout;
 		this.activity = activity;
@@ -125,6 +123,10 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		notifyDataSetChanged();
 	}
 
+	/**
+	 * used for import JSON
+	 * @param inputCases
+	 */
 	public void loadCaseList(List<Case> inputCases)
 	{
 		// loop through case cursor and put info into cards

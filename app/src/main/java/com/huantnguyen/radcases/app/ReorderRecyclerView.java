@@ -93,6 +93,7 @@ public class ReorderRecyclerView extends RecyclerView {
 
 		// detector for the long press in order to start the dragging
 		final GestureDetector longPressGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+			/*
 			public void onLongPress(MotionEvent event) {
 				downX = (int) event.getX();
 				downY = (int) event.getY();
@@ -108,6 +109,36 @@ public class ReorderRecyclerView extends RecyclerView {
 				hoverCell = getAndAddHoverView(selectedView);
 				selectedView.setVisibility(INVISIBLE);
 				cellIsMobile = true;
+			}
+			*/
+			public boolean onDown(MotionEvent event) {
+				downX = (int) event.getX();
+				downY = (int) event.getY();
+
+				//UtilClass.showMessage(getContext(), "Down event: " + downX + ", " + downY);
+				if(downX < 100)  // HANDLE WIDTH
+				{
+
+					activePointerId = event.getPointerId(0);
+
+					totalOffsetY = 0;
+					totalOffsetX = 0;
+					View selectedView = findChildViewUnder(downX, downY);
+					if (selectedView == null )  //todo check if it's the last "add new..."
+					{
+						return true;
+					}
+					mobileItemId = getChildItemId(selectedView);
+					hoverCell = getAndAddHoverView(selectedView);
+					selectedView.setVisibility(INVISIBLE);
+					cellIsMobile = true;
+
+					return true;
+				}
+				else
+				{
+					return false;
+				}
 			}
 		});
 
@@ -348,9 +379,11 @@ public class ReorderRecyclerView extends RecyclerView {
 			allowSwaps = false;
 
 			Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
+			handler.postDelayed(new Runnable()
+			{
 				@Override
-				public void run() {
+				public void run()
+				{
 					allowSwaps = true;
 				}
 			}, getItemAnimator().getMoveDuration());

@@ -4,8 +4,8 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_margin="0dp"
-              android:paddingLeft="8dp"
-              android:paddingRight="8dp"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
               android:background="@color/default_background_light_grey"
               android:orientation="horizontal">
 
@@ -27,6 +27,7 @@
         android:layout_height="match_parent"
         android:background="@null"
         android:src="@drawable/ic_close_circle_grey600_18dp"
+        android:clickable="true"
         android:visibility="invisible"/>
 
 </LinearLayout>

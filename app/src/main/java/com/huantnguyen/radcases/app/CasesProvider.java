@@ -156,7 +156,7 @@ public class CasesProvider extends ContentProvider
 	public static final int COL_IMAGE_ORDER = 3;  // order to display images.  0 is main thumbnail
 
 
-	public static final String[] ALL_KEYS = new String[]{KEY_ROWID, KEY_PATIENT_ID, KEY_DIAGNOSIS,
+	public static final String[] CASES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_PATIENT_ID, KEY_DIAGNOSIS,
 		KEY_SECTION, KEY_FINDINGS, KEY_BIOPSY, KEY_FOLLOWUP, KEY_KEYWORDS, KEY_COMMENTS, KEY_STUDY_TYPE,
 		KEY_DATE, KEY_IMAGE_COUNT, KEY_THUMBNAIL, KEY_FAVORITE, KEY_CLINICAL_HISTORY, KEY_FOLLOWUP_COMMENT};
 
@@ -170,11 +170,11 @@ public class CasesProvider extends ContentProvider
     //Create a FTS3 Virtual Table for fast searches
     private static final String DATABASE_CREATE =
         "CREATE VIRTUAL TABLE " + FTS_VIRTUAL_CASES_TABLE + " USING fts3(" +
-        		ALL_KEYS[0] + "," +
-        		ALL_KEYS[1] + "," +
-        		ALL_KEYS[2] + "," +
-        		ALL_KEYS[3] + "," +
-        		" UNIQUE (" + ALL_KEYS[0] + "));";
+        		CASES_TABLE_ALL_KEYS[0] + "," +
+        		CASES_TABLE_ALL_KEYS[1] + "," +
+        		CASES_TABLE_ALL_KEYS[2] + "," +
+        		CASES_TABLE_ALL_KEYS[3] + "," +
+        		" UNIQUE (" + CASES_TABLE_ALL_KEYS[0] + "));";
     */
 
 	public static final String IMAGES_TABLE = "ImagesTable";
@@ -201,26 +201,27 @@ public class CasesProvider extends ContentProvider
 					//		(http://www.sqlite.org/datatype3.html)
 					//  - "not null" means it is a required field (must be given a value).
 					// NOTE: All must be comma separated (end of line!) Last one must have NO comma!!
-					+ ALL_KEYS[1] + " text, "
-					+ ALL_KEYS[2] + " text, "
-					+ ALL_KEYS[3] + " text, "
-					+ ALL_KEYS[4] + " text, "
-					+ ALL_KEYS[5] + " text, "
-					+ ALL_KEYS[6] + " integer, "    //followup
-					+ ALL_KEYS[7] + " text, "
-					+ ALL_KEYS[8] + " text, "
-					+ ALL_KEYS[9] + " text, "
-					+ ALL_KEYS[10] + " text, "
-					+ ALL_KEYS[11] + " integer, "   //imagecount
-					+ ALL_KEYS[12] + " text, "
-					+ ALL_KEYS[13] + " text, "
-					+ ALL_KEYS[14] + " text, "
-					+ ALL_KEYS[15] + " text"
+					+ CASES_TABLE_ALL_KEYS[1] + " text, "
+					+ CASES_TABLE_ALL_KEYS[2] + " text, "
+					+ CASES_TABLE_ALL_KEYS[3] + " text, "
+					+ CASES_TABLE_ALL_KEYS[4] + " text, "
+					+ CASES_TABLE_ALL_KEYS[5] + " text, "
+					+ CASES_TABLE_ALL_KEYS[6] + " integer, "    //followup
+					+ CASES_TABLE_ALL_KEYS[7] + " text, "
+					+ CASES_TABLE_ALL_KEYS[8] + " text, "
+					+ CASES_TABLE_ALL_KEYS[9] + " text, "
+					+ CASES_TABLE_ALL_KEYS[10] + " text, "
+					+ CASES_TABLE_ALL_KEYS[11] + " integer, "   //imagecount
+					+ CASES_TABLE_ALL_KEYS[12] + " text, "
+					+ CASES_TABLE_ALL_KEYS[13] + " text, "
+					+ CASES_TABLE_ALL_KEYS[14] + " text, "
+					+ CASES_TABLE_ALL_KEYS[15] + " text"
 
 					// Rest  of creation:
 					+ ");";
 
 	// list of image files, with links to parent "Cases" table
+	public static final String[] IMAGES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_IMAGE_PARENT_CASE_ID, KEY_IMAGE_FILENAME, KEY_ORDER};
 	private static final String IMAGES_TABLE_CREATE_SQL =
 			"create table " + IMAGES_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
@@ -611,7 +612,7 @@ public class CasesProvider extends ContentProvider
 	public Cursor getAllRows()
 	{
 		String where = null;
-		Cursor c = db.query(true, CASES_TABLE, ALL_KEYS,
+		Cursor c = db.query(true, CASES_TABLE, CASES_TABLE_ALL_KEYS,
 				                   where, null, null, null, null, null);
 		if (c != null)
 		{
@@ -624,7 +625,7 @@ public class CasesProvider extends ContentProvider
 	public Cursor getRow(long rowId)
 	{
 		String where = KEY_ROWID + "=" + rowId;
-		Cursor c = db.query(true, CASES_TABLE, ALL_KEYS,
+		Cursor c = db.query(true, CASES_TABLE, CASES_TABLE_ALL_KEYS,
 				                   where, null, null, null, null, null);
 		if (c != null)
 		{

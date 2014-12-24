@@ -67,7 +67,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.menu_settings) {
+		if (id == R.id.menu_addnew) {
+			UtilClass.showMessage(this, "placeholder: add new item");
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -346,9 +347,14 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 					public void onItemRangeRemoved(int positionStart, int itemCount)
 					{
 						super.onItemRangeRemoved(positionStart, itemCount);
-						UtilClass.showMessage(getActivity(), "onItemRangeRemoved: positionStart: " + positionStart + ", itemCount: " + itemCount);
+					//	UtilClass.showMessage(getActivity(), "onItemRangeRemoved: positionStart: " + positionStart + ", itemCount: " + itemCount);
 
 						// delete from database
+						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));
+						getContentResolver().delete(row_uri, null, null);
+
+						// delete list item
+						mListAdapter.removeItem(positionStart);
 
 					}
 

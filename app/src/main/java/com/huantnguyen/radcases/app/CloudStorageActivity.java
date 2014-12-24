@@ -42,8 +42,6 @@ import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import fr.castorflex.android.smoothprogressbar.SmoothProgressBar;
-
 //import eu.janmuller.android.simplecropimage.ImageViewTouchBase;
 
 
@@ -67,6 +65,9 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	final static String CASES_CSV_FILENAME = "cases_table.csv";
 	final static String IMAGES_CSV_FILENAME = "images_table.csv";
 	final static String STUDIES_CSV_FILENAME = "studies_table.csv";
+
+	final static String CASES_JSON_FILENAME = "cases_table.txt";
+	final static String IMAGES_JSON_FILENAME = "images_table.txt";
 
 	// Database: backup and restore
 	final static String RDB_MIMETYPE = "application/x-7z-compressed";
@@ -358,12 +359,12 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 	private File exportCasesCSV(String filename)
 	{
-		return UtilClass.exportCasesCSV(this, filename, null);
+		return UtilClass.exportCasesJSON(this, filename, null);
 	}
 
 
 	/*
-	public void importCasesCSV(File inFile)
+	public void importCasesJSON(File inFile)
 	{
 		BufferedReader br = null;
 		String line;
@@ -458,14 +459,14 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				long old_case_id = Long.valueOf(values[0]);
 
 				// input all columns for this case, except row_id
-				for (int i = 1; i < CasesProvider.ALL_KEYS.length; i++)
+				for (int i = 1; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
 				{
 					if(i>=values.length) // the rest of fields are blank
 						break;
 
-					insertCaseValues.put(CasesProvider.ALL_KEYS[i], values[i]);
+					insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[i], values[i]);
 
-					if(CasesProvider.ALL_KEYS[i].contentEquals(CasesProvider.KEY_IMAGE_COUNT))
+					if(CasesProvider.CASES_TABLE_ALL_KEYS[i].contentEquals(CasesProvider.KEY_IMAGE_COUNT))
 						imageCount = Integer.valueOf(values[i]);
 				}
 
@@ -721,7 +722,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					// Initiate the upload
 
 					//File restoreFile = new File(restoreFilename);
-					//importCasesCSV(restoreFile);
+					//importCasesJSON(restoreFile);
 
 					restoreDB(tempRestoreFile);
 
@@ -788,7 +789,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					}
 
 					// process file: unzip images, add csv info to database
-					UtilClass.importCasesCSV(this, tempCSV_File);
+					UtilClass.importCasesJSON(this, tempCSV_File);
 
 					// delete the temporary file
 					tempCSV_File.delete();

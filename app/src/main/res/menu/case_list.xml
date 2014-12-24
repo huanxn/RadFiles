@@ -7,7 +7,7 @@
     <item android:title="@string/action_search" radcases:actionViewClass="android.support.v7.widget.SearchView" radcases:showAsAction="ifRoom" android:icon="@drawable/ic_action_search" android:id="@+id/menu_search"/>
 
     <!-- Add new case, should appear as action button -->
-    <item android:title="@string/action_new" radcases:showAsAction="ifRoom" android:icon="@drawable/ic_plus_box_white_36dp" android:id="@+id/menu_addnew"/>
+    <item android:title="@string/action_new" radcases:showAsAction="ifRoom" android:icon="@drawable/ic_action_new" android:id="@+id/menu_addnew"/>
 
 
 

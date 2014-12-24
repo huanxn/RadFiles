@@ -15,13 +15,15 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
+import android.util.JsonReader;
+import android.util.JsonToken;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -31,14 +33,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.google.android.gms.drive.Drive;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -788,13 +792,12 @@ public class UtilClass extends Activity
 	 * @return
 	 */
 
-	public static File exportCasesCSV(Activity activity, String filename, List<Long> selectedCaseList)
+	public static File exportCasesJSON(Activity activity, String filename, List<Long> selectedCaseList)
 	{
 		File returnFile;
 
-		// attempt to create CSV file
-		File casesCSV = null;
-		File imagesCSV = null;
+		// attempt to create json file
+		File casesJSON = null;
 
 		// CSV subdirectory within internal app data directory
 		//File CSV_dir = new File(activity.getApplication().getExternalFilesDir(null), "/CSV/");
@@ -815,8 +818,7 @@ public class UtilClass extends Activity
 
 		try
 		{
-			casesCSV = new File(CSV_dir.getPath(), CloudStorageActivity.CASES_CSV_FILENAME);
-			imagesCSV = new File(CSV_dir.getPath(), CloudStorageActivity.IMAGES_CSV_FILENAME);
+			casesJSON = new File(CSV_dir.getPath(), CloudStorageActivity.CASES_JSON_FILENAME);
 		}
 		catch (Exception e)
 		{
@@ -825,37 +827,15 @@ public class UtilClass extends Activity
 			return null;
 		}
 
-		String csvHeader = "";
-		String case_csvValues = "";
-		String image_csvValues = "";
-
 		// to zip all images into a file for backup
 		String zip_files_array[] = new String[0];
-
-		String value = "";
-
-		for (int i = 0; i < CasesProvider.ALL_KEYS.length; i++) {
-			if (csvHeader.length() > 0) {
-				csvHeader += ",";
-			}
-			csvHeader += "\"" + CasesProvider.ALL_KEYS[i] + "\"";
-		}
-
-		//csvHeader += ",\"Image Files\"\n";
-		csvHeader += "\n";
-
-		Log.d(TAG, "header=" + csvHeader);
 
 		// create local CSV files
 		try
 		{
-			FileWriter casesWriter = new FileWriter(casesCSV);
-			BufferedWriter casesOut = new BufferedWriter(casesWriter);
+			FileOutputStream cases_out = new FileOutputStream(casesJSON);
 
-			FileWriter imagesWriter = new FileWriter(imagesCSV);
-			BufferedWriter imagesOut = new BufferedWriter(imagesWriter);
-
-			// Cases table
+			// Get cases to export from cases table into a cursor
 			Cursor caseCursor;
 			if(selectedCaseList == null)
 			{
@@ -897,35 +877,61 @@ public class UtilClass extends Activity
 
 			if (caseCursor != null && caseCursor.moveToFirst())
 			{
-				casesOut.write(csvHeader);
-				//	outputStream.write(csvHeader.getBytes());
+				JsonWriter cases_writer = new JsonWriter(new OutputStreamWriter(cases_out, "UTF-8"));
+				cases_writer.setIndent("  ");
+
+				//JsonWriter images_writer = new JsonWriter(new OutputStreamWriter(images_out, "UTF-8"));
+				//images_writer.setIndent("  ");
+
+				cases_writer.beginArray();
+				//images_writer.beginArray();
 
 				// loop through all cases
 				do
 				{
-					case_csvValues = "";
-					// output all case columns for this case
-					for (int i = 0; i < CasesProvider.ALL_KEYS.length; i++)
+					cases_writer.beginObject();
+
+					// output all case columns/fields for this case
+					for (int i = 0; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
 					{
-						if (i > 0)
-						{
-							case_csvValues += ",";
-						}
-
-						if (i == 6 || i == 11)
-							case_csvValues += "\"" + String.valueOf(caseCursor.getInt(i)) + "\"";
-						else
-						{
-
-							value = caseCursor.getString(i);
-
-							if(value == null)
-								value = "";
-
-							case_csvValues += "\"" + value + "\"";
-						}
+						cases_writer.name(CasesProvider.CASES_TABLE_ALL_KEYS[i]).value(caseCursor.getString(i));
 					}
 
+					// output all linked images for this case (via parent_case_id)
+					String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
+					Cursor imageCursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+					// loop through all images of this case
+					if(imageCursor.moveToFirst())
+					{
+						cases_writer.name("IMAGES");
+						cases_writer.beginArray();
+						do
+						{
+							cases_writer.beginObject();
+							for(int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
+							{
+								cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
+							}
+							cases_writer.endObject();
+
+							// add image filename to zip list
+							zip_files_array = UtilClass.addArrayElement(zip_files_array, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+
+						} while (imageCursor.moveToNext());
+
+						cases_writer.endArray();
+					}
+					else
+					{
+						cases_writer.name("IMAGES").nullValue();
+					}
+
+					imageCursor.close();
+
+					cases_writer.endObject();
+
+					/*
 					// Image Table CSV
 					String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
 					Cursor imageCursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
@@ -936,6 +942,13 @@ public class UtilClass extends Activity
 					{
 						do
 						{
+							images_writer.beginObject();
+							for(int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
+							{
+								images_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
+							}
+							images_writer.endObject();
+
 							image_csvValues = imageCursor.getString(0) + "," + imageCursor.getString(1) + "," + imageCursor.getString(2) + "," + imageCursor.getString(3) + "\n";
 							imagesOut.write(image_csvValues);
 
@@ -945,27 +958,25 @@ public class UtilClass extends Activity
 					}
 
 					imageCursor.close();
+					*/
 
-					casesOut.write(case_csvValues + "\n");
-					//			outputStream.write(case_csvValues.getBytes());
 				} while (caseCursor.moveToNext());
+
 				caseCursor.close();
 
+				cases_writer.endArray();
+				cases_writer.close();
 			}
-			casesOut.close();
-			imagesOut.close();
 
 			// zip image and csv files
 			String zip_filename = CSV_dir.getPath() + "/" + filename + CloudStorageActivity.RCS_EXTENSION;
-			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesCSV.getPath());
-			zip_files_array = UtilClass.addArrayElement(zip_files_array, imagesCSV.getPath());
+			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesJSON.getPath());
 
 			// create zip file.  return link to that file.
 			returnFile = UtilsFile.zip(zip_files_array, zip_filename);
 
 			// delete temporary files
-			casesCSV.delete();
-			imagesCSV.delete();
+			//casesJSON.delete();
 
 		}
 		catch (IOException e)
@@ -983,7 +994,7 @@ public class UtilClass extends Activity
 	 * @param activity
 	 * @param inFile
 	 */
-	public static void importCasesCSV(Activity activity, File inFile)
+	public static void importCasesJSON(Activity activity, File inFile)
 	{
 		BufferedReader br = null;
 		String line;
@@ -1004,14 +1015,15 @@ public class UtilClass extends Activity
 			return;
 		}
 
-		File tempCasesCSV = null;
-		File tempImagesCSV = null;
+		File tempCasesJSON = null;
+		JsonReader reader = null;
+
 		try
 		{
-			// open existing files that should have been unzipped
-			tempCasesCSV = new File(picturesDir, CloudStorageActivity.CASES_CSV_FILENAME);
-			tempImagesCSV = new File(picturesDir, CloudStorageActivity.IMAGES_CSV_FILENAME);
-
+			// open existing file that should have been unzipped
+			tempCasesJSON = new File(picturesDir, CloudStorageActivity.CASES_JSON_FILENAME);
+			FileInputStream cases_in = new FileInputStream(tempCasesJSON);
+			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
 		}
 		catch (Exception e)
 		{
@@ -1020,6 +1032,7 @@ public class UtilClass extends Activity
 			return;
 		}
 
+		/*
 		//////////////////parent ids will change in new database!!!!
 		// IMAGES TABLE
 		try
@@ -1051,10 +1064,138 @@ public class UtilClass extends Activity
 			Toast.makeText(activity, "Unable to open Images CSV file", Toast.LENGTH_SHORT).show();
 			return;
 		}
+		*/
 
 		// CASES TABLE
 		try
 		{
+			ContentValues insertCaseValues = new ContentValues();
+			ContentValues insertImageValues = new ContentValues();
+
+			reader.beginArray();
+
+			// loop through all cases
+			while(reader.hasNext())
+			{
+				insertCaseValues.clear();
+				reader.beginObject();
+
+				while(reader.hasNext())
+				{
+					String field_name = reader.nextName();
+
+					if(reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+					{
+						reader.skipValue();
+					}
+					else if(Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
+					{
+						insertCaseValues.put(field_name, reader.nextString());
+					}
+					else if(field_name.contentEquals("IMAGES"))
+					{
+						// insert the set of case info into the DB cases table
+						rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
+
+						// get parent key information
+						parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+
+						reader.beginArray();
+
+						// loop through all images of this case
+						while(reader.hasNext())
+						{
+							insertImageValues.clear();
+							reader.beginObject();
+
+							while(reader.hasNext())
+							{
+								String image_field_name = reader.nextName();
+
+								if(reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+								{
+									reader.skipValue();
+								}
+								else if(image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
+								{
+									// put new parent_id of newly added case
+									insertImageValues.put(image_field_name, parent_id);
+									reader.skipValue();
+								}
+								else if(Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
+								{
+									insertImageValues.put(image_field_name, reader.nextString());
+								}
+								else
+								{
+									reader.skipValue();
+								}
+							}
+
+							reader.endObject();
+
+							// insert the set of image info into the DB images table
+							activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+						}
+
+						reader.endArray();
+
+					}
+					else
+					{
+						reader.skipValue();
+					}
+				}
+
+				/*
+				// loop through each field of this case (after _id)
+				reader.nextName();
+				for(int i = 1; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
+				{
+					reader.nextName();
+					insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[i], reader.nextString());
+				}
+
+				// insert the set of case info into the DB cases table
+				rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
+
+				// get parent key information
+				parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+
+				if(reader.nextName().contentEquals("IMAGES"))
+				{
+					reader.beginArray();
+
+					// loop through each image in the case
+					while(reader.hasNext())
+					{
+						reader.beginObject();
+						insertImageValues.clear();
+
+						// loop through each field of this image (after _id and parent_id)
+						reader.nextName();
+						reader.nextName();
+						insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[1], parent_id);
+						for(int i = 2; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
+						{
+							reader.nextName();
+							insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[i], reader.nextString());
+						}
+
+						reader.endObject();
+					}
+
+					reader.endArray();
+				}
+
+				*/
+
+				reader.endObject();
+			}
+
+			reader.endArray();
+
+			/*
 			br = new BufferedReader(new FileReader(tempCasesCSV));
 
 			ContentValues insertCaseValues = new ContentValues();
@@ -1074,20 +1215,19 @@ public class UtilClass extends Activity
 				long old_case_id = Long.valueOf(values[0]);
 
 				// input all columns for this case, except row_id
-				for (int i = 1; i < CasesProvider.ALL_KEYS.length; i++)
+				for (int i = 1; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
 				{
 					if(i>=values.length) // the rest of fields are blank
 						break;
 
-					insertCaseValues.put(CasesProvider.ALL_KEYS[i], values[i]);
+					insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[i], values[i]);
 
-					if(CasesProvider.ALL_KEYS[i].contentEquals(CasesProvider.KEY_IMAGE_COUNT))
+					if(CasesProvider.CASES_TABLE_ALL_KEYS[i].contentEquals(CasesProvider.KEY_IMAGE_COUNT))
 						imageCount = Integer.valueOf(values[i]);
 				}
 
 				// insert the set of case info into the DB cases table
 				rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
-
 
 				// get parent key information
 				parent_id = Integer.valueOf(rowUri.getLastPathSegment());
@@ -1105,18 +1245,17 @@ public class UtilClass extends Activity
 
 			}
 			br.close();
+			*/
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			Toast.makeText(activity, "Unable to open Cases CSV file", Toast.LENGTH_SHORT).show();
+			Toast.makeText(activity, "Unable to open Cases JSON file", Toast.LENGTH_SHORT).show();
 			return;
 		}
 
 		Toast.makeText(activity, "Imported cases", Toast.LENGTH_SHORT).show();
-
-		tempCasesCSV.delete();
-		tempImagesCSV.delete();
+		tempCasesJSON.delete();
 	}
 
 

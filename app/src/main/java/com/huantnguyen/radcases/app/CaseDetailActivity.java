@@ -191,7 +191,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				return true;
 
 			case R.id.menu_camera:
-				Toast.makeText(this, "debug: Camera function...", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "placeholder: Camera function...", Toast.LENGTH_SHORT).show();
 				return true;
 
 			case R.id.menu_delete:
