@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 
 import com.astuetz.PagerSlidingTabStrip;
 
@@ -215,7 +213,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 				// Setup RecyclerView
 				mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
-				mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+				//mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+				mRecyclerView.setItemAnimator(null);
 
 				// Setup list to be placed in adapter
 				Cursor listCursor;
@@ -258,17 +257,10 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				mListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
 				{
 					@Override
-					public void onChanged()
-					{
-						super.onChanged();
-						UtilClass.showMessage(getActivity(), "test data changed");
-					}
-
-					@Override
 					public void onItemRangeChanged(int positionStart, int itemCount)
 					{
 						super.onItemRangeChanged(positionStart, itemCount);
-						UtilClass.showMessage(getActivity(), "item Changed: position: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
+						//UtilClass.showMessage(getActivity(), "item Changed: position: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
 
 						// changed item text
 						String newItemString = mListAdapter.getItem(positionStart);
@@ -286,7 +278,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 					public void onItemRangeInserted(int positionStart, int itemCount)
 					{
 						super.onItemRangeInserted(positionStart, itemCount);
-						UtilClass.showMessage(getActivity(), "onItemRangeInserted: positionStart: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
+						//UtilClass.showMessage(getActivity(), "onItemRangeInserted: positionStart: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
 
 						// new item text
 						String newItemString = mListAdapter.getItem(positionStart);
@@ -294,6 +286,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						// put data into "values" for database insert/update
 						ContentValues values = new ContentValues();
 						values.put(tableKEY, newItemString);
+						values.put(CasesProvider.KEY_ORDER, positionStart);
 
 						// Add a new list item into the database
 						Uri new_item_uri = getContentResolver().insert(tableURI, values);
@@ -341,6 +334,9 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 							//UtilClass.showMessage(getActivity(), "item moved: Position: " + i + ", item: " + mListAdapter.getItem(i));
 						}
 
+						// tell adapter to keep animated list changes
+						mListAdapter.notifyDataSetChanged();
+
 					}
 
 					@Override
@@ -360,6 +356,23 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 				});
 				mRecyclerView.setAdapter(mListAdapter);
+
+				// For drag and drop edit list
+				DragSortRecycler dragSortRecycler = new DragSortRecycler();
+				dragSortRecycler.setViewHandleId(R.id.handle); //View you wish to use as the handle
+
+				dragSortRecycler.setItemMoveInterface(new DragSortRecycler.ItemMovedInterface() {
+					@Override
+					public void moveElement(int from, int to)
+					{
+						// move adapter list items
+						mListAdapter.moveElements(from, to);
+					}
+				});
+
+				mRecyclerView.addItemDecoration(dragSortRecycler);
+				mRecyclerView.addOnItemTouchListener(dragSortRecycler);
+				mRecyclerView.setOnScrollListener(dragSortRecycler.getScrollListener());
 
 				return rootView;
 			}

@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Created by Huan on 11/5/2014.
  */
-public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<ManageListsAdapter.ViewHolder> /*RecyclerView.Adapter<ManageListsAdapter.ViewHolder>*/ implements View.OnClickListener, View.OnLongClickListener{
+public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener{
 	private Activity activity;
 	private List<String> itemList;
 	private List<Integer> keyList;
@@ -145,7 +145,8 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 
 	@Override
 	public long getItemId(int position) {
-		return itemList.get(position).hashCode();
+		//return itemList.get(position).hashCode();
+		return position;
 	}
 
 	public List<String> getList()
@@ -284,8 +285,9 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 		return true;
 	}
 
+	/*
 	@Override
-	public void swapElements(int fromIndex, int toIndex)
+	public void moveElements(int fromIndex, int toIndex)
 	{
 		// don't change position of last item (add new custom item)
 		if(fromIndex >= itemList.size()-1 || toIndex >= itemList.size()-1)
@@ -300,6 +302,50 @@ public class ManageListsAdapter extends ReorderRecyclerView.ReorderAdapter<Manag
 		keyList.set(toIndex, temp_key);
 
 		//notifyDataSetChanged();
+		notifyItemMoved(fromIndex, toIndex);
+	}
+	*/
+
+	/**
+	 * moveElements
+	 * move list items in adapter (only)
+	 * @param fromIndex
+	 * @param toIndex
+	 */
+	public void moveElements(int fromIndex, int toIndex)
+	{
+		// don't change position of last item (add new custom item)
+		if(fromIndex >= itemList.size()-1 || toIndex >= itemList.size()-1 || fromIndex == toIndex)
+			return;
+
+		// remember selected item info ("from")
+		String temp = itemList.get(fromIndex);
+		int temp_key = keyList.get(fromIndex);
+
+		if(fromIndex < toIndex)
+		{
+			// move all items inbetween down one position
+			for(int i = fromIndex; i < toIndex; i++)
+			{
+				itemList.set(i, itemList.get(i+1));
+				keyList.set(i, keyList.get(i+1));
+			}
+		}
+		else if(fromIndex > toIndex)
+		{
+			// move all items inbetween up one position
+			for(int i = fromIndex; i > toIndex; i--)
+			{
+				itemList.set(i, itemList.get(i-1));
+				keyList.set(i, keyList.get(i-1));
+			}
+		}
+
+		// move the selected item from old position to new position
+		itemList.set(toIndex, temp);
+		keyList.set(toIndex, temp_key);
+
+		// update database in ManageListsActivity
 		notifyItemMoved(fromIndex, toIndex);
 	}
 
