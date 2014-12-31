@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/* //device/apps/common/assets/res/any/layout/simple_spinner_item.xml
+**
+**  modified android.R.layout.simple_spinner_layout
+*/
+-->
+
+    <!-- divider style set in styles.xml -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:minWidth="@dimen/abc_panel_menu_list_width"
+              android:selectableItemBackground="?android:attr/selectableItemBackground"
+    >
+
+    <TextView
+        android:id="@+id/title"
+        style="@style/spinner_actionBar_title"
+        android:singleLine="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee" />
+
+    <TextView
+        android:id="@+id/subtitle"
+        style="@style/spinner_actionBar_subtitle"
+        android:singleLine="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:ellipsize="marquee" />
+
+</LinearLayout>

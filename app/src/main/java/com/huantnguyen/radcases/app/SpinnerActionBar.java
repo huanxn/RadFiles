@@ -1,6 +1,5 @@
 package com.huantnguyen.radcases.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -71,7 +70,7 @@ public class SpinnerActionBar extends ArrayAdapter<String>
 		ViewHolder holder;
 
 		if (convertView == null) {
-			convertView = inflater.inflate(R.layout.spinner_actionbar, null);
+			convertView = inflater.inflate(R.layout.spinner_toolbar, null);
 			holder = new ViewHolder();
 			holder.txt01 = (TextView) convertView.findViewById(R.id.title);
 			holder.txt02 = (TextView) convertView.findViewById(R.id.subtitle);
