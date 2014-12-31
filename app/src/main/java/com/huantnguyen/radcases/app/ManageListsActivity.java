@@ -358,8 +358,9 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				mRecyclerView.setAdapter(mListAdapter);
 
 				// For drag and drop edit list
-				DragSortRecycler dragSortRecycler = new DragSortRecycler();
+				DragSortRecycler dragSortRecycler = new DragSortRecycler(getApplicationContext());
 				dragSortRecycler.setViewHandleId(R.id.handle); //View you wish to use as the handle
+				dragSortRecycler.setFloatingAlpha((float)0.8);
 
 				dragSortRecycler.setItemMoveInterface(new DragSortRecycler.ItemMovedInterface() {
 					@Override

@@ -1,9 +1,12 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.SearchManager;
+import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
@@ -77,7 +80,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	public static CaseCardAdapter mCardAdapter;
 
-	private PlaceholderFragment fragment;
+	public static PlaceholderFragment fragment;
 
 	// standard directories
 	public static File downloadsDir;
@@ -233,11 +236,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				Intent intent = new Intent(this, CaseAddActivity.class);
 				startActivityForResult(intent, REQUEST_ADD_CASE);
 
-				return true;
-
-			case R.id.menu_settings:
-				//openSettings();
-				Toast.makeText(this, "debug: Settings function...", Toast.LENGTH_SHORT).show();
 				return true;
 
 			default:
@@ -408,6 +406,16 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			// click listeners
 			setCardClickListeners();
 			mCardAdapter.setOnClickListeners(cardOnClickListener, cardOnLongClickListener);
+/*
+			mCardAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
+			                                         {
+				                                         @Override
+				                                         public void onChanged()
+				                                         {
+					                                         populateCards();
+				                                         }
+			                                         });
+*/
 
 			mRecyclerView.setAdapter(mCardAdapter);
 
@@ -735,12 +743,78 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 								}
 							}
 
+							// todo don't finish if canceled
 							mode.finish(); // Action picked, so close the CAB
 							return true;
 
 						case R.id.menu_delete:
-							UtilClass.showMessage(getActivity(), "TEST DELETE");
-							mode.finish(); // Action picked, so close the CAB
+
+							// delete from database
+							//UtilClass.menuItem_deleteCases(getActivity(), mCardAdapter.getMultiselectList());
+
+							final Context context = getActivity();
+							final List<Long> deleteIdList = new ArrayList<Long>(mCardAdapter.getMultiselectList());
+							final ActionMode actionMode = mode;
+							final PlaceholderFragment frag = fragment;
+
+							// Alert dialog to confirm delete
+							AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+							builder.setMessage("Delete " + deleteIdList.size() + " cases?")
+									.setPositiveButton(context.getResources().getString(R.string.button_OK), new DialogInterface.OnClickListener()
+									{
+										public void onClick(DialogInterface dialog, int id)
+										{
+											// delete confirmed
+
+											for (int i = 0; i < deleteIdList.size(); i++)
+											{
+												// get key_id from list array
+												long key_id = deleteIdList.get(i);
+
+												// delete case from CASES table
+												Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+												context.getContentResolver().delete(case_delete_uri, null, null);
+
+												// delete all linked images files
+												Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
+												File imageFile = null;
+												if (image_cursor.moveToFirst())
+												{
+													do
+													{
+														imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+														imageFile.delete();
+													} while (image_cursor.moveToNext());
+												}
+												image_cursor.close();
+
+												// delete all child rows from IMAGES table, by parent case key_id
+												context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
+
+												// remove from recyclerView
+												//mCardAdapter.removeCase(key_id);
+												frag.populateCards();
+
+												mCardAdapter.notifyDataSetChanged();
+												actionMode.finish(); // Action picked, so close the CAB
+											}
+
+											// update CaseCardListActivity
+											//context.setResult(CaseCardListActivity.RESULT_DELETED);
+										}
+									})
+									.setNegativeButton(context.getResources().getString(R.string.button_cancel), new DialogInterface.OnClickListener()
+									{
+										public void onClick(DialogInterface dialog, int id)
+										{
+											// cancel
+										}
+									});
+
+							AlertDialog alert = builder.create();
+							alert.show();
+
 							return true;
 
 						default:

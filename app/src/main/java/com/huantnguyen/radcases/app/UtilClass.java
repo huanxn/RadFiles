@@ -655,7 +655,7 @@ public class UtilClass extends Activity
 		// Alert dialog to confirm delete
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
-		builder.setMessage("Delete this case")
+		builder.setMessage("Delete this case?")
 				.setPositiveButton(context.getResources().getString(R.string.button_OK), new DialogInterface.OnClickListener()
 				{
 					public void onClick(DialogInterface dialog, int id)
@@ -685,6 +685,68 @@ public class UtilClass extends Activity
 						// update CaseCardListActivity
 						context.setResult(CaseCardListActivity.RESULT_DELETED);
 						context.finish();
+					}
+				})
+				.setNegativeButton(context.getResources().getString(R.string.button_cancel), new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						// cancel
+					}
+				});
+
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+
+	/**
+	 * Action Bar menu item: Delete the case from the action bar menu
+	 * @param activity: calling activity for context
+	 * @param case_id_list: list array of unique row id of the cases to be deleted
+	 */
+	public static void menuItem_deleteCases(Activity activity, List<Long> case_id_list)
+	{
+		final List<Long> caseList = new ArrayList<Long>(case_id_list);
+		final Activity context = activity;
+
+		// Alert dialog to confirm delete
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+		builder.setMessage("Delete " + caseList.size() + " cases?")
+				.setPositiveButton(context.getResources().getString(R.string.button_OK), new DialogInterface.OnClickListener()
+				{
+					public void onClick(DialogInterface dialog, int id)
+					{
+						// delete confirmed
+
+						for (int i = 0; i < caseList.size(); i++)
+						{
+							// get key_id from list array
+							long key_id = caseList.get(i);
+
+							// delete case from CASES table
+							Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+							context.getContentResolver().delete(case_delete_uri, null, null);
+
+							// delete all linked images files
+							Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
+							File imageFile = null;
+							if (image_cursor.moveToFirst())
+							{
+								do
+								{
+									imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+									imageFile.delete();
+								} while (image_cursor.moveToNext());
+							}
+							image_cursor.close();
+
+							// delete all child rows from IMAGES table, by parent case key_id
+							context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
+						}
+
+						// update CaseCardListActivity
+						//context.setResult(CaseCardListActivity.RESULT_DELETED);
 					}
 				})
 				.setNegativeButton(context.getResources().getString(R.string.button_cancel), new DialogInterface.OnClickListener()

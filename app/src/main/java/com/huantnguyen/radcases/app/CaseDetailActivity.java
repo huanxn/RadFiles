@@ -214,11 +214,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				Toast.makeText(this, "debug: Search function...", Toast.LENGTH_SHORT).show();
 				return true;
 
-			case R.id.menu_settings:
-				//openSettings();
-				Toast.makeText(this, "debug: Settings function...", Toast.LENGTH_SHORT).show();
-				return true;
-
 			default:
 				return super.onOptionsItemSelected(item);
 		}

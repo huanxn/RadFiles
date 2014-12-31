@@ -196,18 +196,8 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		if(super.onCreateOptionsMenu(menu))
-		{
-			// Inflate the menu; this adds items to the action bar if it is present.
-			if (key_id == -1)
-			{
-				getMenuInflater().inflate(R.menu.add_case, menu);
-			}
-			else
-			{
-				getMenuInflater().inflate(R.menu.edit_case, menu);
-			}
-		}
+
+		getMenuInflater().inflate(R.menu.edit_case, menu);
 
 		return true;
 	}
@@ -240,13 +230,10 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				UtilClass.menuItem_deleteCase(this, key_id);
 				return true;
 
-
-			case R.id.menu_settings:
-				return true;
-
+			default:
+				return super.onOptionsItemSelected(item);
 		}
 
-		return super.onOptionsItemSelected(item);
 	}
 
 	/**

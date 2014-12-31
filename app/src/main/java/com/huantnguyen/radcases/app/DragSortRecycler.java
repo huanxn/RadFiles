@@ -23,11 +23,13 @@ package com.huantnguyen.radcases.app;
 
 
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Vibrator;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -63,9 +65,15 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
 	private int viewHandleId = -1;
 
+	private Vibrator vibrator;
 
 	ItemMovedInterface moveInterface;
 
+	public DragSortRecycler(Context context)
+	{
+		vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+
+	}
 
 	public interface ItemMovedInterface
 	{
@@ -255,6 +263,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 			if ((dragHandleWidth > 0 ) && (e.getX() < dragHandleWidth))
 			{
 				dragging = true;
+
 			}
 			else if (viewHandleId != -1)
 			{
@@ -294,6 +303,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 			if (dragging)
 			{
 				debugLog("Started Drag");
+				vibrator.vibrate(10);
 
 				floatingItem = creatFloatingBitmap(itemView);
 

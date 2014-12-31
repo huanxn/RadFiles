@@ -142,6 +142,18 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		notifyDataSetChanged();
 	}
 
+	public void removeCase(long key_id)
+	{
+		for(int i = 0; i < caseList.size(); i++)
+		{
+			if(caseList.get(i).key_id == key_id)
+			{
+				caseList.remove(i);
+				return;
+			}
+		}
+	}
+
 	public void setActionModeCallback(ActionMode.Callback actionModeCallback)
 	{
 		if(actionModeCallback != null)

@@ -315,8 +315,14 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 	public void moveElements(int fromIndex, int toIndex)
 	{
 		// don't change position of last item (add new custom item)
-		if(fromIndex >= itemList.size()-1 || toIndex >= itemList.size()-1 || fromIndex == toIndex)
+		if(fromIndex >= itemList.size()-1 || toIndex >= itemList.size()-1)
 			return;
+		else if(fromIndex == toIndex)
+		{
+			visible_discard_position = toIndex;
+			notifyDataSetChanged();
+			return;
+		}
 
 		// remember selected item info ("from")
 		String temp = itemList.get(fromIndex);
@@ -344,6 +350,8 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		// move the selected item from old position to new position
 		itemList.set(toIndex, temp);
 		keyList.set(toIndex, temp_key);
+
+		visible_discard_position = toIndex;
 
 		// update database in ManageListsActivity
 		notifyItemMoved(fromIndex, toIndex);
