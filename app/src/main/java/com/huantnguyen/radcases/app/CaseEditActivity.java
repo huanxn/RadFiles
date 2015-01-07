@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -102,6 +103,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment).commit();
 
+			/*
 			// hide bottom buttonbar if keyboard open
 			//final View activityRootView = activityRootView;
 			    activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -121,6 +123,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 					}
 				}
 			});
+			*/
 
 		}
 
@@ -154,10 +157,12 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		section_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
 
 
+		/*
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle("Save");
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setIcon(R.drawable.ic_action_accept);
+		*/
 
 
 	}
@@ -221,6 +226,11 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				choosePictureAlertDialog(item.getActionView());
 				return true;
 
+			case R.id.menu_discard:
+				setResult(CaseCardListActivity.RESULT_NOCHANGE);
+				finish();
+				return true;
+
 			case R.id.menu_delete:
 				//Toast.makeText(this, "debug: delete " + key_id, Toast.LENGTH_SHORT).show();
 
@@ -244,6 +254,11 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	{
 		switch(view.getId())
 		{
+			case R.id.saveButton:
+				saveToDatabase();
+				finish();
+				break;
+			/*
 			case R.id.cancelButton:
 				//TODO delete files that we don't need
 				setResult(CaseCardListActivity.RESULT_NOCHANGE);
@@ -254,6 +269,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				saveToDatabase();
 				finish();
 				break;
+			*/
 
 			/*
 			case R.id.add_new_study_button:
@@ -716,6 +732,14 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			final View view = inflater.inflate(R.layout.fragment_case_edit, container, false);
+
+			Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
+			((ActionBarActivity)getActivity()).setSupportActionBar(toolbar);
+
+			ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+			actionBar.setDisplayHomeAsUpEnabled(false);
+			actionBar.setDisplayShowTitleEnabled(false);
+
 
 			((EditText) view.findViewById(R.id.edit_patient_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
 

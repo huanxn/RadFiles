@@ -56,11 +56,13 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		setContentView(R.layout.activity_navigation_drawer);
 
 		/*
+
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		if (toolbar != null) {
 			setSupportActionBar(toolbar);
 		}
-*/
+		*/
+
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mTitle = new SpannableString(getTitle());
 
@@ -80,14 +82,14 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_navigation_drawer_fab);
 
-/*
+
 		// set the toolbar layout element as the FadingActionBar
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 		if (toolbar != null)
 		{
 			setSupportActionBar(toolbar);
 		}
-*/
+
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mTitle = new SpannableString(getTitle());

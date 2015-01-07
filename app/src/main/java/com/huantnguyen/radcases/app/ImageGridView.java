@@ -69,6 +69,11 @@ public class ImageGridView
 		SetClickListeners();
 	}
 
+	public void setThumbnailPosition(int thumb)
+	{
+		thumbnail = thumb;
+	}
+
 	public void setMode(int m)
 	{
 		mode = m;
@@ -291,6 +296,11 @@ public class ImageGridView
 	public int getThumbnail()
 	{
 		return thumbnail;
+	}
+
+	public String [] getImageFilepaths()
+	{
+		return mAdapter.getImageFilepaths();
 	}
 
 }

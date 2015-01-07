@@ -71,9 +71,9 @@
 
         <activity
             android:name="com.huantnguyen.radcases.app.CaseDetailActivity"
+            android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_case_detail"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity"
-            android:theme="@style/MaterialTheme.Light.TranslucentActionBar"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -87,14 +87,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
         </activity>
+
+        <!-- custom toolbar -->
         <activity
             android:name="com.huantnguyen.radcases.app.CaseEditActivity"
+            android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_activity_edit_case"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />
+                android:value="com.huantnguyen.radcases.app.CaseDetailActivity" />
         </activity>
+
         <activity
             android:name="com.huantnguyen.radcases.app.ImageGalleryActivity"
             android:label="Key Images"
@@ -102,7 +106,7 @@
             android:theme="@style/MaterialTheme.Light.TranslucentActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CaseDetailFragment" />
+                android:value="com.huantnguyen.radcases.app.CaseDetailActivity" />
         </activity>
 
         <!-- enable the search dialog to send searches to SearchableActivity -->
@@ -120,7 +124,7 @@
             android:parentActivityName="com.huantnguyen.radcases.app.CloudStorageActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CaseStorageActivity" />
+                android:value="com.huantnguyen.radcases.app.CloudStorageActivity" />
 
             <intent-filter>
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />

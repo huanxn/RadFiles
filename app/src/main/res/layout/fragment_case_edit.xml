@@ -4,11 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <include
+        layout="@layout/toolbar_save_discard"/>
+
     <ScrollView
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:id="@+id/edit_scrollview"
-                android:layout_above="@+id/buttonBar"
+                android:layout_below="@id/toolbar"
                 tools:context="com.huantnguyen.radcases.app.CaseEditActivity$PlaceholderFragment">
 
         <LinearLayout
@@ -184,7 +187,7 @@
 
     </ScrollView>
 
-    <!-- BUTTON BAR -->
+    <!-- BUTTON BAR
     <LinearLayout
     android:id="@+id/buttonBar"
     style="?android:buttonBarStyle"
@@ -193,7 +196,6 @@
     android:layout_margin="0dp"
     android:background="@color/default_button_background"
     android:layout_alignParentBottom="true">
-    <!--android:layout_below="@id/fields_container"-->
 
     <Button
         android:id="@+id/cancelButton"
@@ -214,4 +216,5 @@
         android:onClick="onClick_Button"
         android:text="@string/button_save"/>
     </LinearLayout>
+    -->
 </RelativeLayout>

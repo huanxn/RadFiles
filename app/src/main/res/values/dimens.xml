@@ -7,6 +7,7 @@
     <dimen name="text_box_height">36dp</dimen>
     <dimen name="list_item_height">48dp</dimen>
     <dimen name="standardTextSize">16sp</dimen>
+    <dimen name="toolbarTextSize">20sp</dimen>
     <dimen name="cardTextSize">16sp</dimen>
     <dimen name="largeTextSize">24sp</dimen>
     <dimen name="large_image_height">250dp</dimen>
@@ -19,5 +20,6 @@
     <dimen name="card_thumbnail_height">125dp</dimen>
 
     <dimen name="navigation_drawer_width">240dp</dimen>
+    <dimen name="parallax_image_height">250dp</dimen>
 
 </resources>

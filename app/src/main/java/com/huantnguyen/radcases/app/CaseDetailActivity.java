@@ -6,12 +6,11 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -19,14 +18,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
+import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
+import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
+import com.github.ksoichiro.android.observablescrollview.ScrollState;
+import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
+//import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
 import static android.view.View.GONE;
 
@@ -84,6 +85,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			// Set back to normal theme
 			setTheme(R.style.MaterialTheme_Light);
 			super.onCreate(savedInstanceState);
+
 		}
 
 		//super.onCreate(savedInstanceState);
@@ -252,12 +254,29 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	}
 
 	/**
+	 * UI clicks
+	 */
+
+	public void onClick_Button(View view)
+	{
+		switch (view.getId())
+		{
+			case R.id.header_image:
+				Intent imageGalleryIntent = new Intent(this, ImageGalleryActivity.class);
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, fragment.thumbnail_pos);
+				startActivity(imageGalleryIntent);
+				break;
+		}
+	}
+
+	/**
 	 * A fragment representing a single Case detail screen.
 	 * This fragment is either contained in a {@link CaseCardListActivity}
 	 * in two-pane mode (on tablets) or a {@link CaseDetailActivity}
 	 * on handsets.
 	 */
-	public class CaseDetailFragment extends Fragment
+	public class CaseDetailFragment extends Fragment implements ObservableScrollViewCallbacks
 	{
 		/**
 		 * The fragment argument representing the item ID that this fragment
@@ -266,7 +285,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		private long selected_key_id;
 		private Activity activity;
 
-		private FadingActionBarHelper mFadingHelper;
+	//	private FadingActionBarHelper mFadingHelper;
 		private View headerView; //fadingactionbar
 		//private ImageView headerImageView;
 
@@ -275,6 +294,15 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		private boolean hasImage;
 
 		private int favorite; // for action menu toggle in CaseDetail Activity (not in this fragment)
+
+		// parallax fading toolbar
+		private ImageView mImageView;
+		private Toolbar mToolbarView;
+		private ObservableScrollView mScrollView;
+		private int mParallaxImageHeight;
+
+		private ImageGridView imageGridView;
+		private int thumbnail_pos;
 
 		// Hold a reference to the current animator,
 		// so that it can be canceled mid-way.
@@ -296,7 +324,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 			mArguments = getArguments();
 			hasImage = mArguments.getBoolean(ARG_HAS_IMAGE);
-
+/*
 			if(hasImage)
 			{
 				//FadingActionBar
@@ -311,6 +339,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				mFadingHelper.initActionBar(activity);
 			}
+			*/
 		}
 
 		@Override
@@ -329,8 +358,23 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			if(hasImage)
 			{
 				//FadingActionBar
-				view = headerView = mFadingHelper.createView(inflater);
+	//			view = headerView = mFadingHelper.createView(inflater);
 				//view.findViewById(R.id.detail_container).setMinimumHeight((int)UtilClass.getDisplayHeight(getActivity()));
+
+
+
+				////////test
+				// fading toolbar
+				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
+
+				mImageView = (ImageView) view.findViewById(R.id.header_image);
+				mToolbarView = (Toolbar) getActivity().findViewById(R.id.toolbar);
+				mToolbarView.setBackgroundColor(ScrollUtils.getColorWithAlpha(0, getResources().getColor(R.color.default_colorPrimary)));
+
+				mScrollView = (ObservableScrollView) view.findViewById(R.id.scroll);
+				mScrollView.setScrollViewCallbacks(this);
+
+				mParallaxImageHeight = getResources().getDimensionPixelSize(R.dimen.parallax_image_height);
 			}
 			else
 			{
@@ -388,8 +432,9 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				}
 
 				String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-				ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
-				UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+				//ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
+				//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+				UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
 				imageCursor.close();
 			}
@@ -438,10 +483,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				String key_words = case_cursor.getString(CasesProvider.COL_KEYWORDS);
 				String biopsy = case_cursor.getString(CasesProvider.COL_BIOPSY);
 				String followup = case_cursor.getString(CasesProvider.COL_FOLLOWUP_COMMENT);
-				int thumbnail = 0;
+
+				thumbnail_pos = 0;
 				String thumbnailString = case_cursor.getString(CasesProvider.COL_THUMBNAIL);
 				if(thumbnailString != null && !thumbnailString.isEmpty())
-					thumbnail = Integer.parseInt(thumbnailString);
+					thumbnail_pos = Integer.parseInt(thumbnailString);
 
 				boolean followup_bool;
 				if(case_cursor.getInt(CasesProvider.COL_FOLLOWUP)==1)
@@ -598,17 +644,19 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					rootView.findViewById(R.id.key_image).setVisibility(View.VISIBLE);
 
 					// set image for FadingActionBar.  first image in cursor array
-					if(thumbnail < imageCursor.getCount())
+					if(thumbnail_pos < imageCursor.getCount())
 					{
-						imageCursor.move(thumbnail);
+						imageCursor.move(thumbnail_pos);
 					}
 
 					// fading action bar
 					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-					ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
-					UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+					//ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
+					//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+					UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
-					ImageGridView imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);
+					imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);
+					imageGridView.setThumbnailPosition(thumbnail_pos);
 					imageGridView.setMode(ImageGridView.DETAIL_ACTIVITY);
 
 					imageCursor.close();
@@ -708,5 +756,26 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		}
 
 
+		@Override
+		public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging)
+		{
+			int baseColor = getResources().getColor(R.color.default_colorPrimary);  //change to attr
+			float alpha = 1 - (float) Math.max(0, mParallaxImageHeight - scrollY) / mParallaxImageHeight;
+			mToolbarView.setBackgroundColor(ScrollUtils.getColorWithAlpha(alpha, baseColor));
+			//ViewHelper.setTranslationY(mImageView, scrollY / 2);
+			mImageView.setTranslationY(scrollY / 2);
+		}
+
+		@Override
+		public void onDownMotionEvent()
+		{
+
+		}
+
+		@Override
+		public void onUpOrCancelMotionEvent(ScrollState scrollState)
+		{
+
+		}
 	}// end fragment
 }

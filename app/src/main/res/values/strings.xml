@@ -8,6 +8,7 @@
     <string name="action_search">Search cases</string>
     <string name="action_new">New case</string>
     <string name="action_delete">Delete case</string>
+    <string name="action_discard">Discard changes</string>
     <string name="action_edit">Edit case</string>
     <string name="action_camera">Add image</string>
     <string name="action_star">Favorite</string>
