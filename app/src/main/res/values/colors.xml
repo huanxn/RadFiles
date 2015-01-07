@@ -6,6 +6,7 @@
     <color name="light_grey_text">@color/md_grey_500</color>
     <color name="white_text">@color/md_grey_50</color>
     <color name="default_colorHeaderText">@color/md_light_blue_700</color>
+    <color name="toolbar_textColor">?attr/actionMenuTextColor</color>
 
     <!-- Theme Colors -->
     <color name="default_colorPrimary">@color/md_blue_grey_700</color>

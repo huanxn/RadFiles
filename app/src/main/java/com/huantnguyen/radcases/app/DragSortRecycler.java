@@ -303,7 +303,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 			if (dragging)
 			{
 				debugLog("Started Drag");
-				vibrator.vibrate(10);
+				vibrator.vibrate(20);
 
 				floatingItem = creatFloatingBitmap(itemView);
 

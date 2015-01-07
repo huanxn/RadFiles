@@ -1,19 +1,11 @@
 package com.huantnguyen.radcases.app;
 
-import android.app.Activity;
-
-import android.app.ActionBar;
 import android.app.AlertDialog;
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.DialogInterface;
+
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -21,7 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -89,7 +80,6 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		{
 			setSupportActionBar(toolbar);
 		}
-
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mTitle = new SpannableString(getTitle());
@@ -211,6 +201,14 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		return super.onOptionsItemSelected(item);
 	}
 
+	public void setDrawerListener(DrawerLayout.DrawerListener listener)
+	{
+		mNavigationDrawerFragment.getDrawerLayout().setDrawerListener(listener);
+	}
 
+	public DrawerLayout getDrawerLayout()
+	{
+		return mNavigationDrawerFragment.getDrawerLayout();
+	}
 
 }

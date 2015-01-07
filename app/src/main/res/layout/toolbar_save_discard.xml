@@ -29,7 +29,7 @@
         android:paddingStart="8dp"
         android:text="@string/save"
         android:textSize="@dimen/toolbarTextSize"
-        android:textColor="@color/primary_text_default_material_dark"
+        android:textColor="?attr/actionMenuTextColor"
 
         android:onClick="onClick_Button"
         />

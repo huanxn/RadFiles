@@ -9,6 +9,10 @@
 
     </style>
 
+    <style name = "toolbarStyle">
+        <item name="android:textColor">?attr/actionMenuTextColor</item>
+    </style>
+
     <!-- Action Bar Spinner -->
     <style name = "spinner_actionBar_title">
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>

@@ -26,6 +26,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
+
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
@@ -186,6 +188,7 @@ public class NavigationDrawerFragment extends Fragment
 			}
 		};
 
+
 		// If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
 		// per the navigation drawer design guidelines.
 		if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
@@ -318,6 +321,11 @@ public class NavigationDrawerFragment extends Fragment
 		 * Called when an item in the navigation drawer is selected.
 		 */
 		void onNavigationDrawerItemSelected(int position);
+	}
+
+	public DrawerLayout getDrawerLayout()
+	{
+		return mDrawerLayout;
 	}
 
 }

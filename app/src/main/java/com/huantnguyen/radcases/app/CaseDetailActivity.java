@@ -5,11 +5,15 @@ import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -297,9 +301,10 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		// parallax fading toolbar
 		private ImageView mImageView;
-		private Toolbar mToolbarView;
+		private Toolbar mToolbar;
 		private ObservableScrollView mScrollView;
-		private int mParallaxImageHeight;
+		private float toolbarAlpha;
+		//private int mParallaxImageHeight;
 
 		private ImageGridView imageGridView;
 		private int thumbnail_pos;
@@ -362,24 +367,25 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				//view.findViewById(R.id.detail_container).setMinimumHeight((int)UtilClass.getDisplayHeight(getActivity()));
 
 
-
-				////////test
-				// fading toolbar
+				// Fading Toolbar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
 
 				mImageView = (ImageView) view.findViewById(R.id.header_image);
-				mToolbarView = (Toolbar) getActivity().findViewById(R.id.toolbar);
-				mToolbarView.setBackgroundColor(ScrollUtils.getColorWithAlpha(0, getResources().getColor(R.color.default_colorPrimary)));
+				mToolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);  // in activity content view
+				toolbarAlpha = 0;
+				mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(0, 0));   // transparent
+				mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(0, 0));    // transparent
 
 				mScrollView = (ObservableScrollView) view.findViewById(R.id.scroll);
 				mScrollView.setScrollViewCallbacks(this);
 
-				mParallaxImageHeight = getResources().getDimensionPixelSize(R.dimen.parallax_image_height);
+				//mParallaxImageHeight = getResources().getDimensionPixelSize(R.dimen.parallax_image_height);
 			}
 			else
 			{
 				// standard ActionBar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
+				mImageView = (ImageView) view.findViewById(R.id.header_image);
 			}
 
 			return view;
@@ -415,6 +421,9 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 			if ((hasImage == false && imageCursor.getCount() > 0) || hasImage == true && imageCursor.getCount() == 0)
 			{
+				mImageView.setVisibility(View.GONE);
+				rootView.findViewById(R.id.anchor).setVisibility(View.GONE);
+
 				// reload activity theme
 				activity.setResult(CaseCardListActivity.RESULT_EDITED);
 				activity.startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
@@ -425,6 +434,9 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 			if (imageCursor.getCount() > 0 && imageCursor.moveToFirst())
 			{
+				mImageView.setVisibility(View.VISIBLE);
+				rootView.findViewById(R.id.anchor).setVisibility(View.VISIBLE);
+
 				// set image for FadingActionBar.  first image in cursor array
 				if(thumbnail < imageCursor.getCount())
 				{
@@ -642,6 +654,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.key_image).setVisibility(View.VISIBLE);
+					mImageView.setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.anchor).setVisibility(View.VISIBLE);
 
 					// set image for FadingActionBar.  first image in cursor array
 					if(thumbnail_pos < imageCursor.getCount())
@@ -655,6 +669,79 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 					UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
+					// fading toolbar with drawer open
+					// ActionBarDrawerToggle ties together the the proper interactions between the navigation drawer and the action bar app icon.
+					final ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(
+							                                         getActivity(),                    /* host Activity */
+							                                         getDrawerLayout(),                    /* DrawerLayout object */
+							                                         //R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
+							                                         R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+							                                         R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+					) {
+						@Override
+						public void onDrawerClosed(View drawerView) {
+							super.onDrawerClosed(drawerView);
+							if (!isAdded()) {
+								return;
+							}
+							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+						}
+
+						@Override
+						public void onDrawerOpened(View drawerView) {
+							super.onDrawerOpened(drawerView);
+							if (!isAdded()) {
+								return;
+							}
+							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+						}
+
+						@Override
+						public void onDrawerSlide(View drawerView, float slideOffset)
+						{
+							super.onDrawerSlide(drawerView, slideOffset);
+
+							int baseColor = UtilClass.get_attr(getActivity(), R.attr.colorPrimary);
+							int textColor = UtilClass.get_attr(getActivity(), R.attr.actionMenuTextColor);
+
+							if(slideOffset > toolbarAlpha)
+							{
+								mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColor));
+								mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(slideOffset, textColor));
+							}
+						}
+
+					};
+
+					// Defer code dependent on restoration of previous instance state.
+					getDrawerLayout().post(new Runnable() {
+						@Override
+						public void run() {
+							mDrawerToggle.syncState();
+						}
+					});
+					setDrawerListener(mDrawerToggle);
+
+					/*
+					setDrawerListener(new DrawerLayout.SimpleDrawerListener(){
+						@Override
+						public void onDrawerSlide(View drawerView, float slideOffset)
+						{
+
+							int baseColor = UtilClass.get_attr(activity, R.attr.colorPrimary);
+							int textColor = UtilClass.get_attr(activity, R.attr.actionMenuTextColor);
+
+							if(slideOffset > toolbarAlpha)
+							{
+								mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColor));
+								mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(slideOffset, textColor));
+							}
+
+						}
+					});
+					*/
+
+					// image grid
 					imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);
 					imageGridView.setThumbnailPosition(thumbnail_pos);
 					imageGridView.setMode(ImageGridView.DETAIL_ACTIVITY);
@@ -666,6 +753,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					// no images
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.GONE);
 					rootView.findViewById(R.id.key_image).setVisibility(View.GONE);
+					mImageView.setVisibility(View.GONE);
+					rootView.findViewById(R.id.anchor).setVisibility(View.GONE);
 				}
 
 				// KEYWORD_LIST
@@ -759,10 +848,15 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		@Override
 		public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging)
 		{
-			int baseColor = getResources().getColor(R.color.default_colorPrimary);  //change to attr
-			float alpha = 1 - (float) Math.max(0, mParallaxImageHeight - scrollY) / mParallaxImageHeight;
-			mToolbarView.setBackgroundColor(ScrollUtils.getColorWithAlpha(alpha, baseColor));
-			//ViewHelper.setTranslationY(mImageView, scrollY / 2);
+			int baseColor = UtilClass.get_attr(activity, R.attr.colorPrimary);
+			int textColor = UtilClass.get_attr(activity, R.attr.actionMenuTextColor);
+
+			int parallaxDistance = (int)activity.getResources().getDimension(R.dimen.large_image_height) - (int)activity.getResources().getDimension(R.dimen.toolbar_size); // todo change to attr
+			toolbarAlpha = 1 - (float) Math.max(0, parallaxDistance - scrollY) / parallaxDistance;
+
+			mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(toolbarAlpha, baseColor));
+			mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(toolbarAlpha, textColor));
+
 			mImageView.setTranslationY(scrollY / 2);
 		}
 

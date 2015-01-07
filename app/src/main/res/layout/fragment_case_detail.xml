@@ -16,15 +16,15 @@
         <ImageView
             android:id="@+id/header_image"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/parallax_image_height"
+            android:layout_height="@dimen/large_image_height"
             android:scaleType="centerCrop"
             android:onClick="onClick_Button"/>
 
         <View
             android:id="@+id/anchor"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/parallax_image_height"
-            android:minHeight="@dimen/parallax_image_height"/>
+            android:layout_height="@dimen/large_image_height"
+            android:minHeight="@dimen/large_image_height"/>
 
         <LinearLayout
             android:id="@+id/detail_container"

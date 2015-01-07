@@ -20,6 +20,7 @@
     <dimen name="card_thumbnail_height">125dp</dimen>
 
     <dimen name="navigation_drawer_width">240dp</dimen>
-    <dimen name="parallax_image_height">250dp</dimen>
+
+    <dimen name="toolbar_size">56dp</dimen>
 
 </resources>

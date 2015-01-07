@@ -23,13 +23,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 import java.io.File;
@@ -202,7 +200,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 
-		getMenuInflater().inflate(R.menu.edit_case, menu);
+		getMenuInflater().inflate(R.menu.case_edit, menu);
 
 		return true;
 	}
