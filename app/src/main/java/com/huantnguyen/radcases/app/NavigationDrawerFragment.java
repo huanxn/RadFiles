@@ -135,6 +135,10 @@ public class NavigationDrawerFragment extends Fragment
 	 */
 	public void setUp(int fragmentId, DrawerLayout drawerLayout)
 	{
+		setUp(fragmentId, drawerLayout, true);
+	}
+	public void setUp(int fragmentId, DrawerLayout drawerLayout, boolean showDrawerIndicator)
+	{
 		mFragmentContainerView = getActivity().findViewById(fragmentId);
 		mDrawerLayout = drawerLayout;
 
@@ -202,6 +206,9 @@ public class NavigationDrawerFragment extends Fragment
 				mDrawerToggle.syncState();
 			}
 		});
+
+		mDrawerToggle.setDrawerIndicatorEnabled(showDrawerIndicator);
+		//mDrawerToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
 
 		mDrawerLayout.setDrawerListener(mDrawerToggle);
 	}

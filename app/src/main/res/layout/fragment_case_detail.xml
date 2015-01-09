@@ -30,7 +30,7 @@
             android:id="@+id/detail_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/anchor"
+            android:layout_below="@id/header_image"
 
             android:background="@color/default_background_light_grey"
             android:orientation="vertical"
@@ -140,6 +140,7 @@
             <TextView
                 android:id="@+id/ImagesLabel"
                 style="@style/sectionHeader"
+                android:paddingBottom="4dp"
                 android:text="Images"/>
 
             <GridView

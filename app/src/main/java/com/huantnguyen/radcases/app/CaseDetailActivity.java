@@ -5,12 +5,10 @@ import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -81,6 +79,13 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			// FadingActionBar
 			// translucent and overlying action bar theme set as default for this CaseDetailActivity in manifest XML
 			super.onCreate_for_FAB(savedInstanceState);
+
+			/*
+			// set back icon
+			getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+			*/
 		}
 		else
 		{
@@ -375,11 +380,22 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				toolbarAlpha = 0;
 				mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(0, 0));   // transparent
 				mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(0, 0));    // transparent
+				getActivity().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
 
 				mScrollView = (ObservableScrollView) view.findViewById(R.id.scroll);
 				mScrollView.setScrollViewCallbacks(this);
 
-				//mParallaxImageHeight = getResources().getDimensionPixelSize(R.dimen.parallax_image_height);
+				Point size = new Point();
+				getWindowManager().getDefaultDisplay().getSize(size);
+
+				int test2 = UtilClass.get_attr(activity, R.attr.actionBarSize);
+				int test = UtilClass.convertDpToPixels(activity, UtilClass.get_attr(activity, R.attr.actionBarSize));
+
+
+
+				int test3 = mToolbar.getHeight();
+
+				view.findViewById(R.id.detail_container).setMinimumHeight(size.y - UtilClass.getToolbarHeight(activity)  - UtilClass.getStatusBarHeight(activity));
 			}
 			else
 			{
@@ -402,7 +418,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		@Override
 		public void onResume() {
 			super.onResume();
-
 
 			// if added image, need to redo FadingActionBar TODO
 			populateFields();
@@ -547,7 +562,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
 				actionBar.setTitle(mTitle);
 
-
 				// Case Information (DIAGNOSIS and FINDINGS)
 				TextView TV_case_info1 = (TextView) rootView.findViewById(R.id.case_info1);
 				TextView TV_case_info2 = (TextView) rootView.findViewById(R.id.detail_case_info2);
@@ -559,7 +573,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setVisibility(View.VISIBLE);
 
 					// if both Diagnosis and Findings fields retrieved, set subtext as the Findings
-					if(findings != null)    // diagnosis and findings
+					if(findings != null && !findings.isEmpty())    // diagnosis and findings
 					{
 						TV_case_info2.setText(findings);
 						TV_case_info2.setVisibility(View.VISIBLE);
@@ -604,32 +618,47 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					((TextView) rootView.findViewById(R.id.SectionLabel)).setVisibility(GONE);
 				}
 
-				// STUDY TYPE
-				TextView TV_study_type = (TextView) rootView.findViewById(R.id.detail_study_type);
+				// STUDY TYPE and STUDY DATE
+				TextView TV_study_text1 = (TextView) rootView.findViewById(R.id.detail_study_type);
+				TextView TV_study_text2 = (TextView) rootView.findViewById(R.id.detail_date);
 				if(study_type != null && !study_type.isEmpty())
 				{
-					TV_study_type.setText(study_type);
-					TV_study_type.setVisibility(View.VISIBLE);
+					TV_study_text1.setText(study_type);
+					TV_study_text1.setVisibility(View.VISIBLE);
 					((TextView) rootView.findViewById(R.id.StudyLabel)).setVisibility(View.VISIBLE);
+
+					// STUDY DATE
+					if(date_str != null && !date_str.isEmpty())
+					{
+						TV_study_text2.setText(UtilClass.convertDateString(date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
+						TV_study_text2.setVisibility(View.VISIBLE);
+					}
+					else
+					{
+						TV_study_text2.setVisibility(GONE);
+					}
+
+				}
+				else if(date_str != null && !date_str.isEmpty())
+				{
+					// only study date known
+					TV_study_text1.setText(UtilClass.convertDateString(date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
+					TV_study_text1.setVisibility(View.VISIBLE);
+
+					((TextView) rootView.findViewById(R.id.StudyLabel)).setVisibility(View.VISIBLE);
+					((TextView) rootView.findViewById(R.id.StudyLabel)).setText("Study Date");
+
+					TV_study_text2.setVisibility(GONE);
 				}
 				else
 				{
-					TV_study_type.setVisibility(GONE);
+					// neither study type or date known
 					((TextView) rootView.findViewById(R.id.StudyLabel)).setVisibility(GONE);
+					TV_study_text2.setVisibility(GONE);
+					TV_study_text1.setVisibility(GONE);
+
 				}
 
-				// STUDY DATE
-				TextView TV_date = (TextView) rootView.findViewById(R.id.detail_date);
-				if(date_str != null && !date_str.isEmpty())
-				{
-					TV_date.setText(UtilClass.convertDateString(date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
-					TV_date.setVisibility(View.VISIBLE);
-					((TextView) rootView.findViewById(R.id.StudyLabel)).setVisibility(View.VISIBLE);
-				}
-				else
-				{
-					TV_date.setVisibility(GONE);
-				}
 
 				// BIOPSY
 				TextView TV_biopsy = (TextView) rootView.findViewById(R.id.detail_biopsy);
@@ -669,14 +698,18 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 					UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
+
+					// set back icon
+					//getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+
 					// fading toolbar with drawer open
 					// ActionBarDrawerToggle ties together the the proper interactions between the navigation drawer and the action bar app icon.
 					final ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(
-							                                         getActivity(),                    /* host Activity */
-							                                         getDrawerLayout(),                    /* DrawerLayout object */
-							                                         //R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
-							                                         R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-							                                         R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+							                                         getActivity(),
+							                                         getDrawerLayout(),
+							                                         //R.drawable.ic_drawer,
+							                                         R.string.navigation_drawer_open,
+							                                         R.string.navigation_drawer_close
 					) {
 						@Override
 						public void onDrawerClosed(View drawerView) {
@@ -720,26 +753,52 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 							mDrawerToggle.syncState();
 						}
 					});
+
+					mDrawerToggle.setDrawerIndicatorEnabled(false);
+					//mDrawerToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+
 					setDrawerListener(mDrawerToggle);
 
-					/*
+
+/*
 					setDrawerListener(new DrawerLayout.SimpleDrawerListener(){
+						@Override
+						public void onDrawerClosed(View drawerView) {
+							super.onDrawerClosed(drawerView);
+							if (!isAdded()) {
+								return;
+							}
+							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+						}
+
+						@Override
+						public void onDrawerOpened(View drawerView) {
+							super.onDrawerOpened(drawerView);
+							if (!isAdded()) {
+								return;
+							}
+							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+						}
+
 						@Override
 						public void onDrawerSlide(View drawerView, float slideOffset)
 						{
+							super.onDrawerSlide(drawerView, slideOffset);
 
-							int baseColor = UtilClass.get_attr(activity, R.attr.colorPrimary);
-							int textColor = UtilClass.get_attr(activity, R.attr.actionMenuTextColor);
+							int baseColor = UtilClass.get_attr(getActivity(), R.attr.colorPrimary);
+							int textColor = UtilClass.get_attr(getActivity(), R.attr.actionMenuTextColor);
 
 							if(slideOffset > toolbarAlpha)
 							{
 								mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColor));
 								mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(slideOffset, textColor));
 							}
-
 						}
 					});
-					*/
+*/
+
+
+
 
 					// image grid
 					imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);
@@ -812,13 +871,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 			case_cursor.close();
 
-			/*
-			//UtilClass.showMessage(activity, String.valueOf(UtilClass.getDisplayHeight(getActivity())));
-			UtilClass.showMessage(activity, String.valueOf(findViewById(R.id.detail_container).getHeight()));
-
-			findViewById(R.id.detail_container).setMinimumHeight((int)UtilClass.getDisplayHeight(getActivity()));
-			*/
-
 		}// end populateFields
 
 		public boolean isStarred()
@@ -845,6 +897,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		}
 
 
+		/**
+		 *
+		 * @param scrollY
+		 * @param firstScroll
+		 * @param dragging
+		 */
 		@Override
 		public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging)
 		{
@@ -858,6 +916,15 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(toolbarAlpha, textColor));
 
 			mImageView.setTranslationY(scrollY / 2);
+
+			if(scrollY >= parallaxDistance)
+			{
+				getActivity().findViewById(R.id.toolbar_dropshadow).setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				getActivity().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+			}
 		}
 
 		@Override

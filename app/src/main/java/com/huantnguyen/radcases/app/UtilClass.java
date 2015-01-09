@@ -614,6 +614,47 @@ public class UtilClass extends Activity
 		return displayMetrics.heightPixels / displayMetrics.density;
 	}
 
+	public static int getDisplayWidthPx(Activity activity)
+	{
+		Point size = new Point();
+		activity.getWindowManager().getDefaultDisplay().getSize(size);
+
+		return size.x;
+	}
+
+	public static int getDisplayHeightPx(Activity activity)
+	{
+		Point size = new Point();
+		activity.getWindowManager().getDefaultDisplay().getSize(size);
+
+		return size.y;
+	}
+
+	public static int getStatusBarHeight(Activity activity)
+	{
+		int result = 0;
+		int resourceId = activity.getResources().getIdentifier("status_bar_height", "dimen", "android");
+		if (resourceId > 0) {
+			result = activity.getResources().getDimensionPixelSize(resourceId);
+		}
+		return result;
+	}
+
+	public static int getToolbarHeight(Activity activity)
+	{
+		//return (int)activity.getResources().getDimension(R.dimen.toolbar_size);
+		TypedValue tv = new TypedValue();
+		if (activity.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true))
+		{
+			return TypedValue.complexToDimensionPixelSize(tv.data, activity.getResources().getDisplayMetrics());
+		}
+		else
+		{
+			return 0;
+		}
+
+	}
+
 	public static String convertDateString(String original_date_str, SimpleDateFormat original_sdf, SimpleDateFormat display_sdf)
 	{
 		if(original_date_str == null)
@@ -1357,6 +1398,7 @@ public class UtilClass extends Activity
 	{
 		return CaseCardListActivity.CSV_dir;
 	}
+
 
 
 }

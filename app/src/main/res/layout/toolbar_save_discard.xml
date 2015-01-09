@@ -11,6 +11,7 @@
     android:contentInsetStart="0dp"
 
     android:minHeight="?attr/actionBarSize"
+    android:elevation="4dp"
     app:contentInsetStart="0dp"
 
     >
@@ -26,8 +27,8 @@
         android:drawableStart="@drawable/ic_action_accept"
         android:gravity="center_vertical"
         android:paddingEnd="20dp"
-        android:paddingStart="8dp"
-        android:text="@string/save"
+        android:paddingStart="0dp"
+        android:text="  Save"
         android:textSize="@dimen/toolbarTextSize"
         android:textColor="?attr/actionMenuTextColor"
 

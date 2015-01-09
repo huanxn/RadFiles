@@ -79,12 +79,14 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		if (toolbar != null)
 		{
 			setSupportActionBar(toolbar);
+			//toolbar.setElevation(4);
+			//getSupportActionBar().setElevation(10);
 		}
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mTitle = new SpannableString(getTitle());
 		// Set up the drawer.
-		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), false);
 	}
 
 	@Override

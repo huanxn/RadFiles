@@ -251,7 +251,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 	public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
 		Log.d(TAG,"onInterceptTouchEvent");
 
-		//if (e.getAction() == MotionEvent.ACTION_DOWN)
+		//if (e.getAction() == MotionEvent.ACTION_DOWN || e.getAction() == MotionEvent.ACTION_MOVE)
 		{
 			View itemView = rv.findChildViewUnder(e.getX(), e.getY());
 
