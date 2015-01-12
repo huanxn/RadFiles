@@ -1,9 +1,12 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.ActivityNotFoundException;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Point;
@@ -15,6 +18,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -93,7 +97,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 			// Set back to normal theme
 			setTheme(R.style.MaterialTheme_Light);
-			super.onCreate(savedInstanceState);
+			super.onCreate(savedInstanceState, false);
 
 		}
 
@@ -503,7 +507,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			{
 				int key_id = case_cursor.getInt(CasesProvider.COL_ROWID);
 				String patient_id = case_cursor.getString(CasesProvider.COL_PATIENT_ID);
-				String diagnosis = case_cursor.getString(CasesProvider.COL_DIAGNOSIS);
+				final String diagnosis = case_cursor.getString(CasesProvider.COL_DIAGNOSIS);
 				String findings = case_cursor.getString(CasesProvider.COL_FINDINGS);
 				String section = case_cursor.getString(CasesProvider.COL_SECTION);
 				String comments = case_cursor.getString(CasesProvider.COL_COMMENTS);
@@ -571,6 +575,59 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					TV_case_info1.setText(diagnosis);
 					TV_case_info1.setVisibility(View.VISIBLE);
 					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setVisibility(View.VISIBLE);
+
+					TV_case_info1.setOnLongClickListener(new View.OnLongClickListener()
+					{
+						@Override
+						public boolean onLongClick(View v)
+						{
+							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+							SpannableString alertTitle = new SpannableString("Search \"" + diagnosis +"\"");
+
+							//mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+							alertTitle.setSpan(new TypefaceSpan(activity, "RobotoCondensed-Bold.ttf"), "Search \"".length(), alertTitle.length()-1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+
+							builder.setTitle(alertTitle)
+									.setItems(R.array.browser_search_array, new DialogInterface.OnClickListener()
+									{
+										public void onClick(DialogInterface dialog, int which)
+										{
+											String uri;
+											switch (which)
+											{
+												case 0:
+													uri = "http://www.google.com/#q=";
+													break;
+												case 1:
+													uri = "http://www.radiopaedia.org/search?q=";
+													break;
+												case 2:
+													uri = "https://en.wikipedia.org/wiki/Special:Search?search=";
+													break;
+												default:
+													uri = "http://www.google.com/#q=";
+													break;
+											}
+
+											try
+											{
+												Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri + diagnosis.replace(' ', '+')));
+												startActivity(browserIntent);
+											}
+											catch (ActivityNotFoundException e)
+											{
+												UtilClass.showMessage(activity, "No application can handle this request. Please install a browser");
+												e.printStackTrace();
+											}
+
+										}
+									});
+							builder.create().show();
+							return true;
+						}
+					});
 
 					// if both Diagnosis and Findings fields retrieved, set subtext as the Findings
 					if(findings != null && !findings.isEmpty())    // diagnosis and findings

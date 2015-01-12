@@ -103,8 +103,8 @@ public class ImageGridView
 				final Activity act = activity;
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
-				CharSequence[] imageSources = {"Delete Image", "Set Thumbnail", "Cancel"};
-				builder.setItems(imageSources, new DialogInterface.OnClickListener()
+				CharSequence[] choices = {"Delete Image", "Set Thumbnail", "Cancel"};
+				builder.setItems(choices, new DialogInterface.OnClickListener()
 				{
 					public void onClick(DialogInterface dialog, int index)
 					{

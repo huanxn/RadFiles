@@ -30,13 +30,17 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
+
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Created by Huan on 6/12/2014.
@@ -51,9 +55,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	private static final int FILTER_SECTION = 0;
 	private static final int FILTER_RECENT = 1;
 	private static final int FILTER_STUDYDATE = 2;
-	private static final int NAV_KEYWORDS = 3;
-	private static final int FILTER_FOLLOWUP = 4;
-	private static final int FILTER_FAVORITE = 5;
+	private static final int FILTER_MODALITY = 3;
+	private static final int FILTER_KEYWORDS = 4;
+	private static final int FILTER_FOLLOWUP = 5;
+	private static final int FILTER_FAVORITE = 6;
 
 	private static final String EMPTY_FIELD_GROUP_HEADER = "Unspecified";
 
@@ -75,6 +80,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	// search view
 	private SearchView searchView;
 	private MenuItem searchItem;
+
+	// ShowCase tutorial
+	private boolean showTutorial = false;
 
 	//private List<Long> multiselectList;
 
@@ -191,6 +199,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 			});
 		}
+
+
 	}
 
 
@@ -216,6 +226,17 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		// Assumes current activity is the searchable activity
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setIconifiedByDefault(true);
+
+		if(showTutorial)
+		{
+			new ShowcaseView.Builder(this)
+					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+					.setTarget(new ViewTarget(findViewById(R.id.menu_addnew)))
+					.setContentTitle("Case Filter")
+					.setContentText("This is highlighting the sorting list")
+					.hideOnTouchOutside()
+					.build();
+		}
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -563,15 +584,82 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					}
 
 					break;
-				case NAV_KEYWORDS:
+
+				case FILTER_MODALITY:
+					case_cursor_array = new Cursor[1];
+					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " is not null and " + CasesProvider.KEY_STUDY_TYPE + " != ?", new String[] {""}, CasesProvider.KEY_STUDY_TYPE, null);
+
+					if(case_cursor_array[0].moveToFirst())
+					{
+						String stickyHeader;
+						String prior_stickyHeader = "";
+						int group_counter = 0;  // section/group counter
+
+						do
+						{
+							stickyHeader = case_cursor_array[0].getString(CasesProvider.COL_STUDY_TYPE);
+
+							if (stickyHeader != null && !stickyHeader.isEmpty())
+							{
+								// set header string
+								// add to headerList
+								headerList.add(stickyHeader);
+
+								// if different date, then put in next filter group
+								if (!stickyHeader.contentEquals(prior_stickyHeader))
+								{
+									group_counter += 1;
+								}
+								//headerIdList.add(group_counter);
+
+								// update prior_stickyHeader for next iteration check
+								prior_stickyHeader = stickyHeader;
+							}
+							else
+							{
+								headerList.add(EMPTY_FIELD_GROUP_HEADER);
+							}
+						} while (case_cursor_array[0].moveToNext());
+					}
+
+					break;
+
+				case FILTER_KEYWORDS:
 					case_cursor_array = new Cursor[1];
 					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " is not null and " + CasesProvider.KEY_KEYWORDS + " != ?", new String[] {""}, CasesProvider.KEY_KEYWORDS, null);
 
-					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
+					// get cursor of "Radiology Keywords List", in order determined by user list preferences
+					Cursor keywords_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+
+					// instantiate case cursor array with size of section_cursor.getCount().
+					// will use MergeCursor afterwards.  must use cursor array this since a case may be in more than one section
+					case_cursor_array = new Cursor[keywords_cursor.getCount()];
+
+					// query each case cursor by "keyword" "LIKE %?%".  Each case may have more than one "keyword" listed. Order by recent
+					if(keywords_cursor.moveToFirst())
 					{
-						headerList.add("Key Words");
-						//headerIdList.add(0);
+						int i = 0;  // section/group counter
+
+						do
+						{
+							// get the KEYWORD name
+							String mKeyword = keywords_cursor.getString(CasesProvider.COL_VALUE);
+
+							// find all cases with this KEY_KEYWORDS
+							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ?", new String[]{"%" + mKeyword + "%"}, CasesProvider.KEY_ROWID + " DESC", null);
+
+							// set KEY_KEYWORDS as headers in each list position in headerList, with same IDs
+							for(int c = 0; c < case_cursor_array[i].getCount(); c++)
+							{
+								headerList.add(mKeyword);
+								//headerIdList.add(i);
+							}
+
+							i = i + 1;
+						} while(keywords_cursor.moveToNext());
+
 					}
+					keywords_cursor.close();
 
 					break;
 				case FILTER_FOLLOWUP:

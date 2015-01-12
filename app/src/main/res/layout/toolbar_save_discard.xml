@@ -29,7 +29,7 @@
         android:paddingEnd="20dp"
         android:paddingStart="0dp"
         android:text="  Save"
-        android:textSize="@dimen/toolbarTextSize"
+        android:textAllCaps="true"
         android:textColor="?attr/actionMenuTextColor"
 
         android:onClick="onClick_Button"

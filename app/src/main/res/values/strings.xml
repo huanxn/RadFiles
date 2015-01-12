@@ -27,7 +27,7 @@
     <!-- Text Field Prompt Strings -->
     <string name="patient_id_prompt">Patient MRN</string>
     <string name="section_prompt">Choose sections</string>
-    <string name="studyType_prompt">Study type</string>
+    <string name="studyType_prompt">Modality</string>
     <string name="keyWords_prompt">Choose key words</string>
     <string name="date_prompt">Study date</string>
     <string name="button_save">Save</string>
@@ -40,7 +40,6 @@
     <string name="Ultrasound">Ultrasound</string>
     <string name="Nuclear">Nuclear</string>
     <string name="MSK">MSK</string>
-    <string name="hello_world">Hello world!</string>
     <string name="title_activity_google_drive_create_file">GoogleDriveCreateFile</string>
 
     <!-- Spinner List of sorting/filters -->
@@ -48,6 +47,7 @@
         <item>Section</item>
         <item>Recent</item>
         <item>Study Date</item>
+        <item>Modality</item>
         <item>Key Words</item>
         <item>Follow Up</item>
         <item>Favorites</item>
@@ -84,6 +84,12 @@
         <item>Key Words</item>
         <item>Study Types</item>
         <item>Sections</item>
+    </string-array>
+
+    <string-array name="browser_search_array">
+        <item>Google</item>
+        <item>Radiopaedia</item>
+        <item>Wikipedia</item>
     </string-array>
 
     <string name="tab_title1">Key words</string>

@@ -43,6 +43,11 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		onCreate(savedInstanceState, true);
+	}
+
+	protected void onCreate(Bundle savedInstanceState, boolean showDrawerIndicator)
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_navigation_drawer);
 
@@ -57,14 +62,14 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mTitle = new SpannableString(getTitle());
 
-	//	if((mTitle.subSequence(0,3)).toString().equals("RAD"))
+		//	if((mTitle.subSequence(0,3)).toString().equals("RAD"))
 		{
 			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		}
 
 		// Set up the drawer.
-		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout));
+		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), showDrawerIndicator);
 	}
 
 

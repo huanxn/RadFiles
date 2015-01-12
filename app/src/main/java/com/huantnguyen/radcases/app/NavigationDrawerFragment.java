@@ -137,6 +137,13 @@ public class NavigationDrawerFragment extends Fragment
 	{
 		setUp(fragmentId, drawerLayout, true);
 	}
+
+	/**
+	 *
+	 * @param fragmentId
+	 * @param drawerLayout
+	 * @param showDrawerIndicator: icon in upper left. default is true.  if false, shows back arrow
+	 */
 	public void setUp(int fragmentId, DrawerLayout drawerLayout, boolean showDrawerIndicator)
 	{
 		mFragmentContainerView = getActivity().findViewById(fragmentId);
