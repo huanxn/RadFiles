@@ -7,6 +7,7 @@ import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -490,6 +491,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	 */
 	public void choosePictureAlertDialog(View view)
 	{
+		final Activity activity = this;
 
 		// Alert dialog to choose either to take a new photo with camera, or select existing picture from file storage
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -498,13 +500,15 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				.setItems(imageSources, new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int index)
 					{
+
 						switch(index)
 						{
 							// take new photo with the camera intent
 							// then crop photo
 							// store photo and put filename in database
 							case 0:
-								getPictureFromCamera();
+								// runs camera intent.  returns result code to onActivityResult, which will run crop intent if successful
+								tempImageFile = UtilClass.getPictureFromCamera(activity, REQUEST_IMAGE_CAPTURE);
 								break;
 
 							// select file from chooser
@@ -530,20 +534,10 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	}
 
 
-	/**
-	 * Runs from alert dialog selection after user chooses to add a new photo with the camera
-	 * take new photo with UtilClass method, which uses the camera intent and crop intent
-	 */
-	public void getPictureFromCamera()
-	{
-		// runs camera intent.  returns result code to onActivityResult, which will run crop intent if successful
-		tempImageFile = UtilClass.getPictureFromCamera(this, REQUEST_IMAGE_CAPTURE);
-	}
-
 	////////////////////////
-	static final int REQUEST_IMAGE_CAPTURE = 1;
-	static final int REQUEST_CROP_IMAGE = 2;
-	static final int REQUEST_SELECT_IMAGE_FROM_FILE = 3;
+	static final int REQUEST_IMAGE_CAPTURE = 31;
+	static final int REQUEST_CROP_IMAGE = 32;
+	static final int REQUEST_SELECT_IMAGE_FROM_FILE = 33;
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)

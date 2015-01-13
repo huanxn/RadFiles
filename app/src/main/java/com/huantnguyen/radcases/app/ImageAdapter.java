@@ -107,7 +107,18 @@ public class ImageAdapter extends BaseAdapter
 	public void addImage(String newImageFilename)
 	{
 		imageFilepaths = UtilClass.addArrayElement(imageFilepaths, newImageFilename);
+		imageCaptions = UtilClass.addArrayElement(imageCaptions, null);
 		imageIDs = UtilClass.addArrayElement(imageIDs, -1);  // temporary image, with no rowID in the database table
+
+		notifyDataSetChanged();
+	}
+
+	// add permanent image to grid into string array
+	public void addImage(String newImageFilename, long imageID)
+	{
+		imageFilepaths = UtilClass.addArrayElement(imageFilepaths, newImageFilename);
+		imageCaptions = UtilClass.addArrayElement(imageCaptions, null);
+		imageIDs = UtilClass.addArrayElement(imageIDs, imageID);
 
 		notifyDataSetChanged();
 	}
@@ -116,6 +127,7 @@ public class ImageAdapter extends BaseAdapter
 	public void deleteImage(int delete_position)
 	{
 		imageFilepaths = UtilClass.deleteArrayElement(imageFilepaths, delete_position);
+		imageCaptions = UtilClass.deleteArrayElement(imageCaptions, delete_position);
 		imageIDs = UtilClass.deleteArrayElement(imageIDs, delete_position);
 
 		notifyDataSetChanged();

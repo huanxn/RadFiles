@@ -35,6 +35,14 @@ import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 //import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import eu.janmuller.android.simplecropimage.CropImage;
+
 import static android.view.View.GONE;
 
 
@@ -54,10 +62,13 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 	public static final String ARG_HAS_IMAGE = "com.huantnguyen.radcases.ARG_HAS_IMAGE";
 
-	static final int REQUEST_EDIT_CASE = 1;
+	static final int REQUEST_EDIT_CASE = 21;
 
 	private Intent starterIntent; // to recreate Activity if theme/style/fadingactionbar changes due to add/removal of images/header
 	boolean hasImage;
+
+	private File tempImageFile;                                 // new image from camera
+	private static ImageGridView imageGridView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -206,7 +217,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				return true;
 
 			case R.id.menu_camera:
-				Toast.makeText(this, "placeholder: Camera function...", Toast.LENGTH_SHORT).show();
+				choosePictureAlertDialog(item.getActionView());
 				return true;
 
 			case R.id.menu_delete:
@@ -235,35 +246,194 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 	}
 
+	/**
+	 * Called when clicking to add new image
+	 * opens alert dialog to choose from file/gallery or take a photo with camera intent
+	 * @param view
+	 */
+	public void choosePictureAlertDialog(View view)
+	{
+		final Activity activity = this;
+
+		// Alert dialog to choose either to take a new photo with camera, or select existing picture from file storage
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		CharSequence[] imageSources = {"Take photo", "Choose file"};
+		builder.setTitle("Add image")
+				.setItems(imageSources, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int index)
+					{
+
+						switch(index)
+						{
+							// take new photo with the camera intent
+							// then crop photo
+							// store photo and put filename in database
+							case 0:
+								// runs camera intent.  returns result code to onActivityResult, which will run crop intent if successful
+								tempImageFile = UtilClass.getPictureFromCamera(activity, CaseEditActivity.REQUEST_IMAGE_CAPTURE);
+								break;
+
+							// select file from chooser
+							// either local database or TODO cloud storage
+							case 1:
+								// in onCreate or any event where your want the user to
+								// select a file
+								Intent intent = new Intent();
+								intent.setType("image/*");
+								intent.setAction(Intent.ACTION_GET_CONTENT);
+								//intent.putExtra("image_filename", tempImageFilename);
+								startActivityForResult(Intent.createChooser(intent,"Select Picture"), CaseEditActivity.REQUEST_SELECT_IMAGE_FROM_FILE);
+
+								break;
+
+						}
+
+					}
+				});
+
+		AlertDialog alert = builder.create();
+		alert.show();
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
-		switch(requestCode)
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if (requestCode == REQUEST_EDIT_CASE)
 		{
-			case REQUEST_EDIT_CASE:
 
-				// return the result code from CaseEditActivity back, so CaseCardList will know to refresh
-				setResult(resultCode);
+			// return the result code from CaseEditActivity back, so CaseCardList will know to refresh
+			setResult(resultCode);
 
-				if(resultCode == CaseCardListActivity.RESULT_DELETED)
-				{
-					// case has been deleted.  return to case list.
-					finish();
-				}
-				else if(resultCode == CaseCardListActivity.RESULT_EDITED)
-				{
-					// refresh data
-					fragment.populateFields();
-				}
+			if (resultCode == CaseCardListActivity.RESULT_DELETED)
+			{
+				// case has been deleted.  return to case list.
+				finish();
+			}
+			else if (resultCode == CaseCardListActivity.RESULT_EDITED)
+			{
+				// refresh data
+				fragment.populateFields();
+			}
 
-				break;
-
-			default:
-				UtilClass.showMessage(this, "casedetail onActivityResult debug test");
-				break;
 		}
 
-		super.onActivityResult(requestCode, resultCode, data);
+		// IMAGE CHOOSER (same as CaseEditActivity)
+		else if (requestCode == CaseEditActivity.REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
+		{
+			// successful capture of new photo from camera (called from UtilClass method)
+			// replaces tempImageFile with the new cropped image
+			// if successful, return to onActivityResult(REQUEST_CROP_IMAGE)
+
+			UtilClass.CropPicture(this, tempImageFile, CaseEditActivity.REQUEST_CROP_IMAGE);
+
+		}
+		else if (requestCode == CaseEditActivity.REQUEST_CROP_IMAGE && resultCode == RESULT_OK)
+		{
+			// successful crop of new photo from the camera (called from onActivityResult(REQUEST_IMAGE_CAPTURE)->UtilClass.CropPicture())
+			String path = data.getStringExtra(CropImage.IMAGE_PATH);
+			if (path != null)
+			{
+				addNewImageToDatabase(tempImageFile.getPath());
+			}
+			else
+			{
+				// delete tempImageFile since crop was canceled?
+				if (tempImageFile.exists())
+				{
+					tempImageFile.delete();
+					tempImageFile = null;
+				}
+			}
+
+		}
+		else if (requestCode == CaseEditActivity.REQUEST_SELECT_IMAGE_FROM_FILE && resultCode == RESULT_OK)
+		{
+			// successful selection of photo from file explorer
+			Uri selectedImageUri = data.getData();
+			//String originalImageFilename = UtilClass.getFilePathFromResult(this, selectedImageUri);
+
+			// make copy of file into app pictures folder
+			//File originalImageFile = new File(originalImageFilename);
+			//String newImageFilename = originalImageFile.getName();
+			File newImageFile = null;
+			try
+			{
+				newImageFile = File.createTempFile(key_id + "_", ".jpg", CaseCardListActivity.picturesDir);
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				UtilClass.showMessage(this, "Unable to create file.");
+			}
+
+			FileOutputStream outputStream = null;
+			FileInputStream inputStream = null;
+			try
+			{
+				// the selected local or cloud image file
+				inputStream = (FileInputStream) getContentResolver().openInputStream(selectedImageUri);
+
+				// new local file
+				outputStream = new FileOutputStream(newImageFile);
+
+				// copy backup file contents to local file
+				UtilsFile.copyFile(outputStream, inputStream);
+			}
+			catch (FileNotFoundException e)
+			{
+				e.printStackTrace();
+				UtilClass.showMessage(this, "File not found.");
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				UtilClass.showMessage(this, "File IO exception.");
+			}
+
+			addNewImageToDatabase(newImageFile.getPath());
+			//imageGridView.addImage(newImageFile.getPath());
+		}
+		else if (resultCode != RESULT_OK)
+		{
+			// delete tempImageFile if image capture was canceled
+			if (tempImageFile != null && tempImageFile.exists())
+			{
+				tempImageFile.delete();
+				tempImageFile = null;
+			}
+
+			UtilClass.showMessage(this, "Canceled");
+		}
+	}
+
+	private void addNewImageToDatabase(String imageFilepath)
+	{
+		int new_image_index = imageGridView.getCount();
+
+		//store in image table
+		ContentValues imageValues = new ContentValues();
+		imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
+		imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, new File(imageFilepath).getName());
+		imageValues.put(CasesProvider.KEY_ORDER, new_image_index);      // set order to display images.  new files last.  //todo user reodering
+
+		Uri row_uri = getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+		long new_image_id = Long.parseLong(row_uri.getLastPathSegment());
+
+		// show new image in grid display of key images
+		imageGridView.addImage(imageFilepath, new_image_id);
+
+		setResult(CaseCardListActivity.RESULT_EDITED);
+
+		if(imageGridView.getCount() > 0 && hasImage == false)
+		{
+			//reload activity to show new header
+			startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+
+			finish();
+			return;
+		}
 	}
 
 	/**
@@ -316,7 +486,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		private float toolbarAlpha;
 		//private int mParallaxImageHeight;
 
-		private ImageGridView imageGridView;
 		private int thumbnail_pos;
 
 		// Hold a reference to the current animator,
@@ -367,7 +536,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 		                         Bundle savedInstanceState)
 		{
-
 			View view;
 
 			if(hasImage)
@@ -425,8 +593,17 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			super.onResume();
 
 			// if added image, need to redo FadingActionBar TODO
+			//populateFields();
+		}
+
+
+		@Override
+		public void onViewCreated(View view, Bundle savedInstanceState) {
+			super.onViewCreated(view, savedInstanceState);
+
 			populateFields();
 		}
+
 
 		/**
 		 * //todo use the at the beginning of populate fields?
@@ -815,46 +992,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					//mDrawerToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
 
 					setDrawerListener(mDrawerToggle);
-
-
-/*
-					setDrawerListener(new DrawerLayout.SimpleDrawerListener(){
-						@Override
-						public void onDrawerClosed(View drawerView) {
-							super.onDrawerClosed(drawerView);
-							if (!isAdded()) {
-								return;
-							}
-							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-						}
-
-						@Override
-						public void onDrawerOpened(View drawerView) {
-							super.onDrawerOpened(drawerView);
-							if (!isAdded()) {
-								return;
-							}
-							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-						}
-
-						@Override
-						public void onDrawerSlide(View drawerView, float slideOffset)
-						{
-							super.onDrawerSlide(drawerView, slideOffset);
-
-							int baseColor = UtilClass.get_attr(getActivity(), R.attr.colorPrimary);
-							int textColor = UtilClass.get_attr(getActivity(), R.attr.actionMenuTextColor);
-
-							if(slideOffset > toolbarAlpha)
-							{
-								mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColor));
-								mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(slideOffset, textColor));
-							}
-						}
-					});
-*/
-
-
 
 
 					// image grid

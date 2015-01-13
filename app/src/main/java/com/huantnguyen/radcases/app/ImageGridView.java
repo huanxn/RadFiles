@@ -110,7 +110,7 @@ public class ImageGridView
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
 
-				CharSequence[] choices = {"Set image label", "Set as thumbnail", "Delete image"};
+				CharSequence[] choices = {"Set image caption", "Set as thumbnail", "Delete image"};
 				builder.setTitle(image_caption)
 						.setItems(choices, new DialogInterface.OnClickListener()
 						{
@@ -241,8 +241,11 @@ public class ImageGridView
 													}
 
 													// delete from database
-													Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, mAdapter.getImageID(image_position));
-													context.getContentResolver().delete(row_uri, null, null);
+													if(mAdapter.getImageID(image_position)!=-1)
+													{
+														Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, mAdapter.getImageID(image_position));
+														context.getContentResolver().delete(row_uri, null, null);
+													}
 
 													// delete from gridview adapter
 													mAdapter.deleteImage(image_position);
@@ -332,6 +335,13 @@ public class ImageGridView
 	public void addImage(String newImage)
 	{
 		mAdapter.addImage(newImage);
+		notifyDataSetChanged();
+		Resize();
+	}
+
+	public void addImage(String newImage, long newID)
+	{
+		mAdapter.addImage(newImage, newID);
 		notifyDataSetChanged();
 		Resize();
 	}
