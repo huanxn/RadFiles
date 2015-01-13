@@ -115,10 +115,14 @@ public class CasesProvider extends ContentProvider
 	public static final String KEY_FAVORITE = "FAVORITE";
 	public static final String KEY_CLINICAL_HISTORY = "CLINICAL";
 
+	public static final String KEY_LAST_MODIFIED_DATE = "LAST_MODIFIED_DATE";
+
 	// Images Table
 	public static final String KEY_IMAGE_PARENT_CASE_ID = "IMAGE_PARENT_CASE_ID";
 	public static final String KEY_IMAGE_FILENAME = "IMAGE_FILENAME";
 	public static final String KEY_ORDER = "ROW_ORDER";    // re-used in images,  section_list, studytype_list, keyword_list tables
+	public static final String KEY_IMAGE_DETAILS = "IMAGE_DETAILS";
+	public static final String KEY_IMAGE_CAPTION = "IMAGE_CAPTION";
 
 
 	/*
@@ -136,15 +140,16 @@ public class CasesProvider extends ContentProvider
 	public static final int COL_FINDINGS = 4;
 	public static final int COL_BIOPSY = 5;
 	public static final int COL_FOLLOWUP = 6;
-	public static final int COL_KEYWORDS = 7;
-	public static final int COL_COMMENTS = 8;
-	public static final int COL_STUDY_TYPE = 9;
-	public static final int COL_DATE = 10;
-	public static final int COL_IMAGE_COUNT = 11;
-	public static final int COL_THUMBNAIL = 12;
-	public static final int COL_FAVORITE = 13;
-	public static final int COL_CLINICAL_HISTORY = 14;
-	public static final int COL_FOLLOWUP_COMMENT = 15;
+	public static final int COL_FOLLOWUP_COMMENT = 7;
+	public static final int COL_KEYWORDS = 8;
+	public static final int COL_COMMENTS = 9;
+	public static final int COL_STUDY_TYPE = 10;
+	public static final int COL_DATE = 11;
+	public static final int COL_IMAGE_COUNT = 12;
+	public static final int COL_THUMBNAIL = 13;
+	public static final int COL_FAVORITE = 14;
+	public static final int COL_CLINICAL_HISTORY = 15;
+	public static final int COL_LAST_MODIFIED_DATE = 16;
 
 	// for secondary list tables.  study_type tables
 	public static final int COL_VALUE = 1;
@@ -154,15 +159,18 @@ public class CasesProvider extends ContentProvider
 	public static final int COL_IMAGE_PARENT_CASE_ID = 1; // from Cases table
 	public static final int COL_IMAGE_FILENAME = 2;
 	public static final int COL_IMAGE_ORDER = 3;  // order to display images.  0 is main thumbnail
+	public static final int COL_IMAGE_DETAILS = 4;
+	public static final int COL_IMAGE_CAPTION = 5;
 
 
 	public static final String[] CASES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_PATIENT_ID, KEY_DIAGNOSIS,
-		KEY_SECTION, KEY_FINDINGS, KEY_BIOPSY, KEY_FOLLOWUP, KEY_KEYWORDS, KEY_COMMENTS, KEY_STUDY_TYPE,
-		KEY_DATE, KEY_IMAGE_COUNT, KEY_THUMBNAIL, KEY_FAVORITE, KEY_CLINICAL_HISTORY, KEY_FOLLOWUP_COMMENT};
+		KEY_SECTION, KEY_FINDINGS, KEY_BIOPSY, KEY_FOLLOWUP, KEY_FOLLOWUP_COMMENT, KEY_KEYWORDS, KEY_COMMENTS, KEY_STUDY_TYPE,
+		KEY_DATE, KEY_IMAGE_COUNT, KEY_THUMBNAIL, KEY_FAVORITE, KEY_CLINICAL_HISTORY, KEY_LAST_MODIFIED_DATE};
 
 	// DB info: it's name, and the table we are using.
 	public static final String DATABASE_NAME = "MyDB";
 	public static final String CASES_TABLE = "CasesTable";
+	public static final String IMAGES_TABLE = "ImagesTable";
 
 	/*
 	private static final String FTS_VIRTUAL_CASES_TABLE = "FTS_Cases_Table";
@@ -177,8 +185,6 @@ public class CasesProvider extends ContentProvider
         		" UNIQUE (" + CASES_TABLE_ALL_KEYS[0] + "));";
     */
 
-	public static final String IMAGES_TABLE = "ImagesTable";
-
 	// for custom dropdown spinner lists
 	public static final String SECTION_LIST_TABLE = "SectionTable";
 	public static final String KEYWORD_LIST_TABLE = "KeyWordListTable";
@@ -186,7 +192,8 @@ public class CasesProvider extends ContentProvider
 
 
 	// Track DB version if a new version of your app changes the format.
-	public static final int DATABASE_VERSION = 28;
+	public static final int DATABASE_VERSION = 34;
+
 	private static final String DATABASE_CREATE_SQL =
 			"create table " + CASES_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
@@ -211,30 +218,33 @@ public class CasesProvider extends ContentProvider
 					+ CASES_TABLE_ALL_KEYS[8] + " text, "
 					+ CASES_TABLE_ALL_KEYS[9] + " text, "
 					+ CASES_TABLE_ALL_KEYS[10] + " text, "
-					+ CASES_TABLE_ALL_KEYS[11] + " integer, "   //imagecount
-					+ CASES_TABLE_ALL_KEYS[12] + " text, "
+					+ CASES_TABLE_ALL_KEYS[11] + " text, "
+					+ CASES_TABLE_ALL_KEYS[12] + " integer, " //imagecount
 					+ CASES_TABLE_ALL_KEYS[13] + " text, "
 					+ CASES_TABLE_ALL_KEYS[14] + " text, "
-					+ CASES_TABLE_ALL_KEYS[15] + " text"
+					+ CASES_TABLE_ALL_KEYS[15] + " text, "
+					+ CASES_TABLE_ALL_KEYS[16] + " text"
 
 					// Rest  of creation:
 					+ ");";
 
 	// list of image files, with links to parent "Cases" table
-	public static final String[] IMAGES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_IMAGE_PARENT_CASE_ID, KEY_IMAGE_FILENAME, KEY_ORDER};
+	public static final String[] IMAGES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_IMAGE_PARENT_CASE_ID, KEY_IMAGE_FILENAME, KEY_ORDER, KEY_IMAGE_DETAILS, KEY_IMAGE_CAPTION};
 	private static final String IMAGES_TABLE_CREATE_SQL =
 			"create table " + IMAGES_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
-					+ KEY_IMAGE_PARENT_CASE_ID + " integer,"
-					+ KEY_IMAGE_FILENAME + " text,"
-					+ KEY_ORDER + " integer"
+					+ KEY_IMAGE_PARENT_CASE_ID + " integer, "
+					+ KEY_IMAGE_FILENAME + " text, "
+					+ KEY_ORDER + " integer, "
+					+ KEY_IMAGE_DETAILS + " text, "
+					+ KEY_IMAGE_CAPTION + " text"
 					+ ");";
 
 	// list of image files, with links to parent "Cases" table
 	private static final String SECTION_TABLE_CREATE_SQL =
 			"create table " + SECTION_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
-					+ KEY_SECTION + " integer," // COL_VALUE
+					+ KEY_SECTION + " integer, " // COL_VALUE
 					+ KEY_ORDER + " integer"
 					+ ");";
 
@@ -242,7 +252,7 @@ public class CasesProvider extends ContentProvider
 	private static final String KEYWORD_LIST_TABLE_CREATE_SQL =
 			"create table " + KEYWORD_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
-					+ KEY_KEYWORDS + " text," // COL_VALUE
+					+ KEY_KEYWORDS + " text, " // COL_VALUE
 					+ KEY_ORDER + " integer"
 					+ ");";
 
@@ -250,7 +260,7 @@ public class CasesProvider extends ContentProvider
 	private static final String STUDYTYPE_LIST_TABLE_CREATE_SQL =
 			"create table " + STUDYTYPE_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
-					+ KEY_STUDY_TYPE + " text," // COL_VALUE
+					+ KEY_STUDY_TYPE + " text, " // COL_VALUE
 					+ KEY_ORDER + " integer"
 					+ ");";
 
@@ -571,88 +581,7 @@ public class CasesProvider extends ContentProvider
 		myDBHelper.close();
 	}
 
-	/*
-	// Add a new set of values to the database.
-	public long insertRow(String patient_ID, String study_type, String date)
 
-		// TODO: Update data in the row with new fields.
-		// TODO: Also change the function's arguments to be what you need!
-		// Create row's data:
-		ContentValues initialValues = new ContentValues();
-		initialValues.put(KEY_PATIENT_ID, patient_ID);
-		initialValues.put(KEY_STUDY_TYPE, study_type);
-		initialValues.put(KEY_DATE, date);
-
-		// Insert it into the database.
-		return db.insert(CASES_TABLE, null, initialValues);
-	}
-
-	// Delete a row from the database, by rowId (primary key)
-	public boolean deleteRow(long rowId)
-	{
-		String where = KEY_ROWID + "=" + rowId;
-		return db.delete(CASES_TABLE, where, null) != 0;
-	}
-
-	public void deleteAll()
-	{
-		Cursor c = getAllRows();
-		long rowId = c.getColumnIndexOrThrow(KEY_ROWID);
-		if (c.moveToFirst())
-		{
-			do
-			{
-				deleteRow(c.getLong((int) rowId));
-			} while (c.moveToNext());
-		}
-		c.close();
-	}
-
-	// Return all data in the database.
-	public Cursor getAllRows()
-	{
-		String where = null;
-		Cursor c = db.query(true, CASES_TABLE, CASES_TABLE_ALL_KEYS,
-				                   where, null, null, null, null, null);
-		if (c != null)
-		{
-			c.moveToFirst();
-		}
-		return c;
-	}
-
-	// Get a specific row (by rowId)
-	public Cursor getRow(long rowId)
-	{
-		String where = KEY_ROWID + "=" + rowId;
-		Cursor c = db.query(true, CASES_TABLE, CASES_TABLE_ALL_KEYS,
-				                   where, null, null, null, null, null);
-		if (c != null)
-		{
-			c.moveToFirst();
-		}
-		return c;
-	}
-
-	// Change an existing row to be equal to new data.
-	public boolean updateRow(long rowId, String patient_ID, int study_type, String date)
-	{
-		String where = KEY_ROWID + "=" + rowId;
-
-
-		// TODO: Update data in the row with new fields.
-		// TODO: Also change the function's arguments to be what you need!
-		// Create row's data:
-		ContentValues newValues = new ContentValues();
-		newValues.put(KEY_PATIENT_ID, patient_ID);
-		newValues.put(KEY_STUDY_TYPE, study_type);
-		newValues.put(KEY_DATE, date);
-
-		// Insert it into the database.
-		return db.update(CASES_TABLE, newValues, where, null) != 0;
-	}
-
-*/
 	/////////////////////////////////////////////////////////////////////
 	//	Private Helper Classes:
 	/////////////////////////////////////////////////////////////////////

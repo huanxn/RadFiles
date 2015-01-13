@@ -17,6 +17,7 @@ public class ImageAdapter extends BaseAdapter
 {
 	private Context mContext;
 	private String[] imageFilepaths;
+	private String[] imageCaptions;
 	private int imageSizePx;
 
 	private long[] imageIDs;
@@ -73,12 +74,14 @@ public class ImageAdapter extends BaseAdapter
 		if (cursor.moveToFirst())
 		{
 			imageFilepaths = new String[cursor.getCount()];
+			imageCaptions = new String[cursor.getCount()];
 			imageIDs = new long[cursor.getCount()];
 
 			int i = 0;
 			do
 			{
 				imageFilepaths[i] = CaseCardListActivity.picturesDir + "/" + cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+				imageCaptions[i] = cursor.getString(CasesProvider.COL_IMAGE_CAPTION);
 				imageIDs[i] = cursor.getInt(CasesProvider.COL_ROWID);
 
 				i = i + 1;
@@ -152,6 +155,19 @@ public class ImageAdapter extends BaseAdapter
 		if(index < getCount())
 		{
 			return new File(imageFilepaths[index]).getName();
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	// get the image caption at the specified index within the string array
+	public String getImageCaption(int index)
+	{
+		if(index < getCount())
+		{
+			return imageCaptions[index];
 		}
 		else
 		{

@@ -276,7 +276,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		{
 			case R.id.header_image:
 				Intent imageGalleryIntent = new Intent(this, ImageGalleryActivity.class);
-				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
+				//imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
+				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, fragment.thumbnail_pos);
 				startActivity(imageGalleryIntent);
 				break;
@@ -587,7 +588,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 							//mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 							alertTitle.setSpan(new TypefaceSpan(activity, "RobotoCondensed-Bold.ttf"), "Search \"".length(), alertTitle.length()-1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
 
 							builder.setTitle(alertTitle)
 									.setItems(R.array.browser_search_array, new DialogInterface.OnClickListener()

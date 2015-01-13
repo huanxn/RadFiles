@@ -933,7 +933,7 @@ public class UtilClass extends Activity
 		// to zip all images into a file for backup
 		String zip_files_array[] = new String[0];
 
-		// create local CSV files
+		// create local JSON files
 		try
 		{
 			FileOutputStream cases_out = new FileOutputStream(casesJSON);
@@ -983,11 +983,7 @@ public class UtilClass extends Activity
 				JsonWriter cases_writer = new JsonWriter(new OutputStreamWriter(cases_out, "UTF-8"));
 				cases_writer.setIndent("  ");
 
-				//JsonWriter images_writer = new JsonWriter(new OutputStreamWriter(images_out, "UTF-8"));
-				//images_writer.setIndent("  ");
-
 				cases_writer.beginArray();
-				//images_writer.beginArray();
 
 				// loop through all cases
 				do
@@ -997,7 +993,10 @@ public class UtilClass extends Activity
 					// output all case columns/fields for this case
 					for (int i = 0; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
 					{
-						cases_writer.name(CasesProvider.CASES_TABLE_ALL_KEYS[i]).value(caseCursor.getString(i));
+						if(!caseCursor.getString(i).isEmpty())
+						{
+							cases_writer.name(CasesProvider.CASES_TABLE_ALL_KEYS[i]).value(caseCursor.getString(i));
+						}
 					}
 
 					// output all linked images for this case (via parent_case_id)
@@ -1131,43 +1130,9 @@ public class UtilClass extends Activity
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Toast.makeText(activity, "Unable to copy CSV file", Toast.LENGTH_SHORT).show();
+			Toast.makeText(activity, "Unable to copy JSON file", Toast.LENGTH_SHORT).show();
 			return;
 		}
-
-		/*
-		//////////////////parent ids will change in new database!!!!
-		// IMAGES TABLE
-		try
-		{
-			br = new BufferedReader(new FileReader(tempImagesCSV));
-
-			ContentValues insertImageValues = new ContentValues();
-
-			//br.readLine(); // no header
-
-			while ( (line=br.readLine()) != null)
-			{
-				String[] values = line.split(",");
-
-				// input all columns for this case, except row_id
-				insertImageValues.clear();
-				insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, values[1]);
-				insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, values[2]);
-				insertImageValues.put(CasesProvider.KEY_ORDER, values[3]);
-
-				// insert the set of case info into the DB cases table
-				rowUri = activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
-			}
-			br.close();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Toast.makeText(activity, "Unable to open Images CSV file", Toast.LENGTH_SHORT).show();
-			return;
-		}
-		*/
 
 		// CASES TABLE
 		try
@@ -1189,10 +1154,12 @@ public class UtilClass extends Activity
 
 					if(reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
 					{
+						// ignore NULL values and row_id
 						reader.skipValue();
 					}
 					else if(Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
 					{
+						// valid field name, enter in database
 						insertCaseValues.put(field_name, reader.nextString());
 					}
 					else if(field_name.contentEquals("IMAGES"))
@@ -1246,109 +1213,16 @@ public class UtilClass extends Activity
 					}
 					else
 					{
+						// unrecognized field name
 						reader.skipValue();
 					}
 				}
-
-				/*
-				// loop through each field of this case (after _id)
-				reader.nextName();
-				for(int i = 1; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
-				{
-					reader.nextName();
-					insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[i], reader.nextString());
-				}
-
-				// insert the set of case info into the DB cases table
-				rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
-
-				// get parent key information
-				parent_id = Integer.valueOf(rowUri.getLastPathSegment());
-
-				if(reader.nextName().contentEquals("IMAGES"))
-				{
-					reader.beginArray();
-
-					// loop through each image in the case
-					while(reader.hasNext())
-					{
-						reader.beginObject();
-						insertImageValues.clear();
-
-						// loop through each field of this image (after _id and parent_id)
-						reader.nextName();
-						reader.nextName();
-						insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[1], parent_id);
-						for(int i = 2; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
-						{
-							reader.nextName();
-							insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[i], reader.nextString());
-						}
-
-						reader.endObject();
-					}
-
-					reader.endArray();
-				}
-
-				*/
 
 				reader.endObject();
 			}
 
 			reader.endArray();
 
-			/*
-			br = new BufferedReader(new FileReader(tempCasesCSV));
-
-			ContentValues insertCaseValues = new ContentValues();
-
-			// If successfully opened file, clear old database: delete all rows from CASES tables in the database
-			// todo change this to just add to existing database
-			//getContentResolver().delete(CasesProvider.CASES_URI, null, null);
-
-			br.readLine(); // header
-
-			while ( (line=br.readLine()) != null)
-			{
-				line = line.substring(1, line.length()-1);  // trim the double-quotes off
-				String[] values = line.split("\",\"");
-				insertCaseValues.clear();
-
-				long old_case_id = Long.valueOf(values[0]);
-
-				// input all columns for this case, except row_id
-				for (int i = 1; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
-				{
-					if(i>=values.length) // the rest of fields are blank
-						break;
-
-					insertCaseValues.put(CasesProvider.CASES_TABLE_ALL_KEYS[i], values[i]);
-
-					if(CasesProvider.CASES_TABLE_ALL_KEYS[i].contentEquals(CasesProvider.KEY_IMAGE_COUNT))
-						imageCount = Integer.valueOf(values[i]);
-				}
-
-				// insert the set of case info into the DB cases table
-				rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
-
-				// get parent key information
-				parent_id = Integer.valueOf(rowUri.getLastPathSegment());
-
-				// change parent_key link in IMAGES table
-				if(imageCount > 0)
-				{
-					ContentValues updateImageValues = new ContentValues();
-					updateImageValues.clear();
-
-					// replace with new parent_id obtained from newly inserted case row
-					updateImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, parent_id);
-					activity.getContentResolver().update(CasesProvider.IMAGES_URI, updateImageValues, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String [] {String.valueOf(old_case_id)});
-				}
-
-			}
-			br.close();
-			*/
 		}
 		catch (IOException e)
 		{

@@ -1,16 +1,20 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.viewpagerindicator.PageIndicator;
@@ -80,15 +84,15 @@ public class ImageGalleryActivity extends Activity {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_keyimage_gallery);
-		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.key_image);
+		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.viewpager);
 		TouchImageAdapter mAdapter = new TouchImageAdapter();
 
 		if(case_id == -1)   //error getting case id in intent extra
 		{
 			Log.e(TAG, "Did not get usable case id for key image gallery.");
 
-			String [] imageFilenames = getIntent().getStringArrayExtra(ARG_IMAGE_FILES);
-			mAdapter.setImages(imageFilenames);
+			String [] filepaths = getIntent().getStringArrayExtra(ARG_IMAGE_FILES);
+			mAdapter.setImages(filepaths);
 		}
 		else
 		{
@@ -106,26 +110,54 @@ public class ImageGalleryActivity extends Activity {
 		mIndicator.setViewPager(mViewPager);
 
 		mViewPager.setCurrentItem(init_pos);
-
     }
 
     static class TouchImageAdapter extends PagerAdapter {
 
       //  private static int[] images = { R.drawable.nature_1, R.drawable.nature_2, R.drawable.nature_3, R.drawable.nature_4, R.drawable.nature_5 };
-	    private static String[] imageFilename;
+	    private static String[] imageFilepaths;
+	    private String[] imageCaptions;
 
         @Override
         public int getCount() {
-        	return imageFilename.length;
+        	return imageFilepaths.length;
         }
 
         @Override
-        public View instantiateItem(ViewGroup container, int position) {
+        public View instantiateItem(ViewGroup container, int position)
+        {
+/*
             TouchImageView img = new TouchImageView(container.getContext());
             //img.setImageResource(images[position]);
-	        UtilClass.setPic(img, imageFilename[position], 500);
+	        UtilClass.setPic(img, imageFilepaths[position], 500);
             container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
+
+	        if(imageCaptions != null)
+	        {
+		        TextView caption = new TextView(container.getContext());
+		        caption.setText(imageCaptions[position]);
+		        container.addView(caption, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+	        }
+
             return img;
+
+*/
+			LayoutInflater inflater = (LayoutInflater) container.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+	        View view = inflater.inflate(R.layout.key_image_full, container, false);
+
+	        TouchImageView imageView = (TouchImageView)view.findViewById(R.id.key_image);
+	        UtilClass.setPic(imageView, imageFilepaths[position], 500);
+
+	        if(imageCaptions != null)
+	        {
+		        TextView caption = (TextView)view.findViewById(R.id.imageCaption);
+		        caption.setText(imageCaptions[position]);
+	        }
+
+	        container.addView(view, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+	        return view;
+
         }
 
         @Override
@@ -141,34 +173,35 @@ public class ImageGalleryActivity extends Activity {
 
 	    public void setImages(Cursor image_cursor)
 	    {
-		    imageFilename = new String[image_cursor.getCount()];
+		    imageFilepaths = new String[image_cursor.getCount()];
+		    imageCaptions = new String[image_cursor.getCount()];
+
 		    if(image_cursor.moveToFirst())
 		    {
-
 			    int image_counter = 0;
 			    do
 			    {
-				    imageFilename[image_counter] = image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+				    imageFilepaths[image_counter] = CaseCardListActivity.picturesDir + "/" + image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME);
+				    imageCaptions[image_counter] = image_cursor.getString(CasesProvider.COL_IMAGE_CAPTION);
 
 				    image_counter += 1;
 			    } while (image_cursor.moveToNext());
-
 		    }
+
 		    return;
 	    }
 
 	    // set the ImageGalleryActivity images by String array)
 	    public void setImages(String [] in_filenames)
 	    {
-		    imageFilename = new String[in_filenames.length];
+		    imageFilepaths = new String[in_filenames.length];
 		    int image_counter = 0;
 		    for(int i = 0; i < in_filenames.length; i++)
 		    {
-			    imageFilename[i] = in_filenames[i];
+			    imageFilepaths[i] = in_filenames[i];
 		    }
 		    return;
-
 	    }
-
     }
+
 }

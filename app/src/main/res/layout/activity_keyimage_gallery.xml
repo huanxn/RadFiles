@@ -5,7 +5,7 @@
 
     <!-- ExtendedViewPager is a custom view and must be referred to by its full package name in XML -->
 	<com.huantnguyen.radcases.app.ExtendedViewPager
-	    android:id="@+id/key_image"
+	    android:id="@+id/viewpager"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
         android:background="@android:color/black" />
@@ -15,5 +15,7 @@
         android:layout_alignParentBottom="true"
         android:layout_height="2dp"
         android:layout_width="fill_parent" />
+
+
 
 </RelativeLayout>

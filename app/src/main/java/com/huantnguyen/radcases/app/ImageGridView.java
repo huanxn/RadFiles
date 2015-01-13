@@ -9,9 +9,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.InputType;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.GridView;
 
 import java.io.File;
@@ -85,7 +88,8 @@ public class ImageGridView
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
 				Intent imageGalleryIntent = new Intent(activity, ImageGalleryActivity.class);
-				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilepaths());
+				//imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilepaths());
+				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, case_key_id);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
 				activity.startActivity(imageGalleryIntent);
 
@@ -99,63 +103,106 @@ public class ImageGridView
 				//final long image_key_id = id;
 				final long case_id = case_key_id;
 				final int image_position = position;
+				final String image_caption = mAdapter.getImageCaption(position);
+				final long image_id = mAdapter.getImageID(position);
 				final Context context = parent.getContext();
 				final Activity act = activity;
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
-				CharSequence[] choices = {"Delete Image", "Set Thumbnail", "Cancel"};
-				builder.setItems(choices, new DialogInterface.OnClickListener()
-				{
-					public void onClick(DialogInterface dialog, int index)
-					{
-						switch (index)
+
+				CharSequence[] choices = {"Set image label", "Set as thumbnail", "Delete image"};
+				builder.setTitle(image_caption)
+						.setItems(choices, new DialogInterface.OnClickListener()
 						{
-							// Delete the photo.
-							case 0:
-
-								if (mode == EDIT_ACTIVITY)
+							public void onClick(DialogInterface dialog, int index)
+							{
+								switch (index)
 								{
-									// get image row ID of deleted image, for actual delete if user presses "SAVE"
-									deletedImageList.add(mAdapter.getImageFilepath(image_position));
+									// Set caption
+									case 0:
+										// open EditText box to get user input for caption
+										AlertDialog.Builder alertBuilder = new AlertDialog.Builder(activity);
 
-									// delete from gridview adapter
-									mAdapter.deleteImage(image_position);
+										// Set an EditText view to get user input
+										final EditText input = new EditText(activity);
+										input.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+										input.setHighlightColor(UtilClass.get_attr(activity, R.attr.colorControlHighlight));
 
-									notifyDataSetChanged();
-									Resize();
+										alertBuilder.setTitle("Image Caption");
 
-									// adjust thumbnail index or reset to first image
-									if(thumbnail > image_position)
-									{
-										thumbnail = thumbnail - 1;
-									}
-									else if(thumbnail == image_position)
-									{
-										thumbnail = 0;
-									}
-								}
-								else if (mode == DETAIL_ACTIVITY)
-								{
+										// show current text in the edit box
+										input.setText(image_caption);
 
-									// confirm delete image
-									AlertDialog.Builder alert = new AlertDialog.Builder(context);
+										alertBuilder.setView(input);
 
-									alert.setTitle("Delete this image?");
-									alert.setMessage("Are you sure?");
-
-									alert.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-										public void onClick(DialogInterface dialog, int whichButton)
+										alertBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
 										{
-											// delete actual image file
-											File deleteFile = new File(mAdapter.getImageFilepath(image_position));
-											if(deleteFile.exists())
+											public void onClick(DialogInterface dialog, int whichButton)
 											{
-												deleteFile.delete();
+												// Save changes to the image caption
+												ContentValues captionValue = new ContentValues();
+												captionValue.put(CasesProvider.KEY_IMAGE_CAPTION, input.getText().toString());
+
+												// Update database
+												Uri caption_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_id);
+												context.getContentResolver().update(caption_row_uri, captionValue, null, null);
+											}
+										});
+
+										alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+										{
+											public void onClick(DialogInterface dialog, int whichButton)
+											{
+												// Canceled.
+											}
+										});
+
+										AlertDialog editTextDialog = alertBuilder.create();
+										// Show keyboard
+										editTextDialog.setOnShowListener(new DialogInterface.OnShowListener()
+										{
+											@Override
+											public void onShow(DialogInterface dialog)
+											{
+												InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+												imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+											}
+										});
+										editTextDialog.show();
+
+
+
+										break;
+
+									// Set thumbnail
+									case 1:
+										// if thumbnail changed
+										if (thumbnail != image_position)
+										{
+											thumbnail = image_position;
+
+											ContentValues thumbnailValue = new ContentValues();
+											thumbnailValue.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
+											Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_id);
+											context.getContentResolver().update(row_uri, thumbnailValue, null, null);
+
+											if (mode == DETAIL_ACTIVITY)
+											{
+												((CaseDetailActivity) act).reloadHeaderView(thumbnail);
 											}
 
-											// delete from database
-											Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, mAdapter.getImageID(image_position));
-											context.getContentResolver().delete(row_uri, null, null);
+											act.setResult(CaseCardListActivity.RESULT_EDITED);
+										}
+
+										break;
+
+									// Delete the photo.
+									case 2:
+
+										if (mode == EDIT_ACTIVITY)
+										{
+											// get image row ID of deleted image, for actual delete if user presses "SAVE"
+											deletedImageList.add(mAdapter.getImageFilepath(image_position));
 
 											// delete from gridview adapter
 											mAdapter.deleteImage(image_position);
@@ -164,65 +211,86 @@ public class ImageGridView
 											Resize();
 
 											// adjust thumbnail index or reset to first image
-											if(thumbnail > image_position)
+											if (thumbnail > image_position)
 											{
 												thumbnail = thumbnail - 1;
 											}
-											else if(thumbnail == image_position)
+											else if (thumbnail == image_position)
 											{
 												thumbnail = 0;
 											}
+										}
+										else if (mode == DETAIL_ACTIVITY)
+										{
 
-											if (mode == DETAIL_ACTIVITY)
+											// confirm delete image
+											AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+											alert.setTitle("Delete this image?");
+											alert.setMessage("Are you sure?");
+
+											alert.setPositiveButton("Delete", new DialogInterface.OnClickListener()
 											{
-												((CaseDetailActivity) act).reloadHeaderView(thumbnail);
-											}
-											act.setResult(CaseCardListActivity.RESULT_EDITED);
+												public void onClick(DialogInterface dialog, int whichButton)
+												{
+													// delete actual image file
+													File deleteFile = new File(mAdapter.getImageFilepath(image_position));
+													if (deleteFile.exists())
+													{
+														deleteFile.delete();
+													}
+
+													// delete from database
+													Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, mAdapter.getImageID(image_position));
+													context.getContentResolver().delete(row_uri, null, null);
+
+													// delete from gridview adapter
+													mAdapter.deleteImage(image_position);
+
+													notifyDataSetChanged();
+													Resize();
+
+													// adjust thumbnail index or reset to first image
+													if (thumbnail > image_position)
+													{
+														thumbnail = thumbnail - 1;
+													}
+													else if (thumbnail == image_position)
+													{
+														thumbnail = 0;
+													}
+
+													if (mode == DETAIL_ACTIVITY)
+													{
+														((CaseDetailActivity) act).reloadHeaderView(thumbnail);
+													}
+													act.setResult(CaseCardListActivity.RESULT_EDITED);
+												}
+											});
+
+											alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+											{
+												public void onClick(DialogInterface dialog, int whichButton)
+												{
+													// Canceled.
+												}
+											});
+
+											alert.show();
+
+
 										}
-									});
 
-									alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-										public void onClick(DialogInterface dialog, int whichButton) {
-											// Canceled.
-										}
-									});
+										break;
 
-									alert.show();
 
+									// Do Nothing.
+									default:
+										break;
 
 								}
-
-								break;
-
-							// Set thumbnail
-							case 1:
-								// if thumbnail changed
-								if(thumbnail != image_position)
-								{
-									thumbnail = image_position;
-
-									ContentValues values = new ContentValues();
-									values.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
-									Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_id);
-									context.getContentResolver().update(row_uri, values, null, null);
-
-									if (mode == DETAIL_ACTIVITY)
-									{
-										((CaseDetailActivity) act).reloadHeaderView(thumbnail);
-									}
-
-									act.setResult(CaseCardListActivity.RESULT_EDITED);
-								}
-
-								break;
-
-							// Cancel.  Do Nothing.
-							case 2:
-								break;
-
-						}
-					}
-				});
+							}
+						});
 
 				AlertDialog alert = builder.create();
 				alert.show();

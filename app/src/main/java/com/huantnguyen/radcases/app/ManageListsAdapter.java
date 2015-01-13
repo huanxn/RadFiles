@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -176,7 +175,7 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 	{
 		final ViewHolder holder = (ViewHolder) view.getTag();
 
-		AlertDialog.Builder alert = new AlertDialog.Builder(activity);
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(activity);
 
 		// Set an EditText view to get user input
 		final EditText input = new EditText(activity);
@@ -188,7 +187,7 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 
 		if(holder.getPosition() < itemList.size()-1)
 		{
-			alert.setTitle("Edit Item");
+			alertBuilder.setTitle("Edit Item");
 
 			// show current text in the edit box
 			input.setText(holder.mTextView.getText());
@@ -198,12 +197,12 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		}
 		else
 		{
-			alert.setTitle("Add Item");
+			alertBuilder.setTitle("Add Item");
 		}
 
-		alert.setView(input);
+		alertBuilder.setView(input);
 
-		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+		alertBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int whichButton)
 			{
@@ -212,7 +211,7 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 				itemList.set(position, value);
 
 				// if added a new item, replace the "add new" item in last position
-				if(position == itemList.size()-1)
+				if (position == itemList.size() - 1)
 				{
 					itemList.add(ADD_CUSTOM_TEXT);
 					keyList.add(-1);
@@ -230,13 +229,15 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 			}
 		});
 
-		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
+		alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+		{
+			public void onClick(DialogInterface dialog, int whichButton)
+			{
 				// Canceled.
 			}
 		});
 
-		AlertDialog dialog = alert.create();
+		AlertDialog dialog = alertBuilder.create();
 		// Show keyboard
 		dialog.setOnShowListener(new DialogInterface.OnShowListener() {
 			@Override
