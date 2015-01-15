@@ -28,7 +28,7 @@
 
         <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="@dimen/card_thumbnail_height"
+            android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_toLeftOf="@id/thumbnail"
@@ -64,6 +64,18 @@
                 android:layout_below="@id/case_info1"
                 android:layout_alignParentLeft="true"
                 android:text="text 2"/>
+
+            <TextView
+                android:id="@+id/case_info3"
+                style="@style/cardText3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:text="text 3"
+
+                />
 
             <!--
             <CheckBox

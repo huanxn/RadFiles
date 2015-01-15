@@ -802,6 +802,21 @@ public class UtilClass extends Activity
 		alert.show();
 	}
 
+	public static void updateLastModifiedDate(Activity activity, long key_id)
+	{
+		// put data into "values" for database insert/update
+		ContentValues values = new ContentValues();
+
+		// format string for database
+		SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-Hm-s");
+		String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
+		values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
+
+		// Update the existing case in the database
+		Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+		activity.getContentResolver().update(row_uri, values, null, null);
+	}
+
 	/**
 	 *
 	 * @param activity

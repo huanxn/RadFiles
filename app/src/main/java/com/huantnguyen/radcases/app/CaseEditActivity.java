@@ -407,12 +407,20 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 
 		//values.put(CasesProvider.KEY_FAVORITE, ((EditText)findViewById(R.id.edit_favorite)).getText().toString());
 
+		// THUMBNAIL
 		values.put(CasesProvider.KEY_THUMBNAIL, imageGridView.getThumbnail());
 
 		// IMAGE COUNT
 		//values.put(CasesProvider.KEY_IMAGE_COUNT, numImages + newImageFiles.size());
 		values.put(CasesProvider.KEY_IMAGE_COUNT, imageGridView.getCount());
 
+		// LAST MODIFIED DATE
+		// format string for database
+		SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-Hm-s");
+		String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
+		values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
+
+		// UPDATE DATABASE
 		if(key_id == -1)
 		{
 			// Add a new case into the database

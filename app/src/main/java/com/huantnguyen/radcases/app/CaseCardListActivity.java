@@ -30,12 +30,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ActionViewTarget;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.io.File;
@@ -53,7 +51,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	private static int defaultFilterMode = 0;  //todo get from shared preferences
 	private static int caseFilterMode = defaultFilterMode;
 	private static final int FILTER_SECTION = 0;
-	private static final int FILTER_RECENT = 1;
+	private static final int FILTER_LAST_MODIFIED = 1;
 	private static final int FILTER_STUDYDATE = 2;
 	private static final int FILTER_MODALITY = 3;
 	private static final int FILTER_KEYWORDS = 4;
@@ -286,8 +284,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				if(resultCode == RESULT_EDITED || resultCode == RESULT_DELETED)
 				{
 					// refresh cards
-					//caseFilterMode = FILTER_RECENT;
-					getSupportActionBar().setSelectedNavigationItem(FILTER_RECENT);
+					//caseFilterMode = FILTER_LAST_MODIFIED;
+					getSupportActionBar().setSelectedNavigationItem(FILTER_LAST_MODIFIED);
 					fragment.populateCards();
 				}
 				break;
@@ -533,14 +531,50 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 					break;
 
-				case FILTER_RECENT:
+				case FILTER_LAST_MODIFIED:
 					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, CasesProvider.KEY_ROWID + " DESC", null );
+					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, CasesProvider.KEY_LAST_MODIFIED_DATE + " DESC, " + CasesProvider.KEY_ROWID + " DESC", null );
 
+					/*
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
 						headerList.add("Recent");
 						//headerIdList.add(0);
+					}
+					*/
+
+					if(case_cursor_array[0].moveToFirst())
+					{
+						String db_modified_date_str;
+						String prior_str = "";
+						int group_counter = 0;  // section/group counter
+
+						do
+						{
+							db_modified_date_str = case_cursor_array[0].getString(CasesProvider.COL_LAST_MODIFIED_DATE);
+
+							if (db_modified_date_str != null && !db_modified_date_str.isEmpty())
+							{
+								// set header string: group by month
+								String new_date_str = UtilClass.convertDateString(db_modified_date_str, "yyyy-MM-dd", "MMMM yyyy");
+								// add to headerList
+								headerList.add(new_date_str);
+
+								// if different date, then put in next filter group
+								if (!new_date_str.contentEquals(prior_str))
+								{
+									group_counter += 1;
+								}
+								//headerIdList.add(group_counter);
+
+								// update prior_str for next iteration check
+								prior_str = new_date_str;
+							}
+							else
+							{
+								headerList.add(EMPTY_FIELD_GROUP_HEADER);
+							}
+						} while (case_cursor_array[0].moveToNext());
 					}
 
 					break;

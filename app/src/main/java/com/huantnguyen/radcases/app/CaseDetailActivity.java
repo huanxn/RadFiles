@@ -68,13 +68,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	boolean hasImage;
 
 	private File tempImageFile;                                 // new image from camera
-	private static ImageGridView imageGridView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		starterIntent = getIntent();
-
+		starterIntent = getIntent();    // save original intent info
 		key_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
 		//hasImage = getIntent().getBooleanExtra(ARG_HAS_IMAGE, false);
 
@@ -86,6 +84,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		}
 
 		String [] image_args = {String.valueOf(key_id)};
+
+		// see how many images are linked to this case to determine if fading toolbar image header should be used
 		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
 
 		if (imageCursor.getCount() > 0)
@@ -112,13 +112,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		}
 
+		setDrawerPosition(NavigationDrawerActivity.POS_NONE);
+
 		//super.onCreate(savedInstanceState);
 		//setContentView(R.layout.activity_case_detail);
 
-
-		// TODO fix icon instead of drawer icon
-		// Show the Up button in the action bar.
-//		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity
@@ -410,7 +408,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 	private void addNewImageToDatabase(String imageFilepath)
 	{
-		int new_image_index = imageGridView.getCount();
+		int new_image_index = fragment.imageGridView.getCount();
 
 		//store in image table
 		ContentValues imageValues = new ContentValues();
@@ -422,11 +420,14 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		long new_image_id = Long.parseLong(row_uri.getLastPathSegment());
 
 		// show new image in grid display of key images
-		imageGridView.addImage(imageFilepath, new_image_id);
+		fragment.imageGridView.addImage(imageFilepath, new_image_id);
+
+		// update last modified date field
+		UtilClass.updateLastModifiedDate(this, key_id);
 
 		setResult(CaseCardListActivity.RESULT_EDITED);
 
-		if(imageGridView.getCount() > 0 && hasImage == false)
+		if(fragment.imageGridView.getCount() > 0 && hasImage == false)
 		{
 			//reload activity to show new header
 			startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
@@ -487,6 +488,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		//private int mParallaxImageHeight;
 
 		private int thumbnail_pos;
+		private ImageGridView imageGridView;
 
 		// Hold a reference to the current animator,
 		// so that it can be canceled mid-way.

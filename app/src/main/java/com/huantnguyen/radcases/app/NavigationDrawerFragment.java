@@ -222,9 +222,18 @@ public class NavigationDrawerFragment extends Fragment
 
 	public void setDrawerPosition(int position)
 	{
-		if(position >= 0)
+		mCurrentSelectedPosition = position;
+
+		if(position == NavigationDrawerActivity.POS_NONE)
 		{
-			mCurrentSelectedPosition = position;
+			mDrawerListView.setItemChecked(position, false);
+			for(int i = NavigationDrawerActivity.POS_CASE_LIST; i <= NavigationDrawerActivity.POS_HELP; i++)
+			{
+				mDrawerListView.setItemChecked(i, false);
+			}
+		}
+		else
+		{
 			mDrawerListView.setItemChecked(position, true);
 		}
 	}
@@ -248,13 +257,16 @@ public class NavigationDrawerFragment extends Fragment
 				mCallbacks.onNavigationDrawerItemSelected(position);
 			}
 		}
+		// do nothing, drawer stays open
 		// otherwise, same item selected, just close the nav drawer, do not reopen activity
 		else
 		{
+			/*
 			if (mDrawerLayout != null)
 			{
 				mDrawerLayout.closeDrawer(mFragmentContainerView);
 			}
+			*/
 		}
 	}
 

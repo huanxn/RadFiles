@@ -232,6 +232,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			viewHolder.card_title.setText(mCase.patient_id);
 			viewHolder.card_text1.setText(mCase.diagnosis);
 			viewHolder.card_text2.setText(mCase.findings);
+			viewHolder.card_text3.setText(mCase.key_words);
 			//viewHolder.thumbnail.setImageDrawable(activity.getDrawable(country.getImageResourceId(mContext)));
 
 			if(UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE))
@@ -487,6 +488,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		public TextView card_title;
 		public TextView card_text1;
 		public TextView card_text2;
+		public TextView card_text3;
 		public ImageView thumbnail;
 
 		public ViewHolder(View itemView)
@@ -500,6 +502,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			card_title = (TextView) itemView.findViewById(R.id.patient_id);
 			card_text1 = (TextView) itemView.findViewById(R.id.case_info1);
 			card_text2 = (TextView) itemView.findViewById(R.id.case_info2);
+			card_text3 = (TextView) itemView.findViewById(R.id.case_info3);
 			thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
 		}
 	}

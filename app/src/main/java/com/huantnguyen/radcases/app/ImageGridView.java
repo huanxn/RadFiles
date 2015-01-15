@@ -146,6 +146,9 @@ public class ImageGridView
 												// Update database
 												Uri caption_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_id);
 												context.getContentResolver().update(caption_row_uri, captionValue, null, null);
+
+												// update mAdapter
+												mAdapter.setImageCaption(image_position, input.getText().toString());
 											}
 										});
 
@@ -170,7 +173,10 @@ public class ImageGridView
 										});
 										editTextDialog.show();
 
+										// update last modified date field
+										UtilClass.updateLastModifiedDate(act, case_id);
 
+										act.setResult(CaseCardListActivity.RESULT_EDITED);
 
 										break;
 
@@ -190,6 +196,9 @@ public class ImageGridView
 											{
 												((CaseDetailActivity) act).reloadHeaderView(thumbnail);
 											}
+
+											// update last modified date field
+											UtilClass.updateLastModifiedDate(act, case_id);
 
 											act.setResult(CaseCardListActivity.RESULT_EDITED);
 										}
@@ -226,7 +235,7 @@ public class ImageGridView
 											// confirm delete image
 											AlertDialog.Builder alert = new AlertDialog.Builder(context);
 
-											alert.setTitle("Delete this image?");
+											alert.setTitle("Delete image");
 											alert.setMessage("Are you sure?");
 
 											alert.setPositiveButton("Delete", new DialogInterface.OnClickListener()
@@ -267,6 +276,10 @@ public class ImageGridView
 													{
 														((CaseDetailActivity) act).reloadHeaderView(thumbnail);
 													}
+
+													// update last modified date field
+													UtilClass.updateLastModifiedDate(act, case_id);
+
 													act.setResult(CaseCardListActivity.RESULT_EDITED);
 												}
 											});

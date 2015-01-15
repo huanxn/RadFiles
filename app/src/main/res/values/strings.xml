@@ -45,7 +45,7 @@
     <!-- Spinner List of sorting/filters -->
     <string-array name="actionbar_sort_list">
         <item>Section</item>
-        <item>Recent</item>
+        <item>Last Modified</item>
         <item>Study Date</item>
         <item>Modality</item>
         <item>Key Words</item>

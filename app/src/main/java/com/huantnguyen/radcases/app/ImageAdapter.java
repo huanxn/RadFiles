@@ -207,4 +207,13 @@ public class ImageAdapter extends BaseAdapter
 		}
 	}
 
+	public void setImageCaption(int index, String s)
+	{
+		if(index < getCount())
+		{
+			imageCaptions[index] = s;
+		}
+
+		return;
+	}
 }
