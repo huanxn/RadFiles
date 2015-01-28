@@ -69,7 +69,7 @@
         <item name="android:layout_height">@dimen/text_box_height</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@color/white_text</item>
-        <item name="android:textSize">@dimen/largeTextSize</item>
+        <item name="android:textSize">@dimen/veryLargeTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
         <item name="android:paddingTop">0dip</item>
@@ -124,11 +124,31 @@
         <item name="android:inputType">textCapSentences|textNoSuggestions</item>
     </style>
 
+    <style name="textButtonName">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:textSize">@dimen/largeTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingTop">10dip</item>
+    </style>
+
+    <style name="textButtonDescription">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/light_grey_text</item>
+        <item name="android:textSize">@dimen/standardTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingTop">5dip</item>
+    </style>
+
     <style name="sectionSearch">
         <item name="android:drawableTop">@drawable/search_section_divider</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">48dp</item>
-        <item name="android:textSize">@dimen/largeTextSize</item>
+        <item name="android:textSize">@dimen/veryLargeTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">10dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
@@ -219,7 +239,7 @@
     </style>
 
     <style name="toolbarText">
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">@dimen/toolbarTextSize</item>
         <item name="android:textColor">?attr/actionMenuTextColor</item>
     </style>
 
@@ -235,6 +255,14 @@
         <item name="spb_colors">@array/Progress_bar_colors</item>
         <item name="spb_progressiveStart_activated">false</item>
         <item name="spb_generate_background_with_colors">false</item>
+    </style>
+
+    <style name="textButtonStyle">
+        <item name="android:clickable">true</item>
+        <item name="android:background">@drawable/layout_selector</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">8dp</item>
     </style>
 
 </resources>

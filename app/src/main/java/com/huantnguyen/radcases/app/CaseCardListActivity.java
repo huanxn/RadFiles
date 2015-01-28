@@ -659,8 +659,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					break;
 
 				case FILTER_KEYWORDS:
-					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " is not null and " + CasesProvider.KEY_KEYWORDS + " != ?", new String[] {""}, CasesProvider.KEY_KEYWORDS, null);
+
+					//case_cursor_array = new Cursor[1];
+					//case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " is not null and " + CasesProvider.KEY_KEYWORDS + " != ?", new String[] {""}, CasesProvider.KEY_KEYWORDS, null);
 
 					// get cursor of "Radiology Keywords List", in order determined by user list preferences
 					Cursor keywords_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
@@ -762,8 +763,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			String selection = "";
 
-
 			MergeCursor case_cursor; // merge into one cursor for StickyCard List
+
+			//todo add biopsy to search_categories
 
 			String [] search_categories = getResources().getStringArray(R.array.search_categories_array);
 			Cursor [] case_cursor_array = new Cursor[search_categories.length];
@@ -843,10 +845,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 								Uri uriShareFile = Uri.fromFile(shareFile);
 
 								Intent shareIntent = new Intent(Intent.ACTION_SEND);
-								shareIntent.setType("message/rfc822");
+								//shareIntent.setType("message/rfc822");
+								shareIntent.setType(CloudStorageActivity.RCS_MIMETYPE);
 								shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
 								shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
-								shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadCases Android app!");
+								shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store
 								shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
 
 

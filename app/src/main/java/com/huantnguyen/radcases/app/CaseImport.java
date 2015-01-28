@@ -309,8 +309,6 @@ public class CaseImport extends ActionBarActivity
 			return null;
 		}
 
-		Toast.makeText(this, "Imported cases", Toast.LENGTH_SHORT).show();
-
 		tempCasesJSON.delete();
 
 		return importCaseList;

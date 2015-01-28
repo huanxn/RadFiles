@@ -6,10 +6,13 @@
     <dimen name="activity_vertical_margin">8dp</dimen>
     <dimen name="text_box_height">36dp</dimen>
     <dimen name="list_item_height">48dp</dimen>
-    <dimen name="standardTextSize">16sp</dimen>
-    <dimen name="toolbarTextSize">20sp</dimen>
+
     <dimen name="cardTextSize">16sp</dimen>
-    <dimen name="largeTextSize">24sp</dimen>
+    <dimen name="standardTextSize">16sp</dimen>
+    <dimen name="largeTextSize">18sp</dimen>
+    <dimen name="toolbarTextSize">20sp</dimen>
+    <dimen name="veryLargeTextSize">24sp</dimen>
+
     <dimen name="large_image_height">250dp</dimen>
     <dimen name="medium_image_height">175dp</dimen>
     <dimen name="small_image_height">100dp</dimen>

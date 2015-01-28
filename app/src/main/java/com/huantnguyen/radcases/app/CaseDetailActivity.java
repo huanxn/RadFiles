@@ -408,7 +408,16 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 	private void addNewImageToDatabase(String imageFilepath)
 	{
-		int new_image_index = fragment.imageGridView.getCount();
+		int new_image_index = 0;
+
+		if(hasImage)
+		{
+			new_image_index = fragment.imageGridView.getCount();
+		}
+		else
+		{
+			new_image_index = 0;
+		}
 
 		//store in image table
 		ContentValues imageValues = new ContentValues();
@@ -419,15 +428,17 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		Uri row_uri = getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
 		long new_image_id = Long.parseLong(row_uri.getLastPathSegment());
 
-		// show new image in grid display of key images
-		fragment.imageGridView.addImage(imageFilepath, new_image_id);
-
 		// update last modified date field
 		UtilClass.updateLastModifiedDate(this, key_id);
 
 		setResult(CaseCardListActivity.RESULT_EDITED);
 
-		if(fragment.imageGridView.getCount() > 0 && hasImage == false)
+		if(hasImage)
+		{
+			// show new image in grid display of key images
+			fragment.imageGridView.addImage(imageFilepath, new_image_id);
+		}
+		else
 		{
 			//reload activity to show new header
 			startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
@@ -488,7 +499,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		//private int mParallaxImageHeight;
 
 		private int thumbnail_pos;
-		private ImageGridView imageGridView;
+		private ImageGridView imageGridView = null;
 
 		// Hold a reference to the current animator,
 		// so that it can be canceled mid-way.

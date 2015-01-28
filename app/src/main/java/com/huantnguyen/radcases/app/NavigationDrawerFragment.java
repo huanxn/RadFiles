@@ -24,7 +24,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 
@@ -180,7 +179,8 @@ public class NavigationDrawerFragment extends Fragment
 			}
 
 			@Override
-			public void onDrawerOpened(View drawerView) {
+			public void onDrawerOpened(View drawerView)
+			{
 				super.onDrawerOpened(drawerView);
 				if (!isAdded()) {
 					return;
@@ -316,6 +316,20 @@ public class NavigationDrawerFragment extends Fragment
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onPrepareOptionsMenu(Menu menu)
+	{
+		// If the nav drawer is open, hide action items related to the content view
+		MenuItem hiddenItem = menu.findItem(R.id.menu_search);
+
+		if(hiddenItem != null)
+		{
+			hiddenItem.setVisible(!isDrawerOpen());
+		}
+
+		return;// super.onPrepareOptionsMenu(menu);
 	}
 
 	/**

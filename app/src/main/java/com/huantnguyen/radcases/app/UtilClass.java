@@ -34,12 +34,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -808,7 +805,7 @@ public class UtilClass extends Activity
 		ContentValues values = new ContentValues();
 
 		// format string for database
-		SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-Hm-s");
+		SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
 		String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
 		values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
 
@@ -980,16 +977,8 @@ public class UtilClass extends Activity
 
 					j++;
 
-
-					/*
-					if(selArgs.isEmpty())
-						selArgs = String.valueOf(case_id);
-					else
-						selArgs += " OR " + String.valueOf(case_id);
-						*/
 				}
 
-				//caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_ROWID + " = ?", selectionArgs, null);
 				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, selection, selectionArgs, null);
 			}
 
@@ -1008,7 +997,7 @@ public class UtilClass extends Activity
 					// output all case columns/fields for this case
 					for (int i = 0; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
 					{
-						if(!caseCursor.getString(i).isEmpty())
+						if(caseCursor.getString(i) != null && !caseCursor.getString(i).isEmpty())
 						{
 							cases_writer.name(CasesProvider.CASES_TABLE_ALL_KEYS[i]).value(caseCursor.getString(i));
 						}
@@ -1048,35 +1037,6 @@ public class UtilClass extends Activity
 
 					cases_writer.endObject();
 
-					/*
-					// Image Table CSV
-					String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
-					Cursor imageCursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-
-
-					// loop through all images of this case
-					if(imageCursor.moveToFirst())
-					{
-						do
-						{
-							images_writer.beginObject();
-							for(int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
-							{
-								images_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
-							}
-							images_writer.endObject();
-
-							image_csvValues = imageCursor.getString(0) + "," + imageCursor.getString(1) + "," + imageCursor.getString(2) + "," + imageCursor.getString(3) + "\n";
-							imagesOut.write(image_csvValues);
-
-							zip_files_array = UtilClass.addArrayElement(zip_files_array, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-
-						} while (imageCursor.moveToNext());
-					}
-
-					imageCursor.close();
-					*/
-
 				} while (caseCursor.moveToNext());
 
 				caseCursor.close();
@@ -1093,7 +1053,7 @@ public class UtilClass extends Activity
 			returnFile = UtilsFile.zip(zip_files_array, zip_filename);
 
 			// delete temporary files
-			//casesJSON.delete();
+			casesJSON.delete();
 
 		}
 		catch (IOException e)
@@ -1248,6 +1208,328 @@ public class UtilClass extends Activity
 
 		Toast.makeText(activity, "Imported cases", Toast.LENGTH_SHORT).show();
 		tempCasesJSON.delete();
+	}
+
+	public static File exportListsJSON(Activity activity, String filename)
+	{
+		// attempt to create json file
+		File listsJSON = null;
+
+		// create CSV dir if doesn't already exist
+		if(!CSV_dir.exists())
+		{
+			if(CSV_dir.mkdirs())
+			{
+				showMessage(activity, "Created directory: " + CSV_dir.getPath());
+			}
+			else
+			{
+				showMessage(activity, "Unable to create directory: " + CSV_dir.getPath());
+			}
+		}
+
+		try
+		{
+			//listsJSON = new File(CSV_dir.getPath(), CloudStorageActivity.LISTS_JSON_FILENAME);
+			listsJSON = new File(CSV_dir.getPath(), filename+CloudStorageActivity.LIST_EXTENSION);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			showMessage(activity, "Unable to create local JSON backup files.");
+			return null;
+		}
+
+		// create local JSON files
+		try
+		{
+			FileOutputStream lists_out = new FileOutputStream(listsJSON);
+
+			JsonWriter lists_writer = new JsonWriter(new OutputStreamWriter(lists_out, "UTF-8"));
+			lists_writer.setIndent("  ");
+
+			Cursor cursor;
+
+			lists_writer.beginArray();
+
+			// get KEYWORD list
+			cursor = activity.getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+			lists_writer.beginObject();
+			lists_writer.name("KEYWORDS");
+			lists_writer.beginArray();
+
+			if (cursor != null && cursor.moveToFirst())
+			{
+				// loop through all rows
+				do
+				{
+					lists_writer.beginObject();
+
+					lists_writer.name(CasesProvider.KEY_KEYWORDS).value(cursor.getString(CasesProvider.COL_VALUE));
+					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_ORDER));
+
+					lists_writer.endObject();
+
+				} while (cursor.moveToNext());
+
+				cursor.close();
+			}
+
+			lists_writer.endArray();
+			lists_writer.endObject();
+
+			// get modality list
+			cursor = activity.getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+			lists_writer.beginObject();
+			lists_writer.name("MODALITY");
+			lists_writer.beginArray();
+
+			if (cursor != null && cursor.moveToFirst())
+			{
+				// loop through all rows
+				do
+				{
+					lists_writer.beginObject();
+
+					lists_writer.name(CasesProvider.KEY_STUDY_TYPE).value(cursor.getString(CasesProvider.COL_VALUE));
+					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_ORDER));
+
+					lists_writer.endObject();
+
+				} while (cursor.moveToNext());
+
+				cursor.close();
+			}
+
+			lists_writer.endArray();
+			lists_writer.endObject();
+
+			// get KEYWORD list
+			cursor = activity.getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+			lists_writer.beginObject();
+			lists_writer.name("SECTION");
+			lists_writer.beginArray();
+
+			if (cursor != null && cursor.moveToFirst())
+			{
+				// loop through all rows
+				do
+				{
+					lists_writer.beginObject();
+
+					lists_writer.name(CasesProvider.KEY_SECTION).value(cursor.getString(CasesProvider.COL_VALUE));
+					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_ORDER));
+
+					lists_writer.endObject();
+
+				} while (cursor.moveToNext());
+
+				cursor.close();
+			}
+
+			lists_writer.endArray();
+			lists_writer.endObject();
+
+
+			lists_writer.endArray();
+			lists_writer.close();
+
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Log.d(TAG, "IOException: " + e.getMessage());
+			return null;
+		}
+
+		return listsJSON;
+	}
+
+	public static void importListsJSON(Activity activity, File inFile)
+	{
+		BufferedReader br = null;
+		String line;
+		Uri rowUri = null;
+		int parent_id;
+		int imageCount = 0;
+
+
+		File tempListsJSON = null;
+		JsonReader reader = null;
+
+		try
+		{
+			// open existing file that should have been unzipped
+			tempListsJSON = inFile;
+			FileInputStream cases_in = new FileInputStream(tempListsJSON);
+			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Toast.makeText(activity, "Unable to copy JSON file", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		// LIST TABLES
+		try
+		{
+			ContentValues insertListValues = new ContentValues();
+
+			reader.beginArray();
+
+			// loop through all lists
+			while(reader.hasNext())
+			{
+				reader.beginObject();
+
+				while(reader.hasNext())
+				{
+					insertListValues.clear();
+
+					String list_name = reader.nextName();
+
+					if(list_name.contentEquals("KEYWORDS"))
+					{
+						activity.getContentResolver().delete(CasesProvider.KEYWORD_LIST_URI, null, null);
+
+						reader.beginArray();
+
+						while (reader.hasNext())
+						{
+							reader.beginObject();
+
+							while (reader.hasNext())
+							{
+
+								String field_name = reader.nextName();
+
+								if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+								{
+									// ignore NULL values and row_id
+									reader.skipValue();
+								}
+								else if (field_name.contentEquals(CasesProvider.KEY_KEYWORDS) || field_name.contentEquals(CasesProvider.KEY_ORDER))
+								{
+									// valid field name, enter in database
+									insertListValues.put(field_name, reader.nextString());
+								}
+								else
+								{
+									// unrecognized field name
+									reader.skipValue();
+								}
+							}
+
+							reader.endObject();
+
+							// insert the set of case info into the DB cases table
+							rowUri = activity.getContentResolver().insert(CasesProvider.KEYWORD_LIST_URI, insertListValues);
+						}
+
+						reader.endArray();
+
+
+					}
+					else if(list_name.contentEquals("MODALITY"))
+					{
+						activity.getContentResolver().delete(CasesProvider.STUDYTYPE_LIST_URI, null, null);
+
+						reader.beginArray();
+
+						while (reader.hasNext())
+						{
+							reader.beginObject();
+
+							while (reader.hasNext())
+							{
+
+								String field_name = reader.nextName();
+
+								if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+								{
+									// ignore NULL values and row_id
+									reader.skipValue();
+								}
+								else if (field_name.contentEquals(CasesProvider.KEY_STUDY_TYPE) || field_name.contentEquals(CasesProvider.KEY_ORDER))
+								{
+									// valid field name, enter in database
+									insertListValues.put(field_name, reader.nextString());
+								}
+								else
+								{
+									// unrecognized field name
+									reader.skipValue();
+								}
+							}
+
+							reader.endObject();
+
+							// insert the set of case info into the DB cases table
+							rowUri = activity.getContentResolver().insert(CasesProvider.STUDYTYPE_LIST_URI, insertListValues);
+						}
+
+						reader.endArray();
+					}
+					else if(list_name.contentEquals("SECTION"))
+					{
+						activity.getContentResolver().delete(CasesProvider.SECTION_LIST_URI, null, null);
+
+						reader.beginArray();
+
+						while (reader.hasNext())
+						{
+							reader.beginObject();
+
+							while (reader.hasNext())
+							{
+
+								String field_name = reader.nextName();
+
+								if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+								{
+									// ignore NULL values and row_id
+									reader.skipValue();
+								}
+								else if (field_name.contentEquals(CasesProvider.KEY_SECTION) || field_name.contentEquals(CasesProvider.KEY_ORDER))
+								{
+									// valid field name, enter in database
+									insertListValues.put(field_name, reader.nextString());
+								}
+								else
+								{
+									// unrecognized field name
+									reader.skipValue();
+								}
+							}
+
+							reader.endObject();
+
+							// insert the set of case info into the DB cases table
+							rowUri = activity.getContentResolver().insert(CasesProvider.SECTION_LIST_URI, insertListValues);
+
+						}
+
+						reader.endArray();
+					}
+
+				}
+
+				reader.endObject();
+			}
+
+			reader.endArray();
+
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+			Toast.makeText(activity, "Unable to open Cases JSON file", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		Toast.makeText(activity, "Imported lists", Toast.LENGTH_SHORT).show();
+		//tempListsJSON.delete();
 	}
 
 

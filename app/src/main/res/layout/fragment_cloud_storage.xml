@@ -1,5 +1,10 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+<RelativeLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -8,66 +13,230 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.huantnguyen.radcases.app.CloudStorageActivity$CloudStorageFragment">
 
+    <!-- CASES -->
     <TextView
+        style="@style/sectionHeader"
+        android:id="@+id/export_header"
+        android:text="CASES"
+        android:layout_alignParentTop="true"
+        />
+
+    <RelativeLayout
+        style="@style/textButtonStyle"
+        android:id="@+id/case_import_button"
+        android:layout_below="@id/export_header">
+
+        <TextView
+            android:id="@+id/case_import_title"
+            style="@style/textButtonName"
+            android:text = "Import cases"/>
+
+        <TextView
+            style="@style/textButtonDescription"
+            android:layout_below="@id/case_import_title"
+            android:text = "Select a rcs file from your device or cloud storage.  The imported cases will be added to your list of interesting cases." />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_below="@id/case_import_button"
+        android:layout_height="1px"
+        android:background="#FF909090"
+        />
+
+    <RelativeLayout
+        style="@style/textButtonStyle"
+        android:id="@+id/case_export_button"
+        android:layout_below="@id/case_import_button">
+        <TextView
+            android:id="@+id/case_export_title"
+            style="@style/textButtonName"
+            android:text = "Export all cases"/>
+
+        <TextView
+            style="@style/textButtonDescription"
+            android:layout_below="@id/case_export_title"
+            android:text = "Create a rcs file with case information and images and save to your device.  You will have the option to upload the rcs file to your cloud storage." />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_below="@id/case_export_button"
+        android:layout_height="1px"
+        android:background="#FF909090"
+        />
+
+    <RelativeLayout
+        style="@style/textButtonStyle"
+        android:id="@+id/export_multiselect_button"
+        android:layout_below="@id/case_export_button">
+        <TextView
+            android:id="@+id/case_export_multiselect_title"
+            style="@style/textButtonName"
+            android:text = "Export selected cases"/>
+
+        <TextView
+            style="@style/textButtonDescription"
+            android:layout_below="@id/case_export_multiselect_title"
+            android:text = "Choose cases from your interesting case list. Create a rcs file with case information and images.  Share via email or upload to your cloud storage." />
+
+    </RelativeLayout>
+
+
+    <!-- LIST -->
+    <TextView
+        style="@style/sectionHeader"
+        android:id="@+id/backupList_header"
+        android:text="Lists"
+        android:layout_below="@id/export_multiselect_button"
+        />
+
+    <RelativeLayout
+        style="@style/textButtonStyle"
+        android:id="@+id/list_import_button"
+        android:layout_below="@id/backupList_header">
+
+        <TextView
+            android:id="@+id/list_import_title"
+            style="@style/textButtonName"
+            android:text = "Import lists"/>
+
+        <TextView
+            style="@style/textButtonDescription"
+            android:layout_below="@id/list_import_title"
+            android:text = "Select a list file from your device or cloud storage. New lists of Keywords, Modalities, and Sections will overwrite your old lists." />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_below="@id/list_import_button"
+        android:layout_height="1px"
+        android:background="#FF909090"
+        />
+
+    <RelativeLayout
+        style="@style/textButtonStyle"
+        android:id="@+id/list_export_button"
+        android:layout_below="@id/list_import_button">
+        <TextView
+            android:id="@+id/list_export_title"
+            style="@style/textButtonName"
+            android:text = "Export lists"/>
+
+        <TextView
+            style="@style/textButtonDescription"
+            android:layout_below="@id/list_export_title"
+            android:text = "Save your lists of Keywords, Modalities, and Sections as a file on your device with an option to upload to your cloud storage." />
+
+    </RelativeLayout>
+
+
+    <!-- end LIST -->
+
+
+
+    <TextView
+        style="@style/sectionHeader"
+        android:id="@+id/debug_header"
+        android:text="DEBUG"
+        android:layout_below="@id/list_export_button"
+        />
+
+    <Button
+        android:id="@+id/fix_DB_button"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="Fix modified date"
+        android:onClick="onClick_Button"
+        android:visibility="visible"
+        android:layout_below="@id/debug_header">
+    </Button>
+
+
+
+
+    <!--
+    <TextView
+        android:visibility="gone"
         style="@style/sectionHeader"
         android:layout_alignParentTop="true"
         android:id="@+id/backup_header"
         android:text="DATABASE"
         />
     <Button
+        android:visibility="gone"
         android:id="@+id/backup_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="Backup"
         android:onClick="onClick_Button"
         android:layout_below="@id/backup_header">
-        </Button>
+    </Button>
 
     <Button
+        android:visibility="gone"
         android:id="@+id/restore_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:text="Restore"
         android:onClick="onClick_Button"
         android:layout_below="@id/backup_button">
-    </Button>
 
 
-    <TextView
-        style="@style/sectionHeader"
-        android:id="@+id/export_header"
-        android:text="Export CSV"
-        android:layout_below="@id/restore_button"
-        />
 
-
-    <Button
-        android:id="@+id/exportCSV_button"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:text="test exportCSV"
-        android:onClick="onClick_Button"
-        android:layout_below="@id/export_header">
     </Button>
 
     <Button
-        android:id="@+id/importCSV_button"
+
+
+            android:visibility="gone"
+
+
+            android:id="@+id/exportCSV_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Backup"
+            android:onClick="onClick_Button"
+            android:layout_below="@id/export_header">
+        </Button>
+
+        <Button
+
+
+            android:visibility="gone"
+
+
+            android:id="@+id/importCSV_button"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="Restore"
+            android:onClick="onClick_Button"
+            android:layout_below="@id/exportCSV_button">
+        </Button>
+
+
+        <Button
+        android:visibility="gone"
+        android:id="@+id/exportList_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:text="test importCSV"
+        android:text="Backup"
         android:onClick="onClick_Button"
-        android:layout_below="@id/exportCSV_button">
+        android:layout_below="@id/backupList_header">
     </Button>
-
 
     <Button
-        android:id="@+id/fix_DB_button"
+        android:visibility="gone"
+        android:id="@+id/importList_button"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:text="debug"
+        android:text="Restore"
         android:onClick="onClick_Button"
-        android:visibility="invisible"
-        android:layout_below="@id/importCSV_button">
+        android:layout_below="@id/exportList_button">
     </Button>
-
+-->
 </RelativeLayout>
+</ScrollView>

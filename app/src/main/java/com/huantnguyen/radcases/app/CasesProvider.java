@@ -194,7 +194,7 @@ public class CasesProvider extends ContentProvider
 	// Track DB version if a new version of your app changes the format.
 	public static final int DATABASE_VERSION = 34;
 
-	private static final String DATABASE_CREATE_SQL =
+	private static final String CASES_TABLE_CREATE_SQL =
 			"create table " + CASES_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
 
@@ -241,7 +241,7 @@ public class CasesProvider extends ContentProvider
 					+ ");";
 
 	// list of image files, with links to parent "Cases" table
-	private static final String SECTION_TABLE_CREATE_SQL =
+	private static final String SECTION_LIST_TABLE_CREATE_SQL =
 			"create table " + SECTION_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
 					+ KEY_SECTION + " integer, " // COL_VALUE
@@ -529,6 +529,7 @@ public class CasesProvider extends ContentProvider
 		return count;
 	}
 
+
 	@Override
 	public String getType(Uri uri)
 	{
@@ -615,347 +616,13 @@ public class CasesProvider extends ContentProvider
 		@Override
 		public void onCreate(SQLiteDatabase _db)
 		{
-			_db.execSQL(DATABASE_CREATE_SQL);
+			_db.execSQL(CASES_TABLE_CREATE_SQL);
 			_db.execSQL(IMAGES_TABLE_CREATE_SQL);
 
 			//TODO remove initial db data
 			ContentValues initialValues = new ContentValues();
 
-			/*
-			initialValues.put(KEY_PATIENT_ID, "E-4730");
-			initialValues.put(KEY_DIAGNOSIS, "Pulmonary Embolus");
-			initialValues.put(KEY_FINDINGS, "filling defect, right heart strain, pulmonary infarction");
-			initialValues.put(KEY_KEYWORDS, "VA Call");
-			initialValues.put(KEY_COMMENTS, "Right middle lobe PE, with lateral RML infarction");
-			initialValues.put(KEY_FAVORITE, "1");
-			initialValues.put(KEY_SECTION, "Chest");
-			initialValues.put(KEY_STUDY_TYPE, "CT Chest");
-			initialValues.put(KEY_DATE, "2014-05-27");
-			initialValues.put(KEY_IMAGE_COUNT, 2);
-			// Insert it into the database.
-			_db.insert(CASES_TABLE, null, initialValues);
 
-
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 1);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/E-4730-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 1);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/E-4730-2.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-
-
-
-			/////////////////
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "G-9696");
-			initialValues.put(KEY_SECTION, "Chest");
-			initialValues.put(KEY_FINDINGS, "Diffuse interlobular septal thickening and interstitial disease");
-			initialValues.put(KEY_STUDY_TYPE, "CT Chest");
-			initialValues.put(KEY_DATE, "2014-03-14");
-			initialValues.put(KEY_COMMENTS, "Worsening SOB. Smoker.");
-			initialValues.put(KEY_FOLLOWUP, 1);
-			initialValues.put(KEY_FOLLOWUP_COMMENT, "HRCT");
-			initialValues.put(KEY_IMAGE_COUNT, 2);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 2);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/G-9696-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 2);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/G-9696-2.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			//////////////
-
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "N-7007");
-			initialValues.put(KEY_DIAGNOSIS, "Liver Cirrhosis");
-			initialValues.put(KEY_SECTION, "Body");
-			initialValues.put(KEY_STUDY_TYPE, "CT Chest");
-			initialValues.put(KEY_DATE, "2007-02-11");
-			initialValues.put(KEY_IMAGE_COUNT, 1);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 3);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/N-7007.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-
-			////////////
-
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "O-0436");
-			initialValues.put(KEY_DIAGNOSIS, "Bladder rupture");
-			initialValues.put(KEY_SECTION, "Body");
-			initialValues.put(KEY_FINDINGS, "Intraperitoneal contrast extravasation and air");
-			initialValues.put(KEY_STUDY_TYPE, "CT Abdomen and Pelvis");
-			initialValues.put(KEY_DATE, "2013-09-24");
-			initialValues.put(KEY_COMMENTS, "History of bladder cancer. s/p Foley insertion.");
-			initialValues.put(KEY_FOLLOWUP, 1);
-			initialValues.put(KEY_KEYWORDS, "Cancer");
-			initialValues.put(KEY_IMAGE_COUNT, 1);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 4);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/O-0436.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "T-4158");
-			initialValues.put(KEY_SECTION, "Body");
-			initialValues.put(KEY_FINDINGS, "Accessory right renal artery from right common iliac");
-			initialValues.put(KEY_STUDY_TYPE, "CT Abdomen and Pelvis");
-			initialValues.put(KEY_DATE, "2012-08-24");
-			initialValues.put(KEY_COMMENTS, "hematuria");
-			initialValues.put(KEY_IMAGE_COUNT, 2);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 5);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/T4158-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 5);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/T4158-2.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "V-4493");
-			initialValues.put(KEY_SECTION, "Body");
-			initialValues.put(KEY_DIAGNOSIS, "Gallstone ileus");
-			initialValues.put(KEY_FINDINGS, "Gallstones within small bowel.  Dilated small bowel.");
-			initialValues.put(KEY_STUDY_TYPE, "CT Abdomen and Pelvis");
-			initialValues.put(KEY_DATE, "2014-05-24");
-			initialValues.put(KEY_FOLLOWUP, 1);
-			initialValues.put(KEY_COMMENTS, "Poor surgical candidate");
-			initialValues.put(KEY_IMAGE_COUNT, 3);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 6);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/V-4493-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 6);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/V-4493-0.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 6);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/V-4493-2.jpg");
-			initialValues.put(KEY_ORDER, 2);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 6);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/V-4493-3.jpg");
-			initialValues.put(KEY_ORDER, 3);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 6);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/V-4493-4.jpg");
-			initialValues.put(KEY_ORDER, 4);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "W-1165");
-			initialValues.put(KEY_SECTION, "Chest");
-			initialValues.put(KEY_DIAGNOSIS, "Pulmonary Embolus");
-			initialValues.put(KEY_FINDINGS, "Extensive bilateral PE. Right heart strain");
-			initialValues.put(KEY_STUDY_TYPE, "CT Chest");
-			initialValues.put(KEY_DATE, "2014-05-14");
-			initialValues.put(KEY_IMAGE_COUNT, 4);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 7);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-1165-1.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 7);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-1165-2.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 7);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-1165-3.jpg");
-			initialValues.put(KEY_ORDER, 2);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 7);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-1165-4.jpg");
-			initialValues.put(KEY_ORDER, 3);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "W-5832");
-			initialValues.put(KEY_SECTION, "Chest");
-			initialValues.put(KEY_FINDINGS, "Cavitary lung lesion. Multiple lung nodules and liver lesions");
-			initialValues.put(KEY_STUDY_TYPE, "CT Chest");
-			initialValues.put(KEY_DATE, "2014-03-19");
-			initialValues.put(KEY_COMMENTS, "Likely metastatic lung SCC");
-			initialValues.put(KEY_FOLLOWUP, 1);
-			initialValues.put(KEY_FOLLOWUP_COMMENT, "lung and liver lesions");
-			initialValues.put(KEY_IMAGE_COUNT, 2);
-			initialValues.put(KEY_KEYWORDS, "Tumor");
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 8);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-5832-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 8);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-5832-2.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_SECTION, "Ultrasound");
-			initialValues.put(KEY_DIAGNOSIS, "Spontaneous abortion");
-			initialValues.put(KEY_STUDY_TYPE, "US Pelvis");
-			initialValues.put(KEY_DATE, "2011-11-03");
-			initialValues.put(KEY_IMAGE_COUNT, 1);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 9);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/export--249687728_frame_71.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_SECTION, "Ultrasound");
-			initialValues.put(KEY_DIAGNOSIS, "Ectopic pregnancy");
-			initialValues.put(KEY_STUDY_TYPE, "US Pelvis");
-			initialValues.put(KEY_DATE, "2012-07-17");
-			initialValues.put(KEY_IMAGE_COUNT, 1);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 10);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/export--264679977.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_SECTION, "Body");
-			initialValues.put(KEY_DIAGNOSIS, "Intrauterine pregnancy");
-			initialValues.put(KEY_STUDY_TYPE, "CT Abdomen and Pelvis");
-			initialValues.put(KEY_DATE, "2014-02-28");
-			initialValues.put(KEY_IMAGE_COUNT, 1);
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 11);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/export--270766728.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "G-0571");
-			initialValues.put(KEY_SECTION, "Neuro");
-			initialValues.put(KEY_DIAGNOSIS, "Odontoid fracture");
-			initialValues.put(KEY_STUDY_TYPE, "CT C-Spine");
-			initialValues.put(KEY_DATE, "2014-06-18");
-			initialValues.put(KEY_COMMENTS, "Telerad miss");
-			initialValues.put(KEY_IMAGE_COUNT, 2);
-			initialValues.put(KEY_KEYWORDS, "Miss, Trauma");
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 12);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/G-0571-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 12);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/G-0571-2.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "B-5347");
-			initialValues.put(KEY_SECTION, "Body");
-			initialValues.put(KEY_DIAGNOSIS, "");
-			initialValues.put(KEY_FINDINGS, "Biliary and pancreatic ductal dilatation");
-			initialValues.put(KEY_STUDY_TYPE, "CT Abdomen and Pelvis");
-			initialValues.put(KEY_DATE, "2014-06-20");
-			initialValues.put(KEY_IMAGE_COUNT, 2);
-			initialValues.put(KEY_COMMENTS, "Bladder malignancy");
-			initialValues.put(KEY_KEYWORDS, "Cancer");
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 13);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/B-5347-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 13);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/B-5347-2.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-
-			initialValues.clear();
-			initialValues.put(KEY_PATIENT_ID, "W-0199");
-			initialValues.put(KEY_SECTION, "Body");
-			initialValues.put(KEY_DIAGNOSIS, "Midgut malrotation and obstruction");
-			initialValues.put(KEY_FINDINGS, "Duodenum does not cross midline. SMA-SMV reversal.");
-			initialValues.put(KEY_STUDY_TYPE, "CT Abdomen and Pelvis");
-			initialValues.put(KEY_DATE, "2014-06-23");
-			initialValues.put(KEY_IMAGE_COUNT, 2);
-			initialValues.put(KEY_KEYWORDS, "Bowel obstruction");
-			_db.insert(CASES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 14);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-0199-1.jpg");
-			initialValues.put(KEY_ORDER, 0);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			initialValues.clear();
-			initialValues.put(KEY_IMAGE_PARENT_CASE_ID, 14);
-			initialValues.put(KEY_IMAGE_FILENAME, "/storage/emulated/0/Android/data/com.huantnguyen.radcases.app/files/Pictures/W-0199-2.jpg");
-			initialValues.put(KEY_ORDER, 1);
-			_db.insert(IMAGES_TABLE, null, initialValues);
-
-			*/
 
 			// Create StudyTypes Table
 			_db.execSQL(STUDYTYPE_LIST_TABLE_CREATE_SQL);
@@ -1049,7 +716,7 @@ public class CasesProvider extends ContentProvider
 			_db.insert(KEYWORD_LIST_TABLE, null, values);
 
 
-			_db.execSQL(SECTION_TABLE_CREATE_SQL);
+			_db.execSQL(SECTION_LIST_TABLE_CREATE_SQL);
 			initialValues.clear();
 			initialValues.put(KEY_SECTION, "MSK");
 			initialValues.put(KEY_ORDER, 3);

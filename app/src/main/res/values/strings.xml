@@ -19,7 +19,7 @@
     <string name="title_activity_add_case">Add Case</string>
     <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
     <string name="title_activity_edit_case">Edit Case</string>
-    <string name="title_activity_cloud_storage">RAD Backup</string>
+    <string name="title_activity_cloud_storage">RAD Import &amp; Export</string>
     <string name="title_activity_case_card_list">RAD Files</string>
     <string name="title_activity_manage_lists">RAD Lists</string>
     <string name="title_activity_case_import">RAD Import</string>
@@ -57,13 +57,12 @@
     <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="action_example">Example action</string>
 
     <string-array name="nav_drawer_array">
         <item>Interesting Cases</item>
         <item>*Procedure Log</item>
         <item>*Favorites</item>
-        <item>Backup Data</item>
+        <item>Import &amp; Export</item>
         <item>Manage Lists</item>
         <item>*Settings</item>
         <item>*Help</item>
@@ -75,14 +74,14 @@
         <item>Diagnosis</item>
         <item>Findings</item>
         <item>Key Words</item>
-        <item>Study Type</item>
+        <item>Modality</item>
         <item>Comments</item>
     </string-array>
 
     <!-- Manage Lists: tab titles -->
     <string-array name="list_tab_titles_array">
         <item>Key Words</item>
-        <item>Study Types</item>
+        <item>Modalities</item>
         <item>Sections</item>
     </string-array>
 
@@ -91,10 +90,5 @@
         <item>Radiopaedia</item>
         <item>Wikipedia</item>
     </string-array>
-
-    <string name="tab_title1">Key words</string>
-    <string name="tab_title2">Study Types</string>
-    <string name="tab_title3">Sections</string>
-
 
 </resources>

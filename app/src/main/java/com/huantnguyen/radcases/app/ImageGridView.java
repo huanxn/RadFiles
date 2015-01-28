@@ -39,7 +39,7 @@ public class ImageGridView
 
 	private int thumbnail = 0;
 
-	// Constructor for ImageGridView without any intial images
+	// Constructor for ImageGridView without any initial images
 	public ImageGridView(Activity activity, GridView gView)
 	{
 		this.activity = activity;

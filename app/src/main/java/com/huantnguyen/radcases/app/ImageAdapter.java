@@ -28,6 +28,7 @@ public class ImageAdapter extends BaseAdapter
 		setImageSize(c);
 
 		imageFilepaths = new String[0];     // cause memory leak in set images?
+		imageCaptions = new String[0];
 		imageIDs = new long[0];
 	}
 

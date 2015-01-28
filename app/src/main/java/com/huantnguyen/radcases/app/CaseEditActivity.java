@@ -416,7 +416,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 
 		// LAST MODIFIED DATE
 		// format string for database
-		SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-Hm-s");
+		SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
 		String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
 		values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
 
@@ -895,6 +895,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				//numImages = image_cursor.getCount();
 
 				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.key_image), selected_key_id, image_cursor);
+				imageGridView.setThumbnailPosition(Integer.parseInt(case_cursor.getString(CasesProvider.COL_THUMBNAIL)));
 				imageGridView.notifyDataSetChanged();
 
 				image_cursor.close();
