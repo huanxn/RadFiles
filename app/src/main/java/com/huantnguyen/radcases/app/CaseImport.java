@@ -219,9 +219,13 @@ public class CaseImport extends ActionBarActivity
 				{
 					String field_name = reader.nextName();
 
-					if(reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+					if(reader.peek() == JsonToken.NULL)
 					{
 						reader.skipValue();
+					}
+					else if(field_name.contentEquals(CasesProvider.KEY_ROWID))
+					{
+						mCase.key_id = Long.valueOf(reader.nextString());
 					}
 					else if(field_name.contentEquals(CasesProvider.KEY_PATIENT_ID))
 					{
