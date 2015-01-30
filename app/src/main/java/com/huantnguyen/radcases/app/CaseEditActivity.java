@@ -451,6 +451,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				//store in image table
 				imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
 				imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageGridView.getImageFilename(i));
+				imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
 				imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
 				getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);

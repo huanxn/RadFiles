@@ -87,13 +87,14 @@ public class ImageGalleryActivity extends Activity {
 		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.viewpager);
 		TouchImageAdapter mAdapter = new TouchImageAdapter();
 
-		if(case_id == -1)   //error getting case id in intent extra
+		//if(case_id == -1)   //error getting case id in intent extra
 		{
-			Log.e(TAG, "Did not get usable case id for key image gallery.");
+		//	Log.e(TAG, "Did not get usable case id for key image gallery.");
 
 			String [] filepaths = getIntent().getStringArrayExtra(ARG_IMAGE_FILES);
 			mAdapter.setImages(filepaths);
 		}
+		/*
 		else
 		{
 			// get all of the images linked to this case _id
@@ -103,6 +104,7 @@ public class ImageGalleryActivity extends Activity {
 			//Set the adapter to get images from cursor
 			mAdapter.setImages(cursor);
 		}
+		*/
 
 		mViewPager.setAdapter(mAdapter);
 
@@ -194,6 +196,11 @@ public class ImageGalleryActivity extends Activity {
 	    // set the ImageGalleryActivity images by String array)
 	    public void setImages(String [] in_filenames)
 	    {
+		    if(in_filenames == null)
+		    {
+			    return;
+		    }
+
 		    imageFilepaths = new String[in_filenames.length];
 		    int image_counter = 0;
 		    for(int i = 0; i < in_filenames.length; i++)

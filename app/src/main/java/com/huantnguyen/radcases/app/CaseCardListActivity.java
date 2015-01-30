@@ -13,7 +13,10 @@ import android.database.MergeCursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
@@ -33,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.gc.materialdesign.widgets.ProgressDialog;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
@@ -93,8 +97,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	public static File picturesDir;
 	public static File appDir;             // internal app data directory
 	public static File dataDir;            // private data directory (with SQL database)
-	public static File CSV_dir;            // contains created zip files with CSV files and images
+	public static File CSV_dir;            // contains created zip files with JSON files and images
 
+	private static File shareFile;
+
+	private static ProgressDialog progressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -142,6 +149,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					// when item position changes, then repopulate cards using the new criteria
 					caseFilterMode = itemPosition;
 					fragment.populateCards();
+					mCardAdapter.notifyDataSetChanged();
 
 					return false;
 				}
@@ -192,13 +200,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					// when item position changes, then repopulate cards using the new criteria
 					caseFilterMode = itemPosition;
 					fragment.populateCards();
+					mCardAdapter.notifyDataSetChanged();
 
 					return false;
 				}
 			});
 		}
-
-
 	}
 
 
@@ -274,6 +281,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				{
 					// refresh cards
 					fragment.populateCards();
+					mCardAdapter.notifyDataSetChanged();
 				}
 				break;
 
@@ -287,6 +295,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					//caseFilterMode = FILTER_LAST_MODIFIED;
 					getSupportActionBar().setSelectedNavigationItem(FILTER_LAST_MODIFIED);
 					fragment.populateCards();
+					mCardAdapter.notifyDataSetChanged();
 				}
 				break;
 
@@ -352,6 +361,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	{
 		// repopulate full list
 		fragment.populateCards();
+		mCardAdapter.notifyDataSetChanged();
+
 		return false;
 	}
 
@@ -398,6 +409,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		View rootView;
 		CaseCardListActivity mActivity;
 
+		private SwipeRefreshLayout swipeLayout;
+
 		public PlaceholderFragment()
 		{
 		}
@@ -407,6 +420,50 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		{
 			// inflate the activity layout
 			rootView = inflater.inflate(R.layout.activity_case_cardlist, container, false);
+
+			// Setup SwipeRefreshLayout
+			swipeLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
+			swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+			{
+				@Override
+				public void onRefresh()
+				{
+					swipeLayout.setRefreshing(true);
+
+					Thread refreshThread = new Thread()
+					{
+						@Override
+						public void run()
+						{
+							if (fragment != null)
+							{
+								fragment.populateCards();
+
+								Message msg = new Message();
+								msg.arg1 = THREAD_REFRESH_FINISHED;
+								responseHandler.sendMessage(msg);
+							}
+						}
+					};
+					refreshThread.start();
+
+
+					/*
+					new Handler().postDelayed(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+
+						}
+					}, 3000);
+					*/
+				}
+			});
+			swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
+					                          android.R.color.holo_green_light,
+					                          android.R.color.holo_orange_light,
+					                          android.R.color.holo_red_light);
 
 			// Find RecyclerView
 			mRecyclerView = (RecyclerView)rootView.findViewById(R.id.cards_list);
@@ -425,16 +482,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			// click listeners
 			setCardClickListeners();
 			mCardAdapter.setOnClickListeners(cardOnClickListener, cardOnLongClickListener);
-/*
-			mCardAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
-			                                         {
-				                                         @Override
-				                                         public void onChanged()
-				                                         {
-					                                         populateCards();
-				                                         }
-			                                         });
-*/
 
 			mRecyclerView.setAdapter(mCardAdapter);
 
@@ -455,6 +502,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			});
 
 			populateCards();
+			mCardAdapter.notifyDataSetChanged();
 
 			return rootView;
 		}
@@ -755,6 +803,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			if(queryStr.isEmpty())
 			{
 				mCardAdapter.loadCases(null);
+				mCardAdapter.notifyDataSetChanged();
 				return;
 			}
 
@@ -799,6 +848,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				// populate cards and set headers
 				mCardAdapter.loadCases(case_cursor);
 				mCardAdapter.setHeaderList(headerList);
+				mCardAdapter.notifyDataSetChanged();
 			}
 
 			case_cursor.close();
@@ -837,39 +887,33 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					switch (item.getItemId())
 					{
 						case R.id.menu_share:
-							File shareFile = null;
 
 							if(!mCardAdapter.getMultiselectList().isEmpty())
 							{
-								shareFile = UtilClass.exportCasesJSON(activity, "RadFiles cases", mCardAdapter.getMultiselectList());
-								Uri uriShareFile = Uri.fromFile(shareFile);
+								progressDialog = new ProgressDialog(activity, "Exporting cases", getResources().getColor(R.color.default_colorAccent));
+								progressDialog.setCancelable(false);
+								progressDialog.setCanceledOnTouchOutside(false);
+								progressDialog.show();
 
-								Intent shareIntent = new Intent(Intent.ACTION_SEND);
-								//shareIntent.setType("message/rfc822");
-								shareIntent.setType(CloudStorageActivity.RCS_MIMETYPE);
-								shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
-								shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
-								shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store
-								shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
-
-
-								//shareIntent.setData(Uri.parse("mailto:")); // or just "mailto:" for blank
-								//shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
-								try
+								// SHARE thread
+								Thread shareThread = new Thread()
 								{
-									if(mCardAdapter.getMultiselectList().size() == 1)
-										startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " case..."));
-									else
-										startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " cases..."));
-								}
-								catch (android.content.ActivityNotFoundException ex)
-								{
-									Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-								}
+									@Override
+									public void run()
+									{
+										shareFile = UtilClass.exportCasesJSON(activity, "RadFiles cases", mCardAdapter.getMultiselectList());
+
+										Message msg = new Message();
+										msg.arg1 = THREAD_SHARE_FINISHED;
+										responseHandler.sendMessage(msg);
+									}
+								};
+								shareThread.start();
 							}
 
 							// todo don't finish if canceled
-							mode.finish(); // Action picked, so close the CAB
+							//mode.finish(); // Action picked, so close the CAB
+
 							return true;
 
 						case R.id.menu_delete:
@@ -890,40 +934,68 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 									{
 										public void onClick(DialogInterface dialog, int id)
 										{
-											// delete confirmed
+											dialog.dismiss();
 
-											for (int i = 0; i < deleteIdList.size(); i++)
+											// DELETE CASES thread
+											progressDialog = new ProgressDialog(activity, "Deleting cases", getResources().getColor(R.color.default_colorAccent));
+											progressDialog.setCancelable(false);
+											progressDialog.setCanceledOnTouchOutside(false);
+											progressDialog.show();
+											final Activity activity = getActivity();
+											Thread deleteCaseThread = new Thread()
 											{
-												// get key_id from list array
-												long key_id = deleteIdList.get(i);
-
-												// delete case from CASES table
-												Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-												context.getContentResolver().delete(case_delete_uri, null, null);
-
-												// delete all linked images files
-												Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
-												File imageFile = null;
-												if (image_cursor.moveToFirst())
+												@Override
+												public void run()
 												{
-													do
+													// delete confirmed
+													for (int i = 0; i < deleteIdList.size(); i++)
 													{
-														imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-														imageFile.delete();
-													} while (image_cursor.moveToNext());
+														// get key_id from list array
+														long key_id = deleteIdList.get(i);
+
+														// delete case from CASES table
+														Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+														context.getContentResolver().delete(case_delete_uri, null, null);
+
+														// delete all linked images files
+														Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
+														File imageFile = null;
+														if (image_cursor.moveToFirst())
+														{
+															do
+															{
+																imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+																imageFile.delete();
+															} while (image_cursor.moveToNext());
+														}
+														image_cursor.close();
+
+														// delete all child rows from IMAGES table, by parent case key_id
+														context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
+
+													}
+
+													Message msg = new Message();
+													msg.arg1 = THREAD_DELETE_FINISHED;
+													msg.arg2 = deleteIdList.size();
+													responseHandler.sendMessage(msg);
+
+
+													// remove from recyclerView
+													//mCardAdapter.removeCase(key_id);
+													//													frag.populateCards();
+
+													//													mCardAdapter.notifyDataSetChanged();
+
+													//	progressDialog.dismiss();
+													//UtilClass.showMessage(activity, "Deleted " + deleteIdList.size() + " cases.");
+
+
 												}
-												image_cursor.close();
+											};
+											deleteCaseThread.start();
 
-												// delete all child rows from IMAGES table, by parent case key_id
-												context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
-
-												// remove from recyclerView
-												//mCardAdapter.removeCase(key_id);
-												frag.populateCards();
-
-												mCardAdapter.notifyDataSetChanged();
-												actionMode.finish(); // Action picked, so close the CAB
-											}
+											actionMode.finish(); // Action picked, so close the CAB
 
 											// update CaseCardListActivity
 											//context.setResult(CaseCardListActivity.RESULT_DELETED);
@@ -937,8 +1009,29 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 										}
 									});
 
-							AlertDialog alert = builder.create();
-							alert.show();
+							builder.show();
+
+							return true;
+
+						case R.id.menu_select_all:
+
+							/*
+							// get all cases
+							Cursor case_cursor = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null);
+							if(case_cursor != null && case_cursor.moveToFirst())
+							{
+								do
+								{
+									mCardAdapter.addToMultiselectList(case_cursor.getInt(CasesProvider.COL_ROWID));
+
+								} while (case_cursor.moveToNext());
+							}
+
+							mCardAdapter.mActionMode.setTitle(mCardAdapter.getMultiselectList().size() + " selected");
+							mCardAdapter.notifyDataSetChanged();
+
+*/
+							mCardAdapter.addAllToMultiselectList();
 
 							return true;
 
@@ -1028,6 +1121,78 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 			};
 		}
+
+		final public static int THREAD_DELETE_FINISHED = 0;
+		final public static int THREAD_SHARE_FINISHED = 1;
+		final public static int THREAD_REFRESH_FINISHED = 2;
+
+
+		Handler responseHandler = new Handler(new Handler.Callback()
+		{
+
+			@Override
+			public boolean handleMessage(Message msg)
+			{
+				switch(msg.arg1)
+				{
+					case THREAD_DELETE_FINISHED:
+						// remove from recyclerView
+						//mCardAdapter.removeCase(key_id);
+						fragment.populateCards();
+						mCardAdapter.notifyDataSetChanged();
+
+						progressDialog.dismiss();
+
+						UtilClass.showMessage(activity, "Deleted " + msg.arg2 + " cases.");
+
+						break;
+
+					case THREAD_SHARE_FINISHED:
+
+						Uri uriShareFile = Uri.fromFile(shareFile); // file created and stored in shareFile
+
+						Intent shareIntent = new Intent(Intent.ACTION_SEND);
+						//shareIntent.setType("message/rfc822");
+						shareIntent.setType(CloudStorageActivity.RCS_MIMETYPE);
+						shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
+						shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
+						shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store
+						shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
+
+						progressDialog.dismiss();
+
+						try
+						{
+							if (mCardAdapter.getMultiselectList().size() == 1)
+							{
+								startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " case..."));
+							}
+							else
+							{
+								startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " cases..."));
+							}
+						}
+						catch (android.content.ActivityNotFoundException ex)
+						{
+							Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+						}
+
+						break;
+
+					case THREAD_REFRESH_FINISHED:
+						mCardAdapter.notifyDataSetChanged();
+						swipeLayout.setRefreshing(false);
+						break;
+
+					default:
+						break;
+
+				}
+
+
+				return false;
+			}
+		});
 
 	} // end fragment
 

@@ -19,6 +19,8 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.JsonReader;
@@ -26,12 +28,18 @@ import android.util.JsonToken;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.gc.materialdesign.views.ProgressBarDeterminate;
+import com.gc.materialdesign.views.ProgressBarIndeterminateDeterminate;
+import com.gc.materialdesign.widgets.SnackBar;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -72,9 +80,11 @@ public class UtilClass extends Activity
 	/**
 	 * Shows a toast message.
 	 */
-	public static void showMessage(Context context, String message)
+	public static void showMessage(Activity activity, String message)
 	{
-		Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+		//Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+		SnackBar snackbar = new SnackBar(activity, message, null, null);
+		snackbar.show();
 	}
 	public static void showMessage(Context context, int message)
 	{
@@ -909,14 +919,19 @@ public class UtilClass extends Activity
 
 	public static File exportCasesJSON(Activity activity, String filename, List<Long> selectedCaseList)
 	{
+		return exportCasesJSON(activity, filename, selectedCaseList, null);
+	}
+
+	public static File exportCasesJSON(Activity activity, String filename, List<Long> selectedCaseList, Handler progressHandler)
+	{
 		File returnFile;
+		int count = 0;
 
 		// attempt to create json file
 		File casesJSON = null;
 
 		// CSV subdirectory within internal app data directory
 		//File CSV_dir = new File(activity.getApplication().getExternalFilesDir(null), "/CSV/");
-
 
 		// create CSV dir if doesn't already exist
 		if(!CSV_dir.exists())
@@ -956,7 +971,6 @@ public class UtilClass extends Activity
 			{
 				// get all cases
 				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
-				//return null;
 			}
 			else
 			{
@@ -1039,6 +1053,7 @@ public class UtilClass extends Activity
 
 				} while (caseCursor.moveToNext());
 
+				count = caseCursor.getCount();
 				caseCursor.close();
 
 				cases_writer.endArray();
@@ -1050,10 +1065,18 @@ public class UtilClass extends Activity
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesJSON.getPath());
 
 			// create zip file.  return link to that file.
-			returnFile = UtilsFile.zip(zip_files_array, zip_filename);
+			returnFile = UtilsFile.zip(zip_files_array, zip_filename, progressHandler);
 
 			// delete temporary files
 			casesJSON.delete();
+
+			if(progressHandler != null)
+			{
+				Message msg = new Message();
+				msg.arg1 = CloudStorageActivity.PROGRESS_MSG_EXPORT_FINISHED;
+				msg.arg2 = count;
+				progressHandler.sendMessage(msg);
+			}
 
 		}
 		catch (IOException e)
@@ -1063,6 +1086,8 @@ public class UtilClass extends Activity
 			return null;
 		}
 
+		//alertDialog.dismiss();
+
 		return returnFile;
 	}
 
@@ -1071,13 +1096,13 @@ public class UtilClass extends Activity
 	 * @param activity
 	 * @param inFile
 	 */
-	public static void importCasesJSON(Activity activity, File inFile)
+	public static int importCasesJSON(Activity activity, File inFile)
 	{
 		BufferedReader br = null;
 		String line;
 		Uri rowUri = null;
 		int parent_id;
-		int imageCount = 0;
+		int caseCount = 0;
 
 		// unzip image files and csv files
 		try
@@ -1089,7 +1114,7 @@ public class UtilClass extends Activity
 		{
 			e.printStackTrace();
 			Toast.makeText(activity, "Unable to open zip file:", Toast.LENGTH_SHORT).show();
-			return;
+			return 0;
 		}
 
 		File tempCasesJSON = null;
@@ -1106,7 +1131,7 @@ public class UtilClass extends Activity
 		{
 			e.printStackTrace();
 			Toast.makeText(activity, "Unable to copy JSON file", Toast.LENGTH_SHORT).show();
-			return;
+			return 0;
 		}
 
 		// CASES TABLE
@@ -1139,11 +1164,19 @@ public class UtilClass extends Activity
 					}
 					else if(field_name.contentEquals("IMAGES"))
 					{
+						// update LAST_MODIFIED_DATE
+						SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
+						String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
+						insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
+
 						// insert the set of case info into the DB cases table
 						rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
 
 						// get parent key information
 						parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+
+						// increment count
+						caseCount += 1;
 
 						reader.beginArray();
 
@@ -1203,11 +1236,14 @@ public class UtilClass extends Activity
 		{
 			e.printStackTrace();
 			Toast.makeText(activity, "Unable to open Cases JSON file", Toast.LENGTH_SHORT).show();
-			return;
+			return 0;
 		}
 
-		Toast.makeText(activity, "Imported cases", Toast.LENGTH_SHORT).show();
+		//UtilClass.showMessage(activity, "Imported " + caseCount + " cases");
+		//Toast.makeText(activity, "Imported " + caseCount + " cases", Toast.LENGTH_SHORT).show();
 		tempCasesJSON.delete();
+
+		return caseCount;
 	}
 
 	public static File exportListsJSON(Activity activity, String filename)
@@ -1569,6 +1605,7 @@ public class UtilClass extends Activity
 	{
 		return CaseCardListActivity.CSV_dir;
 	}
+
 
 
 

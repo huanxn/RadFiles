@@ -88,9 +88,10 @@ public class ImageGridView
 			public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
 
 				Intent imageGalleryIntent = new Intent(activity, ImageGalleryActivity.class);
-				//imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilepaths());
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilepaths());
 				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, case_key_id);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
+
 				activity.startActivity(imageGalleryIntent);
 
 			}
@@ -144,8 +145,14 @@ public class ImageGridView
 												captionValue.put(CasesProvider.KEY_IMAGE_CAPTION, input.getText().toString());
 
 												// Update database
-												Uri caption_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_id);
-												context.getContentResolver().update(caption_row_uri, captionValue, null, null);
+												if (mode == DETAIL_ACTIVITY)
+												{
+													Uri caption_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_id);
+													context.getContentResolver().update(caption_row_uri, captionValue, null, null);
+
+													// update last modified date field
+													UtilClass.updateLastModifiedDate(act, case_id);
+												}
 
 												// update mAdapter
 												mAdapter.setImageCaption(image_position, input.getText().toString());
@@ -173,9 +180,6 @@ public class ImageGridView
 										});
 										editTextDialog.show();
 
-										// update last modified date field
-										UtilClass.updateLastModifiedDate(act, case_id);
-
 										act.setResult(CaseCardListActivity.RESULT_EDITED);
 
 										break;
@@ -185,20 +189,21 @@ public class ImageGridView
 										// if thumbnail changed
 										if (thumbnail != image_position)
 										{
-											thumbnail = image_position;
 
-											ContentValues thumbnailValue = new ContentValues();
-											thumbnailValue.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
-											Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_id);
-											context.getContentResolver().update(row_uri, thumbnailValue, null, null);
+											thumbnail = image_position;
 
 											if (mode == DETAIL_ACTIVITY)
 											{
-												((CaseDetailActivity) act).reloadHeaderView(thumbnail);
-											}
+												ContentValues thumbnailValue = new ContentValues();
+												thumbnailValue.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
+												Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, case_id);
+												context.getContentResolver().update(row_uri, thumbnailValue, null, null);
 
-											// update last modified date field
-											UtilClass.updateLastModifiedDate(act, case_id);
+												((CaseDetailActivity) act).reloadHeaderView(thumbnail);
+
+												// update last modified date field
+												UtilClass.updateLastModifiedDate(act, case_id);
+											}
 
 											act.setResult(CaseCardListActivity.RESULT_EDITED);
 										}
@@ -372,6 +377,11 @@ public class ImageGridView
 	public String getImageFilename(int index)
 	{
 		return mAdapter.getImageFilename(index);
+	}
+
+	public String getImageCaption(int index)
+	{
+		return mAdapter.getImageCaption(index);
 	}
 
 	public long getImageID(int index)

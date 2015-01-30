@@ -47,19 +47,13 @@ dependencies {
 
     compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'    // Roboto Text font in toolbar title, etc
 
-    compile 'com.github.castorflex.smoothprogressbar:library:1.0.0'
+    //compile 'com.github.castorflex.smoothprogressbar:library:1.0.0'
+
+    compile 'com.github.navasmdc:MaterialDesign:1.+@aar'    // snack bar, progress bar
+    compile 'com.nineoldandroids:library:2.4.0' // gradle error?  need for MaterialDesignLibrary indeterminate progress bar
+
+    //compile 'com.pnikosis:materialish-progress:1.4'         // progress bar
     //
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
- //   
 
 
  //   compile fileTree(include: ['*.jar'], dir: 'libs')

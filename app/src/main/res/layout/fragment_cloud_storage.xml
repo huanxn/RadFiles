@@ -13,6 +13,8 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.huantnguyen.radcases.app.CloudStorageActivity$CloudStorageFragment">
 
+
+
     <!-- CASES -->
     <TextView
         style="@style/sectionHeader"
@@ -21,6 +23,7 @@
         android:layout_alignParentTop="true"
         />
 
+    <!-- Import -->
     <RelativeLayout
         style="@style/textButtonStyle"
         android:id="@+id/case_import_button"
@@ -34,21 +37,46 @@
         <TextView
             style="@style/textButtonDescription"
             android:layout_below="@id/case_import_title"
-            android:text = "Select a rcs file from your device or cloud storage.  The imported cases will be added to your list of interesting cases." />
+            android:text = "Select a RCS file from your device or cloud storage.  The imported cases will be added to your list of interesting cases." />
 
     </RelativeLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_below="@id/case_import_button"
+        android:layout_height="2px"
+        android:background="#FF909090"
+        />
+
+    <!-- Export/Backup all -->
+    <RelativeLayout
+        style="@style/textButtonStyle"
+        android:id="@+id/case_backup_button"
+        android:layout_below="@id/case_import_button">
+        <TextView
+            android:id="@+id/case_backup_title"
+            style="@style/textButtonName"
+            android:text = "Backup all cases"/>
+
+        <TextView
+            style="@style/textButtonDescription"
+            android:layout_below="@id/case_backup_title"
+            android:text = "Create a RCS file of all your cases. Save the file to internal storage on your device." />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_below="@id/case_backup_button"
         android:layout_height="1px"
         android:background="#FF909090"
         />
 
+    <!-- Export all -->
     <RelativeLayout
         style="@style/textButtonStyle"
         android:id="@+id/case_export_button"
-        android:layout_below="@id/case_import_button">
+        android:layout_below="@id/case_backup_button">
         <TextView
             android:id="@+id/case_export_title"
             style="@style/textButtonName"
@@ -57,7 +85,7 @@
         <TextView
             style="@style/textButtonDescription"
             android:layout_below="@id/case_export_title"
-            android:text = "Create a rcs file with case information and images and save to your device.  You will have the option to upload the rcs file to your cloud storage." />
+            android:text = "Create a RCS file of all your cases. Share the file via email or to your cloud storage." />
 
     </RelativeLayout>
 
@@ -68,6 +96,7 @@
         android:background="#FF909090"
         />
 
+    <!-- Export select -->
     <RelativeLayout
         style="@style/textButtonStyle"
         android:id="@+id/export_multiselect_button"
@@ -80,7 +109,7 @@
         <TextView
             style="@style/textButtonDescription"
             android:layout_below="@id/case_export_multiselect_title"
-            android:text = "Choose cases from your interesting case list. Create a rcs file with case information and images.  Share via email or upload to your cloud storage." />
+            android:text = "Choose cases from your interesting case list. Create a RCS file of those cases.  Share the file via email or to your cloud storage." />
 
     </RelativeLayout>
 

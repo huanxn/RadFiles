@@ -20,5 +20,9 @@
         android:title="@string/action_delete"
         app:showAsAction="ifRoom"/>
 
-
+    <!-- Delete selected cases, should appear as action button -->
+    <item
+        android:id="@+id/menu_select_all"
+        android:title="@string/action_select_all"
+        app:showAsAction="never"/>
 </menu>

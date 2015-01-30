@@ -164,7 +164,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 					alert.show();
 
 				}catch(Exception e){
-					UtilClass.showMessage(getApplicationContext(), e.getMessage());
+					UtilClass.showMessage(this, e.getMessage());
 				}
 
 				setDrawerPosition(POS_CASE_LIST);

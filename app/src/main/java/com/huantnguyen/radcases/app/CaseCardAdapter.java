@@ -51,6 +51,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		if(caseCursor != null)
 		{
 			loadCases(caseCursor);
+			notifyDataSetChanged();
 		}
 
 		this.card_layout_id = card_layout;
@@ -119,8 +120,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			caseList.clear();
 		}
 
-
-		notifyDataSetChanged();
+//		notifyDataSetChanged();
 	}
 
 	/**
@@ -173,46 +173,10 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		ViewHolder holder = new ViewHolder(v);
 
-		/*
-		holder.thumbnail.setOnClickListener(new View.OnClickListener()
-		{
-			@Override
-			public void onClick(View view)
-			{
-				UtilClass.showMessage(activity, "TEST CLICK THUMBNAIL");
-
-				CaseCardListActivity caseCardListActivity = (CaseCardListActivity) activity;
-				ActionMode mActionMode = caseCardListActivity.getActionMode();
-
-				if(mActionMode == null)
-				{
-					caseCardListActivity.mActionMode = caseCardListActivity.startSupportActionMode(caseCardListActivity.mActionModeCallback);
-				}
-
-				if(view.isSelected())
-				{
-					view.setSelected(false);
-					view.setBackgroundColor(0x00000000);
-				}
-				else
-				{
-					view.setSelected(true);
-					view.setBackgroundColor(0xffb3e5fc);
-				}
-
-				//UtilClass.setPic((ImageView)view, )
-
-				return;
-
-			}
-		});
-				 */
-
 		holder.cardView.setOnClickListener(mOnClickListener);
 		holder.cardView.setOnLongClickListener(mOnLongClickListener);
 
 		holder.cardView.setTag(holder);
-		//holder.cardView.setTag(i);
 
 		return holder;
 	}
@@ -284,60 +248,6 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		return caseList.get(position);
 	}
 
-	/*
-	@Override
-	public void onClick(View view)
-	{
-		ViewHolder holder = (ViewHolder) view.getTag();
-
-		Case mCase = caseList.get(holder.getPosition());
-
-		if(mActionMode == null)
-		{
-			// open detail view for clicked case
-			Intent detailIntent = new Intent(view.getContext(), CaseDetailActivity.class);
-			detailIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, holder.key_id);
-
-			// activity options
-			//ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, Pair.create((View) holder.card_text1, "DetailCaseInfo1" ));
-
-			detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, false);
-
-			//activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS, options.toBundle());
-			activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
-		}
-		else
-		{
-			// contextual action bar is open
-			toggleSelected(mCase);
-
-		}
-	}
-
-
-	@Override
-	public boolean onLongClick(View view)
-	{
-		ViewHolder holder = (ViewHolder) view.getTag();
-		Case mCase = caseList.get(holder.getPosition());
-
-		if(mActionMode == null)
-		{
-			// open contextual menu
-			mActionMode = ((ActionBarActivity)activity).startSupportActionMode(mActionModeCallback);
-		}
-		else
-		{
-			// close contextual menu
-			//activity.mActionMode.finish();
-		}
-
-		toggleSelected(mCase);
-
-		return true;
-	}
-	*/
-
 	public void toggleSelected(Case mCase)
 	{
 	//	int backgroundColor = 0xffb3e5fc;
@@ -390,6 +300,24 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		if(multiselectList.contains(key_id))
 			multiselectList.remove(key_id);
 	}
+
+	public void addAllToMultiselectList()
+	{
+		for(int i = 0; i < caseList.size(); i++)
+		{
+			Case mCase = caseList.get(i);
+
+			// if not yet selected, then toggle
+			if(mCase.isSelected == false)
+			{
+				mCase.isSelected = true;
+				addToMultiselectList(mCase.key_id);
+			}
+		}
+
+		mActionMode.setTitle(multiselectList.size() + " selected");
+		notifyDataSetChanged();
+	}
 /*
 	public void clearMultiselectList()
 	{
@@ -435,7 +363,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		header = text;
 
-		notifyDataSetChanged();
+//		notifyDataSetChanged();
 	}
 
 	@Override

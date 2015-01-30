@@ -7,10 +7,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,26 +23,14 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.drive.Drive;
-import com.google.android.gms.drive.DriveApi;
-import com.google.android.gms.drive.DriveContents;
-import com.google.android.gms.drive.DriveFile;
-import com.google.android.gms.drive.DriveId;
-import com.google.android.gms.drive.MetadataChangeSet;
-import com.google.android.gms.drive.OpenFileActivityBuilder;
+import com.gc.materialdesign.views.ProgressBarIndeterminateDeterminate;
+import com.gc.materialdesign.widgets.ProgressDialog;
 
-import com.google.android.gms.drive.DriveApi.DriveIdResult;
-
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -50,6 +40,8 @@ import java.util.Date;
 public class CloudStorageActivity extends GoogleDriveBaseActivity
 {
 	String TAG = "CloudStorageActivity";
+
+	private static Activity activity;
 
 	private CloudStorageFragment fragment;
 
@@ -94,11 +86,18 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 	private static File backupDir;
 
+	private ProgressBarIndeterminateDeterminate progressBar = null;
+	private AlertDialog progressBarDialog = null;
+
+	// default
+	private ProgressDialog progressWheelDialog = null;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
+		activity = this;
 		setDrawerPosition(NavigationDrawerActivity.POS_CLOUD_STORAGE);
 		//setContentView(R.layout.activity_cloud_storage);
 
@@ -412,9 +411,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	{
 		String filename;
 
-		AlertDialog.Builder alert = new AlertDialog.Builder(this);
-		AlertDialog dialog;
-		alert.setTitle("Create Cases File");
+		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+		alertBuilder.setTitle("Create Cases File");
 		//alert.setMessage("Filename");
 
 		// Create an image file name based on timestamp
@@ -425,57 +423,85 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		final EditText input = new EditText(this);
 		final Activity activity = this;
 
-		filename = "RadFiles Backup (" + timeStamp + ")";
+		filename = "RadFiles (" + timeStamp + ")";
 		input.setText(filename);
-		alert.setView(input);
+		input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+		alertBuilder.setView(input);
 
-		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener()
+		alertBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int whichButton)
 			{
-				String value = input.getText().toString();
+				dialog.dismiss();
+
+				final String value = input.getText().toString();
 				exportFilename = value + RCS_EXTENSION;
 				exportMIMEtype = RCS_MIMETYPE;
 
+				LayoutInflater inflater = activity.getLayoutInflater();
+				View dialoglayout = inflater.inflate(R.layout.alertdialog_progress, null);
+				AlertDialog.Builder progressBuilder = new AlertDialog.Builder(activity).setCancelable(false);
+				progressBuilder.setView(dialoglayout);
+				progressBarDialog = progressBuilder.create();
+				progressBarDialog.show();
 
-				// create CSV file
-				local_file_to_cloud = UtilClass.exportCasesJSON(activity, value, null); //exportCasesCSV(value);
+				progressBar = (ProgressBarIndeterminateDeterminate) dialoglayout.findViewById(R.id.progress_bar);
+				progressBar.setMin(0);
+
 				/*
-				if(local_file_to_cloud != null)
-				{
-					// Show the Google Drive interface to choose filename and location to create cloud backup file
-					Drive.DriveApi.newDriveContents(getGoogleApiClient())
-							.setResultCallback(driveCreateCopyCallback);
-
-					Toast.makeText(getApplicationContext(), "Saved data to " + local_file_to_cloud.getPath(), Toast.LENGTH_LONG).show();
-				}
+				ProgressDialog progressDialog2 = new ProgressDialog(activity, "Exporting", getResources().getColor(R.color.default_colorAccent));
+				progressDialog2.show();
 				*/
 
-				Uri uriShareFile = Uri.fromFile(local_file_to_cloud);
+				Thread exportThread = new Thread() {
+					@Override
+					public void run()
+					{
+						local_file_to_cloud = UtilClass.exportCasesJSON(activity, value, null, progressHandler); //exportCasesCSV(value);
 
-				Intent shareIntent = new Intent(Intent.ACTION_SEND);
-				//shareIntent.setType("message/rfc822");
-				shareIntent.setType(RCS_MIMETYPE);
-				shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});  // to: field
-				shareIntent.putExtra(Intent.EXTRA_SUBJECT, exportFilename);
-				shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store
-				shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
+						if (local_file_to_cloud != null)
+						{
+							Uri uriShareFile = Uri.fromFile(local_file_to_cloud);
+
+							Intent shareIntent = new Intent(Intent.ACTION_SEND);
+							//shareIntent.setType("message/rfc822");
+							shareIntent.setType(RCS_MIMETYPE);
+							shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});  // to: field
+							//shareIntent.putExtra(Intent.EXTRA_SUBJECT, "New radiology cases!");
+							shareIntent.putExtra(Intent.EXTRA_SUBJECT, exportFilename);
+							shareIntent.putExtra(Intent.EXTRA_TITLE, exportFilename);
+							shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store
+							shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
 
 
-				//shareIntent.setData(Uri.parse("mailto:")); // or just "mailto:" for blank
-				//shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
-				try
-				{
-					startActivity(Intent.createChooser(shareIntent, "Save cases to..."));
-				}
-				catch (android.content.ActivityNotFoundException ex)
-				{
-					Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-				}
+							//shareIntent.setData(Uri.parse("mailto:")); // or just "mailto:" for blank
+							//shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this will make such that when user returns to your app, your app is displayed, instead of the email app.
+							try
+							{
+								startActivity(Intent.createChooser(shareIntent, "Save cases to..."));
+							}
+							catch (android.content.ActivityNotFoundException ex)
+							{
+								Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+							}
+						}
+						else
+						{
+							UtilClass.showMessage(activity, "Unable to export cases to a file.");
+						}
+					}
+				};
+				exportThread.start();
+
+				// create CSV file
+				//local_file_to_cloud = UtilClass.exportCasesJSON(activity, value, null); //exportCasesCSV(value);
+
+
+
 			}
 		});
 
-		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+		alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
 		{
 			public void onClick(DialogInterface dialog, int whichButton)
 			{
@@ -483,10 +509,10 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			}
 		});
 
-		//alert.show();
-		dialog = alert.create();
+		AlertDialog alertDialog = alertBuilder.create();
+		/*
 		// Show keyboard
-		dialog.setOnShowListener(new DialogInterface.OnShowListener()
+		alertDialog.setOnShowListener(new DialogInterface.OnShowListener()
 		{
 			@Override
 			public void onShow(DialogInterface dialog)
@@ -495,7 +521,8 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
 			}
 		});
-		dialog.show();
+		*/
+		alertDialog.show();
 	}
 
 	private void exportLists()
@@ -730,10 +757,22 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	}
 */
 	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	protected void onActivityResult(int requestCode, int resultCode, Intent resultData)
 	{
 		switch (requestCode)
 		{
+			case UtilsFile.WRITE_REQUEST_CODE:
+				if(resultCode == Activity.RESULT_OK)
+				{
+					Uri uri = null;
+					if (resultData != null)
+					{
+						uri = resultData.getData();
+						Log.i(TAG, "Uri: " + uri.toString());
+						UtilClass.showMessage(this, uri.toString());
+					}
+				}
+				break;
 			/*
 			// Restore DB
 			case REQUEST_SELECT_BACKUP_FILE:
@@ -814,61 +853,102 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			case REQUEST_SELECT_CSV_FILE:
 				if (resultCode == RESULT_OK)
 				{
-					String CSV_filename;
+					progressWheelDialog = new ProgressDialog(this, "Importing cases", getResources().getColor(R.color.default_colorAccent));
+					progressWheelDialog.setCancelable(false);
+					progressWheelDialog.setCanceledOnTouchOutside(false);
+					progressWheelDialog.show();
 
 					// Get the Uri of the selected file
-					Uri uri = data.getData();
+					final Uri uri = resultData.getData();
 					//String filename = data.getStringExtra()
 					Log.d(TAG, "File Uri: " + uri.toString());
 					// Get the path
 					//	String path = FileUtils.getPath(this, uri);
-					CSV_filename = uri.getPath();
-					Log.d(TAG, "File Uri: " + CSV_filename);
+					//CSV_filename = uri.getPath();
 
-					// copy drive file uri content to new local file
+					// IMPORT CASE thread
+					final Activity activity = this;
 
-					// create new local file
-					File tempCSV_File = null;
-					try
+					Thread importThread = new Thread()
 					{
-						tempCSV_File = File.createTempFile("RadCases", ".zip", downloadsDir);
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						UtilClass.showMessage(this, "Unable to create temporary file.");
-					}
+						@Override
+						public void run()
+						{
 
-					FileOutputStream outputStream = null;
-					FileInputStream inputStream = null;
-					try
-					{
-						// Google Drive file
-						inputStream = (FileInputStream) getContentResolver().openInputStream(uri);
+							// copy drive file uri content to new local file
 
-						// new local file
-						outputStream = new FileOutputStream(tempCSV_File);
+							// create new local file
+							File tempJSON_File = null;
+							try
+							{
+								tempJSON_File = File.createTempFile("RadCases", ".zip", downloadsDir);
+							}
+							catch (IOException e)
+							{
+								e.printStackTrace();
+								UtilClass.showMessage(activity, "Unable to create temporary file.");
+							}
 
-						// copy backup file contents to local file
-						UtilsFile.copyFile(outputStream, inputStream);
-					}
-					catch (FileNotFoundException e)
-					{
-						e.printStackTrace();
-						UtilClass.showMessage(this, "local CSV file not found");
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						UtilClass.showMessage(this, "Copy CSV to Google Drive: IO exception");
-						UtilClass.showMessage(this, "cannot open input stream from selected uri");
-					}
+							FileOutputStream outputStream = null;
+							FileInputStream inputStream = null;
+							try
+							{
+								// Google Drive file
+								inputStream = (FileInputStream) getContentResolver().openInputStream(uri);
 
-					// process file: unzip images, add csv info to database
-					UtilClass.importCasesJSON(this, tempCSV_File);
+								// new local file
+								outputStream = new FileOutputStream(tempJSON_File);
 
-					// delete the temporary file
-					tempCSV_File.delete();
+								// copy backup file contents to local file
+								UtilsFile.copyFile(outputStream, inputStream);
+							}
+							catch (FileNotFoundException e)
+							{
+								e.printStackTrace();
+								UtilClass.showMessage(activity, "local CSV file not found");
+							}
+							catch (IOException e)
+							{
+								e.printStackTrace();
+								UtilClass.showMessage(activity, "Copy CSV to Google Drive: IO exception");
+								UtilClass.showMessage(activity, "cannot open input stream from selected uri");
+							}
+
+
+
+							/*
+							int lineCount=-1;
+							try
+							{
+								lineCount = UtilsFile.countLines(tempJSON_File.getPath());
+							}
+							catch (IOException e)
+							{
+								e.printStackTrace();
+							}
+
+							UtilClass.showMessage(this, lineCount);
+							*/
+
+
+
+							// process file: unzip images, add csv info to database
+							int count = UtilClass.importCasesJSON(activity, tempJSON_File);
+
+							// delete the temporary file
+							tempJSON_File.delete();
+
+							//setResult(CaseCardListActivity.REQUEST_ADD_CASE); //how to tell CaseCardListActivity to refresh?
+
+							Message msg = new Message();
+							msg.arg1 = PROGRESS_MSG_IMPORT_FINISHED;
+							msg.arg2 = count;
+							progressHandler.sendMessage(msg);
+						}
+					};
+					importThread.start();
+
+
 				}
 				break;
 
@@ -879,7 +959,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					String CSV_filename;
 
 					// Get the Uri of the selected file
-					Uri uri = data.getData();
+					Uri uri = resultData.getData();
 					//String filename = data.getStringExtra()
 					Log.d(TAG, "File Uri: " + uri.toString());
 					// Get the path
@@ -926,6 +1006,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 						UtilClass.showMessage(this, "cannot open input stream from selected uri");
 					}
 
+
 					// process file: unzip images, add csv info to database
 					UtilClass.importListsJSON(this, tempCSV_File);
 
@@ -936,21 +1017,72 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				break;
 
 			default:
-				super.onActivityResult(requestCode, resultCode, data);
+				super.onActivityResult(requestCode, resultCode, resultData);
 				break;
 		}
 
 	}
 
 
+	final public static int PROGRESS_MSG_MIN = 0;
+	final public static int PROGRESS_MSG_MAX = 1;
+	final public static int PROGRESS_MSG_SET = 2;
+	final public static int PROGRESS_MSG_INCREMENT = 3;
+	final public static int PROGRESS_MSG_IMPORT_FINISHED = 4;
+	final public static int PROGRESS_MSG_EXPORT_FINISHED = 5;
 
+	Handler progressHandler = new Handler(new Handler.Callback()
+	{
+		int progress = 0;
+
+		@Override
+		public boolean handleMessage(Message msg)
+		{
+			if(progressBar == null)
+			{
+				if(msg.arg1 == PROGRESS_MSG_IMPORT_FINISHED)
+				{
+					progressWheelDialog.dismiss();
+					UtilClass.showMessage(activity, "Imported " + msg.arg2 + " cases.");
+				}
+
+
+				return false;
+			}
+
+			switch(msg.arg1)
+			{
+				default:
+				case PROGRESS_MSG_INCREMENT:
+					progressBar.setProgress(progress++);
+					break;
+				case PROGRESS_MSG_MIN:
+					progressBar.setMin(msg.arg2);
+					break;
+				case PROGRESS_MSG_MAX:
+					progressBar.setMax(msg.arg2);
+					break;
+				case PROGRESS_MSG_SET:
+					progressBar.setProgress(msg.arg2);
+					break;
+
+				case PROGRESS_MSG_EXPORT_FINISHED:
+					progressBarDialog.dismiss();
+					UtilClass.showMessage(activity, "Exported " + msg.arg2 + " cases.");
+					break;
+
+			}
+
+
+			return false;
+		}
+	});
 
 
 	//////////////////////
 
 	public static class CloudStorageFragment extends Fragment
 	{
-		//public SmoothProgressBar progressBar;
 
 		public CloudStorageFragment()
 		{
@@ -961,10 +1093,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
 			View rootView = inflater.inflate(R.layout.fragment_cloud_storage, container, false);
-
-			//progressBar = (SmoothProgressBar) rootView.findViewById(R.id.progress_bar);
-			//progressBar.progressiveStop();
-
 			setOnClickListeners(rootView);
 
 			return rootView;
@@ -995,6 +1123,11 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				public void onClick(View v)
 				{
 					((CloudStorageActivity) getActivity()).exportCases();
+/*
+					String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+					String filename = "RadFiles (" + timeStamp + ")" + RCS_EXTENSION;
+					UtilsFile.createFile(getActivity(), RCS_MIMETYPE, filename);
+					*/
 				}
 			});
 
@@ -1036,4 +1169,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 		}
 	}
+
+
 }

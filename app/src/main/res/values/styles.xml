@@ -124,6 +124,14 @@
         <item name="android:inputType">textCapSentences|textNoSuggestions</item>
     </style>
 
+    <style name="textButtonStyle">
+        <item name="android:clickable">true</item>
+        <item name="android:background">@drawable/layout_selector</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
     <style name="textButtonName">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -243,6 +251,7 @@
         <item name="android:textColor">?attr/actionMenuTextColor</item>
     </style>
 
+    <!--
     <style name="GNowProgressBar" parent="SmoothProgressBar">
         <item name="spb_stroke_separator_length">8dp</item>
         <item name="spb_sections_count">2</item>
@@ -256,14 +265,9 @@
         <item name="spb_progressiveStart_activated">false</item>
         <item name="spb_generate_background_with_colors">false</item>
     </style>
+    -->
 
-    <style name="textButtonStyle">
-        <item name="android:clickable">true</item>
-        <item name="android:background">@drawable/layout_selector</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:paddingBottom">8dp</item>
-    </style>
+
 
 </resources>
 

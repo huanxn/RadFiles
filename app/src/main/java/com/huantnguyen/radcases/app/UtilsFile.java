@@ -1,8 +1,12 @@
 package com.huantnguyen.radcases.app;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -91,7 +95,7 @@ public class UtilsFile
 		out.close();
 	}
 
-	static public File makeLocalFile(Context context, File downloadsDir, Uri uri) throws IOException
+	static public File makeLocalFile(Activity activity, File downloadsDir, Uri uri) throws IOException
 	{
 		// create new local file
 		File outFile = null;
@@ -102,7 +106,7 @@ public class UtilsFile
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			UtilClass.showMessage(context, "Unable to create temporary file.");
+			UtilClass.showMessage(activity, "Unable to create temporary file.");
 		}
 
 		FileOutputStream outputStream = null;
@@ -110,7 +114,7 @@ public class UtilsFile
 		try
 		{
 			// Google Drive file
-			inputStream = (FileInputStream)context.getContentResolver().openInputStream(uri);
+			inputStream = (FileInputStream)activity.getContentResolver().openInputStream(uri);
 
 			// new local file
 			outputStream = new FileOutputStream(outFile);
@@ -121,13 +125,13 @@ public class UtilsFile
 		catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
-			UtilClass.showMessage(context, "local file not found");
+			UtilClass.showMessage(activity, "local file not found");
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			UtilClass.showMessage(context, "Copy backup to Google Drive: IO exception");
-			UtilClass.showMessage(context, "cannot open input stream from selected uri");
+			UtilClass.showMessage(activity, "Copy backup to Google Drive: IO exception");
+			UtilClass.showMessage(activity, "cannot open input stream from selected uri");
 		}
 
 		return outFile;
@@ -144,7 +148,13 @@ public class UtilsFile
 
 	private static final int BUFFER_SIZE = 8192;
 
-	public static File zip(String[] files, String filename) throws IOException {
+	public static File zip(String[] files, String filename) throws IOException
+	{
+		return zip(files, filename, null);
+	}
+
+	public static File zip(String[] files, String filename, Handler progressHandler) throws IOException
+	{
 		BufferedInputStream origin = null;
 		File outFile = new File(filename);
 		FileOutputStream outputStream = new FileOutputStream(outFile);
@@ -153,20 +163,40 @@ public class UtilsFile
 		{
 			byte data[] = new byte[BUFFER_SIZE];
 
-			for (int i = 0; i < files.length; i++) {
+			// set max for progress handler: number of image files to zip
+			if(progressHandler != null)
+			{
+				Message msg = new Message();
+				msg.arg1 = CloudStorageActivity.PROGRESS_MSG_MAX;
+				msg.arg2 = files.length;       // times 2
+				progressHandler.sendMessage(msg);
+			}
+
+			for (int i = 0; i < files.length; i++)
+			{
 				FileInputStream fi = new FileInputStream(files[i]);
 				origin = new BufferedInputStream(fi, BUFFER_SIZE);
-				try {
+				try
+				{
 					ZipEntry entry = new ZipEntry(files[i].substring(files[i].lastIndexOf("/") + 1));
 					out.putNextEntry(entry);
 					int count;
-					while ((count = origin.read(data, 0, BUFFER_SIZE)) != -1) {
+					while ((count = origin.read(data, 0, BUFFER_SIZE)) != -1)
+					{
 						out.write(data, 0, count);
 					}
 					out.closeEntry();
 				}
-				finally {
+				finally
+				{
 					origin.close();
+				}
+
+				if(progressHandler != null)
+				{
+					Message msg = new Message();
+					msg.arg1 = CloudStorageActivity.PROGRESS_MSG_INCREMENT;
+					progressHandler.sendMessage(msg);
 				}
 			}
 		}
@@ -241,6 +271,52 @@ public class UtilsFile
 		}
 		catch (Exception e) {
 			Log.e(TAG, "Unzip exception", e);
+		}
+	}
+
+	// Here are some examples of how you might call this method.
+	// The first parameter is the MIME type, and the second parameter is the name
+	// of the file you are creating:
+	//
+	// createFile("text/plain", "foobar.txt");
+	// createFile("image/png", "mypicture.png");
+
+	// Unique request code.
+	public static final int WRITE_REQUEST_CODE = 43;
+
+	public static void createFile(Activity activity, String mimeType, String fileName)
+	{
+		Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+		// Filter to only show results that can be "opened", such as
+		// a file (as opposed to a list of contacts or timezones).
+		intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+		// Create a file with the requested MIME type.
+		intent.setType(mimeType);
+		intent.putExtra(Intent.EXTRA_TITLE, fileName);
+		activity.startActivityForResult(intent, WRITE_REQUEST_CODE);
+	}
+
+	public static int countLines(String filename) throws IOException
+	{
+		InputStream is = new BufferedInputStream(new FileInputStream(filename));
+		try {
+			byte[] c = new byte[1024];
+			int count = 0;
+			int readChars = 0;
+			boolean empty = true;
+			while ((readChars = is.read(c)) != -1) {
+				empty = false;
+				for (int i = 0; i < readChars; ++i) {
+					if (c[i] == '\n') {
+						++count;
+					}
+				}
+			}
+			return (count == 0 && !empty) ? 1 : count;
+		} finally {
+			is.close();
 		}
 	}
 }
