@@ -461,6 +461,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				//imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
 				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, fragment.thumbnail_pos);
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
 				startActivity(imageGalleryIntent);
 				break;
 		}

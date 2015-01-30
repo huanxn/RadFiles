@@ -87,7 +87,7 @@ public class ImageGalleryActivity extends Activity {
 		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.viewpager);
 		TouchImageAdapter mAdapter = new TouchImageAdapter();
 
-		//if(case_id == -1)   //error getting case id in intent extra
+		//if(case_id == -1)   //using imageGrid instead of using db
 		{
 		//	Log.e(TAG, "Did not get usable case id for key image gallery.");
 
@@ -105,6 +105,7 @@ public class ImageGalleryActivity extends Activity {
 			mAdapter.setImages(cursor);
 		}
 		*/
+
 
 		mViewPager.setAdapter(mAdapter);
 
