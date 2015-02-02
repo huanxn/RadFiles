@@ -3,6 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+
+
     <!-- ExtendedViewPager is a custom view and must be referred to by its full package name in XML -->
 	<com.huantnguyen.radcases.app.ExtendedViewPager
 	    android:id="@+id/viewpager"
@@ -16,6 +18,7 @@
         android:layout_height="2dp"
         android:layout_width="fill_parent" />
 
+    <include layout="@layout/toolbar_default"/>
 
 
 </RelativeLayout>

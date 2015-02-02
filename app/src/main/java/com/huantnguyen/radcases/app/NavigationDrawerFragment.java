@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -24,8 +23,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -227,7 +224,7 @@ public class NavigationDrawerFragment extends Fragment
 		if(position == NavigationDrawerActivity.POS_NONE)
 		{
 			mDrawerListView.setItemChecked(position, false);
-			for(int i = NavigationDrawerActivity.POS_CASE_LIST; i <= NavigationDrawerActivity.POS_HELP; i++)
+			for(int i = NavigationDrawerActivity.POS_CASE_LIST; i <= NavigationDrawerActivity.POS_INFO; i++)
 			{
 				mDrawerListView.setItemChecked(i, false);
 			}

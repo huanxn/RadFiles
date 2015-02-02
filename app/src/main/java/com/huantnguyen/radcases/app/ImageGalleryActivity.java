@@ -1,18 +1,17 @@
 package com.huantnguyen.radcases.app;
 
-import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,7 +20,8 @@ import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
 
-public class ImageGalleryActivity extends Activity {
+public class ImageGalleryActivity extends ActionBarActivity
+{
 	
 	/**
 	 * Step 1: Download and set up v4 support library: http://developer.android.com/tools/support-library/setup.html
@@ -65,6 +65,10 @@ public class ImageGalleryActivity extends Activity {
 				finish();
 				return true;
 
+			case R.id.menu_edit_caption:
+				Toast.makeText(this, "debug: Add caption function...", Toast.LENGTH_SHORT).show();
+				return true;
+
 			case R.id.menu_camera:
 				Toast.makeText(this, "debug: Camera function...", Toast.LENGTH_SHORT).show();
 				return true;
@@ -84,6 +88,35 @@ public class ImageGalleryActivity extends Activity {
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_keyimage_gallery);
+
+		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+		// Set an OnMenuItemClickListener to handle menu item clicks
+		toolbar.setOnMenuItemClickListener(
+				                                  new Toolbar.OnMenuItemClickListener() {
+					                                  @Override
+					                                  public boolean onMenuItemClick(MenuItem item) {
+						                                  // Handle the menu item
+						                                  return true;
+					                                  }
+				                                  });
+
+		// Inflate a menu to be displayed in the toolbar
+		toolbar.inflateMenu(R.menu.case_import);
+		if (toolbar != null)
+		{
+			setSupportActionBar(toolbar);
+			//toolbar.setElevation(4);
+			//getSupportActionBar().setElevation(10);
+
+			toolbar.setBackgroundColor(getResources().getColor(R.color.transparent));   // transparent
+			//toolbar.setTitleTextColor(getResources().getColor(R.color.transparent));    // transparent
+
+			// set back icon
+			getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+			getSupportActionBar().setTitle("");
+		}
+
 		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.viewpager);
 		TouchImageAdapter mAdapter = new TouchImageAdapter();
 

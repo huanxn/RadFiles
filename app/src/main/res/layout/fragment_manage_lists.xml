@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/default_background_light_grey"
-    tools:context="com.huantnguyen.radcases.app.ManageListsActivity.ViewPagerFragment">
+    tools:context="com.huantnguyen.radcases.app.ManageListsActivity.ViewPagerFragment"
+    android:layout_marginLeft="16dp">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"

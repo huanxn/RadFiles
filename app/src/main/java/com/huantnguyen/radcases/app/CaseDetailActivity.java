@@ -575,13 +575,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				Point size = new Point();
 				getWindowManager().getDefaultDisplay().getSize(size);
 
-				int test2 = UtilClass.get_attr(activity, R.attr.actionBarSize);
-				int test = UtilClass.convertDpToPixels(activity, UtilClass.get_attr(activity, R.attr.actionBarSize));
-
-
-
-				int test3 = mToolbar.getHeight();
-
 				view.findViewById(R.id.detail_container).setMinimumHeight(size.y - UtilClass.getToolbarHeight(activity)  - UtilClass.getStatusBarHeight(activity));
 			}
 			else

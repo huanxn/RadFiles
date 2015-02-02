@@ -104,7 +104,7 @@
             android:name="com.huantnguyen.radcases.app.ImageGalleryActivity"
             android:label="Key Images"
             android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity"
-            android:theme="@style/MaterialTheme.Light.TranslucentActionBar" >
+            android:theme="@style/MaterialTheme.Light.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.huantnguyen.radcases.app.CaseDetailActivity" />

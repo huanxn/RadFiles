@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -34,6 +35,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.gc.materialdesign.widgets.ProgressDialog;
@@ -99,8 +101,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	public static File dataDir;            // private data directory (with SQL database)
 	public static File CSV_dir;            // contains created zip files with JSON files and images
 
-	private static File shareFile;
-
 	private static ProgressDialog progressDialog;
 
 	@Override
@@ -148,8 +148,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				{
 					// when item position changes, then repopulate cards using the new criteria
 					caseFilterMode = itemPosition;
-					fragment.populateCards();
-					mCardAdapter.notifyDataSetChanged();
+
+					if(fragment != null)
+						fragment.new RefreshListTask().execute();
 
 					return false;
 				}
@@ -199,8 +200,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				{
 					// when item position changes, then repopulate cards using the new criteria
 					caseFilterMode = itemPosition;
-					fragment.populateCards();
-					mCardAdapter.notifyDataSetChanged();
+
+					if(fragment != null)
+						fragment.new RefreshListTask().execute();
 
 					return false;
 				}
@@ -261,6 +263,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			case R.id.menu_addnew:
 				Intent intent = new Intent(this, CaseAddActivity.class);
 				startActivityForResult(intent, REQUEST_ADD_CASE);
+
+				return true;
+
+			case R.id.menu_help:
 
 				return true;
 
@@ -389,6 +395,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 	}
 
+
+
 	/**
 	 * Placeholder fragment
 	 */
@@ -428,36 +436,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				@Override
 				public void onRefresh()
 				{
-					swipeLayout.setRefreshing(true);
-
-					Thread refreshThread = new Thread()
+					if(mCardAdapter != null && mCardAdapter.mActionMode != null)    // don't refresh if in contextual action bar mode
 					{
-						@Override
-						public void run()
-						{
-							if (fragment != null)
-							{
-								fragment.populateCards();
-
-								Message msg = new Message();
-								msg.arg1 = THREAD_REFRESH_FINISHED;
-								responseHandler.sendMessage(msg);
-							}
-						}
-					};
-					refreshThread.start();
-
-
-					/*
-					new Handler().postDelayed(new Runnable()
+						swipeLayout.setRefreshing(false);
+					}
+					else
 					{
-						@Override
-						public void run()
-						{
-
-						}
-					}, 3000);
-					*/
+						new RefreshListTask().execute();
+					}
 				}
 			});
 			swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
@@ -513,6 +499,67 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			mActivity = (CaseCardListActivity)activity;
 		}
 
+		private class RefreshListTask extends AsyncTask<Void, Integer, Void>
+		{
+			boolean showProgress;
+
+			public RefreshListTask()
+			{
+				this.showProgress = true;   // default
+			}
+
+			public RefreshListTask(boolean showProgress)
+			{
+				this.showProgress = showProgress;
+			}
+
+			protected void onPreExecute()
+			{
+				if(showProgress)
+				{
+					// show progress wheel in UI thread
+					swipeLayout.post(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							swipeLayout.setRefreshing(true);
+						}
+					});
+				}
+			}
+
+			@Override
+			protected Void doInBackground(Void... v)
+			{
+				populateCards();
+
+				return null;
+			}
+
+			protected void onPostExecute(Void v)
+			{
+				if(showProgress)
+				{
+					swipeLayout.setRefreshing(false);
+
+					// show view changes after progress wheel closes
+					new Handler().postDelayed(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							mCardAdapter.notifyDataSetChanged();
+						}
+					}, 200);
+				}
+				else
+				{
+					mCardAdapter.notifyDataSetChanged();
+					swipeLayout.setRefreshing(false);   // just in case
+				}
+			}
+		}
 
 		/**
 		 * populateCards
@@ -890,25 +937,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 							if(!mCardAdapter.getMultiselectList().isEmpty())
 							{
-								progressDialog = new ProgressDialog(activity, "Exporting cases", getResources().getColor(R.color.default_colorAccent));
-								progressDialog.setCancelable(false);
-								progressDialog.setCanceledOnTouchOutside(false);
-								progressDialog.show();
-
-								// SHARE thread
-								Thread shareThread = new Thread()
-								{
-									@Override
-									public void run()
-									{
-										shareFile = UtilClass.exportCasesJSON(activity, "RadFiles cases", mCardAdapter.getMultiselectList());
-
-										Message msg = new Message();
-										msg.arg1 = THREAD_SHARE_FINISHED;
-										responseHandler.sendMessage(msg);
-									}
-								};
-								shareThread.start();
+								new ShareCasesTask(mCardAdapter.getMultiselectList(), mode).execute();
 							}
 
 							// todo don't finish if canceled
@@ -919,89 +948,26 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						case R.id.menu_delete:
 
 							// delete from database
-							//UtilClass.menuItem_deleteCases(getActivity(), mCardAdapter.getMultiselectList());
 
-							final Context context = getActivity();
 							final List<Long> deleteIdList = new ArrayList<Long>(mCardAdapter.getMultiselectList());
 							final ActionMode actionMode = mode;
-							final PlaceholderFragment frag = fragment;
 
 							// Alert dialog to confirm delete
-							AlertDialog.Builder builder = new AlertDialog.Builder(context);
+							AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
 							builder.setMessage("Delete " + deleteIdList.size() + " cases?")
-									.setPositiveButton(context.getResources().getString(R.string.button_OK), new DialogInterface.OnClickListener()
+									.setPositiveButton(activity.getResources().getString(R.string.button_OK), new DialogInterface.OnClickListener()
 									{
 										public void onClick(DialogInterface dialog, int id)
 										{
 											dialog.dismiss();
 
-											// DELETE CASES thread
-											progressDialog = new ProgressDialog(activity, "Deleting cases", getResources().getColor(R.color.default_colorAccent));
-											progressDialog.setCancelable(false);
-											progressDialog.setCanceledOnTouchOutside(false);
-											progressDialog.show();
-											final Activity activity = getActivity();
-											Thread deleteCaseThread = new Thread()
-											{
-												@Override
-												public void run()
-												{
-													// delete confirmed
-													for (int i = 0; i < deleteIdList.size(); i++)
-													{
-														// get key_id from list array
-														long key_id = deleteIdList.get(i);
-
-														// delete case from CASES table
-														Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-														context.getContentResolver().delete(case_delete_uri, null, null);
-
-														// delete all linked images files
-														Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
-														File imageFile = null;
-														if (image_cursor.moveToFirst())
-														{
-															do
-															{
-																imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-																imageFile.delete();
-															} while (image_cursor.moveToNext());
-														}
-														image_cursor.close();
-
-														// delete all child rows from IMAGES table, by parent case key_id
-														context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
-
-													}
-
-													Message msg = new Message();
-													msg.arg1 = THREAD_DELETE_FINISHED;
-													msg.arg2 = deleteIdList.size();
-													responseHandler.sendMessage(msg);
-
-
-													// remove from recyclerView
-													//mCardAdapter.removeCase(key_id);
-													//													frag.populateCards();
-
-													//													mCardAdapter.notifyDataSetChanged();
-
-													//	progressDialog.dismiss();
-													//UtilClass.showMessage(activity, "Deleted " + deleteIdList.size() + " cases.");
-
-
-												}
-											};
-											deleteCaseThread.start();
+											new DeleteCasesTask(activity, deleteIdList).execute();
 
 											actionMode.finish(); // Action picked, so close the CAB
-
-											// update CaseCardListActivity
-											//context.setResult(CaseCardListActivity.RESULT_DELETED);
 										}
 									})
-									.setNegativeButton(context.getResources().getString(R.string.button_cancel), new DialogInterface.OnClickListener()
+									.setNegativeButton(activity.getResources().getString(R.string.button_cancel), new DialogInterface.OnClickListener()
 									{
 										public void onClick(DialogInterface dialog, int id)
 										{
@@ -1122,77 +1088,137 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			};
 		}
 
-		final public static int THREAD_DELETE_FINISHED = 0;
-		final public static int THREAD_SHARE_FINISHED = 1;
-		final public static int THREAD_REFRESH_FINISHED = 2;
-
-
-		Handler responseHandler = new Handler(new Handler.Callback()
+		private class DeleteCasesTask extends AsyncTask<Void, Integer, Integer>
 		{
+			Activity activity;
+			List<Long> deleteIdList;
+
+			public DeleteCasesTask(Activity activity, List<Long> list)
+			{
+				this.activity = activity;
+				this.deleteIdList = list;
+			}
+
+			protected void onPreExecute()
+			{
+				// show progress wheel dialog
+				progressDialog = new ProgressDialog(activity, "Deleting cases", getResources().getColor(R.color.default_colorAccent));
+				progressDialog.setCancelable(false);
+				progressDialog.setCanceledOnTouchOutside(false);
+				progressDialog.show();
+			}
 
 			@Override
-			public boolean handleMessage(Message msg)
+			protected Integer doInBackground(Void... v)
 			{
-				switch(msg.arg1)
+				for (int i = 0; i < deleteIdList.size(); i++)
 				{
-					case THREAD_DELETE_FINISHED:
-						// remove from recyclerView
-						//mCardAdapter.removeCase(key_id);
-						fragment.populateCards();
-						mCardAdapter.notifyDataSetChanged();
+					// get key_id from list array
+					long key_id = deleteIdList.get(i);
 
-						progressDialog.dismiss();
+					// delete case from CASES table
+					Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+					activity.getContentResolver().delete(case_delete_uri, null, null);
 
-						UtilClass.showMessage(activity, "Deleted " + msg.arg2 + " cases.");
-
-						break;
-
-					case THREAD_SHARE_FINISHED:
-
-						Uri uriShareFile = Uri.fromFile(shareFile); // file created and stored in shareFile
-
-						Intent shareIntent = new Intent(Intent.ACTION_SEND);
-						//shareIntent.setType("message/rfc822");
-						shareIntent.setType(CloudStorageActivity.RCS_MIMETYPE);
-						shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
-						shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
-						shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store
-						shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
-
-						progressDialog.dismiss();
-
-						try
+					// delete all linked images files
+					Cursor image_cursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
+					File imageFile = null;
+					if (image_cursor.moveToFirst())
+					{
+						do
 						{
-							if (mCardAdapter.getMultiselectList().size() == 1)
-							{
-								startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " case..."));
-							}
-							else
-							{
-								startActivity(Intent.createChooser(shareIntent, "Share " + mCardAdapter.getMultiselectList().size() + " cases..."));
-							}
-						}
-						catch (android.content.ActivityNotFoundException ex)
-						{
-							Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
-						}
+							imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+							imageFile.delete();
+						} while (image_cursor.moveToNext());
+					}
+					image_cursor.close();
 
-						break;
-
-					case THREAD_REFRESH_FINISHED:
-						mCardAdapter.notifyDataSetChanged();
-						swipeLayout.setRefreshing(false);
-						break;
-
-					default:
-						break;
+					// delete all child rows from IMAGES table, by parent case key_id
+					activity.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
 
 				}
-
-
-				return false;
+				return deleteIdList.size();
 			}
-		});
+
+			/*
+			protected void onProgressUpdate(Integer... progress) {
+				setProgressPercent(progress[0]);
+			}
+			*/
+			protected void onPostExecute(Integer numDeleted)
+			{
+				new RefreshListTask(false).execute();
+
+				progressDialog.dismiss();
+
+				UtilClass.showMessage(activity, "Deleted " + numDeleted + " cases.");
+			}
+		}
+
+		private class ShareCasesTask extends AsyncTask<Void, Integer, File>
+		{
+			List<Long> selectList;
+			ActionMode actionMode;
+
+			public ShareCasesTask(List<Long> selectList, ActionMode actionMode)
+			{
+				this.selectList = selectList;
+				this.actionMode = actionMode;
+			}
+
+			protected void onPreExecute()
+			{
+				// show progress wheel dialog
+				progressDialog = new ProgressDialog(activity, "Exporting cases", getResources().getColor(R.color.default_colorAccent));
+				progressDialog.setCancelable(false);
+				progressDialog.setCanceledOnTouchOutside(false);
+				progressDialog.show();
+			}
+
+			@Override
+			protected File doInBackground(Void... v)
+			{
+				return UtilClass.exportCasesJSON(activity, "RadFiles cases", selectList);
+			}
+
+			/*
+			protected void onProgressUpdate(Integer... progress) {
+				setProgressPercent(progress[0]);
+			}
+			*/
+			protected void onPostExecute(File shareFile)
+			{
+				Uri uriShareFile = Uri.fromFile(shareFile); // file created and stored in shareFile
+
+				Intent shareIntent = new Intent(Intent.ACTION_SEND);
+				//shareIntent.setType("message/rfc822");
+				shareIntent.setType(CloudStorageActivity.RCS_MIMETYPE);
+				shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
+				shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
+				shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store
+				shareIntent.putExtra(Intent.EXTRA_STREAM, uriShareFile);
+
+				progressDialog.dismiss();
+
+				try
+				{
+					if (selectList.size() == 1)
+					{
+						startActivity(Intent.createChooser(shareIntent, "Share " + selectList.size() + " case..."));
+					}
+					else
+					{
+						startActivity(Intent.createChooser(shareIntent, "Share " + selectList.size() + " cases..."));
+					}
+				}
+				catch (android.content.ActivityNotFoundException ex)
+				{
+					Toast.makeText(activity, "There are no email clients installed.", Toast.LENGTH_SHORT).show();
+				}
+
+				actionMode.finish();
+			}
+		}
 
 	} // end fragment
 

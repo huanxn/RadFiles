@@ -9,4 +9,7 @@
     <!-- Add new case, should appear as action button -->
     <item android:title="@string/action_new" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_new" android:id="@+id/menu_addnew"/>
 
+    <!-- Help -->
+    <item android:title="@string/action_help" app:showAsAction="never" android:icon="@drawable/ic_help_circle_white_36dp" android:id="@+id/menu_help"/>
+
 </menu>

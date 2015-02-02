@@ -13,6 +13,8 @@
     <string name="action_camera">Add image</string>
     <string name="action_star">Favorite</string>
     <string name="action_select_all">Select all</string>
+    <string name="action_edit_caption">Edit caption</string>
+    <string name="action_help">Help</string>
 
     <!-- Activity Titles -->
     <string name="title_activity_search">Search</string>
@@ -59,6 +61,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+
     <string-array name="nav_drawer_array">
         <item>Interesting Cases</item>
         <item>*Procedure Log</item>
@@ -66,7 +69,7 @@
         <item>Import &amp; Export</item>
         <item>Manage Lists</item>
         <item>*Settings</item>
-        <item>*Help</item>
+        <item>Info</item>
     </string-array>
 
     <!-- Search category headers -->

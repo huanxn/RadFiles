@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
@@ -38,7 +39,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	final static protected int POS_CLOUD_STORAGE = 3;
 	final static protected int POS_MANAGE_LISTS = 4;
 	final static protected int POS_SETTINGS = 5;
-	final static protected int POS_HELP = 6;
+	final static protected int POS_INFO = 6;
 	final static protected int POS_NONE = -1;
 
 	private int drawerPosition = POS_NONE;
@@ -113,39 +114,37 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	@Override
 	public void onNavigationDrawerItemSelected(int position)
 	{
+		Intent intent = null;
+
 		// update the main content by replacing fragments
 		switch (position)
 		{
 			// Interesting Case File
 			case POS_CASE_LIST:
 			{
-				Intent intent = new Intent(this, CaseCardListActivity.class);
-				startActivity(intent);
+				intent = new Intent(this, CaseCardListActivity.class);
 				break;
 			}
 			// Cloud Storage
 			case POS_CLOUD_STORAGE:
 			{
-				Intent intent = new Intent(this, CloudStorageActivity.class);
-				startActivity(intent);
+				intent = new Intent(this, CloudStorageActivity.class);
 				break;
 			}
 			// Manage Lists
 			case POS_MANAGE_LISTS:
 			{
-				Intent intent = new Intent(this, ManageListsActivity.class);
-				startActivity(intent);
+				intent = new Intent(this, ManageListsActivity.class);
 				break;
 			}
-			// Manage Lists
+			// Settings
 			case POS_SETTINGS:
 			{
-				Intent intent = new Intent(this, SettingsActivity.class);
-				startActivity(intent);
+				intent = new Intent(this, SettingsActivity.class);
 				break;
 			}
-			// Manage Lists
-			case POS_HELP:
+			// App Info
+			case POS_INFO:
 			{
 				// info alert
 
@@ -159,7 +158,8 @@ public class NavigationDrawerActivity extends ActionBarActivity
 					zf.close();
 
 					AlertDialog.Builder builder = new AlertDialog.Builder(this);
-					builder.setMessage(buildDate).setTitle("Build Date");
+					builder.setTitle("RadFiles");
+					builder.setMessage("Developed by Huan T. Nguyen\n\nBuild date: " + buildDate);
 					AlertDialog alert = builder.create();
 					alert.show();
 
@@ -167,7 +167,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 					UtilClass.showMessage(this, e.getMessage());
 				}
 
-				setDrawerPosition(POS_CASE_LIST);
+				//setDrawerPosition(POS_CASE_LIST);
 
 				////
 				break;
@@ -179,6 +179,20 @@ public class NavigationDrawerActivity extends ActionBarActivity
 
 			default:
 				break;
+		}
+
+		if(intent != null)
+		{
+			final Intent navigationIntent = intent;
+			new Handler().postDelayed(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					startActivity(navigationIntent);
+				}
+
+			}, 300);
 		}
 	}
 
