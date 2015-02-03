@@ -15,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Message;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -35,7 +34,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.gc.materialdesign.widgets.ProgressDialog;
@@ -84,6 +82,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	// search view
 	private SearchView searchView;
 	private MenuItem searchItem;
+	private SearchTask searchTask;
 
 	// ShowCase tutorial
 	private boolean showTutorial = false;
@@ -92,7 +91,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	public static CaseCardAdapter mCardAdapter;
 
-	public static PlaceholderFragment fragment;
+	public static CaseCardListFragment fragment;
 
 	// standard directories
 	public static File downloadsDir;
@@ -121,43 +120,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 		if (savedInstanceState == null)
 		{
-			fragment = new PlaceholderFragment();
+			fragment = new CaseCardListFragment();
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment)
 					.commit();
 
-			SpannableString mTitle = new SpannableString("RAD Cases");
-			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-			// Set up the Action Bar dropdown spinner list
-			// used for sorting the cases per user selected criteria
-			//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
-			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_toolbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
-			//((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
-			ActionBar actionBar = getSupportActionBar();
-			actionBar.setDisplayShowTitleEnabled(false);
-			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-			actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new android.support.v7.app.ActionBar.OnNavigationListener()
-			{
-				//String[] strings = getResources().getStringArray(R.array.action_list);
-
-				@Override
-				public boolean onNavigationItemSelected(int itemPosition, long itemId)
-				{
-					// when item position changes, then repopulate cards using the new criteria
-					caseFilterMode = itemPosition;
-
-					if(fragment != null)
-						fragment.new RefreshListTask().execute();
-
-					return false;
-				}
-			});
 		}
 		else
 		{
+			UtilClass.showMessage(this, "DEBUG: state: " + savedInstanceState.toString());
 			/*
 			SpannableString mTitle = new SpannableString("RAD debug" +
 					                                             "");
@@ -173,41 +144,42 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			// todo change to get stored data
 
-			fragment = new PlaceholderFragment();
+			fragment = new CaseCardListFragment();
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment)
 					.commit();
-
-			SpannableString mTitle = new SpannableString("RAD Cases");
-			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-			// Set up the Action Bar dropdown spinner list
-			// used for sorting the cases per user selected criteria
-			//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
-			SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_toolbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
-			//((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
-			ActionBar actionBar = getSupportActionBar();
-			actionBar.setDisplayShowTitleEnabled(false);
-			actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-			actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new android.support.v7.app.ActionBar.OnNavigationListener()
-			{
-				//String[] strings = getResources().getStringArray(R.array.action_list);
-
-				@Override
-				public boolean onNavigationItemSelected(int itemPosition, long itemId)
-				{
-					// when item position changes, then repopulate cards using the new criteria
-					caseFilterMode = itemPosition;
-
-					if(fragment != null)
-						fragment.new RefreshListTask().execute();
-
-					return false;
-				}
-			});
 		}
+
+		SpannableString mTitle = new SpannableString("RAD Cases");
+		mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+		// Set up the Action Bar dropdown spinner list
+		// used for sorting the cases per user selected criteria
+		//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
+		SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_toolbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
+		//((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayShowTitleEnabled(false);
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new android.support.v7.app.ActionBar.OnNavigationListener()
+		{
+			//String[] strings = getResources().getStringArray(R.array.action_list);
+
+			@Override
+			public boolean onNavigationItemSelected(int itemPosition, long itemId)
+			{
+				// when item position changes, then repopulate cards using the new criteria
+				caseFilterMode = itemPosition;
+
+				if(fragment != null)
+					fragment.new PopulateCardsTask().execute();
+
+				return false;
+			}
+		});
+
 	}
 
 
@@ -286,8 +258,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				if(resultCode == RESULT_EDITED || resultCode == RESULT_DELETED)
 				{
 					// refresh cards
+					/*
 					fragment.populateCards();
 					mCardAdapter.notifyDataSetChanged();
+					*/
+					fragment.new PopulateCardsTask().execute();
 				}
 				break;
 
@@ -297,11 +272,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				// edited case details
 				if(resultCode == RESULT_EDITED || resultCode == RESULT_DELETED)
 				{
-					// refresh cards
-					//caseFilterMode = FILTER_LAST_MODIFIED;
+					// refresh cards with caseFilterMode = FILTER_LAST_MODIFIED;
 					getSupportActionBar().setSelectedNavigationItem(FILTER_LAST_MODIFIED);
-					fragment.populateCards();
-					mCardAdapter.notifyDataSetChanged();
+					fragment.new PopulateCardsTask().execute();
 				}
 				break;
 
@@ -355,8 +328,22 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	 */
 	public boolean onQueryTextChange(String s)
 	{
-		if(!searchView.isIconified())
-			fragment.doSearch(s);
+		if(isSearchViewOpen())
+		{
+			if(fragment != null)
+			{
+				if(searchTask != null)
+				{
+					searchTask.cancel(true);
+
+					// todo memory leak?  how to release before making a "new" searchTask
+				}
+
+				searchTask = new SearchTask(fragment);
+				searchTask.execute(s);
+			}
+
+		}
 
 		return true;
 	}
@@ -365,9 +352,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	// SearchView.OnCloseListener
 	public boolean onClose()
 	{
+
 		// repopulate full list
-		fragment.populateCards();
-		mCardAdapter.notifyDataSetChanged();
+
+		fragment.new PopulateCardsTask().execute();
+		//fragment.populateCards();
+		//mCardAdapter.notifyDataSetChanged();
 
 		return false;
 	}
@@ -379,12 +369,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	 */
 	public void onBackPressed()
 	{
-		if (searchView != null && !searchView.isIconified())
+		if (isSearchViewOpen())
 		{
 			searchView.setIconified(true);
 
 			// if still open (only cleared text)
-			if (!searchView.isIconified())
+			if (isSearchViewOpen())
 			{
 				searchView.setIconified(true);
 			}
@@ -395,12 +385,139 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 	}
 
+	private class SearchTask extends AsyncTask<String, Integer, Boolean>
+	{
+		CaseCardListFragment fragment;
+
+		public SearchTask(CaseCardListFragment fragment)
+		{
+			this.fragment = fragment;
+		}
+
+
+		protected void onPreExecute()
+		{
+			fragment.swipeLayout.post(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					fragment.swipeLayout.setRefreshing(true);
+				}
+			});
+		}
+
+		@Override
+		/**
+		 * returns Boolean true if has results, false if no search results
+		 */
+		protected Boolean doInBackground(String... queryStr)
+		{
+			if(queryStr[0].isEmpty())
+			{
+				mCardAdapter.loadCases(null);
+				return true;
+			}
+			else if(queryStr[0].length() == 1)
+			{
+				mCardAdapter.loadCases(null);
+				return true;
+			}
+
+			String wildQuery = "%" + queryStr[0] + "%";
+			String[] selArgs = {wildQuery};
+
+			MergeCursor case_cursor; // merge into one cursor for StickyCard List
+
+			//todo add biopsy to search_categories
+
+			String [] search_categories = getResources().getStringArray(R.array.search_categories_array);
+			Cursor [] case_cursor_array = new Cursor[search_categories.length];
+
+			// set the headers for StickyRecyclerHeaders
+			List<String> headerList = new ArrayList<String>();
+
+			// do searches of each relevant text field
+			case_cursor_array[0] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_PATIENT_ID + " LIKE ? ", selArgs, CasesProvider.KEY_DATE + " DESC");
+			case_cursor_array[1] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_DIAGNOSIS + " LIKE ? ", selArgs, CasesProvider.KEY_DIAGNOSIS);
+			case_cursor_array[2] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FINDINGS + " LIKE ? ", selArgs, CasesProvider.KEY_FINDINGS);
+
+			if(isCancelled())
+			{
+				return false;
+			}
+
+			case_cursor_array[3] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ? ", selArgs, CasesProvider.KEY_KEYWORDS);
+			case_cursor_array[4] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " LIKE ? ", selArgs, CasesProvider.KEY_STUDY_TYPE);
+			case_cursor_array[5] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_COMMENTS + " LIKE ? ", selArgs, CasesProvider.KEY_COMMENTS);
+
+			if(isCancelled())
+			{
+				return false;
+			}
+
+			// merge cursors into one list
+			case_cursor = new MergeCursor(case_cursor_array);
+
+			if(case_cursor.getCount() == 0)
+			{
+				mCardAdapter.loadCases(null);
+				case_cursor.close();
+				return true;
+			}
+
+			// add search header for each case
+			for(int i = 0; i < case_cursor_array.length; i++)
+			{
+				for(int c = 0; c < case_cursor_array[i].getCount(); c++)
+				{
+					headerList.add(search_categories[i]);
+				}
+
+				if(isCancelled())
+				{
+					return false;
+				}
+
+			}
+
+			// change card adapter and set headers with search results
+			mCardAdapter.loadCases(case_cursor);
+			mCardAdapter.setHeaderList(headerList);
+
+			case_cursor.close();
+
+			return true;
+		}
+
+		protected void onPostExecute(Boolean updateResults)
+		{
+			if(updateResults)
+			{
+				mCardAdapter.notifyDataSetChanged();
+			}
+
+			fragment.swipeLayout.setRefreshing(false);
+		}
+	} // end SearchTask
+
+	private boolean isSearchViewOpen()
+	{
+		if(searchView != null && !searchView.isIconified())
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 
 
 	/**
 	 * Placeholder fragment
 	 */
-	public static class PlaceholderFragment extends Fragment
+	public static class CaseCardListFragment extends Fragment
 	{
 		// Layout
 		private RecyclerView mRecyclerView;
@@ -419,7 +536,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 		private SwipeRefreshLayout swipeLayout;
 
-		public PlaceholderFragment()
+		public CaseCardListFragment()
 		{
 		}
 
@@ -440,9 +557,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					{
 						swipeLayout.setRefreshing(false);
 					}
+					else if(mActivity.isSearchViewOpen()) //don't refresh if search bar open
+					{
+						swipeLayout.setRefreshing(false);
+					}
 					else
 					{
-						new RefreshListTask().execute();
+						new PopulateCardsTask().execute();
 					}
 				}
 			});
@@ -487,8 +608,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 			});
 
+			/*
 			populateCards();
 			mCardAdapter.notifyDataSetChanged();
+			*/
 
 			return rootView;
 		}
@@ -499,16 +622,16 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			mActivity = (CaseCardListActivity)activity;
 		}
 
-		private class RefreshListTask extends AsyncTask<Void, Integer, Void>
+		private class PopulateCardsTask extends AsyncTask<Void, Integer, Void>
 		{
 			boolean showProgress;
 
-			public RefreshListTask()
+			public PopulateCardsTask()
 			{
 				this.showProgress = true;   // default
 			}
 
-			public RefreshListTask(boolean showProgress)
+			public PopulateCardsTask(boolean showProgress)
 			{
 				this.showProgress = showProgress;
 			}
@@ -532,7 +655,275 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			@Override
 			protected Void doInBackground(Void... v)
 			{
-				populateCards();
+				// Get cases, filtered/sorted by spinner list in action bar
+				MergeCursor case_cursor;
+
+				Cursor [] case_cursor_array;
+
+				// set the headers for StickyRecyclerHeaders
+				List<String> headerList = new ArrayList<String>();
+
+				//todo: delete-- don't use this anymore
+				//List<Integer> headerIdList = new ArrayList<Integer>();
+
+				switch(caseFilterMode)
+				{
+					case FILTER_SECTION:
+
+						// get cursor of "Radiology Section List", in order determined by user list preferences
+						Cursor section_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+
+						// instantiate case cursor array with size of section_cursor.getCount() + 1.  Added one for those cases with empty "Radiology Section" field, ie Unknown
+						// will use MergeCursor afterwards.  must use cursor array this since a case may be in more than one section
+						case_cursor_array = new Cursor[section_cursor.getCount()+1];
+
+						// query each case cursor by "Radiology Section" "LIKE %?%".  Each case may have more than one "Radiology Section" listed. Order by desc "Study Date"
+						if(section_cursor.moveToFirst())
+						{
+							int i = 0;  // section/group counter
+
+							do
+							{
+								// get the KEY_SECTION name
+								String mSection = section_cursor.getString(CasesProvider.COL_VALUE);
+
+								// find all cases with this KEY_SECTION
+								case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " LIKE ?", new String[]{"%" + mSection + "%"}, CasesProvider.KEY_DATE + " DESC", null);
+
+								// set KEY_SECTION as headers in each list position in headerList, with same IDs
+								for(int c = 0; c < case_cursor_array[i].getCount(); c++)
+								{
+									headerList.add(mSection);
+									//headerIdList.add(i);
+								}
+
+								i = i + 1;
+							} while(section_cursor.moveToNext());
+
+							// last filter group is the cases with empty "Radiology Section" fields
+							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " IS NULL OR " + CasesProvider.KEY_SECTION + " = ?", new String[] {""}, CasesProvider.KEY_DATE + " DESC", null);
+							for(int c = 0; c < case_cursor_array[i].getCount(); c++)
+							{
+								headerList.add(EMPTY_FIELD_GROUP_HEADER);
+								//headerIdList.add(i);
+							}
+
+						}
+
+						section_cursor.close();
+
+						break;
+
+					case FILTER_LAST_MODIFIED:
+						case_cursor_array = new Cursor[1];
+						case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, CasesProvider.KEY_LAST_MODIFIED_DATE + " DESC, " + CasesProvider.KEY_ROWID + " DESC", null );
+
+					/*
+					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
+					{
+						headerList.add("Recent");
+						//headerIdList.add(0);
+					}
+					*/
+
+						if(case_cursor_array[0].moveToFirst())
+						{
+							String db_modified_date_str;
+							String prior_str = "";
+							int group_counter = 0;  // section/group counter
+
+							do
+							{
+								db_modified_date_str = case_cursor_array[0].getString(CasesProvider.COL_LAST_MODIFIED_DATE);
+
+								if (db_modified_date_str != null && !db_modified_date_str.isEmpty())
+								{
+									// set header string: group by month
+									String new_date_str = UtilClass.convertDateString(db_modified_date_str, "yyyy-MM-dd", "MMMM yyyy");
+									// add to headerList
+									headerList.add(new_date_str);
+
+									// if different date, then put in next filter group
+									if (!new_date_str.contentEquals(prior_str))
+									{
+										group_counter += 1;
+									}
+									//headerIdList.add(group_counter);
+
+									// update prior_str for next iteration check
+									prior_str = new_date_str;
+								}
+								else
+								{
+									headerList.add(EMPTY_FIELD_GROUP_HEADER);
+								}
+							} while (case_cursor_array[0].moveToNext());
+						}
+
+						break;
+
+					case FILTER_STUDYDATE:
+						case_cursor_array = new Cursor[1];
+						case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, CasesProvider.KEY_DATE + " DESC", null);
+
+						if(case_cursor_array[0].moveToFirst())
+						{
+							String db_date_str;
+							String prior_str = "";
+							int group_counter = 0;  // section/group counter
+
+							do
+							{
+								db_date_str = case_cursor_array[0].getString(CasesProvider.COL_DATE);
+
+								if (db_date_str != null && !db_date_str.isEmpty())
+								{
+									// set header string: group by month
+									String new_date_str = UtilClass.convertDateString(db_date_str, "yyyy-MM-dd", "MMMM yyyy");
+									// add to headerList
+									headerList.add(new_date_str);
+
+									// if different date, then put in next filter group
+									if (!new_date_str.contentEquals(prior_str))
+									{
+										group_counter += 1;
+									}
+									//headerIdList.add(group_counter);
+
+									// update prior_str for next iteration check
+									prior_str = new_date_str;
+								}
+								else
+								{
+									headerList.add(EMPTY_FIELD_GROUP_HEADER);
+								}
+							} while (case_cursor_array[0].moveToNext());
+						}
+
+						break;
+
+					case FILTER_MODALITY:
+						case_cursor_array = new Cursor[1];
+						case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " is not null and " + CasesProvider.KEY_STUDY_TYPE + " != ?", new String[] {""}, CasesProvider.KEY_STUDY_TYPE, null);
+
+						if(case_cursor_array[0].moveToFirst())
+						{
+							String stickyHeader;
+							String prior_stickyHeader = "";
+							int group_counter = 0;  // section/group counter
+
+							do
+							{
+								stickyHeader = case_cursor_array[0].getString(CasesProvider.COL_STUDY_TYPE);
+
+								if (stickyHeader != null && !stickyHeader.isEmpty())
+								{
+									// set header string
+									// add to headerList
+									headerList.add(stickyHeader);
+
+									// if different date, then put in next filter group
+									if (!stickyHeader.contentEquals(prior_stickyHeader))
+									{
+										group_counter += 1;
+									}
+									//headerIdList.add(group_counter);
+
+									// update prior_stickyHeader for next iteration check
+									prior_stickyHeader = stickyHeader;
+								}
+								else
+								{
+									headerList.add(EMPTY_FIELD_GROUP_HEADER);
+								}
+							} while (case_cursor_array[0].moveToNext());
+						}
+
+						break;
+
+					case FILTER_KEYWORDS:
+
+						//case_cursor_array = new Cursor[1];
+						//case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " is not null and " + CasesProvider.KEY_KEYWORDS + " != ?", new String[] {""}, CasesProvider.KEY_KEYWORDS, null);
+
+						// get cursor of "Radiology Keywords List", in order determined by user list preferences
+						Cursor keywords_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+
+						// instantiate case cursor array with size of section_cursor.getCount().
+						// will use MergeCursor afterwards.  must use cursor array this since a case may be in more than one section
+						case_cursor_array = new Cursor[keywords_cursor.getCount()];
+
+						// query each case cursor by "keyword" "LIKE %?%".  Each case may have more than one "keyword" listed. Order by recent
+						if(keywords_cursor.moveToFirst())
+						{
+							int i = 0;  // section/group counter
+
+							do
+							{
+								// get the KEYWORD name
+								String mKeyword = keywords_cursor.getString(CasesProvider.COL_VALUE);
+
+								// find all cases with this KEY_KEYWORDS
+								case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ?", new String[]{"%" + mKeyword + "%"}, CasesProvider.KEY_ROWID + " DESC", null);
+
+								// set KEY_KEYWORDS as headers in each list position in headerList, with same IDs
+								for(int c = 0; c < case_cursor_array[i].getCount(); c++)
+								{
+									headerList.add(mKeyword);
+									//headerIdList.add(i);
+								}
+
+								i = i + 1;
+							} while(keywords_cursor.moveToNext());
+
+						}
+						keywords_cursor.close();
+
+						break;
+					case FILTER_FOLLOWUP:
+						case_cursor_array = new Cursor[1];
+						case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FOLLOWUP + " = ?", new String[] {"1"}, CasesProvider.KEY_DATE + " DESC", null);
+
+						for(int c = 0; c < case_cursor_array[0].getCount(); c++)
+						{
+							headerList.add("Followup");
+							//headerIdList.add(0);
+						}
+
+						break;
+					case FILTER_FAVORITE:
+						case_cursor_array = new Cursor[1];
+						case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FAVORITE + " = ?", new String[] {"1"}, CasesProvider.KEY_DATE + " DESC", null);
+
+						for(int c = 0; c < case_cursor_array[0].getCount(); c++)
+						{
+							headerList.add("Favorites");
+							//headerIdList.add(0);
+						}
+
+						break;
+					default:
+						case_cursor_array = new Cursor[1];
+						case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+
+						for(int c = 0; c < case_cursor_array[0].getCount(); c++)
+						{
+							headerList.add("My Cases");
+							//headerIdList.add(0);
+						}
+
+						break;
+
+				}
+
+				case_cursor = new MergeCursor(case_cursor_array);
+				// TODO how to close this cursor?
+
+
+				mCardAdapter.loadCases(case_cursor);
+				mCardAdapter.setHeaderList(headerList);
+
+				case_cursor.close();
 
 				return null;
 			}
@@ -559,285 +950,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					swipeLayout.setRefreshing(false);   // just in case
 				}
 			}
-		}
-
-		/**
-		 * populateCards
-		 *
-		 */
-		private void populateCards()
-		{
-			// Get cases, filtered/sorted by spinner list in action bar
-			MergeCursor case_cursor;
-
-			Cursor [] case_cursor_array;
-
-			// set the headers for StickyRecyclerHeaders
-			List<String> headerList = new ArrayList<String>();
-
-			//todo: delete-- don't use this anymore
-			//List<Integer> headerIdList = new ArrayList<Integer>();
-
-			switch(caseFilterMode)
-			{
-				case FILTER_SECTION:
-
-					// get cursor of "Radiology Section List", in order determined by user list preferences
-					Cursor section_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
-
-					// instantiate case cursor array with size of section_cursor.getCount() + 1.  Added one for those cases with empty "Radiology Section" field, ie Unknown
-					// will use MergeCursor afterwards.  must use cursor array this since a case may be in more than one section
-					case_cursor_array = new Cursor[section_cursor.getCount()+1];
-
-					// query each case cursor by "Radiology Section" "LIKE %?%".  Each case may have more than one "Radiology Section" listed. Order by desc "Study Date"
-					if(section_cursor.moveToFirst())
-					{
-						int i = 0;  // section/group counter
-
-						do
-						{
-							// get the KEY_SECTION name
-							String mSection = section_cursor.getString(CasesProvider.COL_VALUE);
-
-							// find all cases with this KEY_SECTION
-							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " LIKE ?", new String[]{"%" + mSection + "%"}, CasesProvider.KEY_DATE + " DESC", null);
-
-							// set KEY_SECTION as headers in each list position in headerList, with same IDs
-							for(int c = 0; c < case_cursor_array[i].getCount(); c++)
-							{
-								headerList.add(mSection);
-								//headerIdList.add(i);
-							}
-
-							i = i + 1;
-						} while(section_cursor.moveToNext());
-
-						// last filter group is the cases with empty "Radiology Section" fields
-						case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " IS NULL OR " + CasesProvider.KEY_SECTION + " = ?", new String[] {""}, CasesProvider.KEY_DATE + " DESC", null);
-						for(int c = 0; c < case_cursor_array[i].getCount(); c++)
-						{
-							headerList.add(EMPTY_FIELD_GROUP_HEADER);
-							//headerIdList.add(i);
-						}
-
-					}
-
-					section_cursor.close();
-
-					break;
-
-				case FILTER_LAST_MODIFIED:
-					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, CasesProvider.KEY_LAST_MODIFIED_DATE + " DESC, " + CasesProvider.KEY_ROWID + " DESC", null );
-
-					/*
-					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
-					{
-						headerList.add("Recent");
-						//headerIdList.add(0);
-					}
-					*/
-
-					if(case_cursor_array[0].moveToFirst())
-					{
-						String db_modified_date_str;
-						String prior_str = "";
-						int group_counter = 0;  // section/group counter
-
-						do
-						{
-							db_modified_date_str = case_cursor_array[0].getString(CasesProvider.COL_LAST_MODIFIED_DATE);
-
-							if (db_modified_date_str != null && !db_modified_date_str.isEmpty())
-							{
-								// set header string: group by month
-								String new_date_str = UtilClass.convertDateString(db_modified_date_str, "yyyy-MM-dd", "MMMM yyyy");
-								// add to headerList
-								headerList.add(new_date_str);
-
-								// if different date, then put in next filter group
-								if (!new_date_str.contentEquals(prior_str))
-								{
-									group_counter += 1;
-								}
-								//headerIdList.add(group_counter);
-
-								// update prior_str for next iteration check
-								prior_str = new_date_str;
-							}
-							else
-							{
-								headerList.add(EMPTY_FIELD_GROUP_HEADER);
-							}
-						} while (case_cursor_array[0].moveToNext());
-					}
-
-					break;
-
-				case FILTER_STUDYDATE:
-					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, CasesProvider.KEY_DATE + " DESC", null);
-
-					if(case_cursor_array[0].moveToFirst())
-					{
-						String db_date_str;
-						String prior_str = "";
-						int group_counter = 0;  // section/group counter
-
-						do
-						{
-							db_date_str = case_cursor_array[0].getString(CasesProvider.COL_DATE);
-
-							if (db_date_str != null && !db_date_str.isEmpty())
-							{
-								// set header string: group by month
-								String new_date_str = UtilClass.convertDateString(db_date_str, "yyyy-MM-dd", "MMMM yyyy");
-								// add to headerList
-								headerList.add(new_date_str);
-
-								// if different date, then put in next filter group
-								if (!new_date_str.contentEquals(prior_str))
-								{
-									group_counter += 1;
-								}
-								//headerIdList.add(group_counter);
-
-								// update prior_str for next iteration check
-								prior_str = new_date_str;
-							}
-							else
-							{
-								headerList.add(EMPTY_FIELD_GROUP_HEADER);
-							}
-						} while (case_cursor_array[0].moveToNext());
-					}
-
-					break;
-
-				case FILTER_MODALITY:
-					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " is not null and " + CasesProvider.KEY_STUDY_TYPE + " != ?", new String[] {""}, CasesProvider.KEY_STUDY_TYPE, null);
-
-					if(case_cursor_array[0].moveToFirst())
-					{
-						String stickyHeader;
-						String prior_stickyHeader = "";
-						int group_counter = 0;  // section/group counter
-
-						do
-						{
-							stickyHeader = case_cursor_array[0].getString(CasesProvider.COL_STUDY_TYPE);
-
-							if (stickyHeader != null && !stickyHeader.isEmpty())
-							{
-								// set header string
-								// add to headerList
-								headerList.add(stickyHeader);
-
-								// if different date, then put in next filter group
-								if (!stickyHeader.contentEquals(prior_stickyHeader))
-								{
-									group_counter += 1;
-								}
-								//headerIdList.add(group_counter);
-
-								// update prior_stickyHeader for next iteration check
-								prior_stickyHeader = stickyHeader;
-							}
-							else
-							{
-								headerList.add(EMPTY_FIELD_GROUP_HEADER);
-							}
-						} while (case_cursor_array[0].moveToNext());
-					}
-
-					break;
-
-				case FILTER_KEYWORDS:
-
-					//case_cursor_array = new Cursor[1];
-					//case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " is not null and " + CasesProvider.KEY_KEYWORDS + " != ?", new String[] {""}, CasesProvider.KEY_KEYWORDS, null);
-
-					// get cursor of "Radiology Keywords List", in order determined by user list preferences
-					Cursor keywords_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
-
-					// instantiate case cursor array with size of section_cursor.getCount().
-					// will use MergeCursor afterwards.  must use cursor array this since a case may be in more than one section
-					case_cursor_array = new Cursor[keywords_cursor.getCount()];
-
-					// query each case cursor by "keyword" "LIKE %?%".  Each case may have more than one "keyword" listed. Order by recent
-					if(keywords_cursor.moveToFirst())
-					{
-						int i = 0;  // section/group counter
-
-						do
-						{
-							// get the KEYWORD name
-							String mKeyword = keywords_cursor.getString(CasesProvider.COL_VALUE);
-
-							// find all cases with this KEY_KEYWORDS
-							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ?", new String[]{"%" + mKeyword + "%"}, CasesProvider.KEY_ROWID + " DESC", null);
-
-							// set KEY_KEYWORDS as headers in each list position in headerList, with same IDs
-							for(int c = 0; c < case_cursor_array[i].getCount(); c++)
-							{
-								headerList.add(mKeyword);
-								//headerIdList.add(i);
-							}
-
-							i = i + 1;
-						} while(keywords_cursor.moveToNext());
-
-					}
-					keywords_cursor.close();
-
-					break;
-				case FILTER_FOLLOWUP:
-					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FOLLOWUP + " = ?", new String[] {"1"}, CasesProvider.KEY_DATE + " DESC", null);
-
-					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
-					{
-						headerList.add("Followup");
-						//headerIdList.add(0);
-					}
-
-					break;
-				case FILTER_FAVORITE:
-					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FAVORITE + " = ?", new String[] {"1"}, CasesProvider.KEY_DATE + " DESC", null);
-
-					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
-					{
-						headerList.add("Favorites");
-						//headerIdList.add(0);
-					}
-
-					break;
-				default:
-					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
-
-					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
-					{
-						headerList.add("My Cases");
-						//headerIdList.add(0);
-					}
-
-					break;
-
-			}
-
-			case_cursor = new MergeCursor(case_cursor_array);
-			// TODO how to close this cursor?
-
-
-			mCardAdapter.loadCases(case_cursor);
-			mCardAdapter.setHeaderList(headerList);
-
-			case_cursor.close();
-
-		}
+		} // end PopulateCardsTask
 
 		/**
 		 * doSearch
@@ -1088,6 +1201,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			};
 		}
 
+		/**
+		 *
+		 */
 		private class DeleteCasesTask extends AsyncTask<Void, Integer, Integer>
 		{
 			Activity activity;
@@ -1147,14 +1263,17 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			*/
 			protected void onPostExecute(Integer numDeleted)
 			{
-				new RefreshListTask(false).execute();
+				new PopulateCardsTask(false).execute();
 
 				progressDialog.dismiss();
 
 				UtilClass.showMessage(activity, "Deleted " + numDeleted + " cases.");
 			}
-		}
+		} // end DeleteCasesTask
 
+		/**
+		 *
+		 */
 		private class ShareCasesTask extends AsyncTask<Void, Integer, File>
 		{
 			List<Long> selectList;
@@ -1218,7 +1337,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 				actionMode.finish();
 			}
-		}
+		} // end ShareCasesTask
 
 	} // end fragment
 
