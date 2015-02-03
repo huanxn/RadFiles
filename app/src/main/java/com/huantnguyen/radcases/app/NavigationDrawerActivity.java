@@ -128,7 +128,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 			// Cloud Storage
 			case POS_CLOUD_STORAGE:
 			{
-				intent = new Intent(this, CloudStorageActivity.class);
+				intent = new Intent(this, ImportExportActivity.class);
 				break;
 			}
 			// Manage Lists
@@ -192,7 +192,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 					startActivity(navigationIntent);
 				}
 
-			}, 300);
+			}, 275);
 		}
 	}
 

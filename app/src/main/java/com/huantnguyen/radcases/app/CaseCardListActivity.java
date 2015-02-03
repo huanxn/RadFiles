@@ -98,7 +98,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	public static File picturesDir;
 	public static File appDir;             // internal app data directory
 	public static File dataDir;            // private data directory (with SQL database)
-	public static File CSV_dir;            // contains created zip files with JSON files and images
 
 	private static ProgressDialog progressDialog;
 
@@ -114,7 +113,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 		appDir = getExternalFilesDir(null);
 		dataDir = Environment.getDataDirectory();
-		CSV_dir = new File(appDir, "/CSV/");
 
 		setDrawerPosition(NavigationDrawerActivity.POS_CASE_LIST);
 
@@ -952,68 +950,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			}
 		} // end PopulateCardsTask
 
-		/**
-		 * doSearch
-		 * @param queryStr
-		 */
-		private void doSearch(String queryStr)
-		{
-			boolean noResults = true;
-
-			if(queryStr.isEmpty())
-			{
-				mCardAdapter.loadCases(null);
-				mCardAdapter.notifyDataSetChanged();
-				return;
-			}
-
-			String wildQuery = "%" + queryStr + "%";
-			String[] selArgs = {wildQuery};
-
-			String selection = "";
-
-			MergeCursor case_cursor; // merge into one cursor for StickyCard List
-
-			//todo add biopsy to search_categories
-
-			String [] search_categories = getResources().getStringArray(R.array.search_categories_array);
-			Cursor [] case_cursor_array = new Cursor[search_categories.length];
-
-			// set the headers for StickyRecyclerHeaders
-			List<String> headerList = new ArrayList<String>();
-			List<Integer> headerIdList = new ArrayList<Integer>();
-
-			// do searches of each relevant text field
-			case_cursor_array[0] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_PATIENT_ID + " LIKE ? ", selArgs, CasesProvider.KEY_DATE + " DESC");
-			case_cursor_array[1] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_DIAGNOSIS + " LIKE ? ", selArgs, CasesProvider.KEY_DIAGNOSIS);
-			case_cursor_array[2] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FINDINGS + " LIKE ? ", selArgs, CasesProvider.KEY_FINDINGS);
-			case_cursor_array[3] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ? ", selArgs, CasesProvider.KEY_KEYWORDS);
-			case_cursor_array[4] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " LIKE ? ", selArgs, CasesProvider.KEY_STUDY_TYPE);
-			case_cursor_array[5] = getActivity().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_COMMENTS + " LIKE ? ", selArgs, CasesProvider.KEY_COMMENTS);
-
-			// merge cursors into one list
-			case_cursor = new MergeCursor(case_cursor_array);
-
-			// add search header for each case
-			for(int i = 0; i < case_cursor_array.length; i++)
-			{
-				for(int c = 0; c < case_cursor_array[i].getCount(); c++)
-				{
-					headerList.add(search_categories[i]);
-				}
-			}
-
-			//if(case_cursor.getCount() > 0)
-			{
-				// populate cards and set headers
-				mCardAdapter.loadCases(case_cursor);
-				mCardAdapter.setHeaderList(headerList);
-				mCardAdapter.notifyDataSetChanged();
-			}
-
-			case_cursor.close();
-
-		}
 
 		/**
 		 * Contextual Menu
@@ -1311,7 +1247,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 				Intent shareIntent = new Intent(Intent.ACTION_SEND);
 				//shareIntent.setType("message/rfc822");
-				shareIntent.setType(CloudStorageActivity.RCS_MIMETYPE);
+				shareIntent.setType(ImportExportActivity.RCS_MIMETYPE);
 				shareIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{""});
 				shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Radiology cases");
 				shareIntent.putExtra(Intent.EXTRA_TEXT, "Please see the attached file.\nOpen it with the RadFiles Android app!"); //todo link to store

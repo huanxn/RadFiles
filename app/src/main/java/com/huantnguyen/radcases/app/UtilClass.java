@@ -28,17 +28,13 @@ import android.util.JsonToken;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.gc.materialdesign.views.ProgressBarDeterminate;
-import com.gc.materialdesign.views.ProgressBarIndeterminateDeterminate;
 import com.gc.materialdesign.widgets.SnackBar;
 
 import java.io.BufferedReader;
@@ -58,6 +54,7 @@ import java.util.List;
 
 import eu.janmuller.android.simplecropimage.CropImage;
 
+
 /**
  * Created by Huan on 6/10/2014.
  */
@@ -75,21 +72,30 @@ public class UtilClass extends Activity
 	private static File picturesDir = CaseCardListActivity.picturesDir;
 	private static File appDir  = CaseCardListActivity.appDir;             // internal app data directory
 	private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
-	private static File CSV_dir  = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
 
 	/**
 	 * Shows a toast message.
 	 */
+	public static void showToast(Activity activity, String message)
+	{
+		Toast.makeText(activity, message, Toast.LENGTH_LONG).show();
+	}
+	public static void showToast(Activity activity, int message)
+	{
+		Toast.makeText(activity, String.valueOf(message), Toast.LENGTH_LONG).show();
+	}
 	public static void showMessage(Activity activity, String message)
 	{
+
+		//SnackbarManager.show(Snackbar.with(activity))				.text(message), activity);
+
+
 		//Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 		SnackBar snackbar = new SnackBar(activity, message, null, null);
 		snackbar.show();
+
 	}
-	public static void showMessage(Context context, int message)
-	{
-		Toast.makeText(context, String.valueOf(message), Toast.LENGTH_LONG).show();
-	}
+
 
 	/**
 	 * Sets ImageView picture from file
@@ -909,7 +915,7 @@ public class UtilClass extends Activity
 
 
 	/**
-	 * Creates zip file of images and CSV of database rows of select cases
+	 * Creates zip file of images and JSON of database rows of select cases
 	 * used by CloudStorageActivity, CardCaseListActivity
 	 * @param activity: context of calling activity
 	 * @param filename: filename of zip to be created (do not include path or extension)
@@ -930,30 +936,16 @@ public class UtilClass extends Activity
 		// attempt to create json file
 		File casesJSON = null;
 
-		// CSV subdirectory within internal app data directory
-		//File CSV_dir = new File(activity.getApplication().getExternalFilesDir(null), "/CSV/");
-
-		// create CSV dir if doesn't already exist
-		if(!CSV_dir.exists())
-		{
-			if(CSV_dir.mkdirs())
-			{
-				showMessage(activity, "Created directory: " + CSV_dir.getPath());
-			}
-			else
-			{
-				showMessage(activity, "Unable to create directory: " + CSV_dir.getPath());
-			}
-		}
+		File cacheDir = activity.getCacheDir();
 
 		try
 		{
-			casesJSON = new File(CSV_dir.getPath(), CloudStorageActivity.CASES_JSON_FILENAME);
+			casesJSON = new File(downloadsDir.getPath(), ImportExportActivity.CASES_JSON_FILENAME);
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			showMessage(activity, "Unable to create local CSV backup files.");
+			showMessage(activity, "Unable to create local backup file.");
 			return null;
 		}
 
@@ -1060,8 +1052,8 @@ public class UtilClass extends Activity
 				cases_writer.close();
 			}
 
-			// zip image and csv files
-			String zip_filename = CSV_dir.getPath() + "/" + filename + CloudStorageActivity.RCS_EXTENSION;
+			// zip image and JSON files
+			String zip_filename = downloadsDir.getPath() + "/" + filename + ImportExportActivity.RCS_EXTENSION;
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesJSON.getPath());
 
 			// create zip file.  return link to that file.
@@ -1073,7 +1065,7 @@ public class UtilClass extends Activity
 			if(progressHandler != null)
 			{
 				Message msg = new Message();
-				msg.arg1 = CloudStorageActivity.PROGRESS_MSG_EXPORT_FINISHED;
+				msg.arg1 = ImportExportActivity.PROGRESS_MSG_EXPORT_FINISHED;
 				msg.arg2 = count;
 				progressHandler.sendMessage(msg);
 			}
@@ -1104,7 +1096,7 @@ public class UtilClass extends Activity
 		int parent_id;
 		int caseCount = 0;
 
-		// unzip image files and csv files
+		// unzip image files and JSON files
 		try
 		{
 			// unzip image files to android pictures directory
@@ -1123,7 +1115,7 @@ public class UtilClass extends Activity
 		try
 		{
 			// open existing file that should have been unzipped
-			tempCasesJSON = new File(picturesDir, CloudStorageActivity.CASES_JSON_FILENAME);
+			tempCasesJSON = new File(picturesDir, ImportExportActivity.CASES_JSON_FILENAME);
 			FileInputStream cases_in = new FileInputStream(tempCasesJSON);
 			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
 		}
@@ -1250,24 +1242,11 @@ public class UtilClass extends Activity
 	{
 		// attempt to create json file
 		File listsJSON = null;
-
-		// create CSV dir if doesn't already exist
-		if(!CSV_dir.exists())
-		{
-			if(CSV_dir.mkdirs())
-			{
-				showMessage(activity, "Created directory: " + CSV_dir.getPath());
-			}
-			else
-			{
-				showMessage(activity, "Unable to create directory: " + CSV_dir.getPath());
-			}
-		}
+		File cacheDir = activity.getCacheDir();
 
 		try
 		{
-			//listsJSON = new File(CSV_dir.getPath(), CloudStorageActivity.LISTS_JSON_FILENAME);
-			listsJSON = new File(CSV_dir.getPath(), filename+CloudStorageActivity.LIST_EXTENSION);
+			listsJSON = new File(downloadsDir.getPath(), filename+ ImportExportActivity.LIST_EXTENSION);
 		}
 		catch (Exception e)
 		{
@@ -1600,13 +1579,4 @@ public class UtilClass extends Activity
 	{
 		return CaseCardListActivity.dataDir;
 	}
-
-	public static File getCSVDir()
-	{
-		return CaseCardListActivity.CSV_dir;
-	}
-
-
-
-
 }

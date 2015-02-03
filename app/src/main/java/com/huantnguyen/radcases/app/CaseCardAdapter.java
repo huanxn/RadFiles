@@ -139,7 +139,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			caseList.clear();
 		}
 
-		notifyDataSetChanged();
+		//notifyDataSetChanged();
 	}
 
 	public void removeCase(long key_id)

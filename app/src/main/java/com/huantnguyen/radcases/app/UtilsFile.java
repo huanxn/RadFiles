@@ -1,10 +1,8 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -95,13 +93,13 @@ public class UtilsFile
 		out.close();
 	}
 
-	static public File makeLocalFile(Activity activity, File downloadsDir, Uri uri) throws IOException
+	static public File makeLocalFile(Activity activity, File downloadsDir, String filename, String extension, Uri uri) throws IOException
 	{
 		// create new local file
 		File outFile = null;
 		try
 		{
-			outFile = File.createTempFile("import", ".rcs", downloadsDir);
+			outFile = File.createTempFile(filename, extension, downloadsDir);
 		}
 		catch (IOException e)
 		{
@@ -167,7 +165,7 @@ public class UtilsFile
 			if(progressHandler != null)
 			{
 				Message msg = new Message();
-				msg.arg1 = CloudStorageActivity.PROGRESS_MSG_MAX;
+				msg.arg1 = ImportExportActivity.PROGRESS_MSG_MAX;
 				msg.arg2 = files.length;       // times 2
 				progressHandler.sendMessage(msg);
 			}
@@ -195,7 +193,7 @@ public class UtilsFile
 				if(progressHandler != null)
 				{
 					Message msg = new Message();
-					msg.arg1 = CloudStorageActivity.PROGRESS_MSG_INCREMENT;
+					msg.arg1 = ImportExportActivity.PROGRESS_MSG_INCREMENT;
 					progressHandler.sendMessage(msg);
 				}
 			}

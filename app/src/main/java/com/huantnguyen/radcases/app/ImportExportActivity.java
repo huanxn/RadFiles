@@ -38,7 +38,7 @@ import java.util.Date;
 //import eu.janmuller.android.simplecropimage.ImageViewTouchBase;
 
 
-public class CloudStorageActivity extends GoogleDriveBaseActivity
+public class ImportExportActivity extends GoogleDriveBaseActivity
 {
 	String TAG = "CloudStorageActivity";
 
@@ -46,11 +46,13 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 	private CloudStorageFragment fragment;
 
-	final static String ARG_IMPORT_STREAM = "com.huan.t.nguyen.radcases.ARG_IMPORT_STREAM";
+	//final static String ARG_IMPORT_STREAM = "com.huan.t.nguyen.radcases.ARG_IMPORT_STREAM";
+	final static String ARG_IMPORT_URI = "com.huan.t.nguyen.radcases.ARG_IMPORT_URI";
 
 	//final static int REQUEST_SELECT_BACKUP_FILE = 0;
 	final static int REQUEST_SELECT_CSV_FILE = 1;
 	final static int REQUEST_LIST_JSON_FILE = 2;
+	final static int REQUEST_IMPORT_CASES = 3;
 
 	// for uploading to cloud
 	private File local_file_to_cloud;
@@ -83,7 +85,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 	private static File picturesDir = CaseCardListActivity.picturesDir;
 	private static File appDir = CaseCardListActivity.appDir;             // internal app data directory
 	private static File dataDir = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
-	private static File CSV_dir = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
+	//private static File CSV_dir = CaseCardListActivity.CSV_dir;            // contains created zip files with CSV files and images
 
 	private static File backupDir;
 
@@ -859,90 +861,21 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					//String filename = data.getStringExtra()
 					Log.d(TAG, "File Uri: " + uri.toString());
 
-					new ImportCasesTask().execute(uri);
+					//new ImportCasesTask().execute(uri);
 
-					/*
-					progressWheelDialog = new ProgressDialog(this, "Importing cases", getResources().getColor(R.color.default_colorAccent));
-					progressWheelDialog.setCancelable(false);
-					progressWheelDialog.setCanceledOnTouchOutside(false);
-					progressWheelDialog.show();
-
-					// Get the Uri of the selected file
-					final Uri uri = resultData.getData();
-					//String filename = data.getStringExtra()
-					Log.d(TAG, "File Uri: " + uri.toString());
-					// Get the path
-					//	String path = FileUtils.getPath(this, uri);
-					//CSV_filename = uri.getPath();
-
-					// IMPORT CASE thread
-					final Activity activity = this;
-
-					Thread importThread = new Thread()
-					{
-						@Override
-						public void run()
-						{
-
-							// copy drive file uri content to new local file
-
-							// create new local file
-							File tempJSON_File = null;
-							try
-							{
-								tempJSON_File = File.createTempFile("RadCases", ".zip", downloadsDir);
-							}
-							catch (IOException e)
-							{
-								e.printStackTrace();
-								UtilClass.showMessage(activity, "Unable to create temporary file.");
-							}
-
-							FileOutputStream outputStream = null;
-							FileInputStream inputStream = null;
-							try
-							{
-								// Google Drive file
-								inputStream = (FileInputStream) getContentResolver().openInputStream(uri);
-
-								// new local file
-								outputStream = new FileOutputStream(tempJSON_File);
-
-								// copy backup file contents to local file
-								UtilsFile.copyFile(outputStream, inputStream);
-							}
-							catch (FileNotFoundException e)
-							{
-								e.printStackTrace();
-								UtilClass.showMessage(activity, "local CSV file not found");
-							}
-							catch (IOException e)
-							{
-								e.printStackTrace();
-								UtilClass.showMessage(activity, "Copy CSV to Google Drive: IO exception");
-								UtilClass.showMessage(activity, "cannot open input stream from selected uri");
-							}
-
-							// process file: unzip images, add csv info to database
-							int count = UtilClass.importCasesJSON(activity, tempJSON_File);
-
-							// delete the temporary file
-							tempJSON_File.delete();
-
-							//setResult(CaseCardListActivity.REQUEST_ADD_CASE); //how to tell CaseCardListActivity to refresh?
-
-							Message msg = new Message();
-							msg.arg1 = PROGRESS_MSG_IMPORT_FINISHED;
-							msg.arg2 = count;
-							progressHandler.sendMessage(msg);
-						}
-					};
-					importThread.start();
-		*/
-
+					Intent intent = new Intent(this, CaseImport.class);
+					intent.putExtra(ARG_IMPORT_URI, uri);
+					startActivity(intent);
 
 				}
 				break;
+			/*
+			case REQUEST_IMPORT_CASES:
+
+				//setResult();??
+
+				break;
+			*/
 
 			// import list JSON file
 			case REQUEST_LIST_JSON_FILE:
@@ -1017,13 +950,6 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 
 	private class ImportCasesTask extends AsyncTask<Uri, Integer, Integer>
 	{
-
-
-		public ImportCasesTask()
-		{
-		}
-
-
 		protected void onPreExecute()
 		{
 			progressWheelDialog = new ProgressDialog(activity, "Importing cases", getResources().getColor(R.color.default_colorAccent));
@@ -1041,7 +967,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			File tempJSON_File = null;
 			try
 			{
-				tempJSON_File = File.createTempFile("RadCases", ".zip", downloadsDir);
+				tempJSON_File = File.createTempFile("RadCases", ".zip", getCacheDir());
 			}
 			catch (IOException e)
 			{
@@ -1165,7 +1091,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					Intent importIntent = new Intent();
 					//importIntent.setType("DOWNLOADS/*.csv");
 					//importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "application/zip");
-					importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), RCS_MIMETYPE);
+					importIntent.setDataAndType(Uri.parse(activity.getCacheDir().getPath()), RCS_MIMETYPE);
 					importIntent.setAction(Intent.ACTION_GET_CONTENT);
 					//intent.putExtra("image_filename", filename);
 					getActivity().startActivityForResult(Intent.createChooser(importIntent, "Select Cases File"), REQUEST_SELECT_CSV_FILE);
@@ -1178,7 +1104,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				@Override
 				public void onClick(View v)
 				{
-					((CloudStorageActivity) getActivity()).exportCases();
+					((ImportExportActivity) getActivity()).exportCases();
 /*
 					String timeStamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 					String filename = "RadFiles (" + timeStamp + ")" + RCS_EXTENSION;
@@ -1188,12 +1114,12 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 			});
 
 			// CASE EXPORT MULTISELECT
-			view.findViewById(R.id.case_export_multiselect_title).setOnClickListener(new View.OnClickListener()
+			view.findViewById(R.id.case_export_multiselect_button).setOnClickListener(new View.OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-
+					UtilClass.showMessage(activity, "In the main case list, long press on a case to start sharing.");
 				}
 			});
 
@@ -1206,10 +1132,10 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 					Intent importListIntent = new Intent();
 					//importIntent.setType("DOWNLOADS/*.csv");
 					//importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "application/zip");
-					importListIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "text/plain");
+					importListIntent.setDataAndType(Uri.parse(activity.getCacheDir().getPath()), "text/plain");
 					importListIntent.setAction(Intent.ACTION_GET_CONTENT);
 					//intent.putExtra("image_filename", filename);
-					getActivity().startActivityForResult(Intent.createChooser(importListIntent, "Select Cases File"), REQUEST_LIST_JSON_FILE);
+					getActivity().startActivityForResult(Intent.createChooser(importListIntent, "Select Lists File"), REQUEST_LIST_JSON_FILE);
 				}
 			});
 
@@ -1219,7 +1145,7 @@ public class CloudStorageActivity extends GoogleDriveBaseActivity
 				@Override
 				public void onClick(View v)
 				{
-					((CloudStorageActivity) getActivity()).exportLists();
+					((ImportExportActivity) getActivity()).exportLists();
 				}
 			});
 

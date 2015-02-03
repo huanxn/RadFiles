@@ -11,7 +11,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context="com.huantnguyen.radcases.app.CloudStorageActivity$CloudStorageFragment">
+        tools:context="com.huantnguyen.radcases.app.ImportExportActivity$CloudStorageFragment">
 
 
         <!-- CASES -->
@@ -74,7 +74,7 @@
 
         <!-- Export select -->
         <RelativeLayout
-            android:id="@+id/export_multiselect_button"
+            android:id="@+id/case_export_multiselect_button"
             style="@style/textButtonStyle"
             android:layout_below="@id/case_export_button">
 
@@ -95,7 +95,7 @@
         <TextView
             android:id="@+id/backupList_header"
             style="@style/sectionHeader"
-            android:layout_below="@id/export_multiselect_button"
+            android:layout_below="@id/case_export_multiselect_button"
             android:text="Lists"
             />
 

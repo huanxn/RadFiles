@@ -122,10 +122,10 @@
             android:name="com.huantnguyen.radcases.app.CaseImport"
             android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_activity_case_import"
-            android:parentActivityName="com.huantnguyen.radcases.app.CloudStorageActivity" >
+            android:parentActivityName=".ImportExportActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CloudStorageActivity" />
+                android:value=".ImportExportActivity" />
 
             <intent-filter>
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
@@ -185,7 +185,7 @@
         </activity>
 
         <activity
-            android:name="com.huantnguyen.radcases.app.CloudStorageActivity"
+            android:name=".ImportExportActivity"
             android:label="@string/title_activity_cloud_storage" >
             <meta-data
                 android:name="com.google.android.apps.drive.APP_ID"
