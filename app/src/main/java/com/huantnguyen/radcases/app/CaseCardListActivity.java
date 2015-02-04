@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -34,10 +36,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.gc.materialdesign.widgets.ProgressDialog;
 import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.io.File;
@@ -85,7 +89,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	private SearchTask searchTask;
 
 	// ShowCase tutorial
-	private boolean showTutorial = false;
+	private boolean showTutorial = true;
 
 	//private List<Long> multiselectList;
 
@@ -204,16 +208,44 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setIconifiedByDefault(true);
 
+		// ShowcaseView tutorial
+		/*
 		if(showTutorial)
 		{
+
+			//final Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+			final ActionBar actionBar = getSupportActionBar();
+
+			final Target viewTarget = new Target() {
+				@Override
+				public Point getPoint() {
+					View navIcon = null;
+					for (int i = 0; i < mToolbar.getChildCount(); i++)
+					{
+						View child = mToolbar.getChildAt(i);
+						if (ImageButton.class.isInstance(child))
+						{
+							navIcon = child;
+							break;
+						}
+					}
+
+					if (navIcon != null)
+						return new ViewTarget(navIcon).getPoint();
+					else
+						return new ViewTarget(mToolbar).getPoint();
+				}
+			};
+
 			new ShowcaseView.Builder(this)
 					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
-					.setTarget(new ViewTarget(findViewById(R.id.menu_addnew)))
-					.setContentTitle("Case Filter")
-					.setContentText("This is highlighting the sorting list")
+					.setTarget(viewTarget)
+					.setContentTitle("Test")
+					.setContentText("This is highlighting ??")
 					.hideOnTouchOutside()
 					.build();
 		}
+		*/
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -237,6 +269,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				return true;
 
 			case R.id.menu_help:
+
+				runTutorial(10);
 
 				return true;
 
@@ -508,6 +542,20 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		else
 		{
 			return false;
+		}
+	}
+
+	private void runTutorial(final int step)
+	{
+		if(step == 10)
+		{
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+					                                  .setTarget(new ViewTarget(fragment.getView().findViewById(R.id.cards_list)))
+					                                  .setContentTitle("Case list")
+					                                  .setContentText("Click on a case to see more details. Long press to start selecting multiple cases for sharing.")
+					                                  .setStyle(R.style.CustomShowcaseThemeEnd)
+					                                  .hideOnTouchOutside()
+					                                  .build();
 		}
 	}
 

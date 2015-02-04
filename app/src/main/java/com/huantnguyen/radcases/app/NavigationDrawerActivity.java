@@ -13,6 +13,7 @@ import android.text.SpannableString;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
+import android.view.View;
 
 import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
@@ -43,6 +44,9 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	final static protected int POS_NONE = -1;
 
 	private int drawerPosition = POS_NONE;
+
+	protected Toolbar mToolbar = null;
+	protected View mOverflowTarget = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -84,13 +88,15 @@ public class NavigationDrawerActivity extends ActionBarActivity
 
 
 		// set the toolbar layout element as the FadingActionBar
-		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-		if (toolbar != null)
+		mToolbar = (Toolbar) findViewById(R.id.toolbar);
+		if (mToolbar != null)
 		{
-			setSupportActionBar(toolbar);
+			setSupportActionBar(mToolbar);
 			//toolbar.setElevation(4);
 			//getSupportActionBar().setElevation(10);
 		}
+
+		mOverflowTarget = findViewById(R.id.overflow_menu_target);
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mTitle = new SpannableString(getTitle());

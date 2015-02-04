@@ -59,6 +59,16 @@
 
         <include layout="@layout/toolbar_dropshadow"/>
 
+        <View android:id="@+id/overflow_menu_target"
+              android:layout_width="0dp"
+              android:layout_height="0dp"
+              android:layout_alignBottom="@id/toolbar"
+              android:layout_alignEnd="@id/toolbar"
+              android:visibility="invisible"
+              />
+
+
+
     </RelativeLayout>
 
 </FrameLayout>

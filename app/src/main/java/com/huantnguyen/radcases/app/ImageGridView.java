@@ -82,6 +82,17 @@ public class ImageGridView
 		mode = m;
 	}
 
+	public void getLocationInWindow(int[] location)
+	{
+		gridView.getLocationInWindow(location);
+	}
+
+	public View getView()
+	{
+		//return gridView;
+		return mAdapter.getFirstImageView();
+	}
+
 	private void SetClickListeners()
 	{
 		gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

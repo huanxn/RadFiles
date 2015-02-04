@@ -118,6 +118,15 @@ public class CaseImport extends ActionBarActivity
 		    {
 			    Uri import_uri = intent.getData();
 
+			    String filename = import_uri.toString();
+			    String extension = filename.substring(filename.length()-4, filename.length()).toLowerCase();
+
+			    if(!extension.contentEquals(".rcs"))
+			    {
+				    UtilClass.showToast(this, "Invalid import file. RadFiles imports *.rcs extension zip files.");
+			    }
+
+
 			    try
 			    {
 				    importFile = UtilsFile.makeLocalFile(this, downloadsDir, "RadFiles import", "rcs", import_uri);

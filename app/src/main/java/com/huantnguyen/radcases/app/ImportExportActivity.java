@@ -948,80 +948,11 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 
 	}
 
-	private class ImportCasesTask extends AsyncTask<Uri, Integer, Integer>
-	{
-		protected void onPreExecute()
-		{
-			progressWheelDialog = new ProgressDialog(activity, "Importing cases", getResources().getColor(R.color.default_colorAccent));
-			progressWheelDialog.setCancelable(false);
-			progressWheelDialog.setCanceledOnTouchOutside(false);
-			progressWheelDialog.show();
-		}
-
-		@Override
-		protected Integer doInBackground(Uri... uri)
-		{
-			// copy drive file uri content to new local file
-
-			// create new local file
-			File tempJSON_File = null;
-			try
-			{
-				tempJSON_File = File.createTempFile("RadCases", ".zip", getCacheDir());
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				UtilClass.showMessage(activity, "Unable to create temporary file.");
-			}
-
-			FileOutputStream outputStream = null;
-			FileInputStream inputStream = null;
-			try
-			{
-				// Google Drive file
-				inputStream = (FileInputStream) getContentResolver().openInputStream(uri[0]);
-
-				// new local file
-				outputStream = new FileOutputStream(tempJSON_File);
-
-				// copy backup file contents to local file
-				UtilsFile.copyFile(outputStream, inputStream);
-			}
-			catch (FileNotFoundException e)
-			{
-				e.printStackTrace();
-				UtilClass.showMessage(activity, "local CSV file not found");
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				UtilClass.showMessage(activity, "Copy CSV to Google Drive: IO exception");
-				UtilClass.showMessage(activity, "cannot open input stream from selected uri");
-			}
-
-			// process file: unzip images, add csv info to database
-			int count = UtilClass.importCasesJSON(activity, tempJSON_File);
-
-			// delete the temporary file
-			tempJSON_File.delete();
-
-			return count;
-		}
-
-		protected void onPostExecute(Integer count)
-		{
-			progressWheelDialog.dismiss();
-			UtilClass.showMessage(activity, "Imported " + count + " cases.");
-		}
-	}
-
 
 	final public static int PROGRESS_MSG_MIN = 0;
 	final public static int PROGRESS_MSG_MAX = 1;
 	final public static int PROGRESS_MSG_SET = 2;
 	final public static int PROGRESS_MSG_INCREMENT = 3;
-	final public static int PROGRESS_MSG_IMPORT_FINISHED = 4;
 	final public static int PROGRESS_MSG_EXPORT_FINISHED = 5;
 
 	Handler progressHandler = new Handler(new Handler.Callback()

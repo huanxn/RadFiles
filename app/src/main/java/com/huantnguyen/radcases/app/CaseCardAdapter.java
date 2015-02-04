@@ -377,17 +377,22 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int position)
 	{
-		if(position < header.size())
+		if(header != null && position < header.size())
 		{
 			TextView textView = (TextView) holder.itemView;
 			//textView.setText(String.valueOf(getItem(position)));
 			textView.setText(header.get(position));
 		}
+		else
+		{
+			if(header == null)
+				UtilClass.showToast(activity, "Debug: CardCaseAdapter.header is null");
+		}
 	}
 	@Override
 	public long getHeaderId(int position) {
 		//return getItem(position).hashCode();
-		if(position < header.size())
+		if(header != null && position < header.size())
 		{
 			//return header_id.get(position);
 			return header.get(position).hashCode();

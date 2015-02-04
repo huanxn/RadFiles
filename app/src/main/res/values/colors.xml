@@ -23,6 +23,9 @@
     <color name="default_background">@color/md_grey_200</color> <!-- for card list background -->
     <color name="default_background_light_grey">@color/md_grey_100</color>
 
+    <color name="showcase_background">#CC101010</color>
+    <color name="showcase_circle">@color/md_amber_500</color>
+
     <!-- Button Color -->
     <color name="default_button_background">@color/md_grey_300</color>
 
@@ -52,14 +55,6 @@
     <color name="holo_blue_bright">#ff00ddff</color>
     <!-- A really bright Holo shade of gray -->
     <color name="holo_gray_bright">#33CCCCCC</color>
-
-    <integer-array name="Progress_bar_colors">
-        <item>@color/holo_blue_dark</item>
-        <item>@color/holo_orange_dark</item>
-        <item>@color/holo_green_dark</item>
-        <item>@color/holo_purple</item>
-        <item>@color/holo_red_dark</item>
-    </integer-array>
 
 
 

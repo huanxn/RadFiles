@@ -22,6 +22,8 @@ public class ImageAdapter extends BaseAdapter
 
 	private long[] imageIDs;
 
+	private ImageView firstImageView = null;
+
 	public ImageAdapter(Context c)
 	{
 		mContext = c;
@@ -62,6 +64,11 @@ public class ImageAdapter extends BaseAdapter
 		else
 		{
 			imageView = (ImageView) convertView;
+		}
+
+		if(firstImageView == null)
+		{
+			firstImageView = imageView;
 		}
 
 		UtilClass.setPic(imageView, imageFilepaths[position], UtilClass.IMAGE_SIZE);
@@ -216,5 +223,10 @@ public class ImageAdapter extends BaseAdapter
 		}
 
 		return;
+	}
+
+	public ImageView getFirstImageView()
+	{
+		return firstImageView;
 	}
 }

@@ -18,17 +18,19 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.Target;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
@@ -149,6 +151,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					.commit();
 
 		}
+
+
 	}
 
 	//todo change to just do headerview update
@@ -229,14 +233,13 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 				return true;
 
-			case R.id.menu_search:
-				//openSearch();
+			case R.id.menu_help:
 
-				//String query = intent.getStringExtra(SearchManager.QUERY);
-				//Cursor c = db.getWordMatches(query, null);
+				// ShowcaseView tutorial
+				runTutorial(0);
 
-				Toast.makeText(this, "debug: Search function...", Toast.LENGTH_SHORT).show();
 				return true;
+
 
 			default:
 				return super.onOptionsItemSelected(item);
@@ -467,6 +470,259 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		}
 	}
 
+	private void runTutorial(final int step)
+	{
+		if(step == 0)
+		{
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+					                            //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+					                            .setTarget(new ViewTarget(mToolbar.findViewById(R.id.menu_edit)))
+					                            .setContentTitle("Edit")
+					                            .setContentText("Edit and add details to this case.")
+					                            .setStyle(R.style.CustomShowcaseTheme)
+					                            .hideOnTouchOutside()
+					                            .build();
+
+//			showcaseView.setShouldCentreText(true);
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+		}
+		else if(step == 1)
+		{
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+					                            //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+					                            .setTarget(new ViewTarget(mToolbar.findViewById(R.id.menu_camera)))
+					                            .setContentTitle("Add Image")
+					                            .setContentText("Add a new image from your camera or file storage.")
+					                            .setStyle(R.style.CustomShowcaseTheme)
+					                            .hideOnTouchOutside()
+					                            .build();
+
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+		}
+
+		else if(step == 2)
+		{
+			View diagnosisTarget = null;
+			View diagnosisLabelTarget = null;
+			String contentText = null;
+			if(fragment != null && fragment.getView() != null)
+			{
+				diagnosisTarget = fragment.getView().findViewById(R.id.case_info1);
+				diagnosisLabelTarget = fragment.getView().findViewById(R.id.CaseInfoLabel);
+
+				// Diagnosis vs Findings
+				if( diagnosisLabelTarget != null && ((TextView)diagnosisLabelTarget).getText().toString().contentEquals("Diagnosis"))  //todo change to @string
+				{
+					contentText = "Long press to search for this diagnosis online.";
+				}
+				else
+				{
+					contentText = "In a case with a diagnosis, long press to search for the diagnosis online.";
+				}
+			}
+
+			if(diagnosisTarget != null && diagnosisLabelTarget != null)
+			{
+				// Scroll to Diagnosis Label
+				int[] view_coordinates = new int[2];
+				diagnosisLabelTarget.getLocationInWindow(view_coordinates);
+				if(fragment.mScrollView != null)
+				{
+					fragment.mScrollView.smoothScrollTo(view_coordinates[0], view_coordinates[1] - UtilClass.getToolbarHeight(this) - UtilClass.getStatusBarHeight(this));
+				}
+
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  //.setTarget(new ViewTarget(fragment.imageGridView.getView()))
+						                                  .setTarget(new ViewTarget(diagnosisTarget))
+						                                  .setContentTitle("Diagnosis")
+						                                  .setContentText(contentText)
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+			}
+			else
+			{
+				// no target
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  .setContentTitle("Diagnosis")
+						                                  .setContentText(contentText)
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+			}
+		}
+		else if(step == 3)
+		{
+			View imagesTarget = null;
+			if(fragment != null && fragment.getView() != null)
+			{
+				//imagesTarget = fragment.getView().findViewById(R.id.ImagesLabel);
+				imagesTarget = fragment.imageGridView.getView();
+				//imagesTarget = fragment.getView().findViewById(R.id.ImagesTarget);
+			}
+
+			if(imagesTarget != null)
+			{
+				int[] image_coordinates = new int[2];
+				imagesTarget.getLocationInWindow(image_coordinates);
+
+				fragment.mScrollView.smoothScrollTo(image_coordinates[0], image_coordinates[1]);
+
+
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  //.setTarget(new ViewTarget(fragment.imageGridView.getView()))
+						                                  .setTarget(new ViewTarget(imagesTarget))
+						                                  .setContentTitle("Case Images")
+						                                  .setContentText("Click on an image to open the image gallery.\nLong press on an image for more options.")
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+
+				/*
+				showcaseView.setShowcaseX(image_coordinates[0]/2);
+				showcaseView.setShowcaseY(image_coordinates[1]);
+				*/
+
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+
+			}
+			else
+			{
+				// no target
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  //.setTarget(new ViewTarget(fragment.imageGridView.getView()))
+						                                  //.setTarget(new ViewTarget(imagesTarget))
+						                                  .setContentTitle("Case Images")
+						                                  .setContentText("In a case with images, click on an one to open the image gallery.\nLong press on an image for more options.")
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+
+				/*
+				showcaseView.setShowcaseX(image_coordinates[0]/2);
+				showcaseView.setShowcaseY(image_coordinates[1]);
+				*/
+
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+			}
+		}
+		else if(step == 4)
+		{
+
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+					                                  .setTarget( new ViewTarget(mOverflowTarget) )
+					                                  //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
+					                                  .setContentTitle("Overflow menu")
+					                                  .setContentText("More menu options here.\nClick the Help button to see this tutorial again.")
+					                                  .setStyle(R.style.CustomShowcaseTheme)
+					                                  .hideOnTouchOutside()
+					                                  .build();
+/*
+			showcaseView.setShowcaseX((int)UtilClass.getDisplayWidthPx(this));
+			showcaseView.setShowcaseY(UtilClass.getToolbarHeight(this));
+*/
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+
+
+
+		}
+		else if(step == 5)
+		{
+			final Target viewTarget = new Target() {
+				@Override
+				public Point getPoint() {
+					View navIcon = null;
+					for (int i = 0; i < mToolbar.getChildCount(); i++)
+					{
+						View child = mToolbar.getChildAt(i);
+						if (ImageButton.class.isInstance(child))
+						{
+							navIcon = child;
+							break;
+						}
+					}
+
+					if (navIcon != null)
+						return new ViewTarget(navIcon).getPoint();
+					else
+						return new ViewTarget(mToolbar).getPoint();
+				}
+			};
+
+			new ShowcaseView.Builder(this)
+					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+					.setTarget(viewTarget)
+					.setContentTitle("Back")
+					.setContentText("Return to your case list.")
+					.setStyle(R.style.CustomShowcaseThemeEnd)
+					.hideOnTouchOutside()
+					.build();
+
+		}
+
+		return;
+	}
+
 	/**
 	 * A fragment representing a single Case detail screen.
 	 * This fragment is either contained in a {@link CaseCardListActivity}
@@ -482,12 +738,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		private long selected_key_id;
 		private Activity activity;
 
-	//	private FadingActionBarHelper mFadingHelper;
-		private View headerView; //fadingactionbar
-		//private ImageView headerImageView;
-
 		private Bundle mArguments;
-
 		private boolean hasImage;
 
 		private int favorite; // for action menu toggle in CaseDetail Activity (not in this fragment)
@@ -575,7 +826,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				Point size = new Point();
 				getWindowManager().getDefaultDisplay().getSize(size);
 
-				view.findViewById(R.id.detail_container).setMinimumHeight(size.y - UtilClass.getToolbarHeight(activity)  - UtilClass.getStatusBarHeight(activity));
+				view.findViewById(R.id.detail_container).setMinimumHeight(size.y - UtilClass.getToolbarHeight(activity) - UtilClass.getStatusBarHeight(activity));
 			}
 			else
 			{

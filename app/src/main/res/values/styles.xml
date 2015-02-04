@@ -92,7 +92,7 @@
 
 
     <style name="sectionText">
-        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">@dimen/text_box_height</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:gravity">center_vertical</item>
@@ -267,6 +267,35 @@
     </style>
     -->
 
+
+    <style name="CustomShowcaseTheme" parent="ShowcaseView.Light">
+        <item name="sv_backgroundColor">@color/showcase_background</item>
+        <item name="sv_showcaseColor">@color/showcase_circle</item>
+        <item name="sv_buttonText">Next</item>
+        <item name="sv_tintButtonColor">false</item>
+        <item name="sv_titleTextAppearance">@style/ShowcaseTitleText</item>
+        <item name="sv_detailTextAppearance">@style/ShowcaseDetailText</item>
+    </style>
+
+    <style name="CustomShowcaseThemeEnd" parent="ShowcaseView.Light">
+        <item name="sv_backgroundColor">@color/showcase_background</item>
+        <item name="sv_showcaseColor">@color/showcase_circle</item>
+        <item name="sv_buttonText">OK</item>
+        <item name="sv_tintButtonColor">false</item>
+        <item name="sv_titleTextAppearance">@style/ShowcaseTitleText</item>
+        <item name="sv_detailTextAppearance">@style/ShowcaseDetailText</item>
+    </style>
+
+    <style name="ShowcaseTitleText" parent="TextAppearance.ShowcaseView.Title">
+        <item name="android:textColor">@color/default_colorAccent</item>
+        <item name="android:textSize">@dimen/extremelyLargeTextSize</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="ShowcaseDetailText" parent="TextAppearance.ShowcaseView.Detail.Light">
+        <item name="android:textColor">@color/white_text</item>
+        <item name="android:textSize">@dimen/largeTextSize</item>
+    </style>
 
 
 </resources>

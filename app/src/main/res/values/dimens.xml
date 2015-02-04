@@ -12,6 +12,7 @@
     <dimen name="largeTextSize">18sp</dimen>
     <dimen name="toolbarTextSize">20sp</dimen>
     <dimen name="veryLargeTextSize">24sp</dimen>
+    <dimen name="extremelyLargeTextSize">30dp</dimen>
 
     <dimen name="large_image_height">250dp</dimen>
     <dimen name="medium_image_height">175dp</dimen>
