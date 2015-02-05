@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -26,6 +27,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -37,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gc.materialdesign.widgets.ProgressDialog;
@@ -108,7 +111,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		super.onCreate(savedInstanceState);
+		super.onCreate_new(savedInstanceState, true);
 //		setContentView(R.layout.activity_case_cardlist);
 
 		activity = this;
@@ -208,44 +211,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 		searchView.setIconifiedByDefault(true);
 
-		// ShowcaseView tutorial
-		/*
-		if(showTutorial)
-		{
+		// change text color
+		searchView.setQueryHint(Html.fromHtml("<font color = " + getResources().getColor(R.color.text_light_hint) + ">" + getResources().getString(R.string.search_prompt) + "</font>"));
+		UtilClass.changeSearchViewTextColor(searchView, getResources().getColor(R.color.text_light));
 
-			//final Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
-			final ActionBar actionBar = getSupportActionBar();
+	//	int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+	//	((TextView) searchView.findViewById(id)).setTextColor(Color.WHITE);
 
-			final Target viewTarget = new Target() {
-				@Override
-				public Point getPoint() {
-					View navIcon = null;
-					for (int i = 0; i < mToolbar.getChildCount(); i++)
-					{
-						View child = mToolbar.getChildAt(i);
-						if (ImageButton.class.isInstance(child))
-						{
-							navIcon = child;
-							break;
-						}
-					}
-
-					if (navIcon != null)
-						return new ViewTarget(navIcon).getPoint();
-					else
-						return new ViewTarget(mToolbar).getPoint();
-				}
-			};
-
-			new ShowcaseView.Builder(this)
-					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
-					.setTarget(viewTarget)
-					.setContentTitle("Test")
-					.setContentText("This is highlighting ??")
-					.hideOnTouchOutside()
-					.build();
-		}
-		*/
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -270,7 +242,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			case R.id.menu_help:
 
-				runTutorial(10);
+				runTutorial(1);
 
 				return true;
 
@@ -547,15 +519,160 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	private void runTutorial(final int step)
 	{
-		if(step == 10)
+		if(step == 1)
+		{
+			View viewTarget = null;
+			if(mToolbar != null)
+			{
+				viewTarget = mToolbar;
+			}
+
+			if(viewTarget != null)
+			{
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  .setTarget(new ViewTarget(viewTarget))
+						                                  .setContentTitle("Case Sorting")
+						                                  .setContentText("Click this to change how your cases are sorted.")
+						                                  .setStyle(R.style.CustomShowcaseThemeEnd)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+			}
+		}
+		else if(step == 2)
 		{
 			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-					                                  .setTarget(new ViewTarget(fragment.getView().findViewById(R.id.cards_list)))
-					                                  .setContentTitle("Case list")
-					                                  .setContentText("Click on a case to see more details. Long press to start selecting multiple cases for sharing.")
-					                                  .setStyle(R.style.CustomShowcaseThemeEnd)
+					                                  //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+					                                  .setTarget(new ViewTarget(mToolbar.findViewById(R.id.menu_search)))
+					                                  .setContentTitle("Search")
+					                                  .setContentText("Search through your cases.")
+					                                  .setStyle(R.style.CustomShowcaseTheme)
 					                                  .hideOnTouchOutside()
 					                                  .build();
+
+			//			showcaseView.setShouldCentreText(true);
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+		}
+		else if(step == 3)
+		{
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+					                                  //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+					                                  .setTarget(new ViewTarget(mToolbar.findViewById(R.id.menu_addnew)))
+					                                  .setContentTitle("Add case")
+					                                  .setContentText("Add a new case to your list.")
+					                                  .setStyle(R.style.CustomShowcaseTheme)
+					                                  .hideOnTouchOutside()
+					                                  .build();
+
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+		}
+		else if(step == 4)
+		{
+			View viewTarget = null;
+			if(fragment != null && fragment.getView() != null)
+			{
+				viewTarget = fragment.getView().findViewById(R.id.cards_list);
+			}
+			if(viewTarget != null)
+			{
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  .setTarget(new ViewTarget(viewTarget))
+						                                  .setContentTitle("Case list")
+						                                  .setContentText("Click on a case to see more details. Long press to start selecting multiple cases for sharing.")
+						                                  .setStyle(R.style.CustomShowcaseThemeEnd)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+			}
+		}
+		else if(step == 5)
+		{
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+					                                  .setTarget( new ViewTarget(mOverflowTarget) )
+							                                   //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
+					                                  .setContentTitle("Overflow menu")
+					                                  .setContentText("More menu options here.\n\nClick the Help button to see this tutorial again.")
+					                                  .setStyle(R.style.CustomShowcaseTheme)
+					                                  .hideOnTouchOutside()
+					                                  .build();
+/*
+			showcaseView.setShowcaseX((int)UtilClass.getDisplayWidthPx(this));
+			showcaseView.setShowcaseY(UtilClass.getToolbarHeight(this));
+*/
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+		}
+		else if(step == 6)
+		{
+			final Target viewTarget = new Target() {
+				@Override
+				public Point getPoint() {
+					View navIcon = null;
+					for (int i = 0; i < mToolbar.getChildCount(); i++)
+					{
+						View child = mToolbar.getChildAt(i);
+						if (ImageButton.class.isInstance(child))
+						{
+							navIcon = child;
+							break;
+						}
+					}
+
+					if (navIcon != null)
+						return new ViewTarget(navIcon).getPoint();
+					else
+						return new ViewTarget(mToolbar).getPoint();
+				}
+			};
+
+			new ShowcaseView.Builder(this)
+					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+					.setTarget(viewTarget)
+					.setContentTitle("Navigation Drawer")
+					.setContentText("Click here or swipe from the left to open the navigation drawer.")
+					.setStyle(R.style.CustomShowcaseThemeEnd)
+					.hideOnTouchOutside()
+					.build();
+
 		}
 	}
 

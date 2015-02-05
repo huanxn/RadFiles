@@ -90,7 +90,8 @@
                     android:layout_height="wrap_content"
                     android:paddingLeft="8dip"
                     android:textSize="@dimen/standardTextSize"
-                    android:textColor="@color/dark_grey_text"
+                    android:textColor="@color/text_dark"
+                    android:textColorHint="@color/text_dark_hint"
                     android:hint="@string/date_prompt"
                     android:onClick="onClick_showDatePicker"/>
 

@@ -26,6 +26,15 @@
     <style name="MaterialTheme.Light.NoActionBar" parent="MaterialTheme.Light.Base">
         <item name="android:windowActionBar">false</item>
         <item name="windowActionBar">false</item>
+        <item name="android:actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
+        <item name="actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
+    </style>
+
+    <!-- search text color -->
+    <style name="Theme.MyTheme.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:textColorHint">@color/text_light_hint</item>
+        <item name="android:textColor">@color/text_light</item>
+        <!-- your other custom widget styles -->
     </style>
 
     <!-- translucent fading action bar: extend one of the MaterialTheme base themes -->

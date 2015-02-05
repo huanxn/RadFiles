@@ -59,6 +59,8 @@ import static android.view.View.GONE;
  */
 public class CaseDetailActivity extends NavigationDrawerActivity
 {
+	private Activity activity;
+
 	private CaseDetailFragment fragment = null;
 	private long key_id = -1;
 
@@ -74,6 +76,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		activity = this;
+
 		starterIntent = getIntent();    // save original intent info
 		key_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
 		//hasImage = getIntent().getBooleanExtra(ARG_HAS_IMAGE, false);
@@ -109,8 +113,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			hasImage = false;
 
 			// Set back to normal theme
-			setTheme(R.style.MaterialTheme_Light);
-			super.onCreate(savedInstanceState, false);
+			//setTheme(R.style.MaterialTheme_Light);
+			//super.onCreate(savedInstanceState, false);
+
+
+			super.onCreate_new(savedInstanceState, false);
 
 		}
 
@@ -590,7 +597,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		else if(step == 3)
 		{
 			View imagesTarget = null;
-			if(fragment != null && fragment.getView() != null)
+			if(fragment != null && fragment.imageGridView != null)
 			{
 				//imagesTarget = fragment.getView().findViewById(R.id.ImagesLabel);
 				imagesTarget = fragment.imageGridView.getView();
@@ -606,10 +613,9 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 
 				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-						                                  //.setTarget(new ViewTarget(fragment.imageGridView.getView()))
 						                                  .setTarget(new ViewTarget(imagesTarget))
 						                                  .setContentTitle("Case Images")
-						                                  .setContentText("Click on an image to open the image gallery.\nLong press on an image for more options.")
+						                                  .setContentText("Click on an image to open the image gallery.\n\nLong press on an image for more options.")
 						                                  .setStyle(R.style.CustomShowcaseTheme)
 						                                  .hideOnTouchOutside()
 						                                  .build();
@@ -634,10 +640,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			{
 				// no target
 				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-						                                  //.setTarget(new ViewTarget(fragment.imageGridView.getView()))
-						                                  //.setTarget(new ViewTarget(imagesTarget))
 						                                  .setContentTitle("Case Images")
-						                                  .setContentText("In a case with images, click on an one to open the image gallery.\nLong press on an image for more options.")
+						                                  .setContentText("In a case with images,\nclick on an one to open \nthe image gallery.\n\nLong press on an image \nfor more options.")
 						                                  .setStyle(R.style.CustomShowcaseTheme)
 						                                  .hideOnTouchOutside()
 						                                  .build();
@@ -665,7 +669,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					                                  .setTarget( new ViewTarget(mOverflowTarget) )
 					                                  //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
 					                                  .setContentTitle("Overflow menu")
-					                                  .setContentText("More menu options here.\nClick the Help button to see this tutorial again.")
+					                                  .setContentText("More menu options here.\n\nClick the Help button to see this tutorial again.")
 					                                  .setStyle(R.style.CustomShowcaseTheme)
 					                                  .hideOnTouchOutside()
 					                                  .build();
@@ -736,7 +740,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		 * represents.
 		 */
 		private long selected_key_id;
-		private Activity activity;
+		private CaseDetailActivity mActivity;
 
 		private Bundle mArguments;
 		private boolean hasImage;
@@ -769,26 +773,10 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		public void onAttach(Activity activity) {
 			super.onAttach(activity);
 
-			this.activity = activity;
+			this.mActivity = (CaseDetailActivity) activity;
 
 			mArguments = getArguments();
 			hasImage = mArguments.getBoolean(ARG_HAS_IMAGE);
-/*
-			if(hasImage)
-			{
-				//FadingActionBar
-				//mArguments = getArguments();
-				//int actionBarBg = mArguments != null ? mArguments.getInt(ARG_ACTION_BG_RES) : R.drawable.ab_background_light;
-
-				mFadingHelper = new FadingActionBarHelper()
-						                .actionBarBackground(R.drawable.ab_background_dark)
-						                .headerLayout(R.layout.activity_case_detail_header)
-						                .contentLayout(R.layout.fragment_case_detail)
-				;
-
-				mFadingHelper.initActionBar(activity);
-			}
-			*/
 		}
 
 		@Override
@@ -805,11 +793,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 			if(hasImage)
 			{
-				//FadingActionBar
-	//			view = headerView = mFadingHelper.createView(inflater);
-				//view.findViewById(R.id.detail_container).setMinimumHeight((int)UtilClass.getDisplayHeight(getActivity()));
-
-
 				// Fading Toolbar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
 
@@ -823,9 +806,11 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				mScrollView = (ObservableScrollView) view.findViewById(R.id.scroll);
 				mScrollView.setScrollViewCallbacks(this);
 
+				// get size of screen display
 				Point size = new Point();
 				getWindowManager().getDefaultDisplay().getSize(size);
 
+				// set minimum height so that user can scroll through the entire parallax header image
 				view.findViewById(R.id.detail_container).setMinimumHeight(size.y - UtilClass.getToolbarHeight(activity) - UtilClass.getStatusBarHeight(activity));
 			}
 			else

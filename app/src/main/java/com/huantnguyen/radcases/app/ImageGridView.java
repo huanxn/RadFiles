@@ -100,6 +100,7 @@ public class ImageGridView
 
 				Intent imageGalleryIntent = new Intent(activity, ImageGalleryActivity.class);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, mAdapter.getImageFilepaths());
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_CAPTIONS, mAdapter.getImageCaptions());
 				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, case_key_id);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, position);
 
@@ -122,7 +123,7 @@ public class ImageGridView
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(parent.getContext());
 
-				CharSequence[] choices = {"Set image caption", "Set as thumbnail", "Delete image"};
+				CharSequence[] choices = {"Edit image caption", "Set as thumbnail", "Delete image"};
 				builder.setTitle(image_caption)
 						.setItems(choices, new DialogInterface.OnClickListener()
 						{

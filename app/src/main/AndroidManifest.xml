@@ -47,6 +47,7 @@
 
         <activity
             android:name="com.huantnguyen.radcases.app.CaseCardListActivity"
+            android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_activity_case_card_list" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

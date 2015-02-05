@@ -98,7 +98,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">10dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:textColor">@color/text_dark</item>
     </style>
 
     <style name="sectionText2">
@@ -110,7 +110,7 @@
         <item name="android:paddingLeft">10dip</item>
         <item name="android:paddingBottom">8dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">@color/light_grey_text</item>
+        <item name="android:textColor">@color/text_dark_secondary</item>
     </style>
 
     <style name="sectionEditText">
@@ -120,7 +120,8 @@
         <item name="android:gravity">bottom</item>
         <item name="android:paddingLeft">10dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:textColorHint">@color/text_dark_hint</item>
         <item name="android:inputType">textCapSentences|textNoSuggestions</item>
     </style>
 
@@ -135,7 +136,7 @@
     <style name="textButtonName">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:textColor">@color/text_dark</item>
         <item name="android:textSize">@dimen/largeTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
@@ -145,7 +146,7 @@
     <style name="textButtonDescription">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/light_grey_text</item>
+        <item name="android:textColor">@color/text_dark_secondary</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
@@ -172,7 +173,7 @@
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
-        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:textColor">@color/text_dark</item>
         <item name="android:clickable">true</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
@@ -192,7 +193,8 @@
     <style name="customSpinnerStyle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">48dp</item>
-        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:textColorHint">@color/text_dark_hint</item>  <!-- doesn't work:  must be set in custom java class -->
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:inputType">textCapWords</item>
@@ -220,7 +222,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
-        <item name="android:textColor">@color/dark_grey_text</item>
+        <item name="android:textColor">@color/text_dark</item>
     </style>
 
     <style name="cardText2">
@@ -230,7 +232,7 @@
     <item name="android:textSize">12sp</item>
     <item name="android:paddingLeft">8dip</item>
     <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-    <item name="android:textColor">@color/light_grey_text</item>
+    <item name="android:textColor">@color/text_dark_secondary</item>
     </style>
 
     <style name="cardText3">
@@ -241,7 +243,7 @@
         <item name="android:paddingLeft">8dip</item>
         <item name="android:paddingBottom">8dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:textColor">@color/light_grey_text</item>
+        <item name="android:textColor">@color/text_dark_secondary</item>
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textStyle">bold</item>
     </style>
@@ -250,23 +252,6 @@
         <item name="android:textSize">@dimen/toolbarTextSize</item>
         <item name="android:textColor">?attr/actionMenuTextColor</item>
     </style>
-
-    <!--
-    <style name="GNowProgressBar" parent="SmoothProgressBar">
-        <item name="spb_stroke_separator_length">8dp</item>
-        <item name="spb_sections_count">2</item>
-        <item name="spb_speed">1.7</item>
-        <item name="spb_progressiveStart_speed">2</item>
-        <item name="spb_progressiveStop_speed">3.4</item>
-        <item name="spb_interpolator">spb_interpolator_acceleratedecelerate</item>
-        <item name="spb_mirror_mode">true</item>
-        <item name="spb_reversed">true</item>
-        <item name="spb_colors">@array/Progress_bar_colors</item>
-        <item name="spb_progressiveStart_activated">false</item>
-        <item name="spb_generate_background_with_colors">false</item>
-    </style>
-    -->
-
 
     <style name="CustomShowcaseTheme" parent="ShowcaseView.Light">
         <item name="sv_backgroundColor">@color/showcase_background</item>

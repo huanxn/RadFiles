@@ -267,9 +267,9 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 				v.setText(getPrompt());
 
 				// get hint color
-				final ColorStateList colors = new EditText(context).getHintTextColors();
-				//v.setTextColor(context.getResources().getColor(R.color.light_grey_text));
-				v.setTextColor(colors);
+				//final ColorStateList colors = new EditText(context).getHintTextColors();
+				v.setTextColor(context.getResources().getColor(R.color.text_dark_hint));
+				//v.setTextColor(colors);
 				return v;
 			}
 			return obj.getView(position, convertView, parent);

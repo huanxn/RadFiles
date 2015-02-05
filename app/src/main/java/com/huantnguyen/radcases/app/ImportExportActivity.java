@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -1005,7 +1004,7 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			View rootView = inflater.inflate(R.layout.fragment_cloud_storage, container, false);
+			View rootView = inflater.inflate(R.layout.fragment_import_export, container, false);
 			setOnClickListeners(rootView);
 
 			return rootView;

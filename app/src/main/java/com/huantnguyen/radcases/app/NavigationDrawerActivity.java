@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
@@ -80,6 +81,52 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), showDrawerIndicator);
 	}
 
+	/**
+	 *
+	 * @param savedInstanceState
+	 * @param navigation_drawer_layout: default: activity_navigation_drawer
+	 * @param showDrawerIndicator: default: true
+	 */
+	protected void onCreate_new(Bundle savedInstanceState)
+	{
+		onCreate_new(savedInstanceState, R.layout.activity_navigation_drawer_fab, true);
+	}
+
+	protected void onCreate_new(Bundle savedInstanceState, boolean showDrawerIndicator)
+	{
+		onCreate_new(savedInstanceState, R.layout.activity_navigation_drawer_fab, showDrawerIndicator);
+	}
+
+	protected void onCreate_new(Bundle savedInstanceState, int navigation_drawer_layout)
+	{
+		onCreate_new(savedInstanceState, navigation_drawer_layout, true);
+	}
+
+	protected void onCreate_new(Bundle savedInstanceState, int navigation_drawer_layout, boolean showDrawerIndicator)
+	{
+		super.onCreate(savedInstanceState);
+		setContentView(navigation_drawer_layout);
+
+		// set the toolbar layout element as the FadingActionBar
+		mToolbar = (Toolbar) findViewById(R.id.toolbar);
+		if (mToolbar != null)
+		{
+			setSupportActionBar(mToolbar);
+			//toolbar.setElevation(4);
+			//getSupportActionBar().setElevation(10);
+		}
+
+		mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
+		mTitle = new SpannableString(getTitle());
+
+		// for ShowcaseView tutorial
+		mOverflowTarget = findViewById(R.id.overflow_menu_target);
+
+		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
+
+		// Set up the drawer.
+		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), showDrawerIndicator);
+	}
 
 	protected void onCreate_for_FAB(Bundle savedInstanceState)
 	{
@@ -96,10 +143,21 @@ public class NavigationDrawerActivity extends ActionBarActivity
 			//getSupportActionBar().setElevation(10);
 		}
 
+		DrawerLayout.LayoutParams params = new DrawerLayout.LayoutParams(
+				                                      DrawerLayout.LayoutParams.WRAP_CONTENT,
+				                                      DrawerLayout.LayoutParams.WRAP_CONTENT
+		);
+		params.setMargins(0, 0, 0, 0);
+		findViewById(R.id.container).setLayoutParams(params);
+
+		mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
+		mTitle = new SpannableString(getTitle());
+
+		// for ShowcaseView tutorial
 		mOverflowTarget = findViewById(R.id.overflow_menu_target);
 
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
-		mTitle = new SpannableString(getTitle());
+
 		// Set up the drawer.
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), false);
 	}

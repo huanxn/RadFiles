@@ -36,6 +36,7 @@ public class ImageGalleryActivity extends ActionBarActivity
 
 	public static final String ARG_POSITION = "com.huantnguyen.radcases.INITIAL_POSITION";
 	public final static String ARG_IMAGE_FILES = "com.huantnguyen.radcases.ARG_IMAGE_FILES";
+	public final static String ARG_IMAGE_CAPTIONS = "com.huantnguyen.radcases.ARG_IMAGE_CAPTIONS";
 
 	ViewPager mPager;
 	PageIndicator mIndicator;
@@ -125,7 +126,8 @@ public class ImageGalleryActivity extends ActionBarActivity
 		//	Log.e(TAG, "Did not get usable case id for key image gallery.");
 
 			String [] filepaths = getIntent().getStringArrayExtra(ARG_IMAGE_FILES);
-			mAdapter.setImages(filepaths);
+			String [] captions = getIntent().getStringArrayExtra(ARG_IMAGE_CAPTIONS);
+			mAdapter.setImages(filepaths, captions);
 		}
 		/*
 		else
@@ -162,22 +164,7 @@ public class ImageGalleryActivity extends ActionBarActivity
         @Override
         public View instantiateItem(ViewGroup container, int position)
         {
-/*
-            TouchImageView img = new TouchImageView(container.getContext());
-            //img.setImageResource(images[position]);
-	        UtilClass.setPic(img, imageFilepaths[position], 500);
-            container.addView(img, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT);
 
-	        if(imageCaptions != null)
-	        {
-		        TextView caption = new TextView(container.getContext());
-		        caption.setText(imageCaptions[position]);
-		        container.addView(caption, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-	        }
-
-            return img;
-
-*/
 			LayoutInflater inflater = (LayoutInflater) container.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	        View view = inflater.inflate(R.layout.key_image_full, container, false);
 
@@ -230,19 +217,37 @@ public class ImageGalleryActivity extends ActionBarActivity
 	    // set the ImageGalleryActivity images by String array)
 	    public void setImages(String [] in_filenames)
 	    {
+		    setImages(in_filenames, null);
+	    }
+
+	    // set the ImageGalleryActivity images by String array)
+	    public void setImages(String [] in_filenames, String [] in_captions)
+	    {
 		    if(in_filenames == null)
 		    {
 			    return;
 		    }
 
 		    imageFilepaths = new String[in_filenames.length];
-		    int image_counter = 0;
+
 		    for(int i = 0; i < in_filenames.length; i++)
 		    {
 			    imageFilepaths[i] = in_filenames[i];
 		    }
+
+		    if(in_captions != null && in_captions.length == in_filenames.length)
+		    {
+			    imageCaptions = new String[in_captions.length];
+
+			    for(int i = 0; i < in_captions.length; i++)
+			    {
+				    imageCaptions[i] = in_captions[i];
+			    }
+		    }
+
 		    return;
 	    }
+
     }
 
 }

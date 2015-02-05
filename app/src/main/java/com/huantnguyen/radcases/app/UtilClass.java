@@ -15,6 +15,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -29,10 +30,12 @@ import android.util.JsonWriter;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gc.materialdesign.widgets.SnackBar;
@@ -1578,5 +1581,20 @@ public class UtilClass extends Activity
 	public static File getDataDir()
 	{
 		return CaseCardListActivity.dataDir;
+	}
+
+
+	public static void changeSearchViewTextColor(View view, int color) {
+		if (view != null) {
+			if (view instanceof TextView) {
+				((TextView) view).setTextColor(color);
+				return;
+			} else if (view instanceof ViewGroup) {
+				ViewGroup viewGroup = (ViewGroup) view;
+				for (int i = 0; i < viewGroup.getChildCount(); i++) {
+					changeSearchViewTextColor(viewGroup.getChildAt(i), color);
+				}
+			}
+		}
 	}
 }

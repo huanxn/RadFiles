@@ -202,6 +202,12 @@ public class ImageAdapter extends BaseAdapter
 		return imageFilepaths;
 	}
 
+	// get the image caption array
+	public String [] getImageCaptions()
+	{
+		return imageCaptions;
+	}
+
 	// get the image ID
 	public long getImageID(int index)
 	{

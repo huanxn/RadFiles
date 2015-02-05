@@ -28,9 +28,9 @@
     <string name="title_activity_case_import">RAD Import</string>
 
     <!-- Text Field Prompt Strings -->
-    <string name="patient_id_prompt">Patient MRN</string>
+    <string name="patient_id_prompt">Patient identifier</string>
     <string name="section_prompt">Choose sections</string>
-    <string name="studyType_prompt">Modality</string>
+    <string name="studyType_prompt">Choose modality</string>
     <string name="keyWords_prompt">Choose key words</string>
     <string name="date_prompt">Study date</string>
     <string name="button_save">Save</string>
@@ -55,6 +55,9 @@
         <item>Follow Up</item>
         <item>Favorites</item>
     </string-array>
+
+    <!-- Searchview prompt -->
+    <string name="search_prompt">Search cases</string>
 
     <!-- Navigation Drawer Strings -->
     <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
