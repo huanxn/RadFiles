@@ -18,7 +18,7 @@
         android:layout_height="2dp"
         android:layout_width="fill_parent" />
 
-    <include layout="@layout/toolbar_default"/>
+    <include layout="@layout/toolbar_base"/>
 
 
 </RelativeLayout>

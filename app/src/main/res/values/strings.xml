@@ -22,7 +22,7 @@
     <string name="title_activity_add_case">Add Case</string>
     <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
     <string name="title_activity_edit_case">Edit Case</string>
-    <string name="title_activity_cloud_storage">RAD Import &amp; Export</string>
+    <string name="title_activity_import_export">RAD Import &amp; Export</string>
     <string name="title_activity_case_card_list">RAD Files</string>
     <string name="title_activity_manage_lists">RAD Lists</string>
     <string name="title_activity_case_import">RAD Import</string>

@@ -44,6 +44,14 @@
 
     </android.support.v4.widget.DrawerLayout>
 
+
+    <FrameLayout
+        android:id="@+id/toolbar_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <!--
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -67,9 +75,9 @@
               android:layout_alignEnd="@id/toolbar"
               android:visibility="invisible"
               />
-
-
-
     </RelativeLayout>
+    -->
+
+
 
 </FrameLayout>

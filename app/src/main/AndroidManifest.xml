@@ -187,7 +187,8 @@
 
         <activity
             android:name=".ImportExportActivity"
-            android:label="@string/title_activity_cloud_storage" >
+            android:label="@string/title_activity_import_export"
+            android:theme="@style/MaterialTheme.Light.NoActionBar">
             <meta-data
                 android:name="com.google.android.apps.drive.APP_ID"
                 android:value="id=895901757508" />
@@ -207,7 +208,8 @@
         <activity
             android:name="com.huantnguyen.radcases.app.ManageListsActivity"
             android:label="@string/title_activity_manage_lists"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/MaterialTheme.Light.NoActionBar">
         </activity>
 
     </application>

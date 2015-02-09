@@ -102,28 +102,6 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment).commit();
 
-			/*
-			// hide bottom buttonbar if keyboard open
-			//final View activityRootView = activityRootView;
-			    activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-				@Override
-				public void onGlobalLayout()
-				{
-					int heightDiff = activityRootView.getRootView().getHeight() - activityRootView.getHeight();
-					LinearLayout buttonBar = (LinearLayout) fragment.rootView.findViewById(R.id.buttonBar);
-
-					if (heightDiff > 400)  // if more than 400 pixels, its probably a keyboard...
-					{
-						buttonBar.setVisibility(View.GONE);
-					}
-					else
-					{
-						buttonBar.setVisibility(View.VISIBLE);
-					}
-				}
-			});
-			*/
-
 		}
 
 		selected_date = Calendar.getInstance();
@@ -154,15 +132,6 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		study_types_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
 		key_words_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
 		section_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
-
-
-		/*
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setTitle("Save");
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setIcon(R.drawable.ic_action_accept);
-		*/
-
 
 	}
 
@@ -328,7 +297,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	 * saveToDatabase
 	 * called when click OK button or navigate up button or back button (and confirmed via dialog box)
 	 */
-	private void saveToDatabase()
+	protected void saveToDatabase()
 	{
 		/**
 		 * CASES TABLE
@@ -458,6 +427,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			}
 			else
 			{
+				imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
 				imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
 				Uri uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, imageGridView.getImageID(i));

@@ -21,7 +21,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.view.ActionMode;
+//import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,6 +30,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,8 +38,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,6 +96,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	// ShowCase tutorial
 	private boolean showTutorial = true;
+	private Target caseFilterTarget;
 
 	//private List<Long> multiselectList;
 
@@ -111,7 +115,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		super.onCreate_new(savedInstanceState, true);
+		//super.onCreate(savedInstanceState, true);
+		super.onCreate(savedInstanceState, R.layout.toolbar_spinner);
 //		setContentView(R.layout.activity_case_cardlist);
 
 		activity = this;
@@ -133,15 +138,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 		else
 		{
-			UtilClass.showMessage(this, "DEBUG: state: " + savedInstanceState.toString());
-			/*
-			SpannableString mTitle = new SpannableString("RAD debug" +
-					                                             "");
-			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 
 			// set the saved filter/spinner state
+			/*
+				UtilClass.showMessage(this, "DEBUG: state: " + savedInstanceState.toString());
+
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
 			UtilClass.showMessage(this, "OnCreate savedInstanceState != null: filterMode " + caseFilterMode);
 			//fragment.populateCards();
@@ -155,10 +157,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					.commit();
 		}
 
+		/* //done in nav drawer class
 		SpannableString mTitle = new SpannableString("RAD Cases");
 		mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 		mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		*/
 
+
+		/*
 		// Set up the Action Bar dropdown spinner list
 		// used for sorting the cases per user selected criteria
 		//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
@@ -185,12 +191,43 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			}
 		});
 
+*/
+
+		getSupportActionBar().setDisplayShowTitleEnabled(false);
+		Spinner caseFilterSpinner = (Spinner) mToolbar.findViewById(R.id.case_filter_spinner);
+		SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_toolbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
+		((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
+		caseFilterSpinner.setAdapter(actionbarSpinnerAdapter);
+		caseFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+		{
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+			{
+				// when item position changes, then repopulate cards using the new criteria
+				caseFilterMode = position;
+
+				if(fragment != null)
+					fragment.new PopulateCardsTask().execute();
+
+				return;
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent)
+			{
+
+			}
+		});
+
+
+
 	}
 
 
 	//
 	// ACTION BAR MENU
 	//
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
@@ -217,6 +254,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	//	int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
 	//	((TextView) searchView.findViewById(id)).setTextColor(Color.WHITE);
+
+		// hide spinner if drawer is open
+		if (mNavigationDrawerFragment.isDrawerOpen())
+		{
+			mToolbar.findViewById(R.id.case_filter_spinner).setVisibility(View.GONE);
+			return true;
+		}
 
 
 		return super.onCreateOptionsMenu(menu);
@@ -283,7 +327,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				break;
 
 			default:
-				UtilClass.showMessage(this, "debug: CaseCardListActivity onActivityResult");
 				break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);
@@ -298,7 +341,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	{
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+//		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+		mToolbar.findViewById(R.id.case_filter_spinner).setVisibility(View.VISIBLE);
 	}
 
 
@@ -524,7 +568,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			View viewTarget = null;
 			if(mToolbar != null)
 			{
-				viewTarget = mToolbar;
+				viewTarget = mToolbar.findViewById(R.id.case_filter_spinner);
 			}
 
 			if(viewTarget != null)
@@ -692,7 +736,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		/**
 		 * Contextual action mode
 		 */
-		public ActionMode.Callback mActionModeCallback = null;
+		public android.view.ActionMode.Callback mActionModeCallback = null;
 
 		View rootView;
 		CaseCardListActivity mActivity;
@@ -1166,10 +1210,20 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 							final List<Long> deleteIdList = new ArrayList<Long>(mCardAdapter.getMultiselectList());
 							final ActionMode actionMode = mode;
 
+							String msg;
+							if(deleteIdList.size() == 1)
+							{
+								msg = "Delete 1 case?";
+							}
+							else
+							{
+								msg = "Delete " + deleteIdList.size() + " cases?";
+							}
+
 							// Alert dialog to confirm delete
 							AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-							builder.setMessage("Delete " + deleteIdList.size() + " cases?")
+							builder.setMessage(msg)
 									.setPositiveButton(activity.getResources().getString(R.string.button_OK), new DialogInterface.OnClickListener()
 									{
 										public void onClick(DialogInterface dialog, int id)
@@ -1244,6 +1298,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		private void setCardClickListeners()
 		{
 			final CaseCardAdapter mAdapter = mCardAdapter;
+
 			cardOnClickListener = new View.OnClickListener()
 			{
 				@Override
@@ -1287,7 +1342,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					if(mAdapter.mActionMode == null)
 					{
 						// open contextual menu
-						mAdapter.mActionMode = ((ActionBarActivity)activity).startSupportActionMode(mActionModeCallback);
+						//mAdapter.mActionMode = ((ActionBarActivity)activity).startSupportActionMode(mActionModeCallback);
+						mAdapter.mActionMode = ((CaseCardListActivity)activity).mToolbar.startActionMode(mActionModeCallback);
 					}
 					else
 					{
@@ -1408,6 +1464,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			*/
 			protected void onPostExecute(File shareFile)
 			{
+				if(shareFile == null)
+				{
+					progressDialog.dismiss();
+					UtilClass.showMessage(activity, "Unable to create share file.");
+					return;
+				}
+
 				Uri uriShareFile = Uri.fromFile(shareFile); // file created and stored in shareFile
 
 				Intent shareIntent = new Intent(Intent.ACTION_SEND);

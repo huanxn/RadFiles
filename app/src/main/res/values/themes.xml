@@ -20,6 +20,8 @@
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small</item>
 
+        <item name="windowActionModeOverlay">true</item>
+
     </style>
 
     <!-- No appcompat actionbar.  ie custom toolbar defined -->

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -39,7 +40,7 @@ public class CaseImport extends ActionBarActivity
 	CaseCardAdapter mCardAdapter;
 
 	// standard directories
-	private static File downloadsDir = UtilClass.getDownloadsDir();
+	//private static File downloadsDir = UtilClass.getDownloadsDir();
 
 	final static String CASES_CSV_FILENAME = "cases_table.csv";
 	final static String IMAGES_CSV_FILENAME = "images_table.csv";
@@ -57,6 +58,7 @@ public class CaseImport extends ActionBarActivity
         setContentView(R.layout.activity_case_import);
 
 	    activity = this;
+	    File downloadsDir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 
 	    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 

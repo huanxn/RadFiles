@@ -71,8 +71,8 @@ public class UtilClass extends Activity
 	public static final String TAG = "UtilClass";
 
 	// standard directories
-	private static File downloadsDir = CaseCardListActivity.downloadsDir;
-	private static File picturesDir = CaseCardListActivity.picturesDir;
+	//private static File downloadsDir = CaseCardListActivity.downloadsDir;
+	//private static File picturesDir = CaseCardListActivity.picturesDir;
 	private static File appDir  = CaseCardListActivity.appDir;             // internal app data directory
 	private static File dataDir  = CaseCardListActivity.dataDir;            // private data directory (with SQL database)
 
@@ -719,28 +719,31 @@ public class UtilClass extends Activity
 					{
 						// delete confirmed
 
-						// delete case from CASES table
-						Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-						context.getContentResolver().delete(case_delete_uri, null, null);
-
-						// delete all linked images files
-						Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
-						File imageFile = null;
-						if (image_cursor.moveToFirst())
+						if (key_id != -1)
 						{
-							do
+							// delete case from CASES table
+							Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+							context.getContentResolver().delete(case_delete_uri, null, null);
+
+							// delete all linked images files
+							Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
+							File imageFile = null;
+							if (image_cursor.moveToFirst())
 							{
-								imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-								imageFile.delete();
-							} while (image_cursor.moveToNext());
+								do
+								{
+									imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+									imageFile.delete();
+								} while (image_cursor.moveToNext());
+							}
+							image_cursor.close();
+
+							// delete all child rows from IMAGES table, by parent case key_id
+							context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
+
+							// update CaseCardListActivity
+							context.setResult(CaseCardListActivity.RESULT_DELETED);
 						}
-						image_cursor.close();
-
-						// delete all child rows from IMAGES table, by parent case key_id
-						context.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
-
-						// update CaseCardListActivity
-						context.setResult(CaseCardListActivity.RESULT_DELETED);
 						context.finish();
 					}
 				})
@@ -940,6 +943,8 @@ public class UtilClass extends Activity
 		File casesJSON = null;
 
 		File cacheDir = activity.getCacheDir();
+		File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
 		try
 		{
@@ -948,7 +953,8 @@ public class UtilClass extends Activity
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			showMessage(activity, "Unable to create local backup file.");
+			//showMessage(activity, "Unable to create local backup file.");
+			Log.d(TAG, "Unable to create local backup file.");
 			return null;
 		}
 
@@ -1099,6 +1105,8 @@ public class UtilClass extends Activity
 		int parent_id;
 		int caseCount = 0;
 
+		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
 		// unzip image files and JSON files
 		try
 		{
@@ -1246,6 +1254,7 @@ public class UtilClass extends Activity
 		// attempt to create json file
 		File listsJSON = null;
 		File cacheDir = activity.getCacheDir();
+		File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 
 		try
 		{

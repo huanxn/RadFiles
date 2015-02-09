@@ -72,7 +72,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	public class TabbedFragment extends Fragment
+	public static class TabbedFragment extends Fragment
 	{
 
 		//public static final String TAG = TabbedFragment.class.getSimpleName();
@@ -189,7 +189,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 			}
 		} // end SectionsPagerAdapter
 
-		public class TabbedContentFragment extends Fragment {
+		public class TabbedContentFragment extends Fragment
+		{
 
 			public static final String ARG_SECTION_NUMBER = "section_number";
 
@@ -245,7 +246,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				}
 				if(tableURI != null)
 				{
-					listCursor = getContentResolver().query(tableURI, null, null, null, CasesProvider.KEY_ORDER);
+					listCursor = activity.getContentResolver().query(tableURI, null, null, null, CasesProvider.KEY_ORDER);
 				}
 				else
 				{
@@ -270,7 +271,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 						values.put(tableKEY, newItemString);
 						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));
-						getContentResolver().update(row_uri, values, null, null);
+						activity.getContentResolver().update(row_uri, values, null, null);
 
 					}
 
@@ -289,7 +290,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						values.put(CasesProvider.KEY_ORDER, positionStart);
 
 						// Add a new list item into the database
-						Uri new_item_uri = getContentResolver().insert(tableURI, values);
+						Uri new_item_uri = activity.getContentResolver().insert(tableURI, values);
 
 						// get the key_id of the new case
 						long key_id = ContentUris.parseId(new_item_uri);
@@ -329,7 +330,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 							values.clear();
 							values.put(CasesProvider.KEY_ORDER, i);
 							Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(i));
-							getContentResolver().update(row_uri, values, null, null);
+							activity.getContentResolver().update(row_uri, values, null, null);
 
 							//UtilClass.showMessage(getActivity(), "item moved: Position: " + i + ", item: " + mListAdapter.getItem(i));
 						}
@@ -347,7 +348,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 						// delete from database
 						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));
-						getContentResolver().delete(row_uri, null, null);
+						activity.getContentResolver().delete(row_uri, null, null);
 
 						// delete list item
 						mListAdapter.removeItem(positionStart);
@@ -358,7 +359,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				mRecyclerView.setAdapter(mListAdapter);
 
 				// For drag and drop edit list
-				DragSortRecycler dragSortRecycler = new DragSortRecycler(getApplicationContext());
+				DragSortRecycler dragSortRecycler = new DragSortRecycler(activity.getApplicationContext());
 				dragSortRecycler.setViewHandleId(R.id.handle); //View you wish to use as the handle
 				dragSortRecycler.setFloatingAlpha((float)0.8);
 

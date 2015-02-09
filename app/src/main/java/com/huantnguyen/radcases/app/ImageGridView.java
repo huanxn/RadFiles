@@ -416,4 +416,9 @@ public class ImageGridView
 		return mAdapter.getImageFilepaths();
 	}
 
+	public String [] getImageCaptions()
+	{
+		return mAdapter.getImageCaptions();
+	}
+
 }

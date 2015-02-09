@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.view.ActionMode;
+//import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -35,8 +35,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	private List<String> header;
 
 	// contextual action mode set in activity
-	private ActionMode.Callback mActionModeCallback = null;
-	public ActionMode mActionMode = null;
+	private android.view.ActionMode.Callback mActionModeCallback = null;
+	public android.view.ActionMode mActionMode = null;
 
 	// contextual multi-select list
 	private List<Long> multiselectList;
@@ -154,7 +154,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		}
 	}
 
-	public void setActionModeCallback(ActionMode.Callback actionModeCallback)
+	public void setActionModeCallback(android.view.ActionMode.Callback actionModeCallback)
 	{
 		if(actionModeCallback != null)
 		{
@@ -162,7 +162,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		}
 	}
 
-	public void setActionMode(ActionMode actionMode)
+	public void setActionMode(android.view.ActionMode actionMode)
 	{
 		mActionMode = actionMode;
 	}
@@ -383,11 +383,13 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			//textView.setText(String.valueOf(getItem(position)));
 			textView.setText(header.get(position));
 		}
+		/*
 		else
 		{
 			if(header == null)
 				UtilClass.showToast(activity, "Debug: CardCaseAdapter.header is null");
 		}
+		*/
 	}
 	@Override
 	public long getHeaderId(int position) {

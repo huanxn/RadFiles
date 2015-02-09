@@ -99,7 +99,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			hasImage = true;
 			// FadingActionBar
 			// translucent and overlying action bar theme set as default for this CaseDetailActivity in manifest XML
-			super.onCreate_for_FAB(savedInstanceState);
+//			super.onCreate_for_FAB(savedInstanceState);
+			super.onCreate(savedInstanceState, false, R.layout.toolbar_fading, true);
 
 			/*
 			// set back icon
@@ -117,7 +118,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			//super.onCreate(savedInstanceState, false);
 
 
-			super.onCreate_new(savedInstanceState, false);
+			super.onCreate(savedInstanceState, false);
 
 		}
 
@@ -472,6 +473,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, fragment.thumbnail_pos);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_CAPTIONS, fragment.imageGridView.getImageCaptions());
 				startActivity(imageGalleryIntent);
 				break;
 		}
