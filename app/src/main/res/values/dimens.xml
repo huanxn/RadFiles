@@ -25,6 +25,7 @@
 
     <dimen name="navigation_drawer_width">240dp</dimen>
 
+    <!--<dimen name="toolbar_size">?attr/actionBarSize</dimen>-->
     <dimen name="toolbar_size">56dp</dimen>
 
 </resources>

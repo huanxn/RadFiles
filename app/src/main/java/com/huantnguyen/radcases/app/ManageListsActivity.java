@@ -92,7 +92,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		 */
 		ViewPager mViewPager;
 
-		Activity activity;
+		static Activity activity;
 
 
 		public TabbedFragment newInstance()
@@ -189,7 +189,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 			}
 		} // end SectionsPagerAdapter
 
-		public class TabbedContentFragment extends Fragment
+		public static class TabbedContentFragment extends Fragment
 		{
 
 			public static final String ARG_SECTION_NUMBER = "section_number";

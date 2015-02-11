@@ -21,6 +21,9 @@
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small</item>
 
         <item name="windowActionModeOverlay">true</item>
+        <item name="android:windowActionModeOverlay">true</item>
+
+        <item name="android:actionModeStyle">@style/ContextualActionModeStyle</item>
 
     </style>
 
@@ -31,6 +34,12 @@
         <item name="android:actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
         <item name="actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
     </style>
+
+    <!-- Contextual action bar -->
+    <style name="ContextualActionMode.Light" parent="MaterialTheme.Light.NoActionBar">
+        <item name="android:actionOverflowButtonStyle">@style/ContextualOverflow</item>
+    </style>
+
 
     <!-- search text color -->
     <style name="Theme.MyTheme.Widget" parent="@android:style/Theme.Holo">

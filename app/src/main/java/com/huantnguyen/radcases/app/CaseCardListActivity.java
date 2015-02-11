@@ -320,8 +320,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				// edited case details
 				if(resultCode == RESULT_EDITED || resultCode == RESULT_DELETED)
 				{
-					// refresh cards with caseFilterMode = FILTER_LAST_MODIFIED;
-					getSupportActionBar().setSelectedNavigationItem(FILTER_LAST_MODIFIED);
+					// resort by last modified to show newly added case at the top
+					caseFilterMode = FILTER_LAST_MODIFIED;
+
 					fragment.new PopulateCardsTask().execute();
 				}
 				break;
@@ -1149,7 +1150,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						{
 							mCardAdapter.notifyDataSetChanged();
 						}
-					}, 200);
+					}, 100);
 				}
 				else
 				{
@@ -1171,9 +1172,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				@Override
 				public boolean onCreateActionMode(ActionMode mode, Menu menu)
 				{
+					activity.setTheme(R.style.ContextualActionMode_Light);
 					// Inflate a menu resource providing context menu items
 					MenuInflater inflater = mode.getMenuInflater();
 					inflater.inflate(R.menu.case_list_contextual, menu);
+
+//					MenuItemCompat.setActionProvider(menu, R.menu.case_list_contextual);
 					return true;
 				}
 
@@ -1341,9 +1345,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 					if(mAdapter.mActionMode == null)
 					{
+						// TODO doesn't work as well as before with support action bar
 						// open contextual menu
 						//mAdapter.mActionMode = ((ActionBarActivity)activity).startSupportActionMode(mActionModeCallback);
-						mAdapter.mActionMode = ((CaseCardListActivity)activity).mToolbar.startActionMode(mActionModeCallback);
+						//mAdapter.mActionMode = ((CaseCardListActivity)activity).mToolbar.startActionMode(mActionModeCallback);
+						//((CaseCardListActivity)activity).mToolbar.setVisibility(View.GONE);
+						mAdapter.mActionMode = ((CaseCardListActivity)activity).startActionMode(mActionModeCallback);
 					}
 					else
 					{

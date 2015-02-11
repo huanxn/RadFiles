@@ -409,50 +409,53 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		/**
 		 * IMAGES TABLE
 		 */
-		// Save image table data
-		ContentValues imageValues = new ContentValues();
-
-		for (int i = 0; i < imageGridView.getCount(); i++)
+		if(imageGridView != null)
 		{
-			// new images in imageGridView have invalid row ID (ie -1)
-			if(imageGridView.getImageID(i) == -1)
-			{
-				//store in image table
-				imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
-				imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageGridView.getImageFilename(i));
-				imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
-				imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
+			// Save image table data
+			ContentValues imageValues = new ContentValues();
 
-				getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
-			}
-			else
+			for (int i = 0; i < imageGridView.getCount(); i++)
 			{
-				imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
-				imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
+				// new images in imageGridView have invalid row ID (ie -1)
+				if (imageGridView.getImageID(i) == -1)
+				{
+					//store in image table
+					imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
+					imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageGridView.getImageFilename(i));
+					imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
+					imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
-				Uri uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, imageGridView.getImageID(i));
-				getContentResolver().update(uri, imageValues, null, null);
+					getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+				}
+				else
+				{
+					imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
+					imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
+
+					Uri uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, imageGridView.getImageID(i));
+					getContentResolver().update(uri, imageValues, null, null);
+				}
 			}
+
+			// delete old images
+			ArrayList<String> deletedImageList = imageGridView.getDeletedImageList();   // contains full path of files to be deleted
+			File deleteFile = null;
+			for (int i = 0; i < deletedImageList.size(); i++)
+			{
+				deleteFile = new File(deletedImageList.get(i));
+
+				// delete from IMAGES table, select by case key_id and fileNAME
+				String[] selArgs = {String.valueOf(key_id), deleteFile.getName()};
+				getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ? AND " + CasesProvider.KEY_IMAGE_FILENAME + " = ?", selArgs);
+
+				// delete actual jpg File
+				if (deleteFile != null && deleteFile.exists())
+				{
+					deleteFile.delete();
+				}
+			}
+
 		}
-
-		// delete old images
-		ArrayList<String> deletedImageList = imageGridView.getDeletedImageList();   // contains full path of files to be deleted
-		File deleteFile = null;
-		for(int i = 0; i < deletedImageList.size(); i++)
-		{
-			deleteFile = new File(deletedImageList.get(i));
-
-			// delete from IMAGES table, select by case key_id and fileNAME
-			String [] selArgs = {String.valueOf(key_id), deleteFile.getName()};
-			getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ? AND " + CasesProvider.KEY_IMAGE_FILENAME + " = ?", selArgs);
-
-			// delete actual jpg File
-			if(deleteFile != null && deleteFile.exists())
-			{
-				deleteFile.delete();
-			}
-		}
-
 
 		// TODO add custom study type to study type table
 		// if spinner text not in table, then add

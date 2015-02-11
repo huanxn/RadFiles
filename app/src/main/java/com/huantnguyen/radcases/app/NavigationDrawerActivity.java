@@ -250,7 +250,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 					startActivity(navigationIntent);
 				}
 
-			}, 275);
+			}, 250);
 		}
 	}
 

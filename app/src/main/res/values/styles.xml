@@ -282,6 +282,14 @@
         <item name="android:textSize">@dimen/largeTextSize</item>
     </style>
 
+    <style name="ContextualActionModeStyle" parent="@style/Widget.AppCompat.ActionMode">
+        <item name="android:background">@color/white_text</item>
+        <item name="android:height">@dimen/toolbar_size</item>
+    </style>
+
+    <style name="ContextualOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_dots_vertical_grey600_24dp</item>
+    </style>
 
 </resources>
 

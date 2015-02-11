@@ -32,8 +32,8 @@
 
     <View
         android:id="@+id/overflow_menu_target"
-        android:layout_width="4dp"
-        android:layout_height="16dp"
+        android:layout_width="8dp"
+        android:layout_height="28dp"
         android:layout_alignTop="@id/toolbar"
         android:layout_alignEnd="@id/toolbar"
         android:visibility="invisible"
