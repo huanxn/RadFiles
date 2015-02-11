@@ -23,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -1569,6 +1570,18 @@ public class UtilClass extends Activity
 		theme.resolveAttribute(value, typedValue, true);
 
 		return typedValue.data;
+	}
+
+	public static boolean hitTest(View v, int x, int y)
+	{
+		final int tx = (int) (ViewCompat.getTranslationX(v) + 0.5f);
+		final int ty = (int) (ViewCompat.getTranslationY(v) + 0.5f);
+		final int left = v.getLeft() + tx;
+		final int right = v.getRight() + tx;
+		final int top = v.getTop() + ty;
+		final int bottom = v.getBottom() + ty;
+
+		return (x >= left) && (x <= right) && (y >= top) && (y <= bottom);
 	}
 
 	// FILE DIRECTORIES

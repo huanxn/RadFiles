@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
-        android:background="@color/default_colorPrimary"
+        android:background="?attr/colorPrimary"
         android:layout_alignParentTop="true"
         />
     <!-- uses list_item_sortable.xml textview-->

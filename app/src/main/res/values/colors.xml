@@ -37,6 +37,12 @@
     <color name="showcase_background">#CC101010</color>
     <color name="showcase_circle">@color/md_amber_500</color>
 
+    <!-- Draggable List Item -->
+    <color name="bg_item_dragging_active_state">@color/default_colorSelected</color>
+    <color name="bg_item_dragging_state">@color/default_card_background</color>
+    <color name="bg_item_normal_state">@color/default_card_background</color>
+    <color name="bg_item_normal_pressed_state">@color/default_colorSelected</color>
+
     <!-- Button Color -->
     <color name="default_button_background">@color/md_grey_300</color>
 

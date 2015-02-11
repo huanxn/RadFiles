@@ -8,7 +8,9 @@ import android.app.FragmentManager;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -21,6 +23,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
+import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
+import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
+import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.BasicSwapTargetTranslationInterpolator;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 
 
 public class ManageListsActivity extends NavigationDrawerActivity {
@@ -197,6 +205,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 			private View rootView;
 			private RecyclerView mRecyclerView;
+			private RecyclerView.Adapter mWrappedAdapter;
+			private RecyclerViewDragDropManager mRecyclerViewDragDropManager;
 
 			public TabbedContentFragment() {
 			}
@@ -252,6 +262,13 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				{
 					listCursor = null;
 				}
+
+				// drag & drop manager
+				mRecyclerViewDragDropManager = new RecyclerViewDragDropManager();
+				mRecyclerViewDragDropManager.setSwapTargetTranslationInterpolator(new BasicSwapTargetTranslationInterpolator());
+				mRecyclerViewDragDropManager.setDraggingItemShadowDrawable(
+						                                                          (NinePatchDrawable) getResources().getDrawable(R.drawable.drawer_shadow));  //change
+
 
 				final ManageListsAdapter mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
 				mListAdapter.setHasStableIds(true);
@@ -356,25 +373,24 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 					}
 
 				});
-				mRecyclerView.setAdapter(mListAdapter);
 
-				// For drag and drop edit list
-				DragSortRecycler dragSortRecycler = new DragSortRecycler(activity.getApplicationContext());
-				dragSortRecycler.setViewHandleId(R.id.handle); //View you wish to use as the handle
-				dragSortRecycler.setFloatingAlpha((float)0.8);
+				mWrappedAdapter = mRecyclerViewDragDropManager.createWrappedAdapter(mListAdapter);      // wrap for dragging
+				final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
 
-				dragSortRecycler.setItemMoveInterface(new DragSortRecycler.ItemMovedInterface() {
-					@Override
-					public void moveElement(int from, int to)
-					{
-						// move adapter list items
-						mListAdapter.moveElements(from, to);
-					}
-				});
 
-				mRecyclerView.addItemDecoration(dragSortRecycler);
-				mRecyclerView.addOnItemTouchListener(dragSortRecycler);
-				mRecyclerView.setOnScrollListener(dragSortRecycler.getScrollListener());
+				mRecyclerView.setAdapter(mWrappedAdapter);
+				mRecyclerView.setItemAnimator(animator);
+
+				// additional decorations
+				//noinspection StatementWithEmptyBody
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+					// Lollipop or later has native drop shadow feature. ItemShadowDecorator is not required.
+				} else {
+		//			mRecyclerView.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z1)));
+				}
+		//		mRecyclerView.addItemDecoration(new SimpleListDividerDecorator(getResources().getDrawable(R.drawable.list_divider), true));
+
+				mRecyclerViewDragDropManager.attachRecyclerView(mRecyclerView);
 
 				return rootView;
 			}

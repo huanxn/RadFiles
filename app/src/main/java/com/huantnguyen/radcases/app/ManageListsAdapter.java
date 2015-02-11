@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.view.LayoutInflater;
@@ -16,13 +17,18 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
+import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableItemViewHolder;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Huan on 11/5/2014.
  */
-public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener{
+public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener, DraggableItemAdapter<ManageListsAdapter.ViewHolder>
+{
 	private Activity activity;
 	private List<String> itemList;
 	private List<Integer> keyList;
@@ -49,8 +55,11 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 			} while(cursor.moveToNext());
 		}
 		itemList.add(ADD_CUSTOM_TEXT);
+		keyList.add(-1);
 
 		//mDataset = stringList.toArray(new String[stringList.size()]);
+
+		setHasStableIds(true);
 	}
 
 	// Create new views (invoked by the layout manager)
@@ -74,7 +83,7 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		// - get element from your dataset at this position
 		// - replace the contents of the view with that element
 		holder.mTextView.setText(itemList.get(position));
-		holder.mTextView.setClickable(true);
+		//holder.mTextView.setClickable(true);
 
 		holder.mTextView.setOnClickListener(this);
 		holder.mTextView.setOnLongClickListener(this);
@@ -113,10 +122,31 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		{
 			holder.mDiscardButton.setVisibility(View.INVISIBLE);
 		}
+
+
+
+		// set background resource (target view ID: container)
+		final int dragState = holder.getDragStateFlags();
+
+		if (((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_UPDATED) != 0)) {
+			int bgResId;
+
+			if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_IS_ACTIVE) != 0) {
+				bgResId = R.drawable.bg_item_dragging_active_state;
+			} else if ((dragState & RecyclerViewDragDropManager.STATE_FLAG_DRAGGING) != 0) {
+				bgResId = R.drawable.bg_item_dragging_state;
+			} else {
+				bgResId = R.drawable.bg_item_normal_state;
+			}
+
+			holder.mContainer.setBackgroundResource(bgResId);
+		}
+
 	}
 
 	private void showDiscardButton(ViewHolder holder)
 	{
+		/*
 		visible_discard_position = holder.getPosition();
 
 		// hide old button
@@ -128,6 +158,7 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		// show new button
 		discard_button = holder.mDiscardButton;
 		discard_button.setVisibility(View.VISIBLE);
+		*/
 	}
 
 	public void removeItem(int position)
@@ -144,8 +175,13 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 
 	@Override
 	public long getItemId(int position) {
+		//return position;
+
 		//return itemList.get(position).hashCode();
-		return position;
+		if(keyList == null)
+			return -1;
+		else
+			return keyList.get(position);
 	}
 
 	public List<String> getList()
@@ -358,20 +394,50 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		notifyItemMoved(fromIndex, toIndex);
 	}
 
+	@Override
+	public boolean onCheckCanStartDrag(ManageListsAdapter.ViewHolder holder, int x, int y) {
+
+		// x, y --- relative from the itemView's top-left
+		final View containerView = holder.mContainer;
+		final View dragHandleView = holder.mHandle;
+
+		final int offsetX = containerView.getLeft() + (int) (ViewCompat.getTranslationX(containerView) + 0.5f);
+		final int offsetY = containerView.getTop() + (int) (ViewCompat.getTranslationY(containerView) + 0.5f);
+
+		return UtilClass.hitTest(dragHandleView, x - offsetX, y - offsetY);
+
+
+
+		//return true;
+
+	}
+	@Override
+	public void onMoveItem(int fromPosition, int toPosition)
+	{
+		if (fromPosition == toPosition) {
+			return;
+		}
+
+		moveElements(fromPosition, toPosition);
+	//	notifyItemMoved(fromPosition, toPosition);
+	}
+
 
 	// Provide a reference to the views for each data item
 	// Complex data items may need more than one view per item, and
 	// you provide access to all the views for a data item in a view holder
-	public static class ViewHolder extends RecyclerView.ViewHolder
+	public static class ViewHolder extends AbstractDraggableItemViewHolder
 	{
 		// each data item is just a string in this case
-		public ImageView mHandle;
+		public ViewGroup mContainer;
 		public TextView mTextView;
 		public ImageButton mDiscardButton;
+		public ImageView mHandle;
 
 		public ViewHolder(View v)
 		{
 			super(v);
+			mContainer = (ViewGroup) v.findViewById(R.id.container);
 			mHandle = (ImageView) v.findViewById(R.id.handle);
 			mTextView = (TextView) v.findViewById(R.id.item_text);
 			mDiscardButton = (ImageButton) v.findViewById(R.id.discard_button);

@@ -590,6 +590,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						runTutorial(step + 1);
 					}
 				});
+
 			}
 		}
 		else if(step == 2)

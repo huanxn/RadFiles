@@ -92,6 +92,7 @@
     <orderEntry type="library" exported="" name="robototextview-2.2.0" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-21.0.3" level="project" />
     <orderEntry type="library" exported="" name="pagerslidingtabstrip-1.0.1" level="project" />
+    <orderEntry type="library" exported="" name="advrecyclerview-0.6.1" level="project" />
     <orderEntry type="library" exported="" name="library-5.0.0" level="project" />
     <orderEntry type="library" exported="" name="android-observablescrollview-1.4.0" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-21.0.3" level="project" />
