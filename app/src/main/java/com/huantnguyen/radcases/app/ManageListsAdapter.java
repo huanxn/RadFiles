@@ -19,15 +19,18 @@ import android.widget.TextView;
 
 import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
-import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableItemViewHolder;
+import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
 
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.List;
 
 /**
  * Created by Huan on 11/5/2014.
  */
-public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.ViewHolder> implements View.OnClickListener, View.OnLongClickListener, DraggableItemAdapter<ManageListsAdapter.ViewHolder>
+public class ManageListsAdapter
+		extends RecyclerView.Adapter<ManageListsAdapter.ViewHolder>
+		implements View.OnClickListener, View.OnLongClickListener, DraggableItemAdapter<ManageListsAdapter.ViewHolder>
 {
 	private Activity activity;
 	private List<String> itemList;
@@ -35,6 +38,8 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 	private final String ADD_CUSTOM_TEXT = "Add new...";
 
 	private int visible_discard_position = -1;
+
+	private EventListener mEventListener;
 
 	private ImageButton discard_button = null;
 
@@ -57,8 +62,6 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		itemList.add(ADD_CUSTOM_TEXT);
 		keyList.add(-1);
 
-		//mDataset = stringList.toArray(new String[stringList.size()]);
-
 		setHasStableIds(true);
 	}
 
@@ -72,7 +75,7 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		// set the view's size, margins, paddings and layout parameters
 		ViewHolder holder = new ViewHolder(view);
 
-		holder.mTextView.setTag(holder);
+		holder.mContainer.setTag(holder);   // used to get holder with clickListener
 
 		return holder;
 	}
@@ -85,8 +88,11 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		holder.mTextView.setText(itemList.get(position));
 		//holder.mTextView.setClickable(true);
 
-		holder.mTextView.setOnClickListener(this);
-		holder.mTextView.setOnLongClickListener(this);
+		//holder.mTextView.setOnClickListener(this);
+		//holder.mTextView.setOnLongClickListener(this);
+
+		holder.mContainer.setOnClickListener(this);
+		holder.mContainer.setOnLongClickListener(this);
 
 		holder.mDiscardButton.setOnClickListener(new View.OnClickListener()
 		{
@@ -122,8 +128,6 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		{
 			holder.mDiscardButton.setVisibility(View.INVISIBLE);
 		}
-
-
 
 		// set background resource (target view ID: container)
 		final int dragState = holder.getDragStateFlags();
@@ -343,57 +347,15 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 	}
 	*/
 
+
+
 	/**
-	 * moveElements
-	 * move list items in adapter (only)
-	 * @param fromIndex
-	 * @param toIndex
+	 * Drag drop resorting
+	 * @param holder
+	 * @param x
+	 * @param y
+	 * @return
 	 */
-	public void moveElements(int fromIndex, int toIndex)
-	{
-		// don't change position of last item (add new custom item)
-		if(fromIndex >= itemList.size()-1 || toIndex >= itemList.size()-1)
-			return;
-		else if(fromIndex == toIndex)
-		{
-			visible_discard_position = toIndex;
-			notifyDataSetChanged();
-			return;
-		}
-
-		// remember selected item info ("from")
-		String temp = itemList.get(fromIndex);
-		int temp_key = keyList.get(fromIndex);
-
-		if(fromIndex < toIndex)
-		{
-			// move all items inbetween down one position
-			for(int i = fromIndex; i < toIndex; i++)
-			{
-				itemList.set(i, itemList.get(i+1));
-				keyList.set(i, keyList.get(i+1));
-			}
-		}
-		else if(fromIndex > toIndex)
-		{
-			// move all items inbetween up one position
-			for(int i = fromIndex; i > toIndex; i--)
-			{
-				itemList.set(i, itemList.get(i-1));
-				keyList.set(i, keyList.get(i-1));
-			}
-		}
-
-		// move the selected item from old position to new position
-		itemList.set(toIndex, temp);
-		keyList.set(toIndex, temp_key);
-
-		visible_discard_position = toIndex;
-
-		// update database in ManageListsActivity
-		notifyItemMoved(fromIndex, toIndex);
-	}
-
 	@Override
 	public boolean onCheckCanStartDrag(ManageListsAdapter.ViewHolder holder, int x, int y) {
 
@@ -411,22 +373,68 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 		//return true;
 
 	}
+
+	/**
+	 * drag drop resorting
+	 * @param fromPosition
+	 * @param toPosition
+	 */
 	@Override
 	public void onMoveItem(int fromPosition, int toPosition)
 	{
-		if (fromPosition == toPosition) {
+		if (fromPosition == toPosition)
+		{
 			return;
 		}
 
-		moveElements(fromPosition, toPosition);
-	//	notifyItemMoved(fromPosition, toPosition);
+		// don't change position of last item (add new custom item)
+		if(fromPosition >= itemList.size()-1 || toPosition >= itemList.size()-1)
+			return;
+		else if(fromPosition == toPosition)
+		{
+			visible_discard_position = toPosition;
+			notifyDataSetChanged();
+			return;
+		}
+
+		// remember selected item info ("from")
+		String temp = itemList.get(fromPosition);
+		int temp_key = keyList.get(fromPosition);
+
+		if(fromPosition < toPosition)
+		{
+			// move all items inbetween down one position
+			for(int i = fromPosition; i < toPosition; i++)
+			{
+				itemList.set(i, itemList.get(i+1));
+				keyList.set(i, keyList.get(i+1));
+			}
+		}
+		else if(fromPosition > toPosition)
+		{
+			// move all items inbetween up one position
+			for(int i = fromPosition; i > toPosition; i--)
+			{
+				itemList.set(i, itemList.get(i-1));
+				keyList.set(i, keyList.get(i-1));
+			}
+		}
+
+		// move the selected item from old position to new position
+		itemList.set(toPosition, temp);
+		keyList.set(toPosition, temp_key);
+
+		visible_discard_position = toPosition;
+
+		// update database in ManageListsActivity
+		notifyItemMoved(fromPosition, toPosition);
 	}
 
 
 	// Provide a reference to the views for each data item
 	// Complex data items may need more than one view per item, and
 	// you provide access to all the views for a data item in a view holder
-	public static class ViewHolder extends AbstractDraggableItemViewHolder
+	public static class ViewHolder extends AbstractDraggableSwipeableItemViewHolder
 	{
 		// each data item is just a string in this case
 		public ViewGroup mContainer;
@@ -441,6 +449,12 @@ public class ManageListsAdapter extends RecyclerView.Adapter<ManageListsAdapter.
 			mHandle = (ImageView) v.findViewById(R.id.handle);
 			mTextView = (TextView) v.findViewById(R.id.item_text);
 			mDiscardButton = (ImageButton) v.findViewById(R.id.discard_button);
+		}
+
+		@Override
+		public View getSwipeableContainerView()
+		{
+			return mContainer;
 		}
 	}
 

@@ -166,7 +166,7 @@
     <style name="listSortable">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/list_item_height</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingTop">10dip</item>
         <item name="android:paddingBottom">10dip</item>
@@ -174,9 +174,8 @@
         <item name="android:paddingRight">16dip</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:textColor">@color/text_dark</item>
-        <item name="android:clickable">true</item>
-        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
+    <!--<item name="android:background">?android:attr/selectableItemBackground</item>-->
 
     <style name="imageGridView">
         <item name="android:layout_width">fill_parent</item>
@@ -199,6 +198,8 @@
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:inputType">textCapWords</item>
     </style>
+
+
 
     <!-- Cards -->
     <style name="cardTitle"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
@@ -289,6 +290,12 @@
 
     <style name="ContextualOverflow" parent="Widget.AppCompat.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_dots_vertical_grey600_24dp</item>
+    </style>
+
+    <style name="divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">2px</item>
+        <item name="android:background">@color/text_dark_divider</item>
     </style>
 
 </resources>

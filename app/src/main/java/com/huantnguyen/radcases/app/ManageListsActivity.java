@@ -271,7 +271,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 
 				final ManageListsAdapter mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
-				mListAdapter.setHasStableIds(true);
+
 				mListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
 				{
 					@Override
@@ -375,6 +375,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				});
 
 				mWrappedAdapter = mRecyclerViewDragDropManager.createWrappedAdapter(mListAdapter);      // wrap for dragging
+
 				final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
 
 
@@ -388,7 +389,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				} else {
 		//			mRecyclerView.addItemDecoration(new ItemShadowDecorator((NinePatchDrawable) getResources().getDrawable(R.drawable.material_shadow_z1)));
 				}
-		//		mRecyclerView.addItemDecoration(new SimpleListDividerDecorator(getResources().getDrawable(R.drawable.list_divider), true));
+				mRecyclerView.addItemDecoration(new SimpleListDividerDecorator(getResources().getDrawable(R.drawable.list_divider), true));
 
 				mRecyclerViewDragDropManager.attachRecyclerView(mRecyclerView);
 
