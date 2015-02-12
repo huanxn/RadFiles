@@ -44,7 +44,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
     boolean[] _selection = null;
 
 	private int custom_position;                        // position in list, which is at the end
-	private String custom_alert_title;                  // alert dialog title
+	private String custom_alert_title = "Add new item";                  // alert dialog title
 	static final private String CUSTOM_TEXT = "Custom..."; // test in spinner list
 	private int previous_position;                      // in case canceled custom input, revert back to previous
 
@@ -120,6 +120,7 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
     @Override
     public void onClick(DialogInterface dialogInterface, int which, boolean isChecked)
     {
+	    final SpinnerMultiSelect multiselect = this;
         if (_selection != null)
         {
 	        if(which < _selection.length-1)
@@ -174,7 +175,10 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 				        //selected_position = previous_position;
 				        //adapter.setSelection(previous_position);
 
-				        //TODO uncheck custom box on cancel
+				        //TODO uncheck custom box on cancel and close
+				        _selection[_selection.length-1] = false;
+
+
 
 			        }
 		        });
@@ -302,8 +306,17 @@ public class SpinnerMultiSelect extends Spinner implements OnMultiChoiceClickLis
 
 	        if(!isInItemList)
 	        {
+		        /*
 		        _items = addElement(_items, sel);
 		        _selection = addElement(_selection, true);
+		        */
+
+		        // add value to end of list, but before the Custom item
+		        _items[_items.length-1] = sel;
+		        _selection[_selection.length-1] = true; //set newly created custom item (which is now last in list) to be true
+
+		        _items = addElement(_items, CUSTOM_TEXT);
+		        _selection = addElement(_selection, false);
 	        }
         }
 

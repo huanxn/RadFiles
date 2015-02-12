@@ -27,4 +27,5 @@ public class Case
 
 	public boolean isSelected = false;
 
+	public boolean isHidden = false;
 }

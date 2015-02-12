@@ -3,6 +3,8 @@ package com.huantnguyen.radcases.app;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
+//compile 'com.timehop.stickyheadersrecyclerview:library:0.3.6@aar'
+
 public interface StickyRecyclerHeadersAdapter<VH extends RecyclerView.ViewHolder> {
   /**
    * Get the ID of the header associated with this item.  For example, if your headers group

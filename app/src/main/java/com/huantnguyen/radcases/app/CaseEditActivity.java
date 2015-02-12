@@ -7,7 +7,6 @@ import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -40,6 +39,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import eu.janmuller.android.simplecropimage.CropImage;
 
@@ -326,6 +326,36 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			values.put(CasesProvider.KEY_STUDY_TYPE, (String) null);
 		}
 
+		// add new sections to database
+
+		if(new_study_type != null && study_types_cursor != null && study_types_cursor.moveToFirst())
+		{
+			int studyType_lastPosition = study_types_cursor.getCount();
+			boolean found = false;
+
+			do
+			{
+				if (study_types_cursor.getString(CasesProvider.COL_VALUE).contentEquals(new_study_type))
+				{
+					found = true;
+					break;
+				}
+
+			} while (study_types_cursor.moveToNext());
+
+			if(!found)
+			{
+				// add to database
+				ContentValues studytype_values = new ContentValues();
+				studytype_values.put(CasesProvider.KEY_STUDY_TYPE, new_study_type);
+				studytype_values.put(CasesProvider.KEY_ORDER, studyType_lastPosition);  // put at end of list
+				getContentResolver().insert(CasesProvider.STUDYTYPE_LIST_URI, studytype_values);
+
+				studyType_lastPosition += 1;
+			}
+		}
+
+
 		// STUDY DATE
 		String new_date_str = ((Button)findViewById(R.id.edit_date)).getText().toString();
 		if (new_date_str != null && !new_date_str.isEmpty())
@@ -349,8 +379,42 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			values.put(CasesProvider.KEY_SECTION, (String) null);
 		}
 
+		// add new sections to database
+		List<String> sectionsList = ((SpinnerMultiSelect)findViewById(R.id.edit_section)).getSelectedStrings();
+		int sections_lastPosition = section_cursor.getCount();
+
+		for (String section : sectionsList)
+		{
+			boolean found = false;
+
+			if(section_cursor != null && section_cursor.moveToFirst())
+			{
+				do
+				{
+					if (section_cursor.getString(CasesProvider.COL_VALUE).contentEquals(section))
+					{
+						found = true;
+						break;
+					}
+
+				} while (section_cursor.moveToNext());
+
+				if(!found)
+				{
+					// add to database
+					ContentValues sections_values = new ContentValues();
+					sections_values.put(CasesProvider.KEY_SECTION, section);
+					sections_values.put(CasesProvider.KEY_ORDER, sections_lastPosition);  // put at end of list
+					getContentResolver().insert(CasesProvider.SECTION_LIST_URI, sections_values);
+
+					sections_lastPosition += 1;
+				}
+			}
+		}
+
 		// KEYWORDS
 		String new_keyWords = ((SpinnerMultiSelect)findViewById(R.id.edit_key_words)).getSelectedString();
+
 		if (new_keyWords != null && !new_keyWords.isEmpty())
 		{
 			values.put(CasesProvider.KEY_KEYWORDS, new_keyWords);
@@ -358,6 +422,39 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		else
 		{
 			values.put(CasesProvider.KEY_KEYWORDS, (String) null);
+		}
+
+		// add new keywords to database
+		List<String> keyWordsList = ((SpinnerMultiSelect)findViewById(R.id.edit_key_words)).getSelectedStrings();
+		int keyWords_lastPosition = key_words_cursor.getCount();
+
+		for (String keyWord : keyWordsList)
+		{
+			boolean found = false;
+
+			if(key_words_cursor != null && key_words_cursor.moveToFirst())
+			{
+				do
+				{
+					if (key_words_cursor.getString(CasesProvider.COL_VALUE).contentEquals(keyWord))
+					{
+						found = true;
+						break;
+					}
+
+				} while (key_words_cursor.moveToNext());
+
+				if(!found)
+				{
+					// add to database
+					ContentValues keyWords_values = new ContentValues();
+					keyWords_values.put(CasesProvider.KEY_KEYWORDS, keyWord);
+					keyWords_values.put(CasesProvider.KEY_ORDER, keyWords_lastPosition);  // put at end of list
+					getContentResolver().insert(CasesProvider.KEYWORD_LIST_URI, keyWords_values);
+
+					keyWords_lastPosition += 1;
+				}
+			}
 		}
 
 		// BIOPSY

@@ -287,6 +287,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						ContentValues values = new ContentValues();
 
 						values.put(tableKEY, newItemString);
+						//todo hidden flag
 						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));
 						activity.getContentResolver().update(row_uri, values, null, null);
 
@@ -346,6 +347,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						{
 							values.clear();
 							values.put(CasesProvider.KEY_ORDER, i);
+							//todo hiddenflag?
 							Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(i));
 							activity.getContentResolver().update(row_uri, values, null, null);
 

@@ -35,13 +35,8 @@ public class ManageListsAdapter
 	private Activity activity;
 	private List<String> itemList;
 	private List<Integer> keyList;
+	private List<Boolean> isHiddenList;
 	private final String ADD_CUSTOM_TEXT = "Add new...";
-
-	private int visible_discard_position = -1;
-
-	private EventListener mEventListener;
-
-	private ImageButton discard_button = null;
 
 	// Provide a suitable constructor (depends on the kind of dataset)
 	public ManageListsAdapter(Activity activity, Cursor cursor)
@@ -49,6 +44,7 @@ public class ManageListsAdapter
 		this.activity = activity;
 		itemList = new ArrayList<String>();
 		keyList = new ArrayList<Integer>();
+		isHiddenList = new ArrayList<Boolean>();
 
 		if(cursor != null && cursor.moveToFirst())
 		{
@@ -56,11 +52,14 @@ public class ManageListsAdapter
 			{
 				itemList.add(cursor.getString(CasesProvider.COL_VALUE));
 				keyList.add(cursor.getInt(CasesProvider.COL_ROWID));
+				//isHiddenList.add(cursor.getInt(CasesProvider.COL_HIDDEN));
+				isHiddenList.add(false);
 
 			} while(cursor.moveToNext());
 		}
 		itemList.add(ADD_CUSTOM_TEXT);
 		keyList.add(-1);
+		isHiddenList.add(false);
 
 		setHasStableIds(true);
 	}
@@ -86,6 +85,17 @@ public class ManageListsAdapter
 		// - get element from your dataset at this position
 		// - replace the contents of the view with that element
 		holder.mTextView.setText(itemList.get(position));
+
+		// grey-out if hidden
+		if(isHiddenList.get(position))
+		{
+			holder.mTextView.setTextColor(activity.getResources().getColor(R.color.text_dark_hint));
+		}
+		else
+		{
+			holder.mTextView.setTextColor(activity.getResources().getColor(R.color.text_dark));
+		}
+
 		//holder.mTextView.setClickable(true);
 
 		//holder.mTextView.setOnClickListener(this);
@@ -93,21 +103,6 @@ public class ManageListsAdapter
 
 		holder.mContainer.setOnClickListener(this);
 		holder.mContainer.setOnLongClickListener(this);
-
-		holder.mDiscardButton.setOnClickListener(new View.OnClickListener()
-		{
-
-			@Override
-			public void onClick(View view)
-			{
-				// delete item from database and from Lists in ManageListsActivity
-				notifyItemRemoved(visible_discard_position);
-
-				// reset
-				visible_discard_position = -1;
-			}
-
-		});
 
 		//if(holder.mTextView.equals(ADD_CUSTOM_TEXT))
 		if(position >= itemList.size()-1)
@@ -118,15 +113,6 @@ public class ManageListsAdapter
 		else
 		{
 			holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.huantnguyen.radcases.app:drawable/ic_menu_grey600_18dp", null, null));
-		}
-
-		if(position == visible_discard_position)
-		{
-			showDiscardButton(holder);
-		}
-		else
-		{
-			holder.mDiscardButton.setVisibility(View.INVISIBLE);
 		}
 
 		// set background resource (target view ID: container)
@@ -146,23 +132,6 @@ public class ManageListsAdapter
 			holder.mContainer.setBackgroundResource(bgResId);
 		}
 
-	}
-
-	private void showDiscardButton(ViewHolder holder)
-	{
-		/*
-		visible_discard_position = holder.getPosition();
-
-		// hide old button
-		if(discard_button != null)
-		{
-			discard_button.setVisibility(View.INVISIBLE);
-		}
-
-		// show new button
-		discard_button = holder.mDiscardButton;
-		discard_button.setVisibility(View.VISIBLE);
-		*/
 	}
 
 	public void removeItem(int position)
@@ -231,9 +200,6 @@ public class ManageListsAdapter
 
 			// show current text in the edit box
 			input.setText(holder.mTextView.getText());
-
-			// show delete item button
-			showDiscardButton(holder);
 		}
 		else
 		{
@@ -294,59 +260,71 @@ public class ManageListsAdapter
 	public boolean onLongClick(View view)
 	{
 		final ViewHolder holder = (ViewHolder) view.getTag();
-
 		final int position = holder.getPosition();
 
+		// if not the add-custom button
 		if(holder.getPosition() < itemList.size()-1)
 		{
-			// show delete item button
-			showDiscardButton(holder);
-		}
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
-		/*
-		if(position == visible_discard_position)
-		{
-			// hide old button
-			if(discard_button != null)
+			String hideString = "Hide";
+
+			if(isHiddenList.get(holder.getPosition()))
 			{
-				discard_button.setVisibility(View.INVISIBLE);
+				hideString = "Unhide";
 			}
 
-			// show new button
-			discard_button = holder.mDiscardButton;
-			discard_button.setVisibility(View.VISIBLE);
-			//holder.mDiscardButton.setVisibility(View.VISIBLE);
+			CharSequence[] choices = {hideString, "Delete"};
+			builder.setTitle(holder.mTextView.getText())
+					.setItems(choices, new DialogInterface.OnClickListener()
+					{
+						public void onClick(DialogInterface dialog, int index)
+						{
+							switch (index)
+							{
+								// hide list item
+								case 0:
+
+									// toggle
+									if(isHiddenList.get(holder.getPosition()))
+									{
+										isHiddenList.set(holder.getPosition(), false);
+									}
+									else
+									{
+										isHiddenList.set(holder.getPosition(), true);
+									}
+
+									// TODO change database
+									notifyItemChanged(position);
+
+									break;
+
+								// delete list item
+								case 1:
+									// delete item from database and from Lists in ManageListsActivity
+									notifyItemRemoved(holder.getPosition());
+
+									break;
+
+
+
+								// Do Nothing.
+								default:
+									break;
+
+							}
+						}
+					});
+
+			AlertDialog alert = builder.create();
+			alert.show();
 		}
-		else
-		{
-			discard_button.setVisibility(View.INVISIBLE);
-		}
-*/
+
+
 
 		return true;
 	}
-
-	/*
-	@Override
-	public void moveElements(int fromIndex, int toIndex)
-	{
-		// don't change position of last item (add new custom item)
-		if(fromIndex >= itemList.size()-1 || toIndex >= itemList.size()-1)
-			return;
-
-		String temp = itemList.get(fromIndex);
-		itemList.set(fromIndex, itemList.get(toIndex));
-		itemList.set(toIndex, temp);
-
-		int temp_key = keyList.get(fromIndex);
-		keyList.set(fromIndex, keyList.get(toIndex));
-		keyList.set(toIndex, temp_key);
-
-		//notifyDataSetChanged();
-		notifyItemMoved(fromIndex, toIndex);
-	}
-	*/
-
 
 
 	/**
@@ -390,16 +368,11 @@ public class ManageListsAdapter
 		// don't change position of last item (add new custom item)
 		if(fromPosition >= itemList.size()-1 || toPosition >= itemList.size()-1)
 			return;
-		else if(fromPosition == toPosition)
-		{
-			visible_discard_position = toPosition;
-			notifyDataSetChanged();
-			return;
-		}
 
 		// remember selected item info ("from")
 		String temp = itemList.get(fromPosition);
 		int temp_key = keyList.get(fromPosition);
+		boolean temp_hidden = isHiddenList.get(fromPosition);
 
 		if(fromPosition < toPosition)
 		{
@@ -408,6 +381,7 @@ public class ManageListsAdapter
 			{
 				itemList.set(i, itemList.get(i+1));
 				keyList.set(i, keyList.get(i+1));
+				isHiddenList.set(i, isHiddenList.get(i+1));
 			}
 		}
 		else if(fromPosition > toPosition)
@@ -417,14 +391,14 @@ public class ManageListsAdapter
 			{
 				itemList.set(i, itemList.get(i-1));
 				keyList.set(i, keyList.get(i-1));
+				isHiddenList.set(i, isHiddenList.get(i-1));
 			}
 		}
 
 		// move the selected item from old position to new position
 		itemList.set(toPosition, temp);
 		keyList.set(toPosition, temp_key);
-
-		visible_discard_position = toPosition;
+		isHiddenList.set(toPosition, temp_hidden);
 
 		// update database in ManageListsActivity
 		notifyItemMoved(fromPosition, toPosition);
@@ -439,7 +413,6 @@ public class ManageListsAdapter
 		// each data item is just a string in this case
 		public ViewGroup mContainer;
 		public TextView mTextView;
-		public ImageButton mDiscardButton;
 		public ImageView mHandle;
 
 		public ViewHolder(View v)
@@ -448,7 +421,6 @@ public class ManageListsAdapter
 			mContainer = (ViewGroup) v.findViewById(R.id.container);
 			mHandle = (ImageView) v.findViewById(R.id.handle);
 			mTextView = (TextView) v.findViewById(R.id.item_text);
-			mDiscardButton = (ImageButton) v.findViewById(R.id.discard_button);
 		}
 
 		@Override

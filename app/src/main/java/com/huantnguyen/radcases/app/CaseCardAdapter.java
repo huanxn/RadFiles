@@ -1,9 +1,7 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.database.Cursor;
-import android.support.v7.app.ActionBarActivity;
 //import android.support.v7.view.ActionMode;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -191,6 +189,16 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		{
 			Case mCase = caseList.get(i);
 
+			if(mCase.isHidden)
+			{
+				viewHolder.cardView.setVisibility(View.GONE);
+			}
+			else
+			{
+				viewHolder.cardView.setVisibility(View.VISIBLE);
+			}
+
+
 			viewHolder.key_id = mCase.key_id;
 
 			viewHolder.card_title.setText(mCase.patient_id);
@@ -364,6 +372,28 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		header = text;
 
 //		notifyDataSetChanged();
+	}
+
+	public void toggleCollapseHeader(Long headerId)
+	{
+		// find all cases with this headerId
+		for(int i = 0; i < header.size(); i++)
+		{
+			if(getHeaderId(i) == headerId)
+			{
+				// toggle Case hidden flag
+				if(caseList.get(i).isHidden)
+				{
+					caseList.get(i).isHidden = false;
+				}
+				else
+				{
+					caseList.get(i).isHidden = true;
+				}
+			}
+		}
+
+		notifyDataSetChanged();
 	}
 
 	@Override

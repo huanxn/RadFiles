@@ -93,10 +93,12 @@
 
     <style name="sectionText">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">@dimen/text_box_height</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">8dp</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">@color/text_dark</item>
     </style>

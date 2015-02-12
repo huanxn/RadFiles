@@ -10,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -20,16 +19,11 @@ import android.os.Handler;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-//import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -42,7 +36,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gc.materialdesign.widgets.ProgressDialog;
@@ -71,6 +64,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	private static final int FILTER_KEYWORDS = 4;
 	private static final int FILTER_FOLLOWUP = 5;
 	private static final int FILTER_FAVORITE = 6;
+
+	private static final List<Long> filterGroupCollapsedList = new ArrayList<Long>();
 
 	private static final String EMPTY_FIELD_GROUP_HEADER = "Unspecified";
 
@@ -578,7 +573,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						                                  .setTarget(new ViewTarget(viewTarget))
 						                                  .setContentTitle("Case Sorting")
 						                                  .setContentText("Click this to change how your cases are sorted.")
-						                                  .setStyle(R.style.CustomShowcaseThemeEnd)
+						                                  .setStyle(R.style.CustomShowcaseTheme)
 						                                  .hideOnTouchOutside()
 						                                  .build();
 				showcaseView.overrideButtonClick(new View.OnClickListener()
@@ -801,11 +796,25 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			mRecyclerView.setAdapter(mCardAdapter);
 
-			//sticky headers
-			// type2
+			// Sticky headers
 			StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(mCardAdapter);
 			//mRecyclerView.addItemDecoration(new DividerDecoration(this));
 			mRecyclerView.addItemDecoration(headersDecor);
+
+			/*
+			// Sticky headers touch listener
+			StickyRecyclerHeadersTouchListener touchListener =
+					new StickyRecyclerHeadersTouchListener(mRecyclerView, headersDecor);
+			touchListener.setOnHeaderClickListener(
+					                                      new StickyRecyclerHeadersTouchListener.OnHeaderClickListener() {
+						                                      @Override
+						                                      public void onHeaderClick(View header, int position, long headerId)
+						                                      {
+							                                      mCardAdapter.toggleCollapseHeader(headerId);
+						                                      }
+					                                      });
+			mRecyclerView.addOnItemTouchListener(touchListener);
+			*/
 
 			mRecyclerView.setOnTouchListener(new View.OnTouchListener()
 			{
@@ -817,10 +826,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 			});
 
-			/*
-			populateCards();
-			mCardAdapter.notifyDataSetChanged();
-			*/
 
 			return rootView;
 		}

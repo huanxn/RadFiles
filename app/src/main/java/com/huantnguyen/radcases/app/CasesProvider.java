@@ -153,7 +153,7 @@ public class CasesProvider extends ContentProvider
 
 	// for secondary list tables.  study_type tables
 	public static final int COL_VALUE = 1;
-	public static final int COL_ORDER = 2; //TODO do i need this?  only for sorting purposes
+	public static final int COL_ORDER = 2;  // sorting
 
 	// for images table
 	public static final int COL_IMAGE_PARENT_CASE_ID = 1; // from Cases table
