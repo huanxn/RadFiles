@@ -129,9 +129,9 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		}
 
 		// get study types list for the spinner
-		study_types_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
-		key_words_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
-		section_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+		study_types_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, CasesProvider.KEY_LIST_ITEM_IS_HIDDEN + " = ?", new String[]{"0"}, CasesProvider.KEY_ORDER);
+		key_words_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, CasesProvider.KEY_LIST_ITEM_IS_HIDDEN + " = ?", new String[]{"0"}, CasesProvider.KEY_ORDER);
+		section_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, CasesProvider.KEY_LIST_ITEM_IS_HIDDEN + " = ?", new String[]{"0"}, CasesProvider.KEY_ORDER);
 
 	}
 
@@ -252,7 +252,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				Button editStudyDate = (Button) editStudyTypeLayout.findViewById(R.id.edit_date);
 
 				editStudyType.setPrompt("Study type");
-				editStudyType.setItems(study_types_cursor, CasesProvider.COL_VALUE, "Custom study type");
+				editStudyType.setItems(study_types_cursor, CasesProvider.COL_LIST_ITEM_VALUE, "Custom study type");
 
 				linearLayout.addView(editStudyTypeLayout);
 
@@ -260,7 +260,7 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 				/*
 				SpinnerCustom study_type_spinner = new SpinnerCustom(this);
 				study_type_spinner.setPrompt("Study type");
-				study_type_spinner.setItems(study_types_cursor, CasesProvider.COL_VALUE, "Custom study type");
+				study_type_spinner.setItems(study_types_cursor, CasesProvider.COL_LIST_ITEM_VALUE, "Custom study type");
 
 				linearLayout.removeView(findViewById(R.id.add_new_study_button));
 				linearLayout.addView(study_type_spinner);
@@ -326,22 +326,22 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			values.put(CasesProvider.KEY_STUDY_TYPE, (String) null);
 		}
 
-		// add new sections to database
-
-		if(new_study_type != null && study_types_cursor != null && study_types_cursor.moveToFirst())
+		// add new study types to database
+		final Cursor study_types_all_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+		if(new_study_type != null && study_types_all_cursor != null && study_types_all_cursor.moveToFirst())
 		{
-			int studyType_lastPosition = study_types_cursor.getCount();
+			int studyType_lastPosition = study_types_all_cursor.getCount();
 			boolean found = false;
 
 			do
 			{
-				if (study_types_cursor.getString(CasesProvider.COL_VALUE).contentEquals(new_study_type))
+				if (study_types_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(new_study_type))
 				{
 					found = true;
 					break;
 				}
 
-			} while (study_types_cursor.moveToNext());
+			} while (study_types_all_cursor.moveToNext());
 
 			if(!found)
 			{
@@ -353,6 +353,8 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 
 				studyType_lastPosition += 1;
 			}
+
+			study_types_all_cursor.close();
 		}
 
 
@@ -380,24 +382,25 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		}
 
 		// add new sections to database
+		final Cursor section_all_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
 		List<String> sectionsList = ((SpinnerMultiSelect)findViewById(R.id.edit_section)).getSelectedStrings();
-		int sections_lastPosition = section_cursor.getCount();
+		int sections_lastPosition = section_all_cursor.getCount();
 
 		for (String section : sectionsList)
 		{
 			boolean found = false;
 
-			if(section_cursor != null && section_cursor.moveToFirst())
+			if(section_all_cursor != null && section_all_cursor.moveToFirst())
 			{
 				do
 				{
-					if (section_cursor.getString(CasesProvider.COL_VALUE).contentEquals(section))
+					if (section_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(section))
 					{
 						found = true;
 						break;
 					}
 
-				} while (section_cursor.moveToNext());
+				} while (section_all_cursor.moveToNext());
 
 				if(!found)
 				{
@@ -410,6 +413,10 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 					sections_lastPosition += 1;
 				}
 			}
+		}
+		if(section_all_cursor != null)
+		{
+			section_all_cursor.close();
 		}
 
 		// KEYWORDS
@@ -425,24 +432,25 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		}
 
 		// add new keywords to database
+		final Cursor key_words_all_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
 		List<String> keyWordsList = ((SpinnerMultiSelect)findViewById(R.id.edit_key_words)).getSelectedStrings();
-		int keyWords_lastPosition = key_words_cursor.getCount();
+		int keyWords_lastPosition = key_words_all_cursor.getCount();
 
 		for (String keyWord : keyWordsList)
 		{
 			boolean found = false;
 
-			if(key_words_cursor != null && key_words_cursor.moveToFirst())
+			if(key_words_all_cursor != null && key_words_all_cursor.moveToFirst())
 			{
 				do
 				{
-					if (key_words_cursor.getString(CasesProvider.COL_VALUE).contentEquals(keyWord))
+					if (key_words_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(keyWord))
 					{
 						found = true;
 						break;
 					}
 
-				} while (key_words_cursor.moveToNext());
+				} while (key_words_all_cursor.moveToNext());
 
 				if(!found)
 				{
@@ -455,6 +463,10 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 					keyWords_lastPosition += 1;
 				}
 			}
+		}
+		if(key_words_all_cursor != null)
+		{
+			key_words_all_cursor.close();
 		}
 
 		// BIOPSY
@@ -553,11 +565,6 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			}
 
 		}
-
-		// TODO add custom study type to study type table
-		// if spinner text not in table, then add
-
-
 
 		setResult(CaseCardListActivity.RESULT_EDITED);
 	}
@@ -842,15 +849,15 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		{
 			// STUDY TYPES SPINNER
 			study_type_spinner = (SpinnerCustom) view.findViewById(R.id.edit_study_type);
-			study_type_spinner.setItems(study_types_cursor, CasesProvider.COL_VALUE, "Custom study type");
+			study_type_spinner.setItems(study_types_cursor, CasesProvider.COL_LIST_ITEM_VALUE, "Custom study type");
 
 			// SECTION MULTI SPINNER
 			section_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_section);
-			section_spinner.setItems(section_cursor, CasesProvider.COL_VALUE);
+			section_spinner.setItems(section_cursor, CasesProvider.COL_LIST_ITEM_VALUE);
 
 			// KEYWORDS MULTI SPINNER
 			key_words_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_key_words);
-			key_words_spinner.setItems(key_words_cursor, CasesProvider.COL_VALUE);
+			key_words_spinner.setItems(key_words_cursor, CasesProvider.COL_LIST_ITEM_VALUE);
 
 			// Fetch and display data
 			// Fetch and display data

@@ -12,7 +12,7 @@
     <item android:title="@string/action_camera" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_camera" android:id="@+id/menu_camera"/>
 
     <!-- Toggle favorites "star", should appear as action button -->
-    <item android:title="@string/action_star" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_not_important" android:id="@+id/menu_star"/>
+    <item android:title="@string/add_star" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_not_important" android:id="@+id/menu_star"/>
 
     <!-- Delete this case, should appear as action button -->
     <item android:title="@string/action_delete" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_discard" android:id="@+id/menu_delete"/>

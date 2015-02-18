@@ -177,11 +177,17 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		getMenuInflater().inflate(R.menu.case_detail, menu);
 		MenuItem star = menu.findItem(R.id.menu_star);
 
-		// Set the starred icon in action bar
+		// Set the starred icon and text in action bar
 		if (fragment.isStarred())
+		{
+			star.setTitle(getResources().getString(R.string.remove_star));
 			star.setIcon(R.drawable.ic_action_important);
+		}
 		else
+		{
+			star.setTitle(getResources().getString(R.string.add_star));
 			star.setIcon(R.drawable.ic_action_not_important);
+		}
 
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -207,6 +213,17 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 //					findViewById(R.id.action_star);
 					// toggle favorites star
 					fragment.toggleStar();
+
+					if(fragment.isStarred())
+					{
+						item.setTitle(getResources().getString(R.string.remove_star));
+						item.setIcon(R.drawable.ic_action_important);
+					}
+					else
+					{
+						item.setTitle(getResources().getString(R.string.add_star));
+						item.setIcon(R.drawable.ic_action_not_important);
+					}
 
 					// reset the action bar to reflex new Star state
 					invalidateOptionsMenu();
@@ -467,7 +484,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	{
 		switch (view.getId())
 		{
-			case R.id.header_image:
+			case R.id.thumbnail:
 				Intent imageGalleryIntent = new Intent(this, ImageGalleryActivity.class);
 				//imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
 				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
@@ -666,34 +683,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		}
 		else if(step == 4)
 		{
-
-			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-					                                  .setTarget( new ViewTarget(mOverflowTarget) )
-					                                  //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
-					                                  .setContentTitle("Overflow menu")
-					                                  .setContentText("More menu options here.\n\nClick the Help button to see this tutorial again.")
-					                                  .setStyle(R.style.CustomShowcaseTheme)
-					                                  .hideOnTouchOutside()
-					                                  .build();
-/*
-			showcaseView.setShowcaseX((int)UtilClass.getDisplayWidthPx(this));
-			showcaseView.setShowcaseY(UtilClass.getToolbarHeight(this));
-*/
-			showcaseView.overrideButtonClick(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					showcaseView.hide();
-					runTutorial(step + 1);
-				}
-			});
-
-
-
-		}
-		else if(step == 5)
-		{
 			final Target viewTarget = new Target() {
 				@Override
 				public Point getPoint() {
@@ -715,7 +704,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				}
 			};
 
-			new ShowcaseView.Builder(this)
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
 					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
 					.setTarget(viewTarget)
 					.setContentTitle("Back")
@@ -723,6 +712,29 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					.setStyle(R.style.CustomShowcaseThemeEnd)
 					.hideOnTouchOutside()
 					.build();
+
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+
+		}
+		else if(step == 5)
+		{
+
+			new ShowcaseView.Builder(this)
+					                                  .setTarget( new ViewTarget(mOverflowTarget) )
+							                                   //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
+					                                  .setContentTitle("Overflow menu")
+					                                  .setContentText("More menu options here.\n\nClick the Help button to see this tutorial again.")
+					                                  .setStyle(R.style.CustomShowcaseTheme)
+					                                  .hideOnTouchOutside()
+					                                  .build();
 
 		}
 
@@ -798,7 +810,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				// Fading Toolbar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
 
-				mImageView = (ImageView) view.findViewById(R.id.header_image);
+				mImageView = (ImageView) view.findViewById(R.id.thumbnail);
 				mToolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);  // in activity content view
 				toolbarAlpha = 0;
 				mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(0, 0));   // transparent
@@ -819,7 +831,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			{
 				// standard ActionBar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
-				mImageView = (ImageView) view.findViewById(R.id.header_image);
+				mImageView = (ImageView) view.findViewById(R.id.thumbnail);
 			}
 
 			return view;

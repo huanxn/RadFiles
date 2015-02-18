@@ -15,7 +15,6 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -39,7 +38,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.gc.materialdesign.widgets.SnackBar;
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.SnackbarManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -90,13 +90,16 @@ public class UtilClass extends Activity
 	}
 	public static void showMessage(Activity activity, String message)
 	{
+		SnackbarManager.show(Snackbar.with(activity)
+				       .text(message));
 
-		//SnackbarManager.show(Snackbar.with(activity))				.text(message), activity);
 
 
 		//Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+		/*
 		SnackBar snackbar = new SnackBar(activity, message, null, null);
 		snackbar.show();
+		*/
 
 	}
 
@@ -1293,8 +1296,9 @@ public class UtilClass extends Activity
 				{
 					lists_writer.beginObject();
 
-					lists_writer.name(CasesProvider.KEY_KEYWORDS).value(cursor.getString(CasesProvider.COL_VALUE));
-					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_ORDER));
+					lists_writer.name(CasesProvider.KEY_KEYWORDS).value(cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
+					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_LIST_ITEM_ORDER));
+					lists_writer.name(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN).value(cursor.getString(CasesProvider.COL_LIST_ITEM_IS_HIDDEN));
 
 					lists_writer.endObject();
 
@@ -1319,8 +1323,9 @@ public class UtilClass extends Activity
 				{
 					lists_writer.beginObject();
 
-					lists_writer.name(CasesProvider.KEY_STUDY_TYPE).value(cursor.getString(CasesProvider.COL_VALUE));
-					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_ORDER));
+					lists_writer.name(CasesProvider.KEY_STUDY_TYPE).value(cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
+					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_LIST_ITEM_ORDER));
+					lists_writer.name(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN).value(cursor.getString(CasesProvider.COL_LIST_ITEM_IS_HIDDEN));
 
 					lists_writer.endObject();
 
@@ -1345,8 +1350,9 @@ public class UtilClass extends Activity
 				{
 					lists_writer.beginObject();
 
-					lists_writer.name(CasesProvider.KEY_SECTION).value(cursor.getString(CasesProvider.COL_VALUE));
-					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_ORDER));
+					lists_writer.name(CasesProvider.KEY_SECTION).value(cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
+					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_LIST_ITEM_ORDER));
+					lists_writer.name(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN).value(cursor.getString(CasesProvider.COL_LIST_ITEM_IS_HIDDEN));
 
 					lists_writer.endObject();
 

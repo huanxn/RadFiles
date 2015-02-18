@@ -14,7 +14,7 @@
 
         <!-- fading thumbnail header image -->
         <ImageView
-            android:id="@+id/header_image"
+            android:id="@+id/thumbnail"
             android:layout_width="match_parent"
             android:layout_height="@dimen/large_image_height"
             android:scaleType="centerCrop"
@@ -30,7 +30,7 @@
             android:id="@+id/detail_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/header_image"
+            android:layout_below="@id/thumbnail"
 
             android:background="@color/default_background_light_grey"
             android:orientation="vertical"

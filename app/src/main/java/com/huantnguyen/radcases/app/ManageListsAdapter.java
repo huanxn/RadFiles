@@ -2,9 +2,12 @@ package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -13,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,7 +24,6 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropM
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
 
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
 
 /**
@@ -38,6 +39,8 @@ public class ManageListsAdapter
 	private List<Boolean> isHiddenList;
 	private final String ADD_CUSTOM_TEXT = "Add new...";
 
+	private ViewHolder firstListItem;
+
 	// Provide a suitable constructor (depends on the kind of dataset)
 	public ManageListsAdapter(Activity activity, Cursor cursor)
 	{
@@ -50,10 +53,16 @@ public class ManageListsAdapter
 		{
 			do
 			{
-				itemList.add(cursor.getString(CasesProvider.COL_VALUE));
+				itemList.add(cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
 				keyList.add(cursor.getInt(CasesProvider.COL_ROWID));
-				//isHiddenList.add(cursor.getInt(CasesProvider.COL_HIDDEN));
-				isHiddenList.add(false);
+				if(cursor.getInt(CasesProvider.COL_LIST_ITEM_IS_HIDDEN) == 1)
+				{
+					isHiddenList.add(true);
+				}
+				else    // == 0
+				{
+					isHiddenList.add(false);    // visible
+				}
 
 			} while(cursor.moveToNext());
 		}
@@ -96,11 +105,6 @@ public class ManageListsAdapter
 			holder.mTextView.setTextColor(activity.getResources().getColor(R.color.text_dark));
 		}
 
-		//holder.mTextView.setClickable(true);
-
-		//holder.mTextView.setOnClickListener(this);
-		//holder.mTextView.setOnLongClickListener(this);
-
 		holder.mContainer.setOnClickListener(this);
 		holder.mContainer.setOnLongClickListener(this);
 
@@ -134,10 +138,17 @@ public class ManageListsAdapter
 
 	}
 
+	public ViewHolder getFirstViewHolder()
+	{
+
+		return null;
+	}
+
 	public void removeItem(int position)
 	{
 		itemList.remove(position);
 		keyList.remove(position);
+		isHiddenList.remove(position);
 	}
 
 	// Return the size of your dataset (invoked by the layout manager)
@@ -170,6 +181,15 @@ public class ManageListsAdapter
 	public int getKey(int position)
 	{
 		return keyList.get(position);
+	}
+
+	public int getIsHidden(int position)
+	{
+		if(isHiddenList.get(position))
+			return 1;
+		else            // false or null
+			return 0;
+
 	}
 
 	public void setKey(int position, int key_id)
@@ -221,6 +241,7 @@ public class ManageListsAdapter
 				{
 					itemList.add(ADD_CUSTOM_TEXT);
 					keyList.add(-1);
+					isHiddenList.add(false);
 
 					// add item to database and set key_id in ManageListsActivity
 					notifyItemInserted(position);
@@ -285,6 +306,7 @@ public class ManageListsAdapter
 								// hide list item
 								case 0:
 
+									ContentValues values = new ContentValues();
 									// toggle
 									if(isHiddenList.get(holder.getPosition()))
 									{
@@ -295,7 +317,7 @@ public class ManageListsAdapter
 										isHiddenList.set(holder.getPosition(), true);
 									}
 
-									// TODO change database
+									// change database in ManageListsActivity
 									notifyItemChanged(position);
 
 									break;

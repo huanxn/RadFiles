@@ -23,6 +23,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.decoration.ItemShadowDecorator;
@@ -73,11 +75,122 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.menu_addnew) {
+		if (id == R.id.menu_addnew)
+		{
 			UtilClass.showMessage(this, "placeholder: add new item");
 			return true;
 		}
+		else if(id == R.id.menu_help)
+		{
+			runTutorial(1);
+		}
+
+
+
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void runTutorial(final int step)
+	{
+		if (step == 1)
+		{
+			View viewTarget = fragment.rootView.findViewById(R.id.tabs);
+
+			if (viewTarget != null)
+			{
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  .setTarget(new ViewTarget(viewTarget))
+						                                  .setContentTitle("Select a list")
+						                                  .setContentText("Swipe or click the tabs to select a list.")
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+
+			}
+		}
+		else if (step == 2)
+		{
+			//LinearLayoutManager layoutManager = ((LinearLayoutManager) )
+			//((TabbedFragment.TabbedContentFragment) ((TabbedFragment.SectionsPagerAdapter) fragment.mSectionsPagerAdapter).mCurrentPrimaryItem).mRecyclerView.findViewHolderForPosition(0);
+			//View viewTarget = ((ManageListsAdapter.ViewHolder)((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getItem(fragment.mViewPager.getCurrentItem())).mRecyclerView.findViewHolderForPosition(0)).mTextView;
+			View viewTarget = fragment.mSectionsPagerAdapter.getItem(fragment.mViewPager.getCurrentItem()).getView();
+
+			if (viewTarget != null)
+			{
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+						                                  .setTarget(new ViewTarget(viewTarget))
+						                                  .setContentTitle("Edit list item")
+						                                  .setContentText("Click to edit the list item.\n\nLong press for more options.\nHiding will remove the item from drop-down lists, but will remain for sorting and searching.")
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+			}
+		}
+		else if (step == 3)
+		{
+			View viewTarget = ((ManageListsAdapter.ViewHolder)((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getItem(0)).mRecyclerView.findViewHolderForPosition(0)).mHandle;
+
+			if (viewTarget != null)
+			{
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
+						                                  .setTarget(new ViewTarget(viewTarget))
+						                                  .setContentTitle("Sort list items")
+						                                  .setContentText("Drag the handle up or down to change the order of list items.")
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+
+				//			showcaseView.setShouldCentreText(true);
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+			}
+		}
+
+		else if (step == 4)
+		{
+			/*
+			View viewTarget = ((ManageListsAdapter.ViewHolder)((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getItem(0)).mRecyclerView.findViewHolderForPosition(??)).mTextView;
+
+			if (viewTarget != null)
+			{
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  .setTarget(new ViewTarget(viewTarget))
+						                                  .setContentTitle("Add new item")
+						                                  .setContentText("Click to add a new item to the list.")
+						                                  .setStyle(R.style.CustomShowcaseThemeEnd)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+			}
+			*/
+		}
 	}
 
 	public static class TabbedFragment extends Fragment
@@ -101,6 +214,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		ViewPager mViewPager;
 
 		static Activity activity;
+		private View rootView;
 
 
 		public TabbedFragment newInstance()
@@ -138,6 +252,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 			//TypedValue textColor = new TypedValue();
 			//tabs.setDividerColor(textColor.);
 
+			rootView = view;
 			return view;
 		}
 
@@ -287,6 +402,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						ContentValues values = new ContentValues();
 
 						values.put(tableKEY, newItemString);
+						values.put(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN, mListAdapter.getIsHidden(positionStart));
+
 						//todo hidden flag
 						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));
 						activity.getContentResolver().update(row_uri, values, null, null);

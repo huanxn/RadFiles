@@ -49,7 +49,7 @@ dependencies {
     compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'    // Roboto Text font in toolbar title, etc
 
 
-    //compile 'com.nispok:snackbar:2.7.5' //snack bar better?  can't compile
+    compile 'com.nispok:snackbar:2.9.0' //snack bar better?  can't compile
 
     compile 'com.github.navasmdc:MaterialDesign:1.+@aar'    // snack bar no good, progress bar
     compile 'com.nineoldandroids:library:2.4.0' // gradle error?  need for MaterialDesignLibrary indeterminate progress bar

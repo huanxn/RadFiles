@@ -2,11 +2,14 @@ package com.huantnguyen.radcases.app;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import java.io.File;
 
@@ -49,31 +52,70 @@ public class ImageAdapter extends BaseAdapter
 		return imageIDs[position];
 	}
 
+
+	public class Holder
+	{
+		TextView captionTextView;
+		ImageView imageView;
+	}
+
 	// create a new ImageView for each item referenced by the Adapter
 	public View getView(int position, View convertView, ViewGroup parent)
 	{
-		ImageView imageView;
+		Holder holder = new Holder();
+		View view;
+
+	//	ImageView imageView;
 
 		if (convertView == null)
-		{  // if it's not recycled, initialize some attributes
+		{
+			// if it's not recycled, initialize some attributes
+
+			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			view = inflater.inflate(R.layout.key_image_caption, parent, false);
+			holder.captionTextView = (TextView) view.findViewById(R.id.imageCaption);
+
+			holder.imageView = (ImageView) view.findViewById(R.id.image);
+
+			if(getImageCaption(position) != null && !getImageCaption(position).contentEquals(""))
+			{
+				holder.captionTextView.setVisibility(View.VISIBLE);
+			}
+			else
+			{
+				holder.captionTextView.setVisibility(View.GONE);
+			}
+
+			//holder.imageView.setLayoutParams(new GridView.LayoutParams(imageSizePx, imageSizePx));
+
+			view.setLayoutParams(new GridView.LayoutParams(imageSizePx,imageSizePx));
+
+			/*
 			imageView = new ImageView(mContext);
 			imageView.setLayoutParams(new GridView.LayoutParams(imageSizePx, imageSizePx));
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			imageView.setPadding(1, 1, 1, 1);
+			*/
+
 		}
 		else
 		{
-			imageView = (ImageView) convertView;
+			//imageView = (ImageView) convertView;
+
+			view = convertView;
+			holder.captionTextView = (TextView) view.findViewById(R.id.imageCaption);
+			holder.imageView = (ImageView) view.findViewById(R.id.image);
 		}
 
 		if(firstImageView == null)
 		{
-			firstImageView = imageView;
+			firstImageView = holder.imageView;
 		}
 
-		UtilClass.setPic(imageView, imageFilepaths[position], UtilClass.IMAGE_SIZE);
+		UtilClass.setPic(holder.imageView, imageFilepaths[position], UtilClass.IMAGE_SIZE);
+		holder.captionTextView.setText(getImageCaption(position));
 
-		return imageView;
+		return view;
 	}
 
 	// set initial images with cursor
@@ -114,11 +156,7 @@ public class ImageAdapter extends BaseAdapter
 	// add temporary images to grid into string array
 	public void addImage(String newImageFilename)
 	{
-		imageFilepaths = UtilClass.addArrayElement(imageFilepaths, newImageFilename);
-		imageCaptions = UtilClass.addArrayElement(imageCaptions, null);
-		imageIDs = UtilClass.addArrayElement(imageIDs, -1);  // temporary image, with no rowID in the database table
-
-		notifyDataSetChanged();
+		addImage(newImageFilename, -1);
 	}
 
 	// add permanent image to grid into string array

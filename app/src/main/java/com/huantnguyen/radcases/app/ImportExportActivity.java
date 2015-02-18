@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +26,10 @@ import android.widget.Toast;
 
 import com.gc.materialdesign.views.ProgressBarIndeterminateDeterminate;
 import com.gc.materialdesign.widgets.ProgressDialog;
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.SnackbarManager;
+import com.nispok.snackbar.enums.SnackbarType;
+import com.nispok.snackbar.listeners.ActionClickListener;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,9 +54,10 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 	final static String ARG_IMPORT_URI = "com.huan.t.nguyen.radcases.ARG_IMPORT_URI";
 
 	//final static int REQUEST_SELECT_BACKUP_FILE = 0;
-	final static int REQUEST_SELECT_CSV_FILE = 1;
+	final static int REQUEST_SELECT_IMPORT_CASES_FILE = 1;
 	final static int REQUEST_LIST_JSON_FILE = 2;
 	final static int REQUEST_IMPORT_CASES = 3;
+	final static int REQUEST_EXPORT_CASES_SAF = 4;
 
 	// for uploading to cloud
 	private File local_file_to_cloud;
@@ -206,203 +212,9 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 
 		switch (view.getId())
 		{
-/*
-			case R.id.backup_button:
 
-				filename = "RadBackup (" + timeStamp + ")";
-				input.setText(filename);
-				alert.setView(input);
-
-				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						String value = input.getText().toString();
-						exportFilename = value + RDB_EXTENSION;
-						exportMIMEtype = RDB_MIMETYPE;
-
-						// backup SQLite file
-						local_file_to_cloud = backupDB(value);
-
-						if(local_file_to_cloud != null)
-						{
-							// Show the Google Drive interface to choose filename and location to create cloud backup file
-							Drive.DriveApi.newDriveContents(getGoogleApiClient())
-									.setResultCallback(driveCreateCopyCallback);
-
-							Toast.makeText(getApplicationContext(), "Saved data to " + local_file_to_cloud.getPath(), Toast.LENGTH_LONG).show();
-						}
-
-					}
-				});
-
-				alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Canceled.
-					}
-				});
-
-				//alert.show();
-				dialog = alert.create();
-				// Show keyboard
-				dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-					@Override
-					public void onShow(DialogInterface dialog) {
-						InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
-					}
-				});
-				dialog.show();
-
-				break;
-
-			case R.id.restore_button:
-				Intent restoreIntent = new Intent();
-				//restoreIntent.setType("DOWNLOADS/*.db");
-				restoreIntent.setDataAndType(Uri.parse(backupDir.getPath()), RDB_MIMETYPE);
-				restoreIntent.setAction(Intent.ACTION_GET_CONTENT);
-				//intent.putExtra("image_filename", filename);
-				startActivityForResult(Intent.createChooser(restoreIntent,"Select Backup File"), REQUEST_SELECT_BACKUP_FILE);
-
-				break;
-
-
-
-			case R.id.exportCSV_button:
-
-				filename = "RadExport (" + timeStamp + ")";
-				input.setText(filename);
-				alert.setView(input);
-
-				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						String value = input.getText().toString();
-						exportFilename = value + RCS_EXTENSION;
-						//exportMIMEtype = "application/zip";
-						exportMIMEtype = RCS_MIMETYPE;
-
-						// create CSV file
-						local_file_to_cloud = exportCasesCSV(value);
-						if(local_file_to_cloud != null)
-						{
-							// Show the Google Drive interface to choose filename and location to create cloud backup file
-							Drive.DriveApi.newDriveContents(getGoogleApiClient())
-									.setResultCallback(driveCreateCopyCallback);
-
-							Toast.makeText(getApplicationContext(), "Saved data to " + local_file_to_cloud.getPath(), Toast.LENGTH_LONG).show();
-						}
-					}
-				});
-
-				alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// Canceled.
-					}
-				});
-
-				//alert.show();
-				dialog = alert.create();
-				// Show keyboard
-				dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-					@Override
-					public void onShow(DialogInterface dialog) {
-						InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
-					}
-				});
-				dialog.show();
-
-
-				break;
-
-
-
-			case R.id.importCSV_button:
-
-				Intent importIntent = new Intent();
-				//importIntent.setType("DOWNLOADS/*.csv");
-				//importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "application/zip");
-				importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), RCS_MIMETYPE);
-				importIntent.setAction(Intent.ACTION_GET_CONTENT);
-				//intent.putExtra("image_filename", filename);
-				startActivityForResult(Intent.createChooser(importIntent,"Select Cases File"), REQUEST_SELECT_CSV_FILE);
-
-				break;
-
-			case R.id.exportList_button:
-				UtilClass.exportListsJSON(this, "RadLists.json");
-				break;
-
-			case R.id.importList_button:
-				Intent importListIntent = new Intent();
-				//importIntent.setType("DOWNLOADS/*.csv");
-				//importIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "application/zip");
-				importListIntent.setDataAndType(Uri.parse(CSV_dir.getPath()), "text/plain");
-				importListIntent.setAction(Intent.ACTION_GET_CONTENT);
-				//intent.putExtra("image_filename", filename);
-				startActivityForResult(Intent.createChooser(importListIntent,"Select Cases File"), REQUEST_LIST_JSON_FILE);
-				break;
-*/
 			case R.id.fix_DB_button:
 
-				/*
-				//change path to just filename
-				Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, null, null, null);
-				String path;
-				String name;
-				ContentValues updateImageValues = new ContentValues();
-
-				String row_id;
-
-				if(imageCursor.moveToFirst())
-				{
-					do
-					{
-						row_id = imageCursor.getString(CasesProvider.COL_ROWID);
-						path = imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-						name = new File(path).getName();
-
-
-						// input all columns for this case, except row_id
-						updateImageValues.clear();
-						updateImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, name);
-
-						getContentResolver().update(CasesProvider.IMAGES_URI, updateImageValues, CasesProvider.KEY_ROWID + " = ?", new String [] {row_id});
-
-
-					} while(imageCursor.moveToNext());
-
-					imageCursor.close();
-				}
-				*/
-
-				Cursor caseCursor = getContentResolver().query(CasesProvider.CASES_URI, null,
-						                                              CasesProvider.KEY_LAST_MODIFIED_DATE + " IS NULL OR " + CasesProvider.KEY_LAST_MODIFIED_DATE + "= ?", new String[]{""},
-						                                              null);
-
-				ContentValues updateValues = new ContentValues();
-				String date;
-
-				String row_id;
-
-				if (caseCursor.moveToFirst())
-				{
-					do
-					{
-						row_id = caseCursor.getString(CasesProvider.COL_ROWID);
-						date = caseCursor.getString(CasesProvider.COL_DATE);
-
-						// input all columns for this case, except row_id
-						updateValues.clear();
-						updateValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, date);
-
-						getContentResolver().update(CasesProvider.CASES_URI, updateValues, CasesProvider.KEY_ROWID + " = ?", new String[]{row_id});
-
-
-					} while (caseCursor.moveToNext());
-
-					caseCursor.close();
-				}
-
-				UtilClass.showMessage(this, "added modified date");
 
 
 				break;
@@ -420,12 +232,38 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 		// Create an image file name based on timestamp
 		//String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmm").format(new Date());
 		String timeStamp = new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date());
+		filename = "RadFiles (" + timeStamp + ")";
 
+		/*
+		// would need to disable ACTION_GET_CONTENT in manifext for 4.4+
+		// https://developer.android.com/guide/topics/providers/document-provider.html
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+		{
+			exportFilename = filename + RCS_EXTENSION;
+			exportMIMEtype = RCS_MIMETYPE;
+
+			// Storage Access Framework
+			Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+
+			// Filter to only show results that can be "opened", such as
+			// a file (as opposed to a list of contacts or timezones).
+			intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+			// Create a file with the requested MIME type.
+			exportFilename = "" + RCS_EXTENSION;
+			exportMIMEtype = RCS_MIMETYPE;
+
+			intent.setType(exportMIMEtype);
+			intent.putExtra(Intent.EXTRA_TITLE, exportFilename);
+			startActivityForResult(intent, REQUEST_EXPORT_CASES_SAF);
+		}
+		*/
+
+		// no Storage Access Framework pre KITKAT
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
 		final Activity activity = this;
 
-		filename = "RadFiles (" + timeStamp + ")";
 		input.setText(filename);
 		input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 		alertBuilder.setView(input);
@@ -449,11 +287,6 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 
 				progressBar = (ProgressBarIndeterminateDeterminate) dialoglayout.findViewById(R.id.progress_bar);
 				progressBar.setMin(0);
-
-				/*
-				ProgressDialog progressDialog2 = new ProgressDialog(activity, "Exporting", getResources().getColor(R.color.default_colorAccent));
-				progressDialog2.show();
-				*/
 
 				Thread exportThread = new Thread() {
 					@Override
@@ -494,11 +327,6 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 					}
 				};
 				exportThread.start();
-
-				// create CSV file
-				//local_file_to_cloud = UtilClass.exportCasesJSON(activity, value, null); //exportCasesCSV(value);
-
-
 
 			}
 		});
@@ -571,7 +399,7 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 
 				try
 				{
-					startActivity(Intent.createChooser(shareIntent, "Save cases to..."));
+					startActivity(Intent.createChooser(shareIntent, "Save lists to..."));
 				}
 				catch (android.content.ActivityNotFoundException ex)
 				{
@@ -605,165 +433,13 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 
 	}
 
-	/////////////////////
-/*
-	//importing database
-	private void restoreDB(File inFile)
-	{
-		// unzip image files and db files
-		try
-		{
-			// unzip image files to android pictures directory
-			UtilsFile.unzip(inFile.getPath(), picturesDir.getPath());
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Toast.makeText(this, "Unable to open bak file:", Toast.LENGTH_SHORT).show();
-			return;
-		}
-
-		File tempBackupDB = null;
-		try
-		{
-			// open existing file that should have been unzipped
-			tempBackupDB = new File(picturesDir, DB_FILENAME);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			Toast.makeText(this, "Unable to copy CSV file", Toast.LENGTH_SHORT).show();
-			return;
-		}
-
-		try
-		{
-			//File sd = Environment.getExternalStorageDirectory();
-			//File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
-			//File data  = Environment.getDataDirectory();
-
-			String currentDBDirPath = "//data//" + getPackageName() + "//databases//";
-			File currentDBDir = new File(dataDir, currentDBDirPath);
-
-			if (currentDBDir.canWrite())
-			{
-				// If successfully opened file, // todo delete old image files
-
-				String currentDBPath = "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
-				File currentDB = new File(dataDir, currentDBPath);
-				//File  backupDB = new File(picturesDir, DB_FILENAME);
-
-				FileChannel src = new FileInputStream(tempBackupDB).getChannel();
-				FileChannel dst = new FileOutputStream(currentDB).getChannel();
-
-				dst.transferFrom(src, 0, src.size());
-				src.close();
-				dst.close();
-			}
-		}
-		catch (Exception e)
-		{
-
-			Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
-					.show();
-
-		}
-		tempBackupDB.delete();
-
-	}
-
-	//exporting database
-	private File backupDB(String backupFilename)
-	{
-		// TODO Auto-generated method stub
-
-		File returnFile = null;
-
-		try
-		{
-			if (appDir.canWrite())
-			{
-				String currentDBPath = "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
-				File currentDB_file = new File(dataDir, currentDBPath);
-
-				//String backupDBPath  = "/Backup/" + DB_FILENAME;
-				//File backupDB_file = new File(appDir, backupDBPath);
-				File backupDB_file = new File(backupDir, DB_FILENAME);
-
-				//String backupDirPath  = "/Backup/";
-				//File backupDir = new File(appDir, backupDirPath);
-
-				if (!backupDir.exists())
-				{
-					if (backupDir.mkdirs())
-					{
-						Toast.makeText(this, "Created directory: " + backupDir.getPath(), Toast.LENGTH_LONG).show();
-					}
-					else
-					{
-						Toast.makeText(this, "Unable to create directory: " + backupDir.getPath(), Toast.LENGTH_LONG).show();
-					}
-
-				}
-
-				FileChannel src = new FileInputStream(currentDB_file).getChannel();
-				FileChannel dst = new FileOutputStream(backupDB_file).getChannel();
-				dst.transferFrom(src, 0, src.size());
-				src.close();
-				dst.close();
-				Toast.makeText(getBaseContext(), backupDB_file.toString(), Toast.LENGTH_LONG).show();
-
-
-				// to zip all images into a file for backup
-				String zip_files_array[] = new String[0];
-
-				// get image filenames
-				//String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
-				Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, null, null, CasesProvider.KEY_ORDER);
-
-				// store image filenames in string array for zip
-				if (imageCursor.moveToFirst())
-				{
-					do
-					{
-						zip_files_array = UtilClass.addArrayElement(zip_files_array, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-
-					} while (imageCursor.moveToNext());
-				}
-
-				imageCursor.close();
-
-				// add the SQL database file
-				zip_files_array = UtilClass.addArrayElement(zip_files_array, backupDB_file.getPath());
-
-				// zip image and csv files
-				String zip_filename = backupDir.getPath() + "/" + backupFilename + RDB_EXTENSION;
-				// return the zip file
-				returnFile = UtilsFile.zip(zip_files_array, zip_filename);
-
-				// delete db file (copy in zip)
-				backupDB_file.delete();
-
-			}
-		}
-		catch (Exception e)
-		{
-
-			Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG).show();
-			return null;
-
-		}
-
-		// success
-		return returnFile;
-	}
-*/
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent resultData)
 	{
 		switch (requestCode)
 		{
-			case UtilsFile.WRITE_REQUEST_CODE:
+			/*
+			case REQUEST_EXPORT_CASES_SAF:
 				if(resultCode == Activity.RESULT_OK)
 				{
 					Uri uri = null;
@@ -775,84 +451,10 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 					}
 				}
 				break;
-			/*
-			// Restore DB
-			case REQUEST_SELECT_BACKUP_FILE:
-				if (resultCode == RESULT_OK)
-				{
-					String restoreFilename;
+				*/
 
-
-					//fragment.progressBar.progressiveStart();
-
-					// Get the Uri of the selected file
-					Uri uri = data.getData();
-					//String filename = data.getStringExtra()
-					Log.d(TAG, "File Uri: " + uri.toString());
-					// Get the path
-					//	String path = FileUtils.getPath(this, uri);
-					restoreFilename = uri.getPath();
-					Log.d(TAG, "File Uri: " + restoreFilename);
-
-					// copy drive file uri content to new local file
-
-					// create new local file
-					File tempRestoreFile = null;
-					try
-					{
-						tempRestoreFile = File.createTempFile("RadCases", ".zip", downloadsDir);
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						UtilClass.showMessage(this, "Unable to create temporary file.");
-					}
-
-					FileOutputStream outputStream = null;
-					FileInputStream inputStream = null;
-					try
-					{
-						// Google Drive file
-						inputStream = (FileInputStream) getContentResolver().openInputStream(uri);
-
-						// new local file
-						outputStream = new FileOutputStream(tempRestoreFile);
-
-						// copy backup file contents to local file
-						UtilsFile.copyFile(outputStream, inputStream);
-					}
-					catch (FileNotFoundException e)
-					{
-						e.printStackTrace();
-						UtilClass.showMessage(this, "local file not found");
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-						UtilClass.showMessage(this, "Copy backup to Google Drive: IO exception");
-						UtilClass.showMessage(this, "cannot open input stream from selected uri");
-					}
-
-					//	Log.d(TAG, "File Path: " + path);
-					// Get the file instance
-					// File file = new File(path);
-					// Initiate the upload
-
-					//File restoreFile = new File(restoreFilename);
-					//importCasesJSON(restoreFile);
-
-					restoreDB(tempRestoreFile);
-
-					// delete the temporary file
-					tempRestoreFile.delete();
-
-					//fragment.progressBar.progressiveStop();
-
-				}
-				break;
-*/
-			// Import CSV
-			case REQUEST_SELECT_CSV_FILE:
+			// Import JSON
+			case REQUEST_SELECT_IMPORT_CASES_FILE:
 				if (resultCode == RESULT_OK)
 				{
 					// Get the Uri of the selected file
@@ -868,13 +470,7 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 
 				}
 				break;
-			/*
-			case REQUEST_IMPORT_CASES:
 
-				//setResult();??
-
-				break;
-			*/
 
 			// import list JSON file
 			case REQUEST_LIST_JSON_FILE:
@@ -1024,7 +620,7 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 					importIntent.setDataAndType(Uri.parse(activity.getCacheDir().getPath()), RCS_MIMETYPE);
 					importIntent.setAction(Intent.ACTION_GET_CONTENT);
 					//intent.putExtra("image_filename", filename);
-					getActivity().startActivityForResult(Intent.createChooser(importIntent, "Select Cases File"), REQUEST_SELECT_CSV_FILE);
+					getActivity().startActivityForResult(Intent.createChooser(importIntent, "Select Cases File"), REQUEST_SELECT_IMPORT_CASES_FILE);
 				}
 			});
 
@@ -1049,7 +645,25 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 				@Override
 				public void onClick(View v)
 				{
-					UtilClass.showMessage(activity, "In the main case list, long press on a case to start sharing.");
+					SnackbarManager.show(Snackbar.with(activity)
+							                     .type(SnackbarType.MULTI_LINE)
+							                     .text("In the main case list, long press on a case to start sharing.")
+							                     .duration(Snackbar.SnackbarDuration.LENGTH_LONG)
+							                     .actionLabel("GO")
+							                     .actionColor(Color.GREEN) // action button label color
+							                     .actionListener(new ActionClickListener()
+							                     {
+								                     @Override
+								                     public void onActionClicked(Snackbar snackbar)
+								                     {
+									                     Intent intent = new Intent(activity, CaseCardListActivity.class);
+									                     activity.startActivity(intent);
+
+									                     activity.finish();
+								                     }
+							                     }));
+
+					//UtilClass.showMessage(activity, "In the main case list, long press on a case to start sharing.");
 				}
 			});
 

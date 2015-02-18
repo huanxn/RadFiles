@@ -124,6 +124,11 @@ public class CasesProvider extends ContentProvider
 	public static final String KEY_IMAGE_DETAILS = "IMAGE_DETAILS";
 	public static final String KEY_IMAGE_CAPTION = "IMAGE_CAPTION";
 
+	// list tables
+	// KEY_ // keywords, modality, section
+	// KEY_ORDER
+	public static final String KEY_LIST_ITEM_IS_HIDDEN = "LIST_ITEM_IS_HIDDEN";
+
 
 	/*
 	 * modified date
@@ -152,8 +157,9 @@ public class CasesProvider extends ContentProvider
 	public static final int COL_LAST_MODIFIED_DATE = 16;
 
 	// for secondary list tables.  study_type tables
-	public static final int COL_VALUE = 1;
-	public static final int COL_ORDER = 2;  // sorting
+	public static final int COL_LIST_ITEM_VALUE = 1;
+	public static final int COL_LIST_ITEM_ORDER = 2;  // sorting
+	public static final int COL_LIST_ITEM_IS_HIDDEN = 3;
 
 	// for images table
 	public static final int COL_IMAGE_PARENT_CASE_ID = 1; // from Cases table
@@ -192,7 +198,7 @@ public class CasesProvider extends ContentProvider
 
 
 	// Track DB version if a new version of your app changes the format.
-	public static final int DATABASE_VERSION = 34;
+	public static final int DATABASE_VERSION = 38;
 
 	private static final String CASES_TABLE_CREATE_SQL =
 			"create table " + CASES_TABLE
@@ -240,28 +246,31 @@ public class CasesProvider extends ContentProvider
 					+ KEY_IMAGE_CAPTION + " text"
 					+ ");";
 
-	// list of image files, with links to parent "Cases" table
+	// to generate list of available Sections
 	private static final String SECTION_LIST_TABLE_CREATE_SQL =
 			"create table " + SECTION_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
-					+ KEY_SECTION + " integer, " // COL_VALUE
-					+ KEY_ORDER + " integer"
+					+ KEY_SECTION + " integer, " // COL_LIST_ITEM_VALUE
+					+ KEY_ORDER + " integer, "
+					+ KEY_LIST_ITEM_IS_HIDDEN + " integer DEFAULT 0"
 					+ ");";
 
 	// to generate list of available Key Words
 	private static final String KEYWORD_LIST_TABLE_CREATE_SQL =
 			"create table " + KEYWORD_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
-					+ KEY_KEYWORDS + " text, " // COL_VALUE
-					+ KEY_ORDER + " integer"
+					+ KEY_KEYWORDS + " text, " // COL_LIST_ITEM_VALUE
+					+ KEY_ORDER + " integer, "
+					+ KEY_LIST_ITEM_IS_HIDDEN + " integer DEFAULT 0"
 					+ ");";
 
 	// to generate list of available Study Types
 	private static final String STUDYTYPE_LIST_TABLE_CREATE_SQL =
 			"create table " + STUDYTYPE_LIST_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
-					+ KEY_STUDY_TYPE + " text, " // COL_VALUE
-					+ KEY_ORDER + " integer"
+					+ KEY_STUDY_TYPE + " text, " // COL_LIST_ITEM_VALUE
+					+ KEY_ORDER + " integer, "
+					+ KEY_LIST_ITEM_IS_HIDDEN + " integer DEFAULT 0"
 					+ ");";
 
 

@@ -17,6 +17,8 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 
+import com.nispok.snackbar.Snackbar;
+
 import java.io.File;
 import java.util.ArrayList;
 
@@ -168,6 +170,7 @@ public class ImageGridView
 
 												// update mAdapter
 												mAdapter.setImageCaption(image_position, input.getText().toString());
+												mAdapter.notifyDataSetChanged();
 											}
 										});
 
@@ -191,6 +194,7 @@ public class ImageGridView
 											}
 										});
 										editTextDialog.show();
+
 
 										act.setResult(CaseCardListActivity.RESULT_EDITED);
 
@@ -297,6 +301,8 @@ public class ImageGridView
 													// update last modified date field
 													UtilClass.updateLastModifiedDate(act, case_id);
 
+													UtilClass.showMessage(activity, "Image deleted.");
+
 													act.setResult(CaseCardListActivity.RESULT_EDITED);
 												}
 											});
@@ -340,8 +346,8 @@ public class ImageGridView
 		int numCols = 2;
 		int itemCount = mAdapter.getCount();
 
-		//int itemHeight = mAdapter.getImageSizePx();
-		int itemHeight = UtilClass.IMAGE_GRID_SIZE;
+		int itemHeight = mAdapter.getImageSizePx();
+		//int itemHeight = UtilClass.IMAGE_GRID_SIZE;
 
 		int numRows = itemCount/numCols;
 		if(itemCount%numCols > 0)
@@ -351,7 +357,7 @@ public class ImageGridView
 
 
 		//layoutParams.height = convertDpToPixels(context, IMAGE_GRID_SIZE*numRows); //this is in pixels
-		layoutParams.height = itemHeight*numRows; //this is in pixels
+		layoutParams.height = (itemHeight)*numRows; //this is in pixels
 
 
 		gridView.setLayoutParams(layoutParams);
@@ -364,9 +370,7 @@ public class ImageGridView
 
 	public void addImage(String newImage)
 	{
-		mAdapter.addImage(newImage);
-		notifyDataSetChanged();
-		Resize();
+		addImage(newImage, -1);
 	}
 
 	public void addImage(String newImage, long newID)
@@ -374,6 +378,8 @@ public class ImageGridView
 		mAdapter.addImage(newImage, newID);
 		notifyDataSetChanged();
 		Resize();
+
+		UtilClass.showMessage(activity, "New image saved.");
 	}
 
 	public int getCount()

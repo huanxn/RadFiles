@@ -1,6 +1,7 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.SearchManager;
@@ -13,6 +14,7 @@ import android.database.MergeCursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -35,6 +37,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -660,30 +663,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 		else if(step == 5)
 		{
-			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-					                                  .setTarget( new ViewTarget(mOverflowTarget) )
-							                                   //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
-					                                  .setContentTitle("Overflow menu")
-					                                  .setContentText("More menu options here.\n\nClick the Help button to see this tutorial again.")
-					                                  .setStyle(R.style.CustomShowcaseTheme)
-					                                  .hideOnTouchOutside()
-					                                  .build();
-/*
-			showcaseView.setShowcaseX((int)UtilClass.getDisplayWidthPx(this));
-			showcaseView.setShowcaseY(UtilClass.getToolbarHeight(this));
-*/
-			showcaseView.overrideButtonClick(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					showcaseView.hide();
-					runTutorial(step + 1);
-				}
-			});
-		}
-		else if(step == 6)
-		{
 			final Target viewTarget = new Target() {
 				@Override
 				public Point getPoint() {
@@ -705,14 +684,36 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 			};
 
-			new ShowcaseView.Builder(this)
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
 					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
 					.setTarget(viewTarget)
 					.setContentTitle("Navigation Drawer")
 					.setContentText("Click here or swipe from the left to open the navigation drawer.")
-					.setStyle(R.style.CustomShowcaseThemeEnd)
+					.setStyle(R.style.CustomShowcaseTheme)
 					.hideOnTouchOutside()
 					.build();
+
+			showcaseView.overrideButtonClick(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					showcaseView.hide();
+					runTutorial(step + 1);
+				}
+			});
+
+		}
+		else if(step == 6)
+		{
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+					                                  .setTarget( new ViewTarget(mOverflowTarget) )
+							                                   //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
+					                                  .setContentTitle("Overflow menu")
+					                                  .setContentText("More menu options here.\n\nClick the Help button to see this tutorial again.")
+					                                  .setStyle(R.style.CustomShowcaseThemeEnd)
+					                                  .hideOnTouchOutside()
+					                                  .build();
 
 		}
 	}
@@ -899,7 +900,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 							do
 							{
 								// get the KEY_SECTION name
-								String mSection = section_cursor.getString(CasesProvider.COL_VALUE);
+								String mSection = section_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE);
 
 								// find all cases with this KEY_SECTION
 								case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_SECTION + " LIKE ?", new String[]{"%" + mSection + "%"}, CasesProvider.KEY_DATE + " DESC", null);
@@ -1075,7 +1076,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 							do
 							{
 								// get the KEYWORD name
-								String mKeyword = keywords_cursor.getString(CasesProvider.COL_VALUE);
+								String mKeyword = keywords_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE);
 
 								// find all cases with this KEY_KEYWORDS
 								case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ?", new String[]{"%" + mKeyword + "%"}, CasesProvider.KEY_ROWID + " DESC", null);
@@ -1329,8 +1330,18 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 						detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, false);
 
-						//activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS, options.toBundle());
-						activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+						//TODO check if this works on lollipop
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+						{
+							// get the common element for the transition in this activity
+							final ImageView thumbnail_header = holder.thumbnail;
+							ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, thumbnail_header, "thumbnail");
+							activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS, options.toBundle());
+						}
+						else
+						{
+							activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+						}
 					}
 					else
 					{
@@ -1437,7 +1448,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 				progressDialog.dismiss();
 
-				UtilClass.showMessage(activity, "Deleted " + numDeleted + " cases.");
+				if(numDeleted == 1)
+				{
+					UtilClass.showMessage(activity, "Deleted 1 case.");
+				}
+				else
+				{
+					UtilClass.showMessage(activity, "Deleted " + numDeleted + " cases.");
+				}
 			}
 		} // end DeleteCasesTask
 
