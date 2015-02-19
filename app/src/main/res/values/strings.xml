@@ -65,6 +65,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="remove_star">Remove Star</string>
     <string name="add_star">Add Star</string>
+    <string name="action_clear_cache">Clear cache</string>
 
 
     <string-array name="nav_drawer_array">

@@ -17,16 +17,12 @@
         <TextView
             android:id="@+id/item_text"
             style="@style/listSortable"
-            android:layout_weight="1"
             android:text="list item text"/>
 
-        <ImageButton
-            android:id="@+id/discard_button"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:clickable="true"
-            android:src="@drawable/ic_close_circle_grey600_18dp"
+        <TextView
+            style="@style/listSortable"
+            android:text="filler"
+            android:layout_weight="1"
             android:visibility="invisible"/>
 
         <ImageView

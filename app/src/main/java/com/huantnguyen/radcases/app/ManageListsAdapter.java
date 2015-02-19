@@ -39,7 +39,8 @@ public class ManageListsAdapter
 	private List<Boolean> isHiddenList;
 	private final String ADD_CUSTOM_TEXT = "Add new...";
 
-	private ViewHolder firstListItem;
+	private ViewHolder firstViewHolder = null;
+	private ViewHolder lastViewHolder = null;
 
 	// Provide a suitable constructor (depends on the kind of dataset)
 	public ManageListsAdapter(Activity activity, Cursor cursor)
@@ -113,6 +114,8 @@ public class ManageListsAdapter
 		{
 			//holder.mHandle.setImageDrawable(activity.getDrawable(R.drawable.ic_plus_circle_grey600_18dp));
 			holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.huantnguyen.radcases.app:drawable/ic_plus_circle_grey600_18dp", null, null));
+
+			lastViewHolder = holder;
 		}
 		else
 		{
@@ -136,12 +139,24 @@ public class ManageListsAdapter
 			holder.mContainer.setBackgroundResource(bgResId);
 		}
 
+		if(firstViewHolder == null)
+			firstViewHolder = holder;
+
+
 	}
 
+	// for ShowcaseView tutorials
 	public ViewHolder getFirstViewHolder()
 	{
-
-		return null;
+		return firstViewHolder;
+	}
+	public ViewHolder getLastViewHolder()
+	{
+		return lastViewHolder;
+	}
+	public int getLastViewPosition()
+	{
+		return itemList.size()-1;
 	}
 
 	public void removeItem(int position)

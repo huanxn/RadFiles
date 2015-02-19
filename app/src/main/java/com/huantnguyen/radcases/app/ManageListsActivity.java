@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -122,7 +123,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 			//LinearLayoutManager layoutManager = ((LinearLayoutManager) )
 			//((TabbedFragment.TabbedContentFragment) ((TabbedFragment.SectionsPagerAdapter) fragment.mSectionsPagerAdapter).mCurrentPrimaryItem).mRecyclerView.findViewHolderForPosition(0);
 			//View viewTarget = ((ManageListsAdapter.ViewHolder)((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getItem(fragment.mViewPager.getCurrentItem())).mRecyclerView.findViewHolderForPosition(0)).mTextView;
-			View viewTarget = fragment.mSectionsPagerAdapter.getItem(fragment.mViewPager.getCurrentItem()).getView();
+			View viewTarget = ((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).getListItemTextView();
 
 			if (viewTarget != null)
 			{
@@ -130,7 +131,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						                                  //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
 						                                  .setTarget(new ViewTarget(viewTarget))
 						                                  .setContentTitle("Edit list item")
-						                                  .setContentText("Click to edit the list item.\n\nLong press for more options.\nHiding will remove the item from drop-down lists, but will remain for sorting and searching.")
+						                                  .setContentText("Click to edit the list item.\n\nLong press for more options.")
 						                                  .setStyle(R.style.CustomShowcaseTheme)
 						                                  .hideOnTouchOutside()
 						                                  .build();
@@ -148,7 +149,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		}
 		else if (step == 3)
 		{
-			View viewTarget = ((ManageListsAdapter.ViewHolder)((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getItem(0)).mRecyclerView.findViewHolderForPosition(0)).mHandle;
+			View viewTarget = ((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).getListItemHandleView();
 
 			if (viewTarget != null)
 			{
@@ -168,7 +169,17 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 					public void onClick(View v)
 					{
 						showcaseView.hide();
-						runTutorial(step + 1);
+
+						// scroll to bottom
+						((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).scrollToAddView();
+						new Handler().postDelayed(new Runnable()
+						{
+							@Override
+							public void run()
+							{
+								runTutorial(step + 1);
+							}
+						}, 100);
 					}
 				});
 			}
@@ -176,8 +187,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 		else if (step == 4)
 		{
-			/*
-			View viewTarget = ((ManageListsAdapter.ViewHolder)((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getItem(0)).mRecyclerView.findViewHolderForPosition(??)).mTextView;
+
+			View viewTarget = ((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).getListItemAddView();
 
 			if (viewTarget != null)
 			{
@@ -189,7 +200,6 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						                                  .hideOnTouchOutside()
 						                                  .build();
 			}
-			*/
 		}
 	}
 
@@ -267,12 +277,14 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		{
 
 			String [] tab_titles;
+			TabbedContentFragment [] tabbedContentFragments;// = new TabbedContentFragment[tab_titles.length];
 
 			public SectionsPagerAdapter(FragmentManager fm)
 			{
 				super(fm);
 
 				tab_titles = getResources().getStringArray(R.array.list_tab_titles_array);
+				tabbedContentFragments = new TabbedContentFragment[tab_titles.length];
 			}
 
 			@Override
@@ -281,9 +293,12 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				if(position < getCount())
 				{
 					Fragment fragment = new TabbedContentFragment();
+
 					Bundle args = new Bundle();
 					args.putInt(TabbedContentFragment.ARG_SECTION_NUMBER, position);
 					fragment.setArguments(args);
+
+					tabbedContentFragments[position] = (TabbedContentFragment) fragment;
 
 					return fragment;
 				}
@@ -292,6 +307,11 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 					return null;
 				}
 
+			}
+
+			public TabbedContentFragment getList(int position)
+			{
+				return tabbedContentFragments[position];
 			}
 
 			@Override
@@ -320,8 +340,12 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 			private View rootView;
 			private RecyclerView mRecyclerView;
-			private RecyclerView.Adapter mWrappedAdapter;
+			//private RecyclerView.Adapter mWrappedAdapter;
 			private RecyclerViewDragDropManager mRecyclerViewDragDropManager;
+
+			private ManageListsAdapter mListAdapter;
+
+			private LinearLayoutManager mLinearLayoutManager;
 
 			public TabbedContentFragment() {
 			}
@@ -338,7 +362,9 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				mRecyclerView = (RecyclerView) rootView.findViewById(R.id.list);
 
 				// Setup RecyclerView
-				mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
+				mLinearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+				mRecyclerView.setLayoutManager(mLinearLayoutManager);
+				//mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
 				//mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 				mRecyclerView.setItemAnimator(null);
 
@@ -385,7 +411,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						                                                          (NinePatchDrawable) getResources().getDrawable(R.drawable.drawer_shadow));  //change
 
 
-				final ManageListsAdapter mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
+				//final ManageListsAdapter mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
+				mListAdapter = new ManageListsAdapter(getActivity(), listCursor);
 
 				mListAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
 				{
@@ -404,7 +431,6 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						values.put(tableKEY, newItemString);
 						values.put(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN, mListAdapter.getIsHidden(positionStart));
 
-						//todo hidden flag
 						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));
 						activity.getContentResolver().update(row_uri, values, null, null);
 
@@ -464,7 +490,6 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						{
 							values.clear();
 							values.put(CasesProvider.KEY_ORDER, i);
-							//todo hiddenflag?
 							Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(i));
 							activity.getContentResolver().update(row_uri, values, null, null);
 
@@ -493,6 +518,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 
 				});
 
+				RecyclerView.Adapter mWrappedAdapter;
 				mWrappedAdapter = mRecyclerViewDragDropManager.createWrappedAdapter(mListAdapter);      // wrap for dragging
 
 				final GeneralItemAnimator animator = new RefactoredDefaultItemAnimator();
@@ -513,6 +539,47 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 				mRecyclerViewDragDropManager.attachRecyclerView(mRecyclerView);
 
 				return rootView;
+			}
+
+			// For ShowcaseView tutorial
+			public View getListItemTextView()
+			{
+				//return ((ManageListsAdapter)mRecyclerView.getAdapter()).getFirstViewHolder().mTextView;
+				if(mListAdapter.getFirstViewHolder() != null)
+				{
+					return mListAdapter.getFirstViewHolder().mTextView;
+				}
+				else
+				{
+					return null;
+				}
+			}
+			public void scrollToAddView()
+			{
+				mLinearLayoutManager.scrollToPosition(mListAdapter.getLastViewPosition());
+				mListAdapter.notifyDataSetChanged();
+			}
+			public View getListItemAddView()
+			{
+				if(mListAdapter.getLastViewHolder() != null)
+				{
+					return mListAdapter.getLastViewHolder().mTextView;
+				}
+				else
+				{
+					return null;
+				}
+			}
+			public View getListItemHandleView()
+			{
+				if(mListAdapter.getFirstViewHolder() != null)
+				{
+					return mListAdapter.getFirstViewHolder().mHandle;
+				}
+				else
+				{
+					return null;
+				}
 			}
 
 		} // end TabbedContentFragment

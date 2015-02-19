@@ -170,7 +170,7 @@ public class ImageGridView
 
 												// update mAdapter
 												mAdapter.setImageCaption(image_position, input.getText().toString());
-												mAdapter.notifyDataSetChanged();
+												notifyDataSetChanged();
 											}
 										});
 

@@ -65,26 +65,14 @@ public class ImageAdapter extends BaseAdapter
 		Holder holder = new Holder();
 		View view;
 
-	//	ImageView imageView;
-
 		if (convertView == null)
 		{
 			// if it's not recycled, initialize some attributes
-
 			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			view = inflater.inflate(R.layout.key_image_caption, parent, false);
 			holder.captionTextView = (TextView) view.findViewById(R.id.imageCaption);
 
 			holder.imageView = (ImageView) view.findViewById(R.id.image);
-
-			if(getImageCaption(position) != null && !getImageCaption(position).contentEquals(""))
-			{
-				holder.captionTextView.setVisibility(View.VISIBLE);
-			}
-			else
-			{
-				holder.captionTextView.setVisibility(View.GONE);
-			}
 
 			//holder.imageView.setLayoutParams(new GridView.LayoutParams(imageSizePx, imageSizePx));
 
@@ -110,6 +98,16 @@ public class ImageAdapter extends BaseAdapter
 		if(firstImageView == null)
 		{
 			firstImageView = holder.imageView;
+		}
+
+		// hide if no caption
+		if(getImageCaption(position) != null && !getImageCaption(position).contentEquals(""))
+		{
+			holder.captionTextView.setVisibility(View.VISIBLE);
+		}
+		else
+		{
+			holder.captionTextView.setVisibility(View.GONE);
 		}
 
 		UtilClass.setPic(holder.imageView, imageFilepaths[position], UtilClass.IMAGE_SIZE);

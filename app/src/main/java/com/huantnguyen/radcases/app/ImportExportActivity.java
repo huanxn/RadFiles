@@ -3,11 +3,9 @@ package com.huantnguyen.radcases.app;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -177,7 +175,7 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 	// Inflate the menu; this adds items to the action bar if it is present.
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-		getMenuInflater().inflate(R.menu.cloud_storage, menu);
+		getMenuInflater().inflate(R.menu.import_export, menu);
 
 		return super.onCreateOptionsMenu(menu);     // nav drawer
 	}
