@@ -12,12 +12,12 @@
     <item android:title="@string/action_camera" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_camera" android:id="@+id/menu_camera"/>
 
     <!-- Toggle favorites "star", should appear as action button -->
-    <item android:title="@string/add_star" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_not_important" android:id="@+id/menu_star"/>
+    <item android:title="@string/add_star" app:showAsAction="ifRoom" android:icon="@drawable/ic_star_outline_grey600_24dp" android:id="@+id/menu_star"/>
 
     <!-- Delete this case, should appear as action button -->
-    <item android:title="@string/action_delete" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_discard" android:id="@+id/menu_delete"/>
+    <item android:title="@string/action_delete" app:showAsAction="never" android:icon="@drawable/ic_delete_grey600_24dp" android:id="@+id/menu_delete"/>
 
     <!-- Open the help tutorial ShowcaseView, should always be hidden in overflow menu -->
-    <item android:title="@string/action_help" app:showAsAction="never" android:icon="@drawable/ic_help_circle_white_36dp" android:id="@+id/menu_help"/>
+    <item android:title="@string/action_help" app:showAsAction="never" android:icon="@drawable/ic_help_circle_grey600_24dp" android:id="@+id/menu_help"/>
 
 </menu>

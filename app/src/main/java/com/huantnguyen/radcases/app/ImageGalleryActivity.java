@@ -32,7 +32,7 @@ public class ImageGalleryActivity extends ActionBarActivity
 	 */
 
 	private static long case_id;
-	private static String TAG = "KeyImageGallery Activity";
+	private static String TAG = "ImageGallery Activity";
 
 	public static final String ARG_POSITION = "com.huantnguyen.radcases.INITIAL_POSITION";
 	public final static String ARG_IMAGE_FILES = "com.huantnguyen.radcases.ARG_IMAGE_FILES";

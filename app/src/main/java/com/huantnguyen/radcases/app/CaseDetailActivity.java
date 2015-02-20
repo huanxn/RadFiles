@@ -18,11 +18,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -42,6 +44,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 
 import eu.janmuller.android.simplecropimage.CropImage;
 
@@ -59,6 +62,8 @@ import static android.view.View.GONE;
  */
 public class CaseDetailActivity extends NavigationDrawerActivity
 {
+	private static String TAG = "CaseDetail Activity";
+
 	private Activity activity;
 
 	private CaseDetailFragment fragment = null;
@@ -181,15 +186,42 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		if (fragment.isStarred())
 		{
 			star.setTitle(getResources().getString(R.string.remove_star));
-			star.setIcon(R.drawable.ic_action_important);
+			star.setIcon(R.drawable.ic_star_grey600_24dp);
 		}
 		else
 		{
 			star.setTitle(getResources().getString(R.string.add_star));
-			star.setIcon(R.drawable.ic_action_not_important);
+			star.setIcon(R.drawable.ic_star_outline_grey600_24dp);
 		}
 
 		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onMenuOpened(int featureId, Menu menu)
+	{
+		if (featureId == Window.FEATURE_ACTION_BAR && menu != null)
+		{
+			if (menu.getClass().getSimpleName().equals("MenuBuilder"))
+			{
+				try
+				{
+					Method m = menu.getClass().getDeclaredMethod(
+							                                            "setOptionalIconsVisible", Boolean.TYPE);
+					m.setAccessible(true);
+					m.invoke(menu, true);
+				}
+				catch (NoSuchMethodException e)
+				{
+					Log.e(TAG, "onMenuOpened", e);
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return super.onMenuOpened(featureId, menu);
 	}
 
 	@Override

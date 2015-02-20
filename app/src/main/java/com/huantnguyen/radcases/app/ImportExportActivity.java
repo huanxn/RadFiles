@@ -8,10 +8,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.text.InputType;
+import android.util.JsonReader;
+import android.util.JsonToken;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,8 +38,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 //import eu.janmuller.android.simplecropimage.ImageViewTouchBase;
 
@@ -96,7 +103,7 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 	private AlertDialog progressBarDialog = null;
 
 	// default
-	private ProgressDialog progressWheelDialog = null;
+	//private ProgressDialog progressWheelDialog = null;
 
 
 	@Override
@@ -187,6 +194,18 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
+
+		switch(id)
+		{
+			case R.id.menu_clear_cache:
+
+				final File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+				ProgressDialog progressWheelDialog = new ProgressDialog(activity, "Clearing cache...", activity.getResources().getColor(R.color.default_colorAccent));
+				new ClearDirectoryTask(this, progressWheelDialog).execute(downloadsDir);
+
+				break;
+
+		}
 
 		return super.onOptionsItemSelected(item);
 	}
@@ -694,5 +713,41 @@ public class ImportExportActivity extends GoogleDriveBaseActivity
 		}
 	}
 
+	private class ClearDirectoryTask extends AsyncTask<File, Integer, Boolean>
+	{
+		private Activity activity;
+		private ProgressDialog progressWheelDialog;
 
+		ClearDirectoryTask(Activity activity, ProgressDialog progressWheelDialog)
+		{
+			this.activity = activity;
+			this.progressWheelDialog = progressWheelDialog;
+		}
+		protected void onPreExecute()
+		{
+			progressWheelDialog.setCancelable(false);
+			progressWheelDialog.setCanceledOnTouchOutside(false);
+			progressWheelDialog.show();
+		}
+
+		@Override
+		protected Boolean doInBackground(File... dir)
+		{
+			return UtilsFile.clearDir(dir[0]);
+		}
+
+		protected void onPostExecute(Boolean isSuccessful)
+		{
+			progressWheelDialog.dismiss();
+
+			if(isSuccessful)
+			{
+				UtilClass.showMessage(activity, "Deleted cache files.");
+			}
+			else
+			{
+				UtilClass.showMessage(activity, "Clear directory failed.");
+			}
+		}
+	}
 }

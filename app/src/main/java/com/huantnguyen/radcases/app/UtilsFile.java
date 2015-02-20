@@ -3,9 +3,12 @@ package com.huantnguyen.radcases.app;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
+import com.gc.materialdesign.widgets.ProgressDialog;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -317,4 +320,85 @@ public class UtilsFile
 			is.close();
 		}
 	}
+
+	/**
+	 *
+	 * @param dir
+	 * @return false if fails
+	 */
+	public static boolean clearDir(File dir)
+	{
+		if (dir.isDirectory())
+		{
+			String[] children = dir.list();
+			for (int i=0; i<children.length; i++) {
+				boolean success = deleteDir(new File(dir, children[i]));
+				if (!success) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	public static boolean deleteDir(File dir)
+	{
+		if (dir.isDirectory()) {
+			String[] children = dir.list();
+			for (int i=0; i<children.length; i++) {
+				boolean success = deleteDir(new File(dir, children[i]));
+				if (!success) {
+					return false;
+				}
+			}
+		}
+
+		// The directory is now empty so delete it
+		return dir.delete();
+	}
+
+	/*
+	public class ClearDirectoryTask extends AsyncTask<File, Integer, Boolean>
+	{
+		private Activity activity;
+		private ProgressDialog progressWheelDialog;
+
+		ClearDirectoryTask(Activity activity, ProgressDialog progressWheelDialog)
+		{
+			this.activity = activity;
+			this.progressWheelDialog = progressWheelDialog;
+		}
+		protected void onPreExecute()
+		{
+			progressWheelDialog.setCancelable(false);
+			progressWheelDialog.setCanceledOnTouchOutside(false);
+			progressWheelDialog.show();
+		}
+
+		@Override
+		protected Boolean doInBackground(File... dir)
+		{
+			return UtilsFile.clearDir(dir[0]);
+		}
+
+		protected void onPostExecute(Boolean isSuccessful)
+		{
+			progressWheelDialog.dismiss();
+
+			if(isSuccessful)
+			{
+				UtilClass.showMessage(activity, "Cleared cache files.");
+			}
+			else
+			{
+				UtilClass.showMessage(activity, "Clear directory failed.");
+			}
+		}
+	}
+	*/
 }
