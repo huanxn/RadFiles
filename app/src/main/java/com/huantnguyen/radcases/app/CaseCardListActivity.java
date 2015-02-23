@@ -26,6 +26,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.Html;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +35,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -47,6 +49,7 @@ import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +58,7 @@ import java.util.List;
  */
 public class CaseCardListActivity extends NavigationDrawerActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener
 {
+	private static String TAG = "CaseCardList Activity";
 	private static Activity activity;
 
 	// Spinner sort/filter
@@ -262,6 +266,33 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 
 		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	// show menu icons in overflow
+	public boolean onMenuOpened(int featureId, Menu menu)
+	{
+		if (featureId == Window.FEATURE_ACTION_BAR && menu != null)
+		{
+			if (menu.getClass().getSimpleName().equals("MenuBuilder"))
+			{
+				try
+				{
+					Method m = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
+					m.setAccessible(true);
+					m.invoke(menu, true);
+				}
+				catch (NoSuchMethodException e)
+				{
+					Log.e(TAG, "onMenuOpened", e);
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return super.onMenuOpened(featureId, menu);
 	}
 
 	@Override

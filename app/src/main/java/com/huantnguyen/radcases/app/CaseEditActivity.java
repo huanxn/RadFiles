@@ -9,10 +9,12 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -191,7 +193,31 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
                 return true;
 
 			case R.id.menu_camera:
-				choosePictureAlertDialog(item.getActionView());
+				SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+				int pref_image_source = Integer.parseInt(sharedPref.getString(getString(R.string.pref_image_source_key), "0"));
+
+				switch(pref_image_source)
+				{
+					// from camera
+					case 1:
+						tempImageFile = UtilClass.getPictureFromCamera(this, CaseEditActivity.REQUEST_IMAGE_CAPTURE);
+						break;
+
+					// from file
+					case 2:
+						Intent intent = new Intent();
+						intent.setType("image/*");
+						intent.setAction(Intent.ACTION_GET_CONTENT);
+						//intent.putExtra("image_filename", tempImageFilename);
+						startActivityForResult(Intent.createChooser(intent,"Select Picture"), CaseEditActivity.REQUEST_SELECT_IMAGE_FROM_FILE);
+						break;
+
+					// always ask
+					default:
+						choosePictureAlertDialog(item.getActionView());
+						break;
+				}
+
 				return true;
 
 			case R.id.menu_discard:
@@ -299,6 +325,9 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 	 */
 	protected void saveToDatabase()
 	{
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		boolean pref_auto_add_to_list = sharedPref.getBoolean(getString(R.string.pref_auto_add_to_list_key), true);
+
 		/**
 		 * CASES TABLE
 		 */
@@ -327,34 +356,37 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		}
 
 		// add new study types to database
-		final Cursor study_types_all_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
-		if(new_study_type != null && study_types_all_cursor != null && study_types_all_cursor.moveToFirst())
+		if(pref_auto_add_to_list)
 		{
-			int studyType_lastPosition = study_types_all_cursor.getCount();
-			boolean found = false;
-
-			do
+			final Cursor study_types_all_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+			if (new_study_type != null && study_types_all_cursor != null && study_types_all_cursor.moveToFirst())
 			{
-				if (study_types_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(new_study_type))
+				int studyType_lastPosition = study_types_all_cursor.getCount();
+				boolean found = false;
+
+				do
 				{
-					found = true;
-					break;
+					if (study_types_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(new_study_type))
+					{
+						found = true;
+						break;
+					}
+
+				} while (study_types_all_cursor.moveToNext());
+
+				if (!found)
+				{
+					// add to database
+					ContentValues studytype_values = new ContentValues();
+					studytype_values.put(CasesProvider.KEY_STUDY_TYPE, new_study_type);
+					studytype_values.put(CasesProvider.KEY_ORDER, studyType_lastPosition);  // put at end of list
+					getContentResolver().insert(CasesProvider.STUDYTYPE_LIST_URI, studytype_values);
+
+					studyType_lastPosition += 1;
 				}
 
-			} while (study_types_all_cursor.moveToNext());
-
-			if(!found)
-			{
-				// add to database
-				ContentValues studytype_values = new ContentValues();
-				studytype_values.put(CasesProvider.KEY_STUDY_TYPE, new_study_type);
-				studytype_values.put(CasesProvider.KEY_ORDER, studyType_lastPosition);  // put at end of list
-				getContentResolver().insert(CasesProvider.STUDYTYPE_LIST_URI, studytype_values);
-
-				studyType_lastPosition += 1;
+				study_types_all_cursor.close();
 			}
-
-			study_types_all_cursor.close();
 		}
 
 
@@ -382,41 +414,44 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		}
 
 		// add new sections to database
-		final Cursor section_all_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
-		List<String> sectionsList = ((SpinnerMultiSelect)findViewById(R.id.edit_section)).getSelectedStrings();
-		int sections_lastPosition = section_all_cursor.getCount();
-
-		for (String section : sectionsList)
+		if(pref_auto_add_to_list)
 		{
-			boolean found = false;
+			final Cursor section_all_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+			List<String> sectionsList = ((SpinnerMultiSelect) findViewById(R.id.edit_section)).getSelectedStrings();
+			int sections_lastPosition = section_all_cursor.getCount();
 
-			if(section_all_cursor != null && section_all_cursor.moveToFirst())
+			for (String section : sectionsList)
 			{
-				do
+				boolean found = false;
+
+				if (section_all_cursor != null && section_all_cursor.moveToFirst())
 				{
-					if (section_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(section))
+					do
 					{
-						found = true;
-						break;
+						if (section_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(section))
+						{
+							found = true;
+							break;
+						}
+
+					} while (section_all_cursor.moveToNext());
+
+					if (!found)
+					{
+						// add to database
+						ContentValues sections_values = new ContentValues();
+						sections_values.put(CasesProvider.KEY_SECTION, section);
+						sections_values.put(CasesProvider.KEY_ORDER, sections_lastPosition);  // put at end of list
+						getContentResolver().insert(CasesProvider.SECTION_LIST_URI, sections_values);
+
+						sections_lastPosition += 1;
 					}
-
-				} while (section_all_cursor.moveToNext());
-
-				if(!found)
-				{
-					// add to database
-					ContentValues sections_values = new ContentValues();
-					sections_values.put(CasesProvider.KEY_SECTION, section);
-					sections_values.put(CasesProvider.KEY_ORDER, sections_lastPosition);  // put at end of list
-					getContentResolver().insert(CasesProvider.SECTION_LIST_URI, sections_values);
-
-					sections_lastPosition += 1;
 				}
 			}
-		}
-		if(section_all_cursor != null)
-		{
-			section_all_cursor.close();
+			if (section_all_cursor != null)
+			{
+				section_all_cursor.close();
+			}
 		}
 
 		// KEYWORDS
@@ -432,41 +467,44 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		}
 
 		// add new keywords to database
-		final Cursor key_words_all_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
-		List<String> keyWordsList = ((SpinnerMultiSelect)findViewById(R.id.edit_key_words)).getSelectedStrings();
-		int keyWords_lastPosition = key_words_all_cursor.getCount();
-
-		for (String keyWord : keyWordsList)
+		if(pref_auto_add_to_list)
 		{
-			boolean found = false;
+			final Cursor key_words_all_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
+			List<String> keyWordsList = ((SpinnerMultiSelect) findViewById(R.id.edit_key_words)).getSelectedStrings();
+			int keyWords_lastPosition = key_words_all_cursor.getCount();
 
-			if(key_words_all_cursor != null && key_words_all_cursor.moveToFirst())
+			for (String keyWord : keyWordsList)
 			{
-				do
+				boolean found = false;
+
+				if (key_words_all_cursor != null && key_words_all_cursor.moveToFirst())
 				{
-					if (key_words_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(keyWord))
+					do
 					{
-						found = true;
-						break;
+						if (key_words_all_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE).contentEquals(keyWord))
+						{
+							found = true;
+							break;
+						}
+
+					} while (key_words_all_cursor.moveToNext());
+
+					if (!found)
+					{
+						// add to database
+						ContentValues keyWords_values = new ContentValues();
+						keyWords_values.put(CasesProvider.KEY_KEYWORDS, keyWord);
+						keyWords_values.put(CasesProvider.KEY_ORDER, keyWords_lastPosition);  // put at end of list
+						getContentResolver().insert(CasesProvider.KEYWORD_LIST_URI, keyWords_values);
+
+						keyWords_lastPosition += 1;
 					}
-
-				} while (key_words_all_cursor.moveToNext());
-
-				if(!found)
-				{
-					// add to database
-					ContentValues keyWords_values = new ContentValues();
-					keyWords_values.put(CasesProvider.KEY_KEYWORDS, keyWord);
-					keyWords_values.put(CasesProvider.KEY_ORDER, keyWords_lastPosition);  // put at end of list
-					getContentResolver().insert(CasesProvider.KEYWORD_LIST_URI, keyWords_values);
-
-					keyWords_lastPosition += 1;
 				}
 			}
-		}
-		if(key_words_all_cursor != null)
-		{
-			key_words_all_cursor.close();
+			if (key_words_all_cursor != null)
+			{
+				key_words_all_cursor.close();
+			}
 		}
 
 		// BIOPSY

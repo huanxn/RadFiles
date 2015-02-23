@@ -8,10 +8,13 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -198,6 +201,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	}
 
 	@Override
+	// show menu icons in overflow
 	public boolean onMenuOpened(int featureId, Menu menu)
 	{
 		if (featureId == Window.FEATURE_ACTION_BAR && menu != null)
@@ -206,8 +210,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			{
 				try
 				{
-					Method m = menu.getClass().getDeclaredMethod(
-							                                            "setOptionalIconsVisible", Boolean.TYPE);
+					Method m = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
 					m.setAccessible(true);
 					m.invoke(menu, true);
 				}
@@ -276,7 +279,31 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				return true;
 
 			case R.id.menu_camera:
-				choosePictureAlertDialog(item.getActionView());
+				SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+				int pref_image_source = Integer.parseInt(sharedPref.getString(getString(R.string.pref_image_source_key), "0"));
+
+				switch(pref_image_source)
+				{
+					// from camera
+					case 1:
+						tempImageFile = UtilClass.getPictureFromCamera(this, CaseEditActivity.REQUEST_IMAGE_CAPTURE);
+						break;
+
+					// from file
+					case 2:
+						Intent intent = new Intent();
+						intent.setType("image/*");
+						intent.setAction(Intent.ACTION_GET_CONTENT);
+						//intent.putExtra("image_filename", tempImageFilename);
+						startActivityForResult(Intent.createChooser(intent,"Select Picture"), CaseEditActivity.REQUEST_SELECT_IMAGE_FROM_FILE);
+						break;
+
+					// always ask
+					default:
+						choosePictureAlertDialog(item.getActionView());
+						break;
+				}
+
 				return true;
 
 			case R.id.menu_delete:
@@ -713,6 +740,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				});
 			}
 		}
+		/*
 		else if(step == 4)
 		{
 			final Target viewTarget = new Target() {
@@ -756,7 +784,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			});
 
 		}
-		else if(step == 5)
+		*/
+		else if(step == 4)
 		{
 
 			new ShowcaseView.Builder(this)
@@ -764,7 +793,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 							                                   //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
 					                                  .setContentTitle("Overflow menu")
 					                                  .setContentText("More menu options here.\n\nClick the Help button to see this tutorial again.")
-					                                  .setStyle(R.style.CustomShowcaseTheme)
+					                                  .setStyle(R.style.CustomShowcaseThemeEnd)
 					                                  .hideOnTouchOutside()
 					                                  .build();
 

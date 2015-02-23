@@ -67,14 +67,20 @@
     <string name="add_star">Add Star</string>
     <string name="action_clear_cache">Clear cache</string>
 
+    <!-- Preferences -->
 
+
+
+
+<!--
+    <item>*Procedure Log</item>
+    <item>*Favorites</item>
+    -->
     <string-array name="nav_drawer_array">
         <item>Interesting Cases</item>
-        <item>*Procedure Log</item>
-        <item>*Favorites</item>
         <item>Import &amp; Export</item>
         <item>Manage Lists</item>
-        <item>*Settings</item>
+        <item>Settings</item>
         <item>Info</item>
     </string-array>
 

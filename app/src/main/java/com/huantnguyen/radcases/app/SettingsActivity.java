@@ -1,7 +1,9 @@
 package com.huantnguyen.radcases.app;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -40,12 +42,16 @@ public class SettingsActivity extends PreferenceActivity {
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
 
+	private Activity activity;
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
         setupSimplePreferencesScreen();
+
+	    activity = this;
     }
 
     /**
@@ -62,13 +68,26 @@ public class SettingsActivity extends PreferenceActivity {
         // use the older PreferenceActivity APIs.
 
         // Add 'general' preferences.
+	    PreferenceCategory fakeHeader = new PreferenceCategory(this);
+	    fakeHeader.setTitle(R.string.pref_header_general);
+	    //getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_general);
 
+	    // Add 'Case Editing' preferences
+	    fakeHeader = new PreferenceCategory(this);
+	    fakeHeader.setTitle(R.string.pref_header_case_editing);
+	    getPreferenceScreen().addPreference(fakeHeader);
+	    addPreferencesFromResource(R.xml.pref_case_editing);
+
+
         // Add 'notifications' preferences, and a corresponding header.
-        PreferenceCategory fakeHeader = new PreferenceCategory(this);
+        fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_notifications);
         getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_notification);
+
+	    bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_image_source_key)));
+	    //    bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_auto_add_to_list_key)));
 
         // Add 'data and sync' preferences, and a corresponding header.
         fakeHeader = new PreferenceCategory(this);
@@ -80,7 +99,6 @@ public class SettingsActivity extends PreferenceActivity {
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
         bindPreferenceSummaryToValue(findPreference("example_text"));
-        bindPreferenceSummaryToValue(findPreference("example_list"));
         bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
         bindPreferenceSummaryToValue(findPreference("sync_frequency"));
     }
@@ -131,7 +149,8 @@ public class SettingsActivity extends PreferenceActivity {
         public boolean onPreferenceChange(Preference preference, Object value) {
             String stringValue = value.toString();
 
-            if (preference instanceof ListPreference) {
+            if (preference instanceof ListPreference)
+            {
                 // For list preferences, look up the correct display value in
                 // the preference's 'entries' list.
                 ListPreference listPreference = (ListPreference) preference;
@@ -143,7 +162,15 @@ public class SettingsActivity extends PreferenceActivity {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
-            } else if (preference instanceof RingtonePreference) {
+	            /*
+	            SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+	            SharedPreferences.Editor editor = sharedPref.edit();
+	            editor.putInt(getString(R.string.saved_high_score), newHighScore);
+	            editor.commit();
+	            */
+
+            }
+            else if (preference instanceof RingtonePreference) {
                 // For ringtone preferences, look up the correct display value
                 // using RingtoneManager.
                 if (TextUtils.isEmpty(stringValue)) {
@@ -211,9 +238,29 @@ public class SettingsActivity extends PreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
         }
     }
+
+	/**
+	 * This fragment shows general preferences only. It is used when the
+	 * activity is showing a two-pane settings UI.
+	 */
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	public static class CaseEditingPreferenceFragment extends PreferenceFragment {
+		@Override
+		public void onCreate(Bundle savedInstanceState) {
+			super.onCreate(savedInstanceState);
+			addPreferencesFromResource(R.xml.pref_case_editing);
+
+			// Bind the summaries of EditText/List/Dialog/Ringtone preferences
+			// to their values. When their values change, their summaries are
+			// updated to reflect the new value, per the Android Design
+			// guidelines.
+			bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_image_source_key)));
+			//bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_auto_add_to_list_key)));
+
+		}
+	}
 
     /**
      * This fragment shows notification preferences only. It is used when the
