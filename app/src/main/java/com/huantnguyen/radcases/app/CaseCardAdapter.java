@@ -1,5 +1,6 @@
 package com.huantnguyen.radcases.app;
 
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.database.Cursor;
 //import android.support.v7.view.ActionMode;
@@ -31,6 +32,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	// StickyRecyclerHeadersAdapter
 	//private List<Integer> header_id;    // if different than previous (ie in a different group), then it will display it's header
 	private List<String> header;
+	private List<Integer> group_position;
 
 	// contextual action mode set in activity
 	private android.view.ActionMode.Callback mActionModeCallback = null;
@@ -189,13 +191,39 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		{
 			Case mCase = caseList.get(i);
 
-			if(mCase.isHidden)
+			int maxCardHeight = (int)activity.getResources().getDimension(R.dimen.card_thumbnail_height);
+			View cardView = viewHolder.cardView;//.findViewById(R.id.container);
+
+			int height = cardView.getLayoutParams().height;
+
+			if(header != null && group_position != null)
 			{
-				viewHolder.cardView.setVisibility(View.GONE);
-			}
-			else
-			{
-				viewHolder.cardView.setVisibility(View.VISIBLE);
+				if(mCase.isHidden)
+				{
+					//viewHolder.cardView.setVisibility(View.GONE);
+					/*
+					ViewGroup.LayoutParams layoutParams = viewHolder.cardView.getLayoutParams();
+					layoutParams.height = 0;
+					viewHolder.cardView.setLayoutParams(layoutParams);
+					*/
+					//animateViewHeightChange(cardContainer, maxCardHeight, 0);
+					setViewHeight(cardView, 0);
+
+					//collapseViewHolder(viewHolder, group_position.get(i));
+				}
+				else
+				{
+					viewHolder.cardView.setVisibility(View.VISIBLE);
+					/*
+					ViewGroup.LayoutParams layoutParams = viewHolder.cardView.getLayoutParams();
+					layoutParams.height = (int)activity.getResources().getDimension(R.dimen.card_thumbnail_height);
+					viewHolder.cardView.setLayoutParams(layoutParams);
+					*/
+					//animateViewHeightChange(cardContainer, 0, maxCardHeight);
+					setViewHeight(cardView, ViewGroup.LayoutParams.MATCH_PARENT);
+
+					//expandViewHolder(viewHolder, group_position.get(i));
+				}
 			}
 
 
@@ -237,6 +265,57 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				//viewHolder.thumbnail.setColorFilter(UtilClass.get_attr(activity, R.attr.colorControlHighlight)); // too opaque
 			}
 		}
+	}
+
+	// collapse animations
+	private void animateViewHeightChange(final View view, int start, int end)
+	{
+		if (view == null)
+		{
+			return;
+		}
+
+		final ValueAnimator animator = ValueAnimator.ofInt(start, end);
+
+		animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
+		{
+			@Override
+			public void onAnimationUpdate(ValueAnimator valueAnimator)
+			{
+				int value = (Integer) valueAnimator.getAnimatedValue();
+				setViewHeight(view, value);
+			}
+		});
+		animator.setDuration(300).start();
+	}
+
+	private void collapseViewHolder(ViewHolder viewHolder, int position_in_group)
+	{
+		//viewHolder.thumbnail.setVisibility(View.GONE);
+		viewHolder.offset = (int) (position_in_group*(activity.getResources().getDimension(R.dimen.card_thumbnail_height)));
+		viewHolder.cardView.setTranslationY(viewHolder.offset);
+	}
+
+	private void expandViewHolder(ViewHolder viewHolder, int position_in_group)
+	{
+		//viewHolder.thumbnail.setVisibility(View.VISIBLE);
+		if(viewHolder.offset != 0)
+		{
+			viewHolder.cardView.setTranslationY( 0-viewHolder.offset );
+			viewHolder.offset = 0;
+		}
+	}
+
+	private void setViewHeight(View view, int height)
+	{
+		if (view == null)
+		{
+			return;
+		}
+
+		ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+		layoutParams.height = height;
+		view.setLayoutParams(layoutParams);
 	}
 
 	@Override
@@ -371,6 +450,28 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 		header = text;
 
+
+		// set position numbers within group (for collapse translation Y)
+		//if(group_position != null)
+		//	group_position = null;
+
+		group_position = new ArrayList<Integer>();
+		long previous_header = 0;
+		int pos = 0;
+		for(int i = 0; i < header.size(); i++)
+		{
+			if(getHeaderId(i) != previous_header)
+			{
+				// new group
+				previous_header = getHeaderId(i);
+				pos = 0;
+
+			}
+
+			group_position.add(pos);
+			pos += 1;
+		}
+
 //		notifyDataSetChanged();
 	}
 
@@ -455,6 +556,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		public TextView card_text2;
 		public TextView card_text3;
 		public ImageView thumbnail;
+
+		int offset = 0;
 
 		public ViewHolder(View itemView)
 		{

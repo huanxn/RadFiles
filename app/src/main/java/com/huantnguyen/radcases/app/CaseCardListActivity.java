@@ -833,7 +833,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			//mRecyclerView.addItemDecoration(new DividerDecoration(this));
 			mRecyclerView.addItemDecoration(headersDecor);
 
-			/*
+
 			// Sticky headers touch listener
 			StickyRecyclerHeadersTouchListener touchListener =
 					new StickyRecyclerHeadersTouchListener(mRecyclerView, headersDecor);
@@ -846,7 +846,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						                                      }
 					                                      });
 			mRecyclerView.addOnItemTouchListener(touchListener);
-			*/
+
 
 			mRecyclerView.setOnTouchListener(new View.OnTouchListener()
 			{
