@@ -2,11 +2,18 @@ package com.huantnguyen.radcases.app;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionSet;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -148,6 +155,25 @@ public class ImageGalleryActivity extends ActionBarActivity
 		mIndicator.setViewPager(mViewPager);
 
 		mViewPager.setCurrentItem(init_pos);
+
+		/*
+		// lollipop transitions
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+		{
+			getWindow().setSharedElementEnterTransition(TransitionInflater.from(this).inflateTransition(R.transition.shared_element));
+
+			TransitionSet transitionSet = new TransitionSet();
+
+			Transition fade = new Fade();
+			fade.excludeTarget(toolbar, true);
+			fade.excludeTarget(android.R.id.statusBarBackground, true);
+			fade.excludeTarget(android.R.id.navigationBarBackground, true);
+			transitionSet.addTransition(fade);
+
+			getWindow().setEnterTransition(transitionSet);
+			getWindow().setExitTransition(transitionSet);
+		}
+		*/
     }
 
     static class TouchImageAdapter extends PagerAdapter {

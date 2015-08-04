@@ -14,8 +14,8 @@
         android:key="@string/pref_auto_add_to_list_key"
         android:title="@string/pref_auto_add_to_list"
         android:defaultValue="true"
-        android:summaryOn="Auto add to keywords, modalities, or sections lists"
-        android:summaryOff="Do not add to keywords, modalities, or sections lists"
+        android:summaryOn="Auto add new custom items to keywords, modalities, or sections lists"
+        android:summaryOff="Do not add new custom items to keywords, modalities, or sections lists"
         />
 
     <!--

@@ -4,12 +4,12 @@
           xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <item android:title="@string/action_camera" app:showAsAction="ifRoom" android:icon="@drawable/ic_action_camera" android:id="@+id/menu_camera"/>
+    <item android:title="@string/action_camera" app:showAsAction="ifRoom" android:icon="@drawable/ic_camera_white_24dp" android:id="@+id/menu_camera"/>
 
     <!-- Discard changes, should appear as action button -->
-    <item android:title="@string/action_discard" app:showAsAction="never" android:icon="@drawable/ic_action_cancel" android:id="@+id/menu_discard"/>
+    <item android:title="@string/action_discard" app:showAsAction="never" android:icon="@drawable/ic_close_white_24dp" android:id="@+id/menu_discard"/>
 
     <!-- Delete this case, should appear as action button -->
-    <item android:title="@string/action_delete" app:showAsAction="never" android:icon="@drawable/ic_delete_grey600_24dp" android:id="@+id/menu_delete"/>
+    <item android:title="@string/action_delete" app:showAsAction="never" android:icon="@drawable/ic_delete_white_24dp" android:id="@+id/menu_delete"/>
 
 </menu>

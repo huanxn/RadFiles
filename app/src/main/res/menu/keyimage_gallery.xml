@@ -7,13 +7,13 @@
 
     <item
         android:id="@+id/menu_camera"
-        android:icon="@drawable/ic_action_camera"
+        android:icon="@drawable/ic_camera_white_24dp"
         radcases:showAsAction="ifRoom"
         android:title="@string/action_camera"/>
 
     <item
         android:id="@+id/menu_edit_caption"
-        android:icon="@drawable/ic_action_edit"
+        android:icon="@drawable/ic_pencil_white_24dp"
         radcases:showAsAction="never"
         android:title="@string/action_edit_caption"/>
 

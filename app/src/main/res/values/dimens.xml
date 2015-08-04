@@ -14,7 +14,7 @@
     <dimen name="veryLargeTextSize">24sp</dimen>
     <dimen name="extremelyLargeTextSize">30dp</dimen>
 
-    <dimen name="large_image_height">250dp</dimen>
+    <dimen name="large_image_height">280dp</dimen>
     <dimen name="medium_image_height">175dp</dimen>
     <dimen name="small_image_height">100dp</dimen>
 
@@ -27,5 +27,7 @@
 
     <!--<dimen name="toolbar_size">?attr/actionBarSize</dimen>-->
     <dimen name="toolbar_size">56dp</dimen>
+
+    <dimen name="statusbar_size">25dp</dimen>
 
 </resources>

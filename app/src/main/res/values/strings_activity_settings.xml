@@ -10,9 +10,10 @@
     <string name="pref_description_social_recommendations">Recommendations for people to contact based on your message history</string>
 
     <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
+    <string name="pref_default_display_name">Radiologist</string>
 
 
+    <string name="pref_show_tutorial_key">tutorials_key</string>
     <string name="pref_show_tutorial">Tutorials</string>
     <string-array name="pref_show_tutorial_entries">
         <item>Show again</item>
@@ -42,7 +43,7 @@
     </string-array>
 
     <string name="pref_auto_add_to_list_key">auto_add_to_list_key</string>
-    <string name="pref_auto_add_to_list">Custom list items</string>
+    <string name="pref_auto_add_to_list">Save custom items</string>
 
 
 

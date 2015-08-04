@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -35,6 +36,8 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -1627,4 +1630,12 @@ public class UtilClass extends Activity
 	}
 
 
+	public static void setMargins(View view, int left, int top, int right, int bottom)
+	{
+		android.support.v4.widget.DrawerLayout.LayoutParams params = new android.support.v4.widget.DrawerLayout.LayoutParams(
+				                                                                                                                    android.support.v4.widget.DrawerLayout.LayoutParams.WRAP_CONTENT,
+				                                                                                                                    android.support.v4.widget.DrawerLayout.LayoutParams.WRAP_CONTENT);
+		params.setMargins(left, top, right, bottom);
+		view.setLayoutParams(params);
+	}
 }

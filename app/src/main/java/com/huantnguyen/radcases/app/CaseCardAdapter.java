@@ -508,7 +508,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder, int position)
 	{
-		if(header != null && position < header.size())
+		if(header != null && position >= 0 && position < header.size())
 		{
 			TextView textView = (TextView) holder.itemView;
 			//textView.setText(String.valueOf(getItem(position)));
@@ -525,7 +525,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 	@Override
 	public long getHeaderId(int position) {
 		//return getItem(position).hashCode();
-		if(header != null && position < header.size())
+		if(header != null && position >= 0 && position < header.size() )
 		{
 			//return header_id.get(position);
 			return header.get(position).hashCode();

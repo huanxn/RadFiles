@@ -13,11 +13,18 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionSet;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -869,6 +876,31 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 					return false;
 				}
 			});
+
+			// lollipop transitions
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+			{
+				//getWindow().setSharedElementEnterTransition(TransitionInflater.from(mActivity).inflateTransition(R.transition.shared_element));
+
+				TransitionSet transitionSet = new TransitionSet();
+
+				Transition slideDown = new Slide(Gravity.TOP);
+				slideDown.addTarget(toolbar);
+				transitionSet.addTransition(slideDown);
+
+				Transition slideUp = new Slide(Gravity.BOTTOM);
+				slideUp.addTarget(view.findViewById(R.id.edit_scrollview));
+				transitionSet.addTransition(slideUp);
+
+				Transition fade = new Fade();
+				fade.excludeTarget(toolbar, true);
+				fade.excludeTarget(android.R.id.statusBarBackground, true);
+				fade.excludeTarget(android.R.id.navigationBarBackground, true);
+				transitionSet.addTransition(fade);
+
+				activity.getWindow().setEnterTransition(transitionSet);
+				activity.getWindow().setExitTransition(transitionSet);
+			}
 
 			rootView = view;
 			return view;

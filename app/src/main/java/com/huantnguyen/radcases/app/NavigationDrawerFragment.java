@@ -3,6 +3,7 @@ package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.database.DataSetObserver;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,7 +23,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+
+import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -54,12 +65,15 @@ public class NavigationDrawerFragment extends Fragment
 	private ActionBarDrawerToggle mDrawerToggle;
 
 	private DrawerLayout mDrawerLayout;
-	private ListView mDrawerListView;
+	//private ListView mDrawerListView;
+	private ExpandableListView mDrawerListView;
 	private View mFragmentContainerView;
 
 	private int mCurrentSelectedPosition = 0;
 	private boolean mFromSavedInstanceState;
 	private boolean mUserLearnedDrawer;
+
+	private NavigationDrawerActivity mActivity;
 
 	public NavigationDrawerFragment() {
 	}
@@ -80,7 +94,7 @@ public class NavigationDrawerFragment extends Fragment
 		}
 
 		// Select either the default item (0) or the last selected item.
-		//selectItem(mCurrentSelectedPosition);
+		selectItem(mCurrentSelectedPosition);
 	}
 
 	@Override
@@ -95,7 +109,11 @@ public class NavigationDrawerFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
-		mDrawerListView = (ListView) inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+		View view = (LinearLayout) inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+
+		//view.findViewById(R.id.fragment_navigation_drawer_linear_layout).setPadding(0, UtilClass.getStatusBarHeight(getActivity()), 0, 0);
+
+		//mDrawerListView = (ListView)view.findViewById(R.id.navigation_list);
 
 		/*
 		ListView.MarginLayoutParams params = new ListView.MarginLayoutParams(ListView.MarginLayoutParams.MATCH_PARENT, ListView.MarginLayoutParams.MATCH_PARENT);
@@ -103,6 +121,86 @@ public class NavigationDrawerFragment extends Fragment
 		mDrawerListView.setLayoutParams(params);
 		*/
 
+		// set up nav drawer expandable list
+
+		List<String> navList = new LinkedList<String>(Arrays.asList(getResources().getStringArray(R.array.nav_drawer_array)));
+		final int sizeOfStandardNavList = navList.size();
+
+		final List<String> listFilterHeader = Arrays.asList(getResources().getStringArray(R.array.actionbar_sort_list));
+		final HashMap<String, List<String>> listDataChild = new HashMap<String, List<String>>();
+		List<String> interestingCase_filterList = Arrays.asList(getResources().getStringArray(R.array.actionbar_sort_list));
+
+		// standard nav drawer list with no children
+		for(int i = 0; i < navList.size(); i++)
+		{
+			// get string list from cursor
+			listDataChild.put(listFilterHeader.get(i), null);
+		}
+
+		navList.add("");
+		listDataChild.put("", null);
+
+		for(int i = 0; i < listFilterHeader.size(); i++)
+		{
+			// append filter list to nav list
+			navList.add(listFilterHeader.get(i));
+			//navList.add("test");
+
+			// get string list from cursor
+			if(i==0)
+			{
+				listDataChild.put(listFilterHeader.get(i), interestingCase_filterList);
+			}
+			else
+			{
+				listDataChild.put(listFilterHeader.get(i), null);
+			}
+		}
+
+		mDrawerListView = (ExpandableListView)view.findViewById(R.id.case_filter_expandable_list);
+
+		mDrawerListView.setAdapter(new NavigationDrawerExpandableListAdapter(getActivity(), navList, listDataChild));
+
+
+		mDrawerListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener()
+		{
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v,
+			                            int groupPosition, long id)
+			{
+				if (groupPosition < sizeOfStandardNavList)
+				{ //not expandable
+					selectItem(groupPosition);
+					return false;
+				}
+				else
+				{   // expandable
+					return false;
+				}
+			}
+		});
+
+
+		mDrawerListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v,
+			                            int groupPosition, int childPosition, long id) {
+				Toast.makeText(
+						              getActivity(),
+						              listFilterHeader.get(groupPosition)
+								              + " : "
+								              + listDataChild.get(
+										                                 listFilterHeader.get(groupPosition)).get(
+												                                                                       childPosition), Toast.LENGTH_SHORT)
+						.show();
+				return false;
+			}
+		});
+
+
+
+		/*
 		mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -115,8 +213,10 @@ public class NavigationDrawerFragment extends Fragment
 				                                            android.R.id.text1,
 				                                            getResources().getStringArray(R.array.nav_drawer_array)
 		));
+*/
 		mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-		return mDrawerListView;
+
+		return view;
 	}
 
 	public boolean isDrawerOpen() {
@@ -143,6 +243,10 @@ public class NavigationDrawerFragment extends Fragment
 	public void setUp(int fragmentId, DrawerLayout drawerLayout, boolean showDrawerIndicator)
 	{
 		mFragmentContainerView = getActivity().findViewById(fragmentId);
+
+		//UtilClass.setMargins(mFragmentContainerView, 0, 81, 0, 0);
+
+
 		mDrawerLayout = drawerLayout;
 
 		// set a custom shadow that overlays the main content when the drawer opens

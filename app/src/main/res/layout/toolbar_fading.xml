@@ -3,25 +3,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-
-    <View xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="?attr/actionBarSize"
-          android:background="@drawable/gradient_header_background"
-          android:minHeight="?attr/actionBarSize"/>
-
-    <include layout="@layout/toolbar_base"/>
-
-    <include layout="@layout/toolbar_dropshadow"/>
-
+    <!--
     <View
-        android:id="@+id/overflow_menu_target"
-        android:layout_width="4dp"
-        android:layout_height="16dp"
-        android:layout_alignTop="@id/toolbar"
-        android:layout_alignEnd="@id/toolbar"
-        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/statusbar_size"
+        android:id="@+id/status_bar_anchor"
         />
+        -->
+
+        <View xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/toolbar_background"
+              android:layout_width="match_parent"
+              android:layout_height="?attr/actionBarSize"
+              android:background="@drawable/gradient_header_background"
+              android:minHeight="?attr/actionBarSize"/>
+
+        <include layout="@layout/toolbar_base"/>
+
+        <include layout="@layout/toolbar_dropshadow"/>
+
+        <View
+            android:id="@+id/overflow_menu_target"
+            android:layout_width="4dp"
+            android:layout_height="16dp"
+            android:layout_alignTop="@id/toolbar"
+            android:layout_alignEnd="@id/toolbar"
+            android:visibility="invisible"
+            />
 
 
 </RelativeLayout>

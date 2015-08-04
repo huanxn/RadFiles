@@ -1,11 +1,48 @@
-<ListView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
+    tools:context="com.huantnguyen.radcases.app.NavigationDrawerFragment"
+    android:id="@+id/fragment_navigation_drawer_linear_layout"
     android:layout_height="match_parent"
-    android:choiceMode="singleChoice"
-    android:divider="@android:color/transparent"
-    android:dividerHeight="0dp"
-    android:background="@color/default_colorPrimaryDark"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    >
 
-    tools:context="com.huantnguyen.radcases.app.NavigationDrawerFragment" />
+    <!--
+    <ListView
+        android:id="@+id/navigation_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/colorPrimaryDark"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        />
 
+    <TextView
+        style="@style/divider"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Case Filters"/>
+    <TextView
+        style="@style/divider"
+        />
+
+-->
+
+    <ExpandableListView
+        android:id="@+id/case_filter_expandable_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/colorPrimaryDark"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:paddingTop="@dimen/statusbar_size"
+        />
+
+
+
+</LinearLayout>

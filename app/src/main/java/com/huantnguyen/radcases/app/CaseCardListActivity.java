@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -26,8 +27,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.text.Html;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -129,6 +136,37 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		dataDir = Environment.getDataDirectory();
 
 		setDrawerPosition(NavigationDrawerActivity.POS_CASE_LIST);
+
+		// lollipop transitions
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+		{
+			//getWindow().setSharedElementExitTransition(TransitionInflater.from(this).inflateTransition(R.transition.shared_element));
+
+			TransitionSet transitionSet = new TransitionSet();
+
+			//transitionSet.setOrdering(transitionSet.ORDERING_SEQUENTIAL);
+
+			//`Transition slideDown = new Slide(Gravity.TOP);
+			//slideDown.addTarget(mToolbar);
+			//transitionSet.addTransition(slideDown);
+
+			Transition fade = new Fade();
+			fade.excludeTarget(mToolbar, true);
+			fade.excludeTarget(android.R.id.statusBarBackground, true);
+			fade.excludeTarget(android.R.id.navigationBarBackground, true);
+			transitionSet.addTransition(fade);
+
+			transitionSet.addTransition(TransitionInflater.from(this).inflateTransition(R.transition.shared_element));
+
+
+
+
+
+			activity.getWindow().setEnterTransition(transitionSet);
+			activity.getWindow().setExitTransition(transitionSet);
+
+
+		}
 
 		if (savedInstanceState == null)
 		{
@@ -1361,17 +1399,22 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 						detailIntent.putExtra(CaseDetailActivity.ARG_HAS_IMAGE, false);
 
-						//TODO check if this works on lollipop
+						//TODO compat for kitkat
 						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
 						{
 							// get the common element for the transition in this activity
 							final ImageView thumbnail_header = holder.thumbnail;
-							ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, thumbnail_header, "thumbnail");
+							ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, thumbnail_header, "transitionImage");
 							activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS, options.toBundle());
 						}
 						else
 						{
-							activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+							//activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
+
+							// get the common element for the transition in this activity
+							final ImageView thumbnail_header = holder.thumbnail;
+							ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, thumbnail_header, "transitionImage");
+							activity.startActivityForResult(detailIntent, CaseCardListActivity.REQUEST_CASE_DETAILS, options.toBundle());
 						}
 					}
 					else

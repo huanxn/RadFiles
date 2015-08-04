@@ -21,7 +21,7 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginTop="?attr/actionBarSize"/>
+            android:layout_marginTop="?attr/actionBarSize"/> <!--set to 0 in java if transparent toolbar-->
 
 
         <!-- android:layout_gravity="start" tells DrawerLayout to treat
@@ -32,6 +32,12 @@
         <!-- The drawer is given a fixed width in dp and extends the full height of
              the container. -->
 
+        <FrameLayout
+            android:id="@+id/toolbar_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
 
         <fragment
             android:id="@+id/navigation_drawer"
@@ -39,17 +45,16 @@
             android:layout_width="@dimen/navigation_drawer_width"
             android:layout_height="match_parent"
             android:layout_gravity="start|bottom"
-            android:layout_marginTop="?attr/actionBarSize"
+
+
             />
+
+        <!--"?attr/actionBarSize"-->
 
     </android.support.v4.widget.DrawerLayout>
 
 
-    <FrameLayout
-        android:id="@+id/toolbar_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+
 
     <!--
     <RelativeLayout

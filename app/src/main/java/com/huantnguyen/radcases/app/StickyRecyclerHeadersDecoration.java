@@ -86,8 +86,11 @@ class StickyRecyclerHeadersDecoration extends RecyclerView.ItemDecoration
 			{
 				for (int i = 1; i < parent.getChildCount(); i++)
 				{
-					int position = parent.getChildPosition(parent.getChildAt(i));
-					if (hasNewHeader(position))
+					int position = parent.getChildAdapterPosition(parent.getChildAt(i));
+
+					// why is position == -1 sometimes?
+
+					if (position > 0 && hasNewHeader(position))
 					{
 						// this header is different than the previous, it must be drawn in the correct place
 						translationX = 0;

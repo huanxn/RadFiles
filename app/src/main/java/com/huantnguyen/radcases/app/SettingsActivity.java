@@ -67,11 +67,14 @@ public class SettingsActivity extends PreferenceActivity {
         // In the simplified UI, fragments are not used at all and we instead
         // use the older PreferenceActivity APIs.
 
+	    PreferenceCategory fakeHeader;
+
         // Add 'general' preferences.
-	    PreferenceCategory fakeHeader = new PreferenceCategory(this);
+	    fakeHeader = new PreferenceCategory(this);
 	    fakeHeader.setTitle(R.string.pref_header_general);
 	    //getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_general);
+
 
 	    // Add 'Case Editing' preferences
 	    fakeHeader = new PreferenceCategory(this);
@@ -89,18 +92,21 @@ public class SettingsActivity extends PreferenceActivity {
 	    bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_image_source_key)));
 	    //    bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_auto_add_to_list_key)));
 
+	    /*
         // Add 'data and sync' preferences, and a corresponding header.
         fakeHeader = new PreferenceCategory(this);
         fakeHeader.setTitle(R.string.pref_header_data_sync);
         getPreferenceScreen().addPreference(fakeHeader);
         addPreferencesFromResource(R.xml.pref_data_sync);
+*/
+
 
         // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
         // their values. When their values change, their summaries are updated
         // to reflect the new value, per the Android Design guidelines.
-        bindPreferenceSummaryToValue(findPreference("example_text"));
+ //       bindPreferenceSummaryToValue(findPreference("example_text"));
         bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-        bindPreferenceSummaryToValue(findPreference("sync_frequency"));
+ //       bindPreferenceSummaryToValue(findPreference("sync_frequency"));
     }
 
     /** {@inheritDoc} */

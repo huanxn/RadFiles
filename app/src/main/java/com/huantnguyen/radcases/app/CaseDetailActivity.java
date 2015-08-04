@@ -1,6 +1,7 @@
 package com.huantnguyen.radcases.app;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
@@ -12,8 +13,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -21,7 +22,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.transition.Fade;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,12 +36,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.GridView;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
@@ -98,6 +104,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		}
 
 		String [] image_args = {String.valueOf(key_id)};
+
 
 		// see how many images are linked to this case to determine if fading toolbar image header should be used
 		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
@@ -273,7 +280,16 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					Intent intent = new Intent(this, CaseEditActivity.class);
 					intent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 
-					startActivityForResult(intent, REQUEST_EDIT_CASE);
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+					{
+						ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity);
+						startActivityForResult(intent, REQUEST_EDIT_CASE, options.toBundle());
+					}
+					else
+					{
+						startActivityForResult(intent, REQUEST_EDIT_CASE);
+					}
+
 				}
 
 				return true;
@@ -543,14 +559,27 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	{
 		switch (view.getId())
 		{
-			case R.id.thumbnail:
+			case R.id.header_image:
+
 				Intent imageGalleryIntent = new Intent(this, ImageGalleryActivity.class);
 				//imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
 				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, fragment.thumbnail_pos);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_CAPTIONS, fragment.imageGridView.getImageCaptions());
-				startActivity(imageGalleryIntent);
+/*
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+				{
+					// get the common element for the transition in this activity
+					final ImageView image_header = (ImageView)view;
+					ActivityOptions options = ActivityOptions.makeSceneTransitionAnimation(activity, image_header, "transitionImage");
+					startActivity(imageGalleryIntent, options.toBundle());
+				}
+				else
+*/				{
+
+					startActivity(imageGalleryIntent);
+				}
 				break;
 		}
 	}
@@ -827,6 +856,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		private Toolbar mToolbar;
 		private ObservableScrollView mScrollView;
 		private float toolbarAlpha;
+		final private float statusbarMinAlpha = (float)0.2;
 		//private int mParallaxImageHeight;
 
 		private int thumbnail_pos;
@@ -868,15 +898,43 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 			if(hasImage)
 			{
-				// Fading Toolbar
+				// Initialize colors and transparency for Fading Toolbar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
 
-				mImageView = (ImageView) view.findViewById(R.id.thumbnail);
+				mImageView = (ImageView) view.findViewById(R.id.header_image);
+
 				mToolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);  // in activity content view
 				toolbarAlpha = 0;
 				mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(0, 0));   // transparent
 				mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(0, 0));    // transparent
 				getActivity().findViewById(R.id.toolbar_dropshadow).setVisibility(View.GONE);
+
+				// adjustments for transparent statusbar
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+				{
+					Window window = getWindow();
+					window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+					//window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+					// pad toolbar to place below the transparent status bar
+					mToolbar.setPadding(0, UtilClass.getStatusBarHeight(getActivity()), 0, 0);
+					getActivity().findViewById(R.id.toolbar_background).setPadding(0, UtilClass.getStatusBarHeight(getActivity()), 0, 0);
+
+					/*
+					// include statusbar height in margin for drawer content
+					//UtilClass.setMargins(getActivity().findViewById(R.id.navigation_drawer), 0, UtilClass.getStatusBarHeight(getActivity()) + UtilClass.getToolbarHeight(getActivity()), 0, 0);  // activity_navigation_drawer_fab  TODO rename to drawer_container or something
+
+					ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams(
+							                                                                   ViewGroup.MarginLayoutParams.WRAP_CONTENT,
+							                                                                   ViewGroup.MarginLayoutParams.WRAP_CONTENT);
+					params.setMargins(0, UtilClass.getStatusBarHeight(getActivity()) + UtilClass.getToolbarHeight(getActivity()), 0, 0);
+					getActivity().findViewById(R.id.navigation_drawer).setLayoutParams(params);
+*/
+
+
+					int baseColorDark = UtilClass.get_attr(activity, R.attr.colorPrimaryDark);
+					window.setStatusBarColor(ScrollUtils.getColorWithAlpha(statusbarMinAlpha, baseColorDark));
+				}
 
 				mScrollView = (ObservableScrollView) view.findViewById(R.id.scroll);
 				mScrollView.setScrollViewCallbacks(this);
@@ -892,8 +950,35 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			{
 				// standard ActionBar
 				view = inflater.inflate(R.layout.fragment_case_detail, container, false);
-				mImageView = (ImageView) view.findViewById(R.id.thumbnail);
+				mImageView = (ImageView) view.findViewById(R.id.header_image);
 			}
+
+
+			// lollipop transitions
+			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+			{
+				getWindow().setSharedElementEnterTransition(TransitionInflater.from(mActivity).inflateTransition(R.transition.shared_element));
+
+				TransitionSet set = new TransitionSet();
+
+				Transition slideUp = new Slide(Gravity.BOTTOM);
+				slideUp.addTarget(view.findViewById(R.id.detail_container));
+				set.addTransition(slideUp);
+
+				Transition slideDown = new Slide(Gravity.TOP);
+				slideDown.addTarget(mToolbar);
+				set.addTransition(slideDown);
+
+				Transition fade = new Fade();
+				fade.excludeTarget(android.R.id.statusBarBackground, true);
+				fade.excludeTarget(android.R.id.navigationBarBackground, true);
+				set.addTransition(fade);
+
+				activity.getWindow().setExitTransition(set);
+				activity.getWindow().setEnterTransition(set);
+			}
+
+
 
 			return view;
 		}
@@ -1281,11 +1366,13 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
 						}
 
+						/*
 						@Override
 						public void onDrawerSlide(View drawerView, float slideOffset)
 						{
 							super.onDrawerSlide(drawerView, slideOffset);
 
+							int baseColorDark = UtilClass.get_attr(getActivity(), R.attr.colorPrimaryDark);
 							int baseColor = UtilClass.get_attr(getActivity(), R.attr.colorPrimary);
 							int textColor = UtilClass.get_attr(getActivity(), R.attr.actionMenuTextColor);
 
@@ -1293,8 +1380,18 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 							{
 								mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColor));
 								mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(slideOffset, textColor));
+
+								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+								{
+									Window window = getWindow();
+									//window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+									//TODO fix if slideoffset > toolbarapha + minalpha
+									window.setStatusBarColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColorDark));
+								}
+
 							}
 						}
+						*/
 
 					};
 
@@ -1418,14 +1515,30 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		@Override
 		public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging)
 		{
+			int baseColorDark = UtilClass.get_attr(activity, R.attr.colorPrimaryDark);
 			int baseColor = UtilClass.get_attr(activity, R.attr.colorPrimary);
 			int textColor = UtilClass.get_attr(activity, R.attr.actionMenuTextColor);
 
 			int parallaxDistance = (int)activity.getResources().getDimension(R.dimen.large_image_height) - (int)activity.getResources().getDimension(R.dimen.toolbar_size); // todo change to attr
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+			{
+				// adjust for transparent status bar
+				parallaxDistance = parallaxDistance - UtilClass.getStatusBarHeight(getActivity());
+			}
+
+
 			toolbarAlpha = 1 - (float) Math.max(0, parallaxDistance - scrollY) / parallaxDistance;
 
 			mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(toolbarAlpha, baseColor));
 			mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(toolbarAlpha, textColor));
+
+			// fading status bar
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+			{
+				Window window = getWindow();
+				//window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+				window.setStatusBarColor(ScrollUtils.getColorWithAlpha(toolbarAlpha + statusbarMinAlpha, baseColorDark));
+			}
 
 			mImageView.setTranslationY(scrollY / 2);
 
@@ -1450,5 +1563,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		{
 
 		}
+
 	}// end fragment
 }

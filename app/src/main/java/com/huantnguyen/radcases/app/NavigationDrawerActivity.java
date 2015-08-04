@@ -128,6 +128,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 			//getSupportActionBar().setElevation(10);
 		}
 
+
 		// transparent toolbar
 		if(isTransparentToolbar)
 		{
@@ -138,6 +139,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 			params.setMargins(0, 0, 0, 0);
 			findViewById(R.id.container).setLayoutParams(params);
 		}
+
 
 		// toolbar title
 		mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
@@ -154,6 +156,13 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		// Set up the drawer.
 		mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.navigation_drawer);
 		mNavigationDrawerFragment.setUp(R.id.navigation_drawer, (DrawerLayout) findViewById(R.id.drawer_layout), showDrawerIndicator);
+
+		// transparent toolbar
+		if(isTransparentToolbar)
+		{
+		//	mNavigationDrawerFragment.mNavigationDrawerFragmentView.findViewById(R.id.fragment_navigation_drawer_linear_layout).setPadding(0, UtilClass.getStatusBarHeight(this), 0, 0);
+
+		}
 	}
 
 	@Override
