@@ -25,6 +25,9 @@
 
         <item name="android:actionModeStyle">@style/ContextualActionModeStyle</item>
 
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
     </style>
 
     <!-- No appcompat actionbar.  ie custom toolbar defined -->
