@@ -28,7 +28,7 @@
     <string name="title_activity_case_import">RAD Import</string>
 
     <!-- Text Field Prompt Strings -->
-    <string name="patient_id_prompt">Patient identifier</string>
+    <string name="patient_id_prompt">Case number</string>
     <string name="section_prompt">Choose sections</string>
     <string name="studyType_prompt">Choose modality</string>
     <string name="keyWords_prompt">Choose key words</string>
@@ -91,6 +91,8 @@
         <item>Findings</item>
         <item>Key Words</item>
         <item>Modality</item>
+        <item>Biopsy</item>
+        <item>Follow Up</item>
         <item>Comments</item>
     </string-array>
 

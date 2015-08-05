@@ -565,7 +565,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			case_cursor_array[3] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " LIKE ? ", selArgs, CasesProvider.KEY_KEYWORDS);
 			case_cursor_array[4] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_STUDY_TYPE + " LIKE ? ", selArgs, CasesProvider.KEY_STUDY_TYPE);
-			case_cursor_array[5] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_COMMENTS + " LIKE ? ", selArgs, CasesProvider.KEY_COMMENTS);
+
+			if(isCancelled())
+			{
+				return false;
+			}
+
+			case_cursor_array[5] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_BIOPSY + " LIKE ? ", selArgs, CasesProvider.KEY_BIOPSY);
+			case_cursor_array[6] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_FOLLOWUP_COMMENT + " LIKE ? ", selArgs, CasesProvider.KEY_FOLLOWUP_COMMENT);
+			case_cursor_array[7] = getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_COMMENTS + " LIKE ? ", selArgs, CasesProvider.KEY_COMMENTS);
 
 			if(isCancelled())
 			{
