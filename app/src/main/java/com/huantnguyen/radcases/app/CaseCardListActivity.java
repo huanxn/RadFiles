@@ -268,7 +268,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	// ACTION BAR MENU
 	//
 
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
@@ -289,11 +288,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		searchView.setIconifiedByDefault(true);
 
 		// change text color
-		searchView.setQueryHint(Html.fromHtml("<font color = " + getResources().getColor(R.color.text_light_hint) + ">" + getResources().getString(R.string.search_prompt) + "</font>"));
-		UtilClass.changeSearchViewTextColor(searchView, getResources().getColor(R.color.text_light));
+		//UtilClass.changeSearchViewTextColor(searchView, getResources().getColor(R.color.text_light));
+		//searchView.setQueryHint(Html.fromHtml("<font color = " + getResources().getColor(R.color.text_light_hint) + ">" + getResources().getString(R.string.search_prompt) + "</font>"));
 
-	//	int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
-	//	((TextView) searchView.findViewById(id)).setTextColor(Color.WHITE);
+		SearchView.SearchAutoComplete searchText = (SearchView.SearchAutoComplete)searchView.findViewById(R.id.search_src_text);
+		searchText.setTextColor(getResources().getColor(R.color.text_light));
+		searchText.setHint(getResources().getString(R.string.search_prompt));
+		searchText.setHintTextColor(getResources().getColor(R.color.text_light_hint));  // TODO fix (removes text instead of changing color)
 
 		// hide spinner if drawer is open
 		if (mNavigationDrawerFragment.isDrawerOpen())
@@ -307,10 +308,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	}
 
 	@Override
-	// show menu icons in overflow
-	public boolean onMenuOpened(int featureId, Menu menu)
+	// called when overflow button opens overflow menu
+	public boolean onPrepareOptionsMenu(Menu menu)
 	{
-		if (featureId == Window.FEATURE_ACTION_BAR && menu != null)
+		// show menu icons in overflow
+		if (menu != null)
 		{
 			if (menu.getClass().getSimpleName().equals("MenuBuilder"))
 			{
@@ -322,7 +324,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 				catch (NoSuchMethodException e)
 				{
-					Log.e(TAG, "onMenuOpened", e);
+				//	Log.e(TAG, "onMenuOpened", e);
 				}
 				catch (Exception e)
 				{
@@ -330,7 +332,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 			}
 		}
-		return super.onMenuOpened(featureId, menu);
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override

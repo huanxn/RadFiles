@@ -44,6 +44,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -182,6 +183,34 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 		getMenuInflater().inflate(R.menu.case_edit, menu);
 
 		return true;
+	}
+
+	@Override
+	// called when overflow button opens overflow menu
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
+		// show menu icons in overflow
+		if (menu != null)
+		{
+			if (menu.getClass().getSimpleName().equals("MenuBuilder"))
+			{
+				try
+				{
+					Method m = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
+					m.setAccessible(true);
+					m.invoke(menu, true);
+				}
+				catch (NoSuchMethodException e)
+				{
+				//	Log.e(TAG, "onMenuOpened", e);
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 	@Override

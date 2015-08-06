@@ -235,6 +235,34 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	}
 
 	@Override
+	// called when overflow button opens overflow menu
+	public boolean onPrepareOptionsMenu(Menu menu)
+	{
+		// show menu icons in overflow
+		if (menu != null)
+		{
+			if (menu.getClass().getSimpleName().equals("MenuBuilder"))
+			{
+				try
+				{
+					Method m = menu.getClass().getDeclaredMethod("setOptionalIconsVisible", Boolean.TYPE);
+					m.setAccessible(true);
+					m.invoke(menu, true);
+				}
+				catch (NoSuchMethodException e)
+				{
+				//	Log.e(TAG, "onMenuOpened", e);
+				}
+				catch (Exception e)
+				{
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
 		// Handle action bar item clicks here. The action bar will

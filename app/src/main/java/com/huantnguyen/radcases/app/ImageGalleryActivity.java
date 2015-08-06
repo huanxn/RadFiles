@@ -2,6 +2,7 @@ package com.huantnguyen.radcases.app;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -19,6 +20,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -90,6 +93,14 @@ public class ImageGalleryActivity extends ActionBarActivity
 	@Override
 	public void onCreate(Bundle savedInstanceState)
 	{
+		// black status bar
+		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+		{
+			Window window = getWindow();
+			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+			window.setStatusBarColor(getResources().getColor(android.R.color.black));
+		}
 
 		case_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
 		int init_pos = getIntent().getIntExtra(ARG_POSITION, 0);

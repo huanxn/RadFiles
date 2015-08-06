@@ -57,7 +57,7 @@
     </string-array>
 
     <!-- Searchview prompt -->
-    <string name="search_prompt">Search cases</string>
+    <string name="search_prompt">Search for cases</string>
 
     <!-- Navigation Drawer Strings -->
     <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
