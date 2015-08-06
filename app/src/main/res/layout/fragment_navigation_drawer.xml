@@ -1,7 +1,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.huantnguyen.radcases.app.NavigationDrawerFragment"
+    tools:context="com.huantnguyen.radfiles.app.NavigationDrawerFragment"
     android:id="@+id/fragment_navigation_drawer_linear_layout"
     android:layout_height="match_parent"
     android:layout_width="match_parent"

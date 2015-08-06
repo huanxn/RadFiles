@@ -18,7 +18,7 @@
         android:layout_centerInParent="true"
         android:src="@drawable/ic_close_grey600_24dp"/>
 
-        <com.huantnguyen.radcases.app.SpinnerDateButton
+        <com.huantnguyen.radfiles.app.SpinnerDateButton
             android:id="@+id/edit_date"
             style="?android:attr/spinnerStyle"
 
@@ -32,7 +32,7 @@
 
             />
 
-    <com.huantnguyen.radcases.app.SpinnerCustom
+    <com.huantnguyen.radfiles.app.SpinnerCustom
         android:id="@+id/edit_study_type"
         style="@style/customSpinnerStyle"
         android:layout_alignParentLeft="true"

@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.huantnguyen.radcases.app.ManageListsActivity"
+    tools:context="com.huantnguyen.radfiles.app.ManageListsActivity"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:id="@+id/menu_help"

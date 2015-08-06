@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.huantnguyen.radcases.app" >
+    package="com.huantnguyen.radfiles.app" >
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -14,10 +14,10 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <uses-library
-        android:name="com.huantnguyen.radcases.app/eu.janmuller.android.simplecropimage"
+        android:name="com.huantnguyen.radfiles.app/eu.janmuller.android.simplecropimage"
         android:required="true" />
     <uses-library
-        android:name="com.huantnguyen.radcases.app/com.android.camera"
+        android:name="com.huantnguyen.radfiles.app/com.android.camera"
         android:required="true" />
 
     <application
@@ -46,7 +46,7 @@
         -->
 
         <activity
-            android:name="com.huantnguyen.radcases.app.CaseCardListActivity"
+            android:name="com.huantnguyen.radfiles.app.CaseCardListActivity"
             android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_activity_case_card_list" >
             <intent-filter>
@@ -66,67 +66,67 @@
 
         <!-- Database -->
         <provider
-            android:name="com.huantnguyen.radcases.app.CasesProvider"
-            android:authorities="com.huantnguyen.radcases.app.CasesProvider" >
+            android:name="com.huantnguyen.radfiles.app.CasesProvider"
+            android:authorities="com.huantnguyen.radfiles.app.CasesProvider" >
         </provider>
 
         <activity
-            android:name="com.huantnguyen.radcases.app.CaseDetailActivity"
+            android:name="com.huantnguyen.radfiles.app.CaseDetailActivity"
             android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_case_detail"
-            android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity"
+            android:parentActivityName="com.huantnguyen.radfiles.app.CaseCardListActivity"
             android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
+                android:value="com.huantnguyen.radfiles.app.CaseCardListActivity" />
         </activity>
         <activity
-            android:name="com.huantnguyen.radcases.app.CaseAddActivity"
+            android:name="com.huantnguyen.radfiles.app.CaseAddActivity"
             android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_activity_add_case"
-            android:parentActivityName="com.huantnguyen.radcases.app.CaseCardListActivity" >
+            android:parentActivityName="com.huantnguyen.radfiles.app.CaseCardListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
+                android:value="com.huantnguyen.radfiles.app.CaseCardListActivity" />
         </activity>
 
         <!-- custom toolbar -->
         <activity
-            android:name="com.huantnguyen.radcases.app.CaseEditActivity"
+            android:name="com.huantnguyen.radfiles.app.CaseEditActivity"
             android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_activity_edit_case"
-            android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity" >
+            android:parentActivityName="com.huantnguyen.radfiles.app.CaseDetailActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CaseDetailActivity" />
+                android:value="com.huantnguyen.radfiles.app.CaseDetailActivity" />
         </activity>
 
         <activity
-            android:name="com.huantnguyen.radcases.app.ImageGalleryActivity"
+            android:name="com.huantnguyen.radfiles.app.ImageGalleryActivity"
             android:label="Key Images"
-            android:parentActivityName="com.huantnguyen.radcases.app.CaseDetailActivity"
+            android:parentActivityName="com.huantnguyen.radfiles.app.CaseDetailActivity"
             android:theme="@style/MaterialTheme.Light.NoActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.huantnguyen.radcases.app.CaseDetailActivity" />
+                android:value="com.huantnguyen.radfiles.app.CaseDetailActivity" />
         </activity>
 
         <!-- enable the search dialog to send searches to SearchableActivity -->
         <meta-data
             android:name="android.app.default_searchable"
-            android:value="com.huantnguyen.radcases.app.CaseCardListActivity" />
+            android:value="com.huantnguyen.radfiles.app.CaseCardListActivity" />
 
         <!-- libs simple-crop-image-lib: crop image from camera picture -->
         <activity android:name="eu.janmuller.android.simplecropimage.CropImage" />
 
         <activity
-            android:name="com.huantnguyen.radcases.app.CaseImport"
+            android:name="com.huantnguyen.radfiles.app.CaseImport"
             android:theme="@style/MaterialTheme.Light.NoActionBar"
             android:label="@string/title_activity_case_import"
-            android:parentActivityName=".ImportExportActivity" >
+            android:parentActivityName="com.huantnguyen.radfiles.app.ImportExportActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ImportExportActivity" />
+                android:value="com.huantnguyen.radfiles.app.ImportExportActivity" />
 
             <intent-filter>
                 <action android:name="com.google.android.apps.drive.DRIVE_OPEN" />
@@ -186,7 +186,7 @@
         </activity>
 
         <activity
-            android:name=".ImportExportActivity"
+            android:name="com.huantnguyen.radfiles.app.ImportExportActivity"
             android:label="@string/title_activity_import_export"
             android:theme="@style/MaterialTheme.Light.NoActionBar">
             <meta-data
@@ -196,17 +196,17 @@
         </activity>
 
         <activity
-            android:name="com.huantnguyen.radcases.app.NavigationDrawerActivity"
+            android:name="com.huantnguyen.radfiles.app.NavigationDrawerActivity"
             android:label="@string/title_activity_navigation_drawer" >
         </activity>
 
         <activity
-            android:name="com.huantnguyen.radcases.app.SettingsActivity"
+            android:name="com.huantnguyen.radfiles.app.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
 
         <activity
-            android:name="com.huantnguyen.radcases.app.ManageListsActivity"
+            android:name="com.huantnguyen.radfiles.app.ManageListsActivity"
             android:label="@string/title_activity_manage_lists"
             android:screenOrientation="portrait"
             android:theme="@style/MaterialTheme.Light.NoActionBar">

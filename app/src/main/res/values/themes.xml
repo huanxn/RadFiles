@@ -28,7 +28,7 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
 
-        <item name="searchViewStyle">@style/MaterialTheme.SearchView</item>
+
 
     </style>
 

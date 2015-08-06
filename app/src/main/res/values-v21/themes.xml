@@ -20,6 +20,8 @@
 
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small</item>
+
+        <item name="searchViewStyle">@style/MaterialTheme.SearchView</item>
     </style>
 
 
