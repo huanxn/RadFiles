@@ -4,7 +4,7 @@
           xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- Search, should appear as action button -->
-    <item android:title="@string/action_search" app:actionViewClass="android.support.v7.widget.SearchView" app:showAsAction="ifRoom" android:icon="@drawable/ic_magnify_white_24dp" android:id="@+id/menu_search"/>
+    <item android:title="@string/action_search" app:actionViewClass="android.support.v7.widget.SearchView" app:showAsAction="ifRoom"  android:id="@+id/menu_search"/>
 
     <!-- Add new case, should appear as action button -->
     <item android:title="@string/action_new" app:showAsAction="ifRoom" android:icon="@drawable/ic_plus_white_36dp" android:id="@+id/menu_addnew"/>

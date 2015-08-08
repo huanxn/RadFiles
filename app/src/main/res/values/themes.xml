@@ -25,23 +25,27 @@
 
         <item name="android:actionModeStyle">@style/ContextualActionModeStyle</item>
 
+
+        <!-- No appcompat actionbar.  ie custom toolbar defined -->
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-
-
+        <item name="android:windowActionBar">false</item>
+        <item name="android:actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
+        <item name="actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
 
     </style>
 
-    <!-- No appcompat actionbar.  ie custom toolbar defined -->
+    <!-- No appcompat actionbar.  ie custom toolbar defined
     <style name="MaterialTheme.Light.NoActionBar" parent="MaterialTheme.Light.Base">
         <item name="android:windowActionBar">false</item>
         <item name="windowActionBar">false</item>
         <item name="android:actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
         <item name="actionBarWidgetTheme">@style/Theme.MyTheme.Widget</item>
     </style>
+    -->
 
     <!-- Contextual action bar -->
-    <style name="ContextualActionMode.Light" parent="MaterialTheme.Light.NoActionBar">
+    <style name="ContextualActionMode.Light" parent="MaterialTheme.Light">
         <item name="android:actionOverflowButtonStyle">@style/ContextualOverflow</item>
     </style>
 

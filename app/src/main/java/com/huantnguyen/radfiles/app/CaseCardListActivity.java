@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -31,6 +32,7 @@ import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionSet;
 import android.view.ActionMode;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -38,6 +40,9 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -54,6 +59,13 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+
+import tourguide.tourguide.Overlay;
+import tourguide.tourguide.Pointer;
+import tourguide.tourguide.ToolTip;
+import tourguide.tourguide.TourGuide;
+import xyz.danoz.recyclerviewfastscroller.sectionindicator.title.SectionTitleIndicator;
+import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
 /**
  * Created by Huan on 6/12/2014.
@@ -99,8 +111,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	private SearchTask searchTask;
 
 	// ShowCase tutorial
+	// TourGuide tutorial
 	private boolean showTutorial = true;
 	private Target caseFilterTarget;
+
 
 	//private List<Long> multiselectList;
 
@@ -283,13 +297,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		searchView.setIconifiedByDefault(true);
 
 		// change text color
-		//UtilClass.changeSearchViewTextColor(searchView, getResources().getColor(R.color.text_light));
-		//searchView.setQueryHint(Html.fromHtml("<font color = " + getResources().getColor(R.color.text_light_hint) + ">" + getResources().getString(R.string.search_prompt) + "</font>"));
 
 		SearchView.SearchAutoComplete searchText = (SearchView.SearchAutoComplete)searchView.findViewById(R.id.search_src_text);
 		searchText.setTextColor(getResources().getColor(R.color.text_light));
 		searchText.setHint(getResources().getString(R.string.search_prompt));
-		searchText.setHintTextColor(getResources().getColor(R.color.text_light_hint));  // TODO fix (removes text instead of changing color)
+		searchText.setHintTextColor(getResources().getColor(R.color.text_light_hint));
 
 		// hide spinner if drawer is open
 		if (mNavigationDrawerFragment.isDrawerOpen())
@@ -636,7 +648,64 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	private void runTutorial(final int step)
 	{
-		if(step == 1)
+		/*
+		TourGuide mTourGuideHandler;
+
+
+
+		if(step == 0)
+		{
+			// Welcome
+			View viewTarget = null;
+			if(mToolbar != null)
+			{
+				viewTarget = mToolbar.findViewById(R.id.case_filter_spinner);
+			}
+
+			if(viewTarget != null)
+			{
+
+
+
+
+				mTourGuideHandler = TourGuide.init(this).with(TourGuide.Technique.Click)
+						                    .setPointer(new Pointer())
+						                    .setToolTip(new ToolTip())
+						                    .setOverlay(new Overlay())
+						                    .playOn(viewTarget);
+
+			}
+		}
+		else */
+		 if(step == 1)
+		{
+			View viewTarget = null;
+			if(fragment != null && fragment.getView() != null)
+			{
+				viewTarget = fragment.getView().findViewById(R.id.cards_list);
+			}
+			if(viewTarget != null)
+			{
+				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+						                                  .setTarget(new ViewTarget(viewTarget))
+						                                  .setContentTitle("Case list")
+						                                  .setContentText("Click on a case to see more details. Long press to start selecting multiple cases for sharing.")
+						                                  .setStyle(R.style.CustomShowcaseTheme)
+						                                  .hideOnTouchOutside()
+						                                  .build();
+				showcaseView.overrideButtonClick(new View.OnClickListener()
+				{
+					@Override
+					public void onClick(View v)
+					{
+						showcaseView.hide();
+						runTutorial(step + 1);
+					}
+				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
+			}
+		}
+		else if(step == 2)
 		{
 			View viewTarget = null;
 			if(mToolbar != null)
@@ -646,6 +715,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			if(viewTarget != null)
 			{
+
+
 				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
 						                                  .setTarget(new ViewTarget(viewTarget))
 						                                  .setContentTitle("Case Sorting")
@@ -662,10 +733,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						runTutorial(step + 1);
 					}
 				});
+				//if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, ApiUtils.getSoftButtonsBarSizeLand(activity), ApiUtils.getSoftButtonsBarSizePort(activity)); }
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
+
 
 			}
+
 		}
-		else if(step == 2)
+		else if(step == 3)
 		{
 			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
 					                                  //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
@@ -686,8 +761,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					runTutorial(step + 1);
 				}
 			});
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 		}
-		else if(step == 3)
+		else if(step == 4)
 		{
 			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
 					                                  //.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
@@ -707,37 +783,13 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					runTutorial(step + 1);
 				}
 			});
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 		}
-		else if(step == 4)
-		{
-			View viewTarget = null;
-			if(fragment != null && fragment.getView() != null)
-			{
-				viewTarget = fragment.getView().findViewById(R.id.cards_list);
-			}
-			if(viewTarget != null)
-			{
-				final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-						                                  .setTarget(new ViewTarget(viewTarget))
-						                                  .setContentTitle("Case list")
-						                                  .setContentText("Click on a case to see more details. Long press to start selecting multiple cases for sharing.")
-						                                  .setStyle(R.style.CustomShowcaseThemeEnd)
-						                                  .hideOnTouchOutside()
-						                                  .build();
-				showcaseView.overrideButtonClick(new View.OnClickListener()
-				{
-					@Override
-					public void onClick(View v)
-					{
-						showcaseView.hide();
-						runTutorial(step + 1);
-					}
-				});
-			}
-		}
+
 		else if(step == 5)
 		{
-			final Target viewTarget = new Target() {
+			final Target viewTarget = new Target()
+			{
 				@Override
 				public Point getPoint() {
 					View navIcon = null;
@@ -776,6 +828,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					runTutorial(step + 1);
 				}
 			});
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 
 		}
 		else if(step == 6)
@@ -788,6 +841,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					                                  .setStyle(R.style.CustomShowcaseThemeEnd)
 					                                  .hideOnTouchOutside()
 					                                  .build();
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 
 		}
 	}
@@ -851,12 +905,21 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					                          android.R.color.holo_orange_light,
 					                          android.R.color.holo_red_light);
 
+			swipeLayout.setEnabled(false);
+
 			// Find RecyclerView
 			mRecyclerView = (RecyclerView)rootView.findViewById(R.id.cards_list);
 
 			// Setup RecyclerView
 			mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
 			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+			// Setup RecyclerView FastScroller
+			VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) rootView.findViewById(R.id.fast_scroller);
+			SectionTitleIndicator sectionTitleIndicator = (SectionTitleIndicator) rootView.findViewById(R.id.fast_scroller_section_title_indicator);
+			fastScroller.setRecyclerView(mRecyclerView);
+			mRecyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
+			fastScroller.setSectionIndicator(sectionTitleIndicator);
 
 			// Setup CaseCardAdapter
 			mCardAdapter = ((CaseCardListActivity)mActivity).mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);

@@ -634,6 +634,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					runTutorial(step + 1);
 				}
 			});
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 		}
 		else if(step == 1)
 		{
@@ -655,6 +656,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					runTutorial(step + 1);
 				}
 			});
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 		}
 
 		else if(step == 2)
@@ -706,6 +708,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 						runTutorial(step + 1);
 					}
 				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 			else
 			{
@@ -726,6 +729,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 						runTutorial(step + 1);
 					}
 				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 		}
 		else if(step == 3)
@@ -768,6 +772,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 						runTutorial(step + 1);
 					}
 				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 
 			}
 			else
@@ -794,6 +799,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 						runTutorial(step + 1);
 					}
 				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 		}
 		/*
@@ -844,7 +850,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		else if(step == 4)
 		{
 
-			new ShowcaseView.Builder(this)
+			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
 					                                  .setTarget( new ViewTarget(mOverflowTarget) )
 							                                   //.setTarget(new ViewTarget(fragment.getView().findViewById(R.id.menu_help)))
 					                                  .setContentTitle("Overflow menu")
@@ -852,7 +858,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					                                  .setStyle(R.style.CustomShowcaseThemeEnd)
 					                                  .hideOnTouchOutside()
 					                                  .build();
-
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 		}
 
 		return;

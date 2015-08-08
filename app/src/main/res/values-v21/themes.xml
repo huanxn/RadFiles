@@ -4,6 +4,7 @@
 <resources>
 
     <!-- extend from parent defined in values/themes.xml -->
+    <!-- No appcompat actionbar.  ie custom toolbar defined -->
     <style name="MaterialTheme.Light" parent="MaterialTheme.Light.Base">
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowAllowEnterTransitionOverlap">true</item>
@@ -21,7 +22,9 @@
         <item name="textAppearanceLargePopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Large</item>
         <item name="textAppearanceSmallPopupMenu">@style/TextAppearance.AppCompat.Light.Widget.PopupMenu.Small</item>
 
+        <!-- SearchView style -->
         <item name="searchViewStyle">@style/MaterialTheme.SearchView</item>
+
     </style>
 
 
@@ -40,12 +43,13 @@
 
         <item name="android:popupTheme">@style/ThemeOverlay.AppCompat.Dark</item>
 
+
     </style>
 
     <!-- SearchView style -->
     <style name="MaterialTheme.SearchView" parent="Widget.AppCompat.SearchView">
         <item name="searchIcon">@drawable/ic_magnify_white_24dp</item>
-        <item name="closeIcon">@drawable/ic_close_white_24dp</item>
+        <item name="closeIcon">@drawable/ic_magnify_white_24dp</item>
     </style>
 
 </resources>

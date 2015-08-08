@@ -114,6 +114,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						runTutorial(step + 1);
 					}
 				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 
 			}
 		}
@@ -144,6 +145,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						runTutorial(step + 1);
 					}
 				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 		}
 		else if (step == 3)
@@ -181,6 +183,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						}, 100);
 					}
 				});
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 		}
 
@@ -198,6 +201,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						                                  .setStyle(R.style.CustomShowcaseThemeEnd)
 						                                  .hideOnTouchOutside()
 						                                  .build();
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 		}
 	}
