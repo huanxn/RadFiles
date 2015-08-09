@@ -11,7 +11,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.MergeCursor;
-import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -32,7 +31,6 @@ import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionSet;
 import android.view.ActionMode;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,9 +38,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -60,10 +55,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import tourguide.tourguide.Overlay;
-import tourguide.tourguide.Pointer;
-import tourguide.tourguide.ToolTip;
-import tourguide.tourguide.TourGuide;
 import xyz.danoz.recyclerviewfastscroller.sectionindicator.title.SectionTitleIndicator;
 import xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller;
 
@@ -522,12 +513,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 		protected void onPreExecute()
 		{
-			fragment.swipeLayout.post(new Runnable()
+			fragment.swipeRefreshLayout.post(new Runnable()
 			{
 				@Override
 				public void run()
 				{
-					fragment.swipeLayout.setRefreshing(true);
+					fragment.swipeRefreshLayout.setRefreshing(true);
 				}
 			});
 		}
@@ -630,7 +621,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				mCardAdapter.notifyDataSetChanged();
 			}
 
-			fragment.swipeLayout.setRefreshing(false);
+			fragment.swipeRefreshLayout.setRefreshing(false);
 		}
 	} // end SearchTask
 
@@ -867,7 +858,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		View rootView;
 		CaseCardListActivity mActivity;
 
-		private SwipeRefreshLayout swipeLayout;
+		private SwipeRefreshLayout swipeRefreshLayout;
 
 		public CaseCardListFragment()
 		{
@@ -880,19 +871,19 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			rootView = inflater.inflate(R.layout.activity_case_cardlist, container, false);
 
 			// Setup SwipeRefreshLayout
-			swipeLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
-			swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+			swipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_container);
+			swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
 			{
 				@Override
 				public void onRefresh()
 				{
 					if(mCardAdapter != null && mCardAdapter.mActionMode != null)    // don't refresh if in contextual action bar mode
 					{
-						swipeLayout.setRefreshing(false);
+						swipeRefreshLayout.setRefreshing(false);
 					}
 					else if(mActivity.isSearchViewOpen()) //don't refresh if search bar open
 					{
-						swipeLayout.setRefreshing(false);
+						swipeRefreshLayout.setRefreshing(false);
 					}
 					else
 					{
@@ -900,12 +891,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					}
 				}
 			});
-			swipeLayout.setColorScheme(android.R.color.holo_blue_bright,
-					                          android.R.color.holo_green_light,
-					                          android.R.color.holo_orange_light,
-					                          android.R.color.holo_red_light);
-
-			swipeLayout.setEnabled(false);
+			swipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
+					                                android.R.color.holo_green_light,
+					                                android.R.color.holo_orange_light,
+					                                android.R.color.holo_red_light);
 
 			// Find RecyclerView
 			mRecyclerView = (RecyclerView)rootView.findViewById(R.id.cards_list);
@@ -993,12 +982,12 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				if(showProgress)
 				{
 					// show progress wheel in UI thread
-					swipeLayout.post(new Runnable()
+					swipeRefreshLayout.post(new Runnable()
 					{
 						@Override
 						public void run()
 						{
-							swipeLayout.setRefreshing(true);
+							swipeRefreshLayout.setRefreshing(true);
 						}
 					});
 				}
@@ -1284,7 +1273,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			{
 				if(showProgress)
 				{
-					swipeLayout.setRefreshing(false);
+					swipeRefreshLayout.setRefreshing(false);
 
 					// show view changes after progress wheel closes
 					new Handler().postDelayed(new Runnable()
@@ -1299,7 +1288,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				else
 				{
 					mCardAdapter.notifyDataSetChanged();
-					swipeLayout.setRefreshing(false);   // just in case
+					swipeRefreshLayout.setRefreshing(false);   // just in case
 				}
 			}
 		} // end PopulateCardsTask

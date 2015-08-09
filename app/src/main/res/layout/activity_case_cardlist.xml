@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     >
 
+
     <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/swipe_container"
             android:layout_width="match_parent"
@@ -14,35 +15,41 @@
             android:background="@color/default_background"
         >
 
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/cards_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:scrollbars="vertical"
             />
 
-        <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
-            android:id="@+id/fast_scroller"
-            android:layout_width="@dimen/fastscroller_width"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
 
-            recyclerviewfastscroller:rfs_barColor="@color/transparent"
-            recyclerviewfastscroller:rfs_handleBackground="@drawable/fast_scroller_handle_rounded"
 
-            />
 
-        <com.huantnguyen.radfiles.app.FastScrollSectionTitleIndicator
-            android:id="@+id/fast_scroller_section_title_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/list_item_height"
-            android:layout_toLeftOf="@id/fast_scroller"
-            android:layout_toStartOf="@id/fast_scroller"
-
-            recyclerviewfastscroller:rfs_backgroundColor="@android:color/white"
-            recyclerviewfastscroller:rfs_textColor="@android:color/black"
-            />
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
+        android:id="@+id/fast_scroller"
+        android:layout_width="@dimen/fastscroller_width"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+
+        recyclerviewfastscroller:rfs_barColor="@color/transparent"
+        recyclerviewfastscroller:rfs_handleBackground="@drawable/fast_scroller_handle"
+        recyclerviewfastscroller:rfs_handleColor="@color/transparent"
+
+        />
+
+    <com.huantnguyen.radfiles.app.FastScrollSectionTitleIndicator
+        android:id="@+id/fast_scroller_section_title_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/list_item_height"
+        android:layout_toLeftOf="@id/fast_scroller"
+        android:layout_toStartOf="@id/fast_scroller"
+
+        recyclerviewfastscroller:rfs_backgroundColor="@color/default_colorAccent"
+        recyclerviewfastscroller:rfs_textColor="@color/white_text"
+        />
 
 </RelativeLayout>

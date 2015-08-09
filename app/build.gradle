@@ -44,8 +44,8 @@ dependencies {
     compile 'com.github.ksoichiro:android-observablescrollview:1.4.0' // for parallax view fading toolbar
 
     compile 'com.github.amlcurran.showcaseview:library:5.0.0'   //ShowCaseView tutorials
-    compile ('com.github.worker8:tourguide:1.0.12-SNAPSHOT@aar')    //TourGuide tutorials
-            {transitive=true}
+    /*compile ('com.github.worker8:tourguide:1.0.12-SNAPSHOT@aar')    //TourGuide tutorials
+            {transitive=true}*/
 
     compile 'com.viewpagerindicator:library:2.4.1@aar'  // ViewPager Indicator for gallery view
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'    // For SlidingTabStrip in Manage Lists

@@ -1,13 +1,30 @@
-<shape
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    >
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <shape xmlns:android="http://schemas.android.com/apk/res/android"
+               android:shape="rectangle">
 
-    <solid
-        android:color="@color/text_light_divider"
-        />
+            <corners android:radius="2dp"/>
 
-    <corners
-        android:radius="10dp"
-        />
+            <solid android:color="#FF0288D1"/>
 
-</shape><!-- From: file:/Users/D/Development/RecyclerViewScroller/recyclerviewfastscroller/src/main/res/drawable/fast_scroller_handle_rounded.xml -->
+            <size
+                android:height="32dp"
+                android:width="4dp"/>
+        </shape>
+    </item>
+    <item >
+        <shape xmlns:android="http://schemas.android.com/apk/res/android"
+               android:shape="rectangle">
+
+            <corners android:radius="2dp"/>
+
+            <solid android:color="#FF737373"/>
+
+            <size
+                android:height="32dp"
+                android:width="4dp"/>
+        </shape>
+    </item>
+
+</selector>
