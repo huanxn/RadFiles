@@ -903,12 +903,15 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
 			mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-			// Setup RecyclerView FastScroller
+			/*// Setup RecyclerView FastScroller
 			VerticalRecyclerViewFastScroller fastScroller = (VerticalRecyclerViewFastScroller) rootView.findViewById(R.id.fast_scroller);
 			SectionTitleIndicator sectionTitleIndicator = (SectionTitleIndicator) rootView.findViewById(R.id.fast_scroller_section_title_indicator);
 			fastScroller.setRecyclerView(mRecyclerView);
 			mRecyclerView.addOnScrollListener(fastScroller.getOnScrollListener());
-			fastScroller.setSectionIndicator(sectionTitleIndicator);
+			fastScroller.setSectionIndicator(sectionTitleIndicator);*/
+
+			FastScroller fastScroller=(FastScroller)rootView.findViewById(R.id.fastscroller);
+			fastScroller.setRecyclerView(mRecyclerView);
 
 			// Setup CaseCardAdapter
 			mCardAdapter = ((CaseCardListActivity)mActivity).mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);

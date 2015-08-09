@@ -192,15 +192,16 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 		MenuItem star = menu.findItem(R.id.menu_star);
 
 		// Set the starred icon and text in action bar
+		// also done in onOptionsItemSelected  //todo change?
 		if (fragment.isStarred())
 		{
 			star.setTitle(getResources().getString(R.string.remove_star));
-			star.setIcon(R.drawable.ic_star_grey600_24dp);
+			star.setIcon(R.drawable.ic_star_white_24dp);
 		}
 		else
 		{
 			star.setTitle(getResources().getString(R.string.add_star));
-			star.setIcon(R.drawable.ic_star_outline_grey600_24dp);
+			star.setIcon(R.drawable.ic_star_outline_white_24dp);
 		}
 
 		return super.onCreateOptionsMenu(menu);
@@ -286,12 +287,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					if(fragment.isStarred())
 					{
 						item.setTitle(getResources().getString(R.string.remove_star));
-						item.setIcon(R.drawable.ic_action_important);
+						item.setIcon(R.drawable.ic_star_white_24dp);
 					}
 					else
 					{
 						item.setTitle(getResources().getString(R.string.add_star));
-						item.setIcon(R.drawable.ic_action_not_important);
+						item.setIcon(R.drawable.ic_star_outline_white_24dp);
 					}
 
 					// reset the action bar to reflex new Star state

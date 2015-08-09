@@ -2,6 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:recyclerviewfastscroller="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
@@ -29,7 +30,7 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
+    <!--<xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
         android:id="@+id/fast_scroller"
         android:layout_width="@dimen/fastscroller_width"
         android:layout_height="match_parent"
@@ -50,6 +51,16 @@
 
         recyclerviewfastscroller:rfs_backgroundColor="@color/default_colorAccent"
         recyclerviewfastscroller:rfs_textColor="@color/white_text"
-        />
+        />-->
+
+    <com.huantnguyen.radfiles.app.FastScroller
+        android:id="@+id/fastscroller"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@id/swipe_container"
+        android:layout_alignBottom="@id/swipe_container"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        tools:ignore="RtlCompat"/>
 
 </RelativeLayout>

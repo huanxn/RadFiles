@@ -4,15 +4,14 @@
           xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
+    <!-- Toggle favorites "star", should appear as action button -->
+    <item android:title="@string/add_star" app:showAsAction="ifRoom" android:icon="@drawable/ic_star_outline_white_24dp" android:id="@+id/menu_star"/>
 
     <!-- Edit this case, should appear as action button -->
     <item android:title="@string/action_edit" app:showAsAction="ifRoom" android:icon="@drawable/ic_pencil_white_24dp" android:id="@+id/menu_edit"/>
     
     <!-- Add image to this case, should appear as action button -->
-    <item android:title="@string/action_camera" app:showAsAction="ifRoom" android:icon="@drawable/ic_camera_white_24dp" android:id="@+id/menu_camera"/>
-
-    <!-- Toggle favorites "star", should appear as action button -->
-    <item android:title="@string/add_star" app:showAsAction="ifRoom" android:icon="@drawable/ic_star_outline_white_24dp" android:id="@+id/menu_star"/>
+    <item android:title="@string/action_camera" app:showAsAction="never" android:icon="@drawable/ic_camera_grey600_24dp" android:id="@+id/menu_camera"/>
 
     <!-- Delete this case, should appear as action button -->
     <item android:title="@string/action_delete" app:showAsAction="never" android:icon="@drawable/ic_delete_grey600_24dp" android:id="@+id/menu_delete"/>
