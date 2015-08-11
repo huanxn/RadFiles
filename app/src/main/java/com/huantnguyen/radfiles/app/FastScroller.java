@@ -2,8 +2,11 @@ package com.huantnguyen.radfiles.app;
 
 import android.widget.LinearLayout;
 
-/* LollipopContactsRecyclerViewFastScroller
- * StylingAndroid */
+/*
+ * StylingAndroid
+ * LollipopContactsRecyclerViewFastScroller
+ *
+ * */
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -20,17 +23,18 @@ import android.view.View;
 import android.widget.TextView;
 
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
+import static android.support.v7.widget.RecyclerView.SCROLL_STATE_DRAGGING;
+import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 public class FastScroller extends LinearLayout
 {
 	private static final int HANDLE_HIDE_DELAY = 1000;
 	private static final int HANDLE_ANIMATION_DURATION = 100;
-	//private static final int TRACK_SNAP_RANGE = 5;
 	private static final String SCALE_X = "scaleX";
 	private static final String SCALE_Y = "scaleY";
 	private static final String ALPHA = "alpha";
-	/// styling android
 
+	private static final int MIN_LIST_SIZE_FOR_FAST_SCROLL = 20;
 
 
 	private static final int BUBBLE_ANIMATION_DURATION=100;
@@ -41,7 +45,7 @@ public class FastScroller extends LinearLayout
 	private RecyclerView recyclerView;
 	private final ScrollListener scrollListener=new ScrollListener();
 	private final HandleHider handleHider = new HandleHider();
-	private int height;
+	private int height; // height of fast scroll track
 	private int handle_position; // y position
 
 	private ObjectAnimator currentAnimator=null;
@@ -78,7 +82,7 @@ public class FastScroller extends LinearLayout
 	@Override
 	protected void onSizeChanged(int w,int h,int oldw,int oldh)
 	{
-		super.onSizeChanged(w,h,oldw,oldh);
+		super.onSizeChanged(w, h, oldw, oldh);
 		height=h;
 	}
 
@@ -92,26 +96,33 @@ public class FastScroller extends LinearLayout
 				if(event.getX()<handle.getX())
 					return false;
 
-				if(currentAnimator!=null)
-					currentAnimator.cancel();
+				final float down_y=event.getY();
+				if(down_y > handle_position-handle.getHeight() && down_y < handle_position+handle.getHeight())  // only if visible?
+				{
+					if(currentAnimator!=null)
+						currentAnimator.cancel();
 
-				if(bubble.getVisibility()==INVISIBLE)
-					showBubble();
+					/*if(bubble.getVisibility()==INVISIBLE)
+						showBubble();*/
 
-				getHandler().removeCallbacks(handleHider);
-				if (handle.getVisibility() == INVISIBLE) {
-					showHandle();
+					getHandler().removeCallbacks(handleHider);
+					if (handle.getVisibility() == INVISIBLE) {
+						showHandle();
+					}
+
+					handle.setSelected(true);
 				}
 
-				handle.setSelected(true);
-
+				// don't return, continue to ACTION_MOVE
 			case MotionEvent.ACTION_MOVE:
 				final float y=event.getY();
 
-				if(y > handle_position-handle.getHeight() && y < handle_position+handle.getHeight())
+				if(handle.isSelected() || (y > handle_position-handle.getHeight() && y < handle_position+handle.getHeight()))
 				{
 					setBubbleAndHandlePosition(y);
 					setRecyclerViewPosition(y);
+
+					bubble.setText(Float.toString(y));
 					return true;
 				}
 				else
@@ -132,7 +143,7 @@ public class FastScroller extends LinearLayout
 	public void setRecyclerView(RecyclerView recyclerView)
 	{
 		this.recyclerView=recyclerView;
-		recyclerView.setOnScrollListener(scrollListener);
+		recyclerView.addOnScrollListener(scrollListener);
 	}
 
 	private void setRecyclerViewPosition(float y)
@@ -148,13 +159,11 @@ public class FastScroller extends LinearLayout
 			else
 				proportion=y/(float)height;
 			int targetPos=getValueInRange(0,itemCount-1,(int)(proportion*(float)itemCount));
-			((LinearLayoutManager)recyclerView.getLayoutManager()).scrollToPositionWithOffset(targetPos,0);
+			((LinearLayoutManager)recyclerView.getLayoutManager()).scrollToPositionWithOffset(targetPos, 0);
 			//      recyclerView.oPositionWithOffset(targetPos);
 
 		//	String bubbleText=((BubbleTextGetter)recyclerView.getAdapter()).getTextToShowInBubble(targetPos);
 		//	bubble.setText(bubbleText);
-
-			bubble.setText(Float.toString(y));
 		}
 	}
 
@@ -169,10 +178,13 @@ public class FastScroller extends LinearLayout
 		int bubbleHeight=bubble.getHeight();
 		int handleHeight=handle.getHeight();
 
-		//handle_position = getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2));
-		handle_position = (int)y;
-		handle.setY(getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2)));
-		//handle.setY((int)y);
+		handle_position = getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2.0));
+		handle.setY(getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2.0)));
+		/*handle_position = (int)y;
+		handle.setY((int)y);*/
+
+	/*	bubble.setText(Integer.toString(getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2.0))));
+		showBubble();*/
 
 		bubble.setY(getValueInRange(0,height-bubbleHeight-handleHeight/2,(int)(y-bubbleHeight)));
 	}
@@ -189,10 +201,11 @@ public class FastScroller extends LinearLayout
 
 	private void hideBubble()
 	{
-		if(currentAnimator!=null)
+		if (currentAnimator != null)
 			currentAnimator.cancel();
-		currentAnimator=ObjectAnimator.ofFloat(bubble,"alpha",1f,0f).setDuration(BUBBLE_ANIMATION_DURATION);
-		currentAnimator.addListener(new AnimatorListenerAdapter(){
+		currentAnimator = ObjectAnimator.ofFloat(bubble, "alpha", 1f, 0f).setDuration(BUBBLE_ANIMATION_DURATION);
+		currentAnimator.addListener(new AnimatorListenerAdapter()
+		{
 			@Override
 			public void onAnimationEnd(Animator animation)
 			{
@@ -250,7 +263,14 @@ public class FastScroller extends LinearLayout
 		currentAnimator.start();
 	}
 
-	private class ScrollListener extends OnScrollListener{
+	private class ScrollListener extends OnScrollListener
+	{
+		private int scrollState = SCROLL_STATE_IDLE;
+		private float cumulative_dy = 0;
+		private int handle_click_position;
+
+		private int old_position;
+
 		@Override
 		public void onScrolled(RecyclerView rv,int dx,int dy)
 		{
@@ -260,6 +280,18 @@ public class FastScroller extends LinearLayout
 			int lastVisiblePosition=firstVisiblePosition+visibleRange;
 			int itemCount=recyclerView.getAdapter().getItemCount();
 			int position;
+			int item_height;
+
+			// don't use fast scroll if item count is too small
+			if(itemCount < MIN_LIST_SIZE_FOR_FAST_SCROLL)
+			{
+				hideHandle();
+				hideBubble();
+				return;
+			}
+
+			item_height = firstVisibleView.getHeight()+4;   //add for padding between cards
+
 			if(firstVisiblePosition==0)
 				position=0;
 			else if(lastVisiblePosition==itemCount)
@@ -267,9 +299,49 @@ public class FastScroller extends LinearLayout
 			else
 				position=(int)(((float)firstVisiblePosition/(((float)itemCount-(float)visibleRange)))*(float)itemCount);
 
-			float proportion=(float)position/(float)itemCount;
+			if(cumulative_dy == 0)
+			{
+				handle_click_position = position;   //item position (number in list)
+			}
 
-			setBubbleAndHandlePosition(height*proportion);
+			cumulative_dy += dy;
+
+			float handle_click_proportion=(float)handle_click_position/(float)itemCount;    // proportion of height of recycler view
+
+			// do not change handle if dragging manually (fast scroll)
+			if(scrollState != SCROLL_STATE_IDLE)
+			{
+				//setBubbleAndHandlePosition((float)height * proportion);
+				// x * height = item_height * item_count
+				// dy / x
+				setBubbleAndHandlePosition((float) height * handle_click_proportion + cumulative_dy * (float)(height)/(float)item_height/(float)itemCount);
+
+			}
+		}
+
+		@Override
+		public void onScrollStateChanged(RecyclerView rv, int newState)
+		{
+			scrollState = newState;
+
+			// let go of drag
+			if (newState == SCROLL_STATE_IDLE)
+			{
+				// hide after short delay
+				getHandler().postDelayed(handleHider, HANDLE_HIDE_DELAY);
+
+				// reset dy
+				cumulative_dy = 0;
+			}
+			else
+			{
+				// dragging or settling
+				getHandler().removeCallbacks(handleHider);
+				if (handle.getVisibility() == INVISIBLE)
+				{
+					showHandle();
+				}
+			}
 		}
 	}
 
@@ -280,8 +352,4 @@ public class FastScroller extends LinearLayout
 		}
 	}
 
-	public interface BubbleTextGetter
-	{
-		String getTextToShowInBubble(int pos);
-	}
 }
