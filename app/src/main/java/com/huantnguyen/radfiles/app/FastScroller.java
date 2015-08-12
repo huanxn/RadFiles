@@ -93,22 +93,26 @@ public class FastScroller extends LinearLayout
 		switch(action)
 		{
 			case MotionEvent.ACTION_DOWN:
-				if(event.getX()<handle.getX())
+				if(handle.getVisibility() == INVISIBLE || event.getX()<handle.getX()-5)    // extra padding of 5 so it's not too narrow to grab
 					return false;
 
+				// only activate if clicked on handle
 				final float down_y=event.getY();
-				if(down_y > handle_position-handle.getHeight() && down_y < handle_position+handle.getHeight())  // only if visible?
+				if((down_y > handle_position-handle.getHeight() && down_y < handle_position+handle.getHeight()) ) // only if visible
 				{
-					if(currentAnimator!=null)
+
+				/*	if(currentAnimator!=null)
 						currentAnimator.cancel();
 
-					/*if(bubble.getVisibility()==INVISIBLE)
-						showBubble();*/
-
 					getHandler().removeCallbacks(handleHider);
-					if (handle.getVisibility() == INVISIBLE) {
+
+					if (handle.getVisibility() == INVISIBLE)
+					{
 						showHandle();
 					}
+
+					*//*if(bubble.getVisibility()==INVISIBLE)
+						showBubble();*/
 
 					handle.setSelected(true);
 				}
@@ -119,10 +123,17 @@ public class FastScroller extends LinearLayout
 
 				if(handle.isSelected() || (y > handle_position-handle.getHeight() && y < handle_position+handle.getHeight()))
 				{
+					if(currentAnimator!=null)
+						currentAnimator.cancel();
+					getHandler().removeCallbacks(handleHider);
+					if (handle.getVisibility() == INVISIBLE)
+					{
+						showHandle();
+					}
+
 					setBubbleAndHandlePosition(y);
 					setRecyclerViewPosition(y);
 
-					bubble.setText(Float.toString(y));
 					return true;
 				}
 				else
@@ -180,8 +191,6 @@ public class FastScroller extends LinearLayout
 
 		handle_position = getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2.0));
 		handle.setY(getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2.0)));
-		/*handle_position = (int)y;
-		handle.setY((int)y);*/
 
 	/*	bubble.setText(Integer.toString(getValueInRange(0,height-handleHeight,(int)(y-handleHeight/2.0))));
 		showBubble();*/
