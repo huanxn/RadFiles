@@ -6,7 +6,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -21,7 +21,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 
-public class NavigationDrawerActivity extends ActionBarActivity
+public class NavigationDrawerActivity extends AppCompatActivity
 		implements NavigationDrawerFragment.NavigationDrawerCallbacks
 {
 
@@ -47,6 +47,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 	private int drawerPosition = POS_NONE;
 
 	protected Toolbar mToolbar = null;
+	protected boolean hasTransparentStatusbar = false;
 	protected View mOverflowTarget = null;
 /*
 	@Override
@@ -76,9 +77,9 @@ public class NavigationDrawerActivity extends ActionBarActivity
 */
 	/**
 	 *
-	 * @param savedInstanceState
-	 * @param navigation_drawer_layout: default: activity_navigation_drawer
-	 * @param showDrawerIndicator: default: true
+	 *  savedInstanceState
+	 *  navigation_drawer_layout: default: activity_navigation_drawer
+	 *  showDrawerIndicator: default: true
 	 */
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -131,12 +132,18 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		// transparent toolbar
 		if(isTransparentToolbar)
 		{
+			// show picture under transparent toolbar, ie no margin
 			DrawerLayout.LayoutParams params = new DrawerLayout.LayoutParams(
 					                                                                DrawerLayout.LayoutParams.WRAP_CONTENT,
 					                                                                DrawerLayout.LayoutParams.WRAP_CONTENT
 			);
 			params.setMargins(0, 0, 0, 0);
 			findViewById(R.id.container).setLayoutParams(params);
+
+			// must adjust navigation drawer in NavigationDrawerFragment to account for zero margin, which would layer drawer over statusbar
+			hasTransparentStatusbar = true;
+
+			//mNavigationDrawerFragment.getDrawerListView().setPadding(0, 0, 0, UtilClass.getStatusBarHeight(this));
 		}
 
 
@@ -159,7 +166,7 @@ public class NavigationDrawerActivity extends ActionBarActivity
 		// transparent toolbar
 		if(isTransparentToolbar)
 		{
-		//	mNavigationDrawerFragment.mNavigationDrawerFragmentView.findViewById(R.id.fragment_navigation_drawer_linear_layout).setPadding(0, UtilClass.getStatusBarHeight(this), 0, 0);
+			mNavigationDrawerFragment.mDrawerLinearLayout.setPadding(0, UtilClass.getStatusBarHeight(this), 0, 0);
 
 		}
 	}

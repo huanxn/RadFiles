@@ -17,8 +17,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -1178,7 +1178,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				else
 					mActivity.mTitle = new SpannableString("");
 
-				ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+				ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
 				actionBar.setTitle(mActivity.mTitle);
 
 				// Case Information (DIAGNOSIS and FINDINGS)

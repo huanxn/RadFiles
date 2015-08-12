@@ -17,7 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.transition.Fade;
 import android.transition.Slide;
@@ -52,7 +52,7 @@ import java.util.List;
 
 import eu.janmuller.android.simplecropimage.CropImage;
 
-public class CaseEditActivity extends ActionBarActivity implements DatePickerDialog.OnDateSetListener
+public class CaseEditActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener
 {
 	static Cursor selected_row_cursor;
 	static long key_id;
@@ -885,9 +885,9 @@ public class CaseEditActivity extends ActionBarActivity implements DatePickerDia
 			final View view = inflater.inflate(R.layout.fragment_case_edit, container, false);
 
 			Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-			((ActionBarActivity)getActivity()).setSupportActionBar(toolbar);
+			((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
-			ActionBar actionBar = ((ActionBarActivity)getActivity()).getSupportActionBar();
+			ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
 			actionBar.setDisplayHomeAsUpEnabled(false);
 			actionBar.setDisplayShowTitleEnabled(false);
 

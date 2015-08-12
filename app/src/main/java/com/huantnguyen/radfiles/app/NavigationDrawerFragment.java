@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.view.LayoutInflater;
@@ -21,8 +22,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -60,8 +64,9 @@ public class NavigationDrawerFragment extends Fragment
 	private ActionBarDrawerToggle mDrawerToggle;
 
 	private DrawerLayout mDrawerLayout;
-	//private ListView mDrawerListView;
-	private ExpandableListView mDrawerListView;
+	private ListView mDrawerListView;
+	public View mDrawerLinearLayout;
+	//private ExpandableListView mDrawerListView;
 	private View mFragmentContainerView;
 
 	private int mCurrentSelectedPosition = 0;
@@ -106,9 +111,14 @@ public class NavigationDrawerFragment extends Fragment
 	{
 		View view = (LinearLayout) inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
 
-		//view.findViewById(R.id.fragment_navigation_drawer_linear_layout).setPadding(0, UtilClass.getStatusBarHeight(getActivity()), 0, 0);
+		mDrawerLinearLayout = (LinearLayout) view.findViewById(R.id.fragment_navigation_drawer_linear_layout);
 
-		//mDrawerListView = (ListView)view.findViewById(R.id.navigation_list);
+		/*if(mActivity.hasTransparentStatusbar)
+		{
+			view.findViewById(R.id.fragment_navigation_drawer_linear_layout).setPadding(0, UtilClass.getStatusBarHeight(getActivity()), 0, 0);
+		}*/
+
+		mDrawerListView = (ListView)view.findViewById(R.id.navigation_list);
 
 		/*
 		ListView.MarginLayoutParams params = new ListView.MarginLayoutParams(ListView.MarginLayoutParams.MATCH_PARENT, ListView.MarginLayoutParams.MATCH_PARENT);
@@ -117,6 +127,8 @@ public class NavigationDrawerFragment extends Fragment
 		*/
 
 		// set up nav drawer expandable list
+
+		/*
 
 		List<String> navList = new LinkedList<String>(Arrays.asList(getResources().getStringArray(R.array.nav_drawer_array)));
 		final int sizeOfStandardNavList = navList.size();
@@ -151,6 +163,7 @@ public class NavigationDrawerFragment extends Fragment
 				listDataChild.put(listFilterHeader.get(i), null);
 			}
 		}
+
 
 		mDrawerListView = (ExpandableListView)view.findViewById(R.id.case_filter_expandable_list);
 
@@ -193,9 +206,9 @@ public class NavigationDrawerFragment extends Fragment
 			}
 		});
 
+*/
 
 
-		/*
 		mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -208,7 +221,6 @@ public class NavigationDrawerFragment extends Fragment
 				                                            android.R.id.text1,
 				                                            getResources().getStringArray(R.array.nav_drawer_array)
 		));
-*/
 		mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
 		return view;
@@ -248,7 +260,7 @@ public class NavigationDrawerFragment extends Fragment
 		mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 		// set up the drawer's list view with items and click listener
 
-		ActionBar actionBar = ((ActionBarActivity) getActivity()).getSupportActionBar();
+		ActionBar actionBar = ((AppCompatActivity) getActivity()).getSupportActionBar();
 		if(actionBar != null)
 		{
 			actionBar.setDisplayHomeAsUpEnabled(true);
@@ -369,6 +381,9 @@ public class NavigationDrawerFragment extends Fragment
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
+
+		mActivity = (NavigationDrawerActivity)activity;
+
 		try {
 			mCallbacks = (NavigationDrawerCallbacks) activity;
 		} catch (ClassCastException e) {
@@ -446,7 +461,7 @@ public class NavigationDrawerFragment extends Fragment
 	}
 
 	private ActionBar getActionBar() {
-		return ((ActionBarActivity)getActivity()).getSupportActionBar();
+		return ((AppCompatActivity)getActivity()).getSupportActionBar();
 	}
 
 	/**
@@ -462,6 +477,10 @@ public class NavigationDrawerFragment extends Fragment
 	public DrawerLayout getDrawerLayout()
 	{
 		return mDrawerLayout;
+	}
+	public ListView getDrawerListView()
+	{
+		return mDrawerListView;
 	}
 
 }

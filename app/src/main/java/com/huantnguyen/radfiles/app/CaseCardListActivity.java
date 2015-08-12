@@ -1495,7 +1495,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					{
 						// TODO doesn't work as well as before with support action bar
 						// open contextual menu
-						//mAdapter.mActionMode = ((ActionBarActivity)activity).startSupportActionMode(mActionModeCallback);
+						//mAdapter.mActionMode = ((AppCompatActivity)activity).startSupportActionMode(mActionModeCallback);
 						//mAdapter.mActionMode = ((CaseCardListActivity)activity).mToolbar.startActionMode(mActionModeCallback);
 						//((CaseCardListActivity)activity).mToolbar.setVisibility(View.GONE);
 						mAdapter.mActionMode = ((CaseCardListActivity)activity).startActionMode(mActionModeCallback);
