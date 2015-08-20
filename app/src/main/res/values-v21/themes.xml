@@ -49,7 +49,7 @@
     <!-- SearchView style -->
     <style name="MaterialTheme.SearchView" parent="Widget.AppCompat.SearchView">
         <item name="searchIcon">@drawable/ic_magnify_white_24dp</item>
-        <item name="closeIcon">@drawable/ic_magnify_white_24dp</item>
+        <item name="closeIcon">@drawable/ic_close_white_24dp</item>
     </style>
 
 </resources>
