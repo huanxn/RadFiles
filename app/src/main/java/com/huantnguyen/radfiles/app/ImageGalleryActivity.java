@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,9 +24,9 @@ import com.viewpagerindicator.PageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
 
-public class ImageGalleryActivity extends ActionBarActivity
+public class ImageGalleryActivity extends AppCompatActivity
 {
-	
+
 	/**
 	 * Step 1: Download and set up v4 support library: http://developer.android.com/tools/support-library/setup.html
 	 * Step 2: Create ExtendedViewPager wrapper which calls TouchImageView.canScrollHorizontallyFroyo

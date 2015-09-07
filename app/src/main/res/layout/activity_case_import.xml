@@ -73,16 +73,19 @@
         <Button
             android:id="@+id/cancelButton"
             style="?android:buttonBarButtonStyle"
+            android:background="@color/default_colorPrimaryDark"
+            android:textColor="@color/text_light"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="onClick_Button"
             android:text="@string/button_discard"/>
 
-
         <Button
             android:id="@+id/importButton"
             style="?android:buttonBarButtonStyle"
+            android:background="@color/default_colorPrimaryDark"
+            android:textColor="@color/text_light"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
