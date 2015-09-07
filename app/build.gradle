@@ -1,62 +1,67 @@
 apply plugin: 'android'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'radicalpeas'
+            keyPassword 'phatman'
+            storeFile file('C:/Users/Huan/AndroidStudioProjects/android.jks')
+            storePassword 'phatman'
+        }
+    }
     compileSdkVersion 22
     buildToolsVersion '22.0.1'
-
     defaultConfig {
         applicationId "com.huantnguyen.radfiles.app"
         minSdkVersion 17
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+
         }
     }
-
     dexOptions {
         preDexLibraries = false
     }
-
-
+    productFlavors {
+    }
 }
 
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.android.support:support-v13:+'
     compile 'com.android.support:support-v4:22.+'
     compile 'com.google.android.gms:play-services:+'
-
     compile 'com.android.support:appcompat-v7:22.+'
     compile 'com.android.support:cardview-v7:+'
     compile 'com.android.support:recyclerview-v7:+'
-
     //compile 'com.timehop.stickyheadersrecyclerview:library:0.3.6@aar' //buggy
-
-    compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.1'   // advanced recyclerview for drag/drap lists
-
-    compile 'com.github.ksoichiro:android-observablescrollview:1.4.0' // for parallax view fading toolbar
-
-    compile 'com.github.amlcurran.showcaseview:library:5.0.0'   //ShowCaseView tutorials
+    compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.1'
+    // advanced recyclerview for drag/drap lists
+    compile 'com.github.ksoichiro:android-observablescrollview:1.4.0'
+    // for parallax view fading toolbar
+    compile 'com.github.amlcurran.showcaseview:library:5.0.0'
+    //ShowCaseView tutorials
     /*compile ('com.github.worker8:tourguide:1.0.12-SNAPSHOT@aar')    //TourGuide tutorials
-            {transitive=true}*/
-
-    compile 'com.viewpagerindicator:library:2.4.1@aar'  // ViewPager Indicator for gallery view
-    compile 'com.astuetz:pagerslidingtabstrip:1.0.1'    // For SlidingTabStrip in Manage Lists
-
-    compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'    // Roboto Text font in toolbar title, etc
-
-
-    compile 'com.nispok:snackbar:2.9.0' //snack bar better?  can't compile
-
-    compile 'com.github.navasmdc:MaterialDesign:1.+@aar'    // snack bar no good, progress bar
-    compile 'com.nineoldandroids:library:2.4.0' // gradle error?  need for MaterialDesignLibrary indeterminate progress bar
-
-
+                    {transitive=true}*/
+    compile 'com.viewpagerindicator:library:2.4.1@aar'
+    // ViewPager Indicator for gallery view
+    compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
+    // For SlidingTabStrip in Manage Lists
+    compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'
+    // Roboto Text font in toolbar title, etc
+    compile 'com.nispok:snackbar:2.9.0'
+    //snack bar better?  can't compile
+    compile 'com.github.navasmdc:MaterialDesign:1.+@aar'
+    // snack bar no good, progress bar
+    compile 'com.nineoldandroids:library:2.4.0'
+    // gradle error?  need for MaterialDesignLibrary indeterminate progress bar
     compile project(':app:libs:simple-crop-image-lib')
 }
