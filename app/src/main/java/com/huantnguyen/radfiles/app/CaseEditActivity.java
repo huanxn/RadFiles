@@ -36,7 +36,6 @@ import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
-import android.widget.ScrollView;
 
 import java.io.File;
 import java.io.FileInputStream;

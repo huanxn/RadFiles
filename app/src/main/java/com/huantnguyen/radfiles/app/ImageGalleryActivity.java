@@ -115,19 +115,16 @@ public class ImageGalleryActivity extends ActionBarActivity
 
 		// Inflate a menu to be displayed in the toolbar
 		toolbar.inflateMenu(R.menu.case_import);
-		if (toolbar != null)
-		{
-			setSupportActionBar(toolbar);
-			//toolbar.setElevation(4);
-			//getSupportActionBar().setElevation(10);
+		setSupportActionBar(toolbar);
+		//toolbar.setElevation(4);
+		//getSupportActionBar().setElevation(10);
 
-			toolbar.setBackgroundColor(getResources().getColor(R.color.transparent));   // transparent
-			//toolbar.setTitleTextColor(getResources().getColor(R.color.transparent));    // transparent
+		toolbar.setBackgroundColor(getResources().getColor(R.color.transparent));   // transparent
+		//toolbar.setTitleTextColor(getResources().getColor(R.color.transparent));    // transparent
 
-			// set back icon
-			getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
-			getSupportActionBar().setTitle("");
-		}
+		// set back icon
+		getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setTitle("");
 
 		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.viewpager);
 		TouchImageAdapter mAdapter = new TouchImageAdapter();
@@ -260,19 +257,13 @@ public class ImageGalleryActivity extends ActionBarActivity
 
 		    imageFilepaths = new String[in_filenames.length];
 
-		    for(int i = 0; i < in_filenames.length; i++)
-		    {
-			    imageFilepaths[i] = in_filenames[i];
-		    }
+		    System.arraycopy(in_filenames, 0, imageFilepaths, 0, in_filenames.length);
 
 		    if(in_captions != null && in_captions.length == in_filenames.length)
 		    {
 			    imageCaptions = new String[in_captions.length];
 
-			    for(int i = 0; i < in_captions.length; i++)
-			    {
-				    imageCaptions[i] = in_captions[i];
-			    }
+			    System.arraycopy(in_captions, 0, imageCaptions, 0, in_captions.length);
 		    }
 
 		    return;

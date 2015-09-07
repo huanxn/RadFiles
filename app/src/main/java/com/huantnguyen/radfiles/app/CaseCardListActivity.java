@@ -39,7 +39,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -542,8 +541,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			MergeCursor case_cursor; // merge into one cursor for StickyCard List
 
-			//todo add biopsy to search_categories
-
 			String [] search_categories = getResources().getStringArray(R.array.search_categories_array);
 			Cursor [] case_cursor_array = new Cursor[search_categories.length];
 
@@ -888,7 +885,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					}
 				}
 			});
-			swipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
+			swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
 					                                android.R.color.holo_green_light,
 					                                android.R.color.holo_orange_light,
 					                                android.R.color.holo_red_light);
@@ -1443,7 +1440,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				{
 					CaseCardAdapter.ViewHolder holder = (CaseCardAdapter.ViewHolder) view.getTag();
 
-					Case mCase = mAdapter.caseList.get(holder.getPosition());
+					Case mCase = mAdapter.caseList.get(holder.getAdapterPosition());
 
 					if (mAdapter.mActionMode == null)
 					{
@@ -1489,7 +1486,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				public boolean onLongClick(View view)
 				{
 					CaseCardAdapter.ViewHolder holder = (CaseCardAdapter.ViewHolder) view.getTag();
-					Case mCase = mAdapter.caseList.get(holder.getPosition());
+					Case mCase = mAdapter.caseList.get(holder.getAdapterPosition());
 
 					if(mAdapter.mActionMode == null)
 					{

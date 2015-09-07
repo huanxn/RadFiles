@@ -255,7 +255,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				cardView.setCardElevation(20);
 				*/
 			}
-			else if(mCase.isSelected)
+			else // mCase.isSelected == true
 			{
 				//viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.attr.colorAccent));
 

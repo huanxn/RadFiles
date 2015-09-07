@@ -23,7 +23,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import static android.support.v7.widget.RecyclerView.OnScrollListener;
-import static android.support.v7.widget.RecyclerView.SCROLL_STATE_DRAGGING;
 import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 public class FastScroller extends LinearLayout
@@ -284,7 +283,7 @@ public class FastScroller extends LinearLayout
 		public void onScrolled(RecyclerView rv,int dx,int dy)
 		{
 			View firstVisibleView=recyclerView.getChildAt(0);
-			int firstVisiblePosition=recyclerView.getChildPosition(firstVisibleView);
+			int firstVisiblePosition=recyclerView.getChildPosition(firstVisibleView);   //adapter or layout position?
 			int visibleRange=recyclerView.getChildCount();
 			int lastVisiblePosition=firstVisiblePosition+visibleRange;
 			int itemCount=recyclerView.getAdapter().getItemCount();
