@@ -109,9 +109,9 @@ public class NavigationDrawerFragment extends Fragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 	                         Bundle savedInstanceState)
 	{
-		View view = (LinearLayout) inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+		View view = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
 
-		mDrawerLinearLayout = (LinearLayout) view.findViewById(R.id.fragment_navigation_drawer_linear_layout);
+		mDrawerLinearLayout = view.findViewById(R.id.fragment_navigation_drawer_linear_layout);
 
 		/*if(mActivity.hasTransparentStatusbar)
 		{

@@ -123,7 +123,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 			//LinearLayoutManager layoutManager = ((LinearLayoutManager) )
 			//((TabbedFragment.TabbedContentFragment) ((TabbedFragment.SectionsPagerAdapter) fragment.mSectionsPagerAdapter).mCurrentPrimaryItem).mRecyclerView.findViewHolderForPosition(0);
 			//View viewTarget = ((ManageListsAdapter.ViewHolder)((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getItem(fragment.mViewPager.getCurrentItem())).mRecyclerView.findViewHolderForPosition(0)).mTextView;
-			View viewTarget = ((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).getListItemTextView();
+			View viewTarget = fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem()).getListItemTextView();
 
 			if (viewTarget != null)
 			{
@@ -150,7 +150,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		}
 		else if (step == 3)
 		{
-			View viewTarget = ((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).getListItemHandleView();
+			View viewTarget = fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem()).getListItemHandleView();
 
 			if (viewTarget != null)
 			{
@@ -172,7 +172,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 						showcaseView.hide();
 
 						// scroll to bottom
-						((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).scrollToAddView();
+						fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem()).scrollToAddView();
 						new Handler().postDelayed(new Runnable()
 						{
 							@Override
@@ -190,7 +190,7 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 		else if (step == 4)
 		{
 
-			View viewTarget = ((TabbedFragment.TabbedContentFragment)fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem())).getListItemAddView();
+			View viewTarget = fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem()).getListItemAddView();
 
 			if (viewTarget != null)
 			{

@@ -233,7 +233,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		Spinner caseFilterSpinner = (Spinner) mToolbar.findViewById(R.id.case_filter_spinner);
 		SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_toolbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
-		((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
+		actionbarSpinnerAdapter.setDropDownViewResource(R.layout.spinner_popup);
 		caseFilterSpinner.setAdapter(actionbarSpinnerAdapter);
 		caseFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
 		{
@@ -911,7 +911,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			fastScroller.setRecyclerView(mRecyclerView);
 
 			// Setup CaseCardAdapter
-			mCardAdapter = ((CaseCardListActivity)mActivity).mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
+			mCardAdapter = mActivity.mCardAdapter = new CaseCardAdapter(getActivity(), null, R.layout.card_case);
 
 			// contextual menu
 			setActionModeCallback();
@@ -1498,7 +1498,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 						//mAdapter.mActionMode = ((AppCompatActivity)activity).startSupportActionMode(mActionModeCallback);
 						//mAdapter.mActionMode = ((CaseCardListActivity)activity).mToolbar.startActionMode(mActionModeCallback);
 						//((CaseCardListActivity)activity).mToolbar.setVisibility(View.GONE);
-						mAdapter.mActionMode = ((CaseCardListActivity)activity).startActionMode(mActionModeCallback);
+						mAdapter.mActionMode = activity.startActionMode(mActionModeCallback);
 					}
 					else
 					{

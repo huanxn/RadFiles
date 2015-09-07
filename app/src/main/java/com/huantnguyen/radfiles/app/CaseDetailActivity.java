@@ -1189,7 +1189,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					TV_case_info1.setText(diagnosis);
 					TV_case_info1.setVisibility(View.VISIBLE);
-					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.CaseInfoLabel).setVisibility(View.VISIBLE);
 
 					TV_case_info1.setOnLongClickListener(new View.OnLongClickListener()
 					{
@@ -1259,7 +1259,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					// if no Diagnosis, only Findings
 					// set label to say "FINDINGS"
 					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setText("FINDINGS");
-					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.CaseInfoLabel).setVisibility(View.VISIBLE);
 					// set the main CaseInfo text to be the Findings
 					TV_case_info1.setText(findings);
 					TV_case_info1.setVisibility(View.VISIBLE);
@@ -1272,7 +1272,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					// if both Diagnosis and Findings fields are empty, then hide CaseInfoLabel
 					TV_case_info1.setVisibility(GONE);
 					TV_case_info2.setVisibility(GONE);
-					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setVisibility(GONE);
+					rootView.findViewById(R.id.CaseInfoLabel).setVisibility(GONE);
 				}
 
 				// SECTION
@@ -1281,12 +1281,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					TV_section.setText(section);
 					TV_section.setVisibility(View.VISIBLE);
-					((TextView) rootView.findViewById(R.id.SectionLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.SectionLabel).setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					TV_section.setVisibility(GONE);
-					((TextView) rootView.findViewById(R.id.SectionLabel)).setVisibility(GONE);
+					rootView.findViewById(R.id.SectionLabel).setVisibility(GONE);
 				}
 
 				// STUDY TYPE and STUDY DATE
@@ -1296,7 +1296,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					TV_study_text1.setText(study_type);
 					TV_study_text1.setVisibility(View.VISIBLE);
-					((TextView) rootView.findViewById(R.id.StudyLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.StudyLabel).setVisibility(View.VISIBLE);
 
 					// STUDY DATE
 					if(date_str != null && !date_str.isEmpty())
@@ -1316,7 +1316,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					TV_study_text1.setText(UtilClass.convertDateString(date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
 					TV_study_text1.setVisibility(View.VISIBLE);
 
-					((TextView) rootView.findViewById(R.id.StudyLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.StudyLabel).setVisibility(View.VISIBLE);
 					((TextView) rootView.findViewById(R.id.StudyLabel)).setText("Study Date");
 
 					TV_study_text2.setVisibility(GONE);
@@ -1324,7 +1324,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				else
 				{
 					// neither study type or date known
-					((TextView) rootView.findViewById(R.id.StudyLabel)).setVisibility(GONE);
+					rootView.findViewById(R.id.StudyLabel).setVisibility(GONE);
 					TV_study_text2.setVisibility(GONE);
 					TV_study_text1.setVisibility(GONE);
 
@@ -1337,12 +1337,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					TV_biopsy.setText(biopsy);
 					TV_biopsy.setVisibility(View.VISIBLE);
-					((TextView) rootView.findViewById(R.id.BiopsyLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.BiopsyLabel).setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					TV_biopsy.setVisibility(GONE);
-					((TextView) rootView.findViewById(R.id.BiopsyLabel)).setVisibility(GONE);
+					rootView.findViewById(R.id.BiopsyLabel).setVisibility(GONE);
 				}
 
 				// KEY IMAGES
@@ -1465,12 +1465,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					TV_key_words.setText(key_words);
 					TV_key_words.setVisibility(View.VISIBLE);
-					((TextView) rootView.findViewById(R.id.KeyWordsLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.KeyWordsLabel).setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					TV_key_words.setVisibility(GONE);
-					((TextView) rootView.findViewById(R.id.KeyWordsLabel)).setVisibility(GONE);
+					rootView.findViewById(R.id.KeyWordsLabel).setVisibility(GONE);
 				}
 
 				// FOLLOWUP
@@ -1488,12 +1488,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 						TV_followup.setText("Needs follow up");
 						TV_followup.setVisibility(View.VISIBLE);
 					}
-					((TextView) rootView.findViewById(R.id.FollowupLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.FollowupLabel).setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					TV_followup.setVisibility(GONE);
-					((TextView) rootView.findViewById(R.id.FollowupLabel)).setVisibility(GONE);
+					rootView.findViewById(R.id.FollowupLabel).setVisibility(GONE);
 				}
 
 				// COMMENTS
@@ -1502,12 +1502,12 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				{
 					TV_comments.setText(comments);
 					TV_comments.setVisibility(View.VISIBLE);
-					((TextView) rootView.findViewById(R.id.CommentsLabel)).setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.CommentsLabel).setVisibility(View.VISIBLE);
 				}
 				else
 				{
 					TV_comments.setVisibility(GONE);
-					((TextView) rootView.findViewById(R.id.CommentsLabel)).setVisibility(GONE);
+					rootView.findViewById(R.id.CommentsLabel).setVisibility(GONE);
 				}
 
 			}

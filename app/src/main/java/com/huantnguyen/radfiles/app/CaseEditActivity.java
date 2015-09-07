@@ -895,7 +895,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 			((EditText) view.findViewById(R.id.edit_patient_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
 
 			// hide soft keyboard if click off keyboard
-			((ScrollView) view.findViewById(R.id.edit_scrollview)).setOnTouchListener(new View.OnTouchListener()
+			view.findViewById(R.id.edit_scrollview).setOnTouchListener(new View.OnTouchListener()
 			{
 				@Override
 				public boolean onTouch(View v, MotionEvent event)
