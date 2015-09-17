@@ -33,4 +33,4 @@
     public static final ** CREATOR;
 }
 
-            -keep class android.support.v7.widget.** { *; }
+-keep class android.support.v7.widget.** { *; }
