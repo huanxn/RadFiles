@@ -42,7 +42,7 @@ import java.util.Date;
 //import eu.janmuller.android.simplecropimage.ImageViewTouchBase;
 
 
-public class ImportExportActivity extends GoogleDriveBaseActivity
+public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriveBaseActivity
 {
 	String TAG = "CloudStorageActivity";
 

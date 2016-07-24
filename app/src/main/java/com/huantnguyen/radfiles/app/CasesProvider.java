@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
+//import net.sqlcipher.database.SQLiteDatabase;  //note the import of net.sqlcipher.database.SQLiteDatabase instead of android.database.sqlite.SQLiteDatabase as well as the call to SQLiteDatabase.loadLibs(this). The call to SQLiteDatabase.loadLibs(this) must occur before any other database operation.
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
