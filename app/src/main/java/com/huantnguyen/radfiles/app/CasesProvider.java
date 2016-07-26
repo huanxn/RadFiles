@@ -9,10 +9,12 @@ import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
-//import net.sqlcipher.database.SQLiteDatabase;  //note the import of net.sqlcipher.database.SQLiteDatabase instead of android.database.sqlite.SQLiteDatabase as well as the call to SQLiteDatabase.loadLibs(this). The call to SQLiteDatabase.loadLibs(this) must occur before any other database operation.
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.database.sqlite.SQLiteQueryBuilder;
+import net.sqlcipher.database.SQLiteDatabase;  //note the import of net.sqlcipher.database.SQLiteDatabase instead of android.database.sqlite.SQLiteDatabase as well as the call to SQLiteDatabase.loadLibs(this). The call to SQLiteDatabase.loadLibs(this) must occur before any other database operation.
+import net.sqlcipher.database.SQLiteOpenHelper;
+import net.sqlcipher.database.SQLiteQueryBuilder;
+//import android.database.sqlite.SQLiteDatabase;
+//import android.database.sqlite.SQLiteOpenHelper;
+//import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -285,6 +287,8 @@ public class CasesProvider extends ContentProvider
 	private DatabaseHelper myDBHelper;
 	private SQLiteDatabase db;
 
+	private String db_key;
+
 	/////////////////////////////////////////////////////////////////////
 	//	Public methods:
 	/////////////////////////////////////////////////////////////////////
@@ -293,11 +297,16 @@ public class CasesProvider extends ContentProvider
 	public boolean onCreate()
 	{
 		Context context = getContext();
+
+		// set up SQLCipher
+		SQLiteDatabase.loadLibs(context);
+		db_key = "test password";
+
 		myDBHelper = new DatabaseHelper(context);
 		//myDBHelper = DatabaseHelper.getInstance(context);
 
 		// permissions to be writable
-		db = myDBHelper.getWritableDatabase();
+		db = myDBHelper.getWritableDatabase(db_key);
 
 		if (db == null)
 		{
@@ -581,7 +590,8 @@ public class CasesProvider extends ContentProvider
 	// Open the database connection.
 	public CasesProvider open()
 	{
-		db = myDBHelper.getWritableDatabase();
+		SQLiteDatabase.loadLibs(getContext());	// TODO: do i need this here?
+		db = myDBHelper.getWritableDatabase(db_key);
 		return this;
 	}
 
@@ -631,7 +641,6 @@ public class CasesProvider extends ContentProvider
 
 			//TODO remove initial db data
 			ContentValues initialValues = new ContentValues();
-
 
 
 			// Create StudyTypes Table

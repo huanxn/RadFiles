@@ -398,7 +398,7 @@ public class UtilClass extends Activity
 			}
 			catch (IOException ex)
 			{
-				Log.e("UtilClass.getPictureFromCamera", "Could not open new image file.");
+				Log.e("getPictureFromCamera", "Could not open new image file.");
 			}
 
 			// Continue only if the File was successfully created
@@ -1168,17 +1168,7 @@ public class UtilClass extends Activity
 				{
 					String field_name = reader.nextName();
 
-					if(reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
-					{
-						// ignore NULL values and row_id
-						reader.skipValue();
-					}
-					else if(Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
-					{
-						// valid field name, enter in database
-						insertCaseValues.put(field_name, reader.nextString());
-					}
-					else if(field_name.contentEquals("IMAGES"))
+					if(field_name.contentEquals("IMAGES"))	// IMAGES are at the end of the row, after other fields
 					{
 						// update LAST_MODIFIED_DATE
 						SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
@@ -1194,46 +1184,67 @@ public class UtilClass extends Activity
 						// increment count
 						caseCount += 1;
 
-						reader.beginArray();
-
-						// loop through all images of this case
-						while(reader.hasNext())
+						// insert images ("IMAGES" is not null)
+						if(reader.peek() != JsonToken.NULL)
 						{
-							insertImageValues.clear();
-							reader.beginObject();
+							reader.beginArray();
 
-							while(reader.hasNext())
+							// loop through all images of this case
+							while (reader.hasNext())
 							{
-								String image_field_name = reader.nextName();
+								insertImageValues.clear();
+								reader.beginObject();
 
-								if(reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+								while (reader.hasNext())
 								{
-									reader.skipValue();
+									String image_field_name = reader.nextName();
+
+									if (reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+									{
+										reader.skipValue();
+									}
+									else if (image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
+									{
+										// put new parent_id of newly added case
+										insertImageValues.put(image_field_name, parent_id);
+										reader.skipValue();
+									}
+									else if (Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
+									{
+										insertImageValues.put(image_field_name, reader.nextString());
+									}
+									else
+									{
+										reader.skipValue();
+									}
 								}
-								else if(image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
-								{
-									// put new parent_id of newly added case
-									insertImageValues.put(image_field_name, parent_id);
-									reader.skipValue();
-								}
-								else if(Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
-								{
-									insertImageValues.put(image_field_name, reader.nextString());
-								}
-								else
-								{
-									reader.skipValue();
-								}
+
+								reader.endObject();
+
+								// insert the set of image info into the DB images table
+								activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+
 							}
 
-							reader.endObject();
+							reader.endArray();
 
-							// insert the set of image info into the DB images table
-							activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+						}
+						else
+						{
+							// skip "IMAGES" NULL value
+							reader.skipValue();
 						}
 
-						reader.endArray();
-
+					}
+					else if(reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+					{
+						// ignore NULL values (except if "IMAGES) and row_id
+						reader.skipValue();
+					}
+					else if(Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
+					{
+						// valid field name, enter in database
+						insertCaseValues.put(field_name, reader.nextString());
 					}
 					else
 					{
