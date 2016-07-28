@@ -1074,6 +1074,19 @@ public class UtilClass extends Activity
 				cases_writer.close();
 			}
 
+			// TODO get user passkey, test encrypt JSON file
+			try
+			{
+				byte[] passkey = UtilsFile.generateKey("passkey");
+				UtilsFile.encryptFile(passkey, casesJSON);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				Log.d(TAG, "Unable to generate encryption key.");
+				return null;
+			}
+
 			// zip image and JSON files
 			String zip_filename = downloadsDir.getPath() + "/" + filename + ImportExportActivity.RCS_EXTENSION;
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesJSON.getPath());
@@ -1140,6 +1153,20 @@ public class UtilClass extends Activity
 		{
 			// open existing file that should have been unzipped
 			tempCasesJSON = new File(picturesDir, ImportExportActivity.CASES_JSON_FILENAME);
+
+			// TODO get user passkey, test decrypt JSON file
+			try
+			{
+				byte[] passkey = UtilsFile.generateKey("passkey");
+				UtilsFile.decryptFile(passkey, tempCasesJSON);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				Log.d(TAG, "Unable to generate encryption key.");
+				return 0;
+			}
+
 			FileInputStream cases_in = new FileInputStream(tempCasesJSON);
 			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
 		}

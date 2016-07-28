@@ -9,6 +9,7 @@ import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -16,10 +17,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.security.SecureRandom;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Created by Huan on 10/5/2014.
@@ -398,4 +406,168 @@ public class UtilsFile
 		}
 	}
 	*/
+
+	/*
+	// File to byte []
+	public static byte[] readFile(File file) throws IOException
+	{
+		// Open file
+		RandomAccessFile f = new RandomAccessFile(file, "r");
+		try
+		{
+			// Get and check length
+			long longlength = f.length();
+			int length = (int) longlength;
+			if (length != longlength)
+				throw new IOException("File size >= 2 GB");
+			// Read file and return data
+			byte[] data = new byte[length];
+			f.readFully(data);
+			return data;
+		} finally {
+			f.close();
+		}
+	}
+	*/
+	// File to byte []
+	public static byte[] convertFileToByteArray(File f)
+	{
+		byte[] byteArray = null;
+		try
+		{
+			InputStream inputStream = new FileInputStream(f);
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			byte[] b = new byte[1024*8];
+			int bytesRead =0;
+
+			while ((bytesRead = inputStream.read(b)) != -1)
+			{
+				bos.write(b, 0, bytesRead);
+			}
+
+			byteArray = bos.toByteArray();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		return byteArray;
+	}
+
+	// byte [] to File
+	public static void convertByteArrayToFile(File inputFile, byte [] byteArray)
+	{
+		try
+		{
+			// overwrite inputFile with byte array
+			FileOutputStream outStream = new FileOutputStream(inputFile.getPath());
+
+			try
+			{
+				outStream.write(byteArray);
+			}
+			finally
+			{
+				outStream.close();
+			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			Log.d(TAG, "Unable to convert byte array to File.");
+			return;
+		}
+	}
+
+
+	// FILE ENCRYPTION
+	public static byte[] generateKey(String password) throws Exception
+	{
+		byte[] keyStart = password.getBytes("UTF-8");
+
+		KeyGenerator kgen = KeyGenerator.getInstance("AES");
+		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG", "Crypto");
+		sr.setSeed(keyStart);
+		kgen.init(128, sr);
+		SecretKey skey = kgen.generateKey();
+		return skey.getEncoded();
+	}
+
+	public static void encryptFile(byte[] key, File inputFile)
+	{
+		byte [] encryptedBytes = null;
+
+		try
+		{
+			// encrypt the File into byte array
+			encryptedBytes = encodeFile(key, convertFileToByteArray(inputFile));
+
+			/*
+			// overwrite inputFile with encrypted bytes
+			FileOutputStream outStream = new FileOutputStream(inputFile.getPath());
+			try
+			{
+				outStream.write(encryptedBytes);
+			}
+			finally
+			{
+				outStream.close();
+			}
+			*/
+
+			// overwrite File with encrypted byte array
+			convertByteArrayToFile(inputFile, encryptedBytes);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			Log.d(TAG, "Unable to encrypt file.");
+			return;
+		}
+
+	}
+
+	public static void decryptFile(byte[] key, File inputFile)
+	{
+		byte [] decryptedBytes = null;
+
+		try
+		{
+			// decrypt the File as byte array
+			decryptedBytes = decodeFile(key, convertFileToByteArray(inputFile));
+
+			// overwrite inputFile with decrypted byte array
+			convertByteArrayToFile(inputFile, decryptedBytes);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Log.d(TAG, "Unable to decrypt file.");
+			return;
+		}
+
+	}
+
+	public static byte[] encodeFile(byte[] key, byte[] fileData) throws Exception
+	{
+		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+		Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+
+		byte[] encrypted = cipher.doFinal(fileData);
+
+		return encrypted;
+	}
+
+
+	public static byte[] decodeFile(byte[] key, byte[] fileData) throws Exception
+	{
+		SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+		Cipher cipher = Cipher.getInstance("AES");
+		cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+
+		byte[] decrypted = cipher.doFinal(fileData);
+
+		return decrypted;
+	}
 }

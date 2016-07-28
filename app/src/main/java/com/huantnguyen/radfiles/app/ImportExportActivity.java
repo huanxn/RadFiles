@@ -36,6 +36,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -444,6 +445,105 @@ public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriv
 		dialog.show();
 
 	}
+
+	//importing database
+	private void restoreDB(String restoreFilename)
+	{
+		try
+		{
+			//File sd = Environment.getExternalStorageDirectory();
+			File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
+			File data  = Environment.getDataDirectory();
+
+			String currentDBDirPath = "//data//" + getPackageName() + "//databases//";
+			File currentDBDir  = new File(data, currentDBDirPath);
+
+			if (currentDBDir.canWrite())
+			{
+				/*
+				String  currentDBPath= "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
+				String backupDBPath  = "/Backup/" + restoreFilename;
+				File  backupDB= new File(data, currentDBPath);
+				File currentDB  = new File(appDir, backupDBPath);
+
+				FileChannel src = new FileInputStream(currentDB).getChannel();
+				FileChannel dst = new FileOutputStream(backupDB).getChannel();
+				*/
+
+				String currentDBPath = "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
+				File currentDB  = new File(data, currentDBPath);
+				File  backupDB= new File(restoreFilename);
+
+				FileChannel src = new FileInputStream(backupDB).getChannel();
+				FileChannel dst = new FileOutputStream(currentDB).getChannel();
+
+				dst.transferFrom(src, 0, src.size());
+				src.close();
+				dst.close();
+				Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_LONG).show();
+
+			}
+		} catch (Exception e) {
+
+			Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG)
+					.show();
+
+		}
+	}
+	//exporting database
+	private boolean backupDB(String backupFilename)
+	{
+		// TODO Auto-generated method stub
+
+		try
+		{
+			//File sd = Environment.getExternalStorageDirectory();
+			File appDir = getApplication().getExternalFilesDir(null);   // internal app data directory
+			File data = Environment.getDataDirectory();
+
+			if (appDir.canWrite())
+			{
+				String  currentDBPath= "//data//" + getPackageName() + "//databases//" + CasesProvider.DATABASE_NAME;
+				String backupDBPath  = "/Backup/" + backupFilename;
+				File currentDB = new File(data, currentDBPath);
+				File backupDB = new File(appDir, backupDBPath);
+
+
+				String backupDirPath  = "/Backup/";
+				File backupDir = new File(appDir, backupDirPath);
+
+				if(!backupDir.exists())
+				{
+					if(backupDir.mkdirs())
+					{
+						Toast.makeText(this, "Created directory: " + backupDir.getPath(), Toast.LENGTH_LONG).show();
+					}
+					else
+					{
+						Toast.makeText(this, "Unable to create directory: " + backupDir.getPath(), Toast.LENGTH_LONG).show();
+					}
+
+				}
+
+				FileChannel src = new FileInputStream(currentDB).getChannel();
+				FileChannel dst = new FileOutputStream(backupDB).getChannel();
+				dst.transferFrom(src, 0, src.size());
+				src.close();
+				dst.close();
+				Toast.makeText(getBaseContext(), backupDB.toString(), Toast.LENGTH_LONG).show();
+
+			}
+		} catch (Exception e) {
+
+			Toast.makeText(getBaseContext(), e.toString(), Toast.LENGTH_LONG).show();
+			return false;
+
+		}
+
+		// success
+		return true;
+	}
+
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent resultData)

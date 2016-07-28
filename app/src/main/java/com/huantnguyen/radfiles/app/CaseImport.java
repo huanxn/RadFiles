@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.JsonReader;
 import android.util.JsonToken;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -260,6 +261,19 @@ public class CaseImport extends AppCompatActivity
 			try
 			{	// open existing file that should have been unzipped
 				tempCasesJSON = new File(getCacheDir(), ImportExportActivity.CASES_JSON_FILENAME);
+
+				// TODO get user passkey, test decrypt JSON file
+				try
+				{
+					byte[] passkey = UtilsFile.generateKey("passkey");
+					UtilsFile.decryptFile(passkey, tempCasesJSON);
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+					return "Unable to generate encryption key.";
+				}
+
 				FileInputStream cases_in = new FileInputStream(tempCasesJSON);
 				reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
 
