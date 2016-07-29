@@ -24,7 +24,7 @@
     </android.support.v4.widget.SwipeRefreshLayout>
 
 
-    <com.huantnguyen.radfiles.app.FastScroller
+    <com.radicalpeas.radfiles.app.FastScroller
         android:id="@+id/fastscroller"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

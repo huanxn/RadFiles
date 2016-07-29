@@ -12,7 +12,7 @@
                 android:layout_height="fill_parent"
                 android:id="@+id/edit_scrollview"
                 android:layout_below="@id/toolbar"
-                tools:context="com.huantnguyen.radfiles.app.CaseEditActivity$EditCaseFragment">
+                tools:context="com.radicalpeas.radfiles.app.CaseEditActivity$EditCaseFragment">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -60,7 +60,7 @@
                 android:paddingLeft="2dp"
                 android:text="Radiology Section"/>
 
-            <com.huantnguyen.radfiles.app.SpinnerMultiSelect
+            <com.radicalpeas.radfiles.app.SpinnerMultiSelect
                 android:id="@+id/edit_section"
                 style="@style/customSpinnerStyle"
                 android:prompt="@string/section_prompt"/>
@@ -78,7 +78,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <com.huantnguyen.radfiles.app.SpinnerCustom
+                <com.radicalpeas.radfiles.app.SpinnerCustom
                     android:id="@+id/edit_study_type"
                     style="@style/customSpinnerStyle"
                     android:prompt="@string/studyType_prompt"/>
@@ -117,7 +117,7 @@
                 android:paddingLeft="2dp"
                 android:text="Key Words"/>
 
-            <com.huantnguyen.radfiles.app.SpinnerMultiSelect
+            <com.radicalpeas.radfiles.app.SpinnerMultiSelect
                 style="@style/customSpinnerStyle"
                 android:id="@+id/edit_key_words"
                 android:prompt="@string/keyWords_prompt"/>

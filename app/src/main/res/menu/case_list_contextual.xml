@@ -3,7 +3,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.huantnguyen.radfiles.app.CaseCardListActivity">
+      tools:context="com.radicalpeas.radfiles.app.CaseCardListActivity">
 
     <!-- Share selected cases, should appear as action button -->
     <!-- android:actionProviderClass="android.widget.ShareActionProvider"-->

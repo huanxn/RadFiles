@@ -11,7 +11,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.huantnguyen.radfiles.app.NavigationDrawerActivity"
+        tools:context="com.radicalpeas.radfiles.app.NavigationDrawerActivity"
         >
 
         <!-- As the main content view, the view below consumes the entire
@@ -40,7 +40,7 @@
 
         <fragment
             android:id="@+id/navigation_drawer"
-            android:name="com.huantnguyen.radfiles.app.NavigationDrawerFragment"
+            android:name="com.radicalpeas.radfiles.app.NavigationDrawerFragment"
             android:layout_width="@dimen/navigation_drawer_width"
             android:layout_height="match_parent"
             android:layout_gravity="start|bottom"

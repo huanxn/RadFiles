@@ -34,3 +34,8 @@
 }
 
 -keep class android.support.v7.widget.** { *; }
+
+-keep class net.sqlcipher.** {
+    *;
+}
+-dontwarn net.sqlcipher.**

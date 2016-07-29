@@ -1,6 +1,6 @@
 <menu
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.huantnguyen.radfiles.app.NavigationDrawerActivity" >
+    tools:context="com.radicalpeas.radfiles.app.NavigationDrawerActivity" >
 
     <!--
     <item android:id="@+id/menu_settings"

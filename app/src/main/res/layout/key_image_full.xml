@@ -3,7 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-    <com.huantnguyen.radfiles.app.TouchImageView
+    <com.radicalpeas.radfiles.app.TouchImageView
         android:id="@+id/key_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

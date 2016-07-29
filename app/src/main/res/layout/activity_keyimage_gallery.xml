@@ -6,7 +6,7 @@
 
 
     <!-- ExtendedViewPager is a custom view and must be referred to by its full package name in XML -->
-	<com.huantnguyen.radfiles.app.ExtendedViewPager
+	<com.radicalpeas.radfiles.app.ExtendedViewPager
 	    android:id="@+id/viewpager"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"

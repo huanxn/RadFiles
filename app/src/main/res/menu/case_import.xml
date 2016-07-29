@@ -1,6 +1,6 @@
 <menu
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.huantnguyen.radfiles.app.CaseImport"
+    tools:context="com.radicalpeas.radfiles.app.CaseImport"
     >
 
     <!-- Settings, should always be in the overflow
