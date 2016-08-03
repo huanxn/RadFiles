@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.gc.materialdesign.views.ProgressBarIndeterminateDeterminate;
@@ -233,8 +234,14 @@ public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriv
 		}
 	}
 
+	static private String password = null;
+
 	private void exportCases()
 	{
+///
+		// TODO get user passkey, test encrypt JSON file
+
+
 		String filename;
 
 		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
@@ -271,14 +278,28 @@ public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriv
 		}
 		*/
 
+
 		// no Storage Access Framework pre KITKAT
 		// Set an EditText view to get user input
 		final EditText input = new EditText(this);
+		final EditText pw_input = new EditText(this);
 		final Activity activity = this;
 
 		input.setText(filename);
 		input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-		alertBuilder.setView(input);
+		input.setHint("File name");
+		pw_input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+		pw_input.setHint("Encryption password");
+//		alertBuilder.setView(input);
+//		alertBuilder.setView(pw_input);
+
+		LinearLayout layout = new LinearLayout(this);
+		layout.setOrientation(LinearLayout.VERTICAL);
+
+		layout.addView(input);
+		layout.addView(pw_input);
+
+		alertBuilder.setView(layout);
 
 		alertBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener()
 		{
@@ -289,6 +310,8 @@ public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriv
 				final String value = input.getText().toString();
 				exportFilename = value + RCS_EXTENSION;
 				exportMIMEtype = RCS_MIMETYPE;
+
+				final String password = pw_input.getText().toString();
 
 				LayoutInflater inflater = activity.getLayoutInflater();
 				View dialoglayout = inflater.inflate(R.layout.alertdialog_progress, null);
@@ -304,7 +327,7 @@ public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriv
 					@Override
 					public void run()
 					{
-						local_file_to_cloud = UtilClass.exportCasesJSON(activity, value, null, progressHandler); //exportCasesCSV(value);
+						local_file_to_cloud = UtilClass.exportCasesJSON(activity, value, null, password, progressHandler); //exportCasesCSV(value);
 
 						if (local_file_to_cloud != null)
 						{

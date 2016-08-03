@@ -2,6 +2,7 @@ package com.radicalpeas.radfiles.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -13,11 +14,14 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.InputType;
 import android.util.JsonReader;
 import android.util.JsonToken;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import com.gc.materialdesign.widgets.ProgressDialog;
 
@@ -42,6 +46,7 @@ public class CaseImport extends AppCompatActivity
 	final static String IMAGES_CSV_FILENAME = "images_table.csv";
 
 	File importFile = null;
+	String password = null;
 
 	private Activity activity;
 
@@ -119,7 +124,6 @@ public class CaseImport extends AppCompatActivity
 			    try
 			    {
 				    importFile = UtilsFile.makeLocalFile(this, downloadsDir, "RadFiles import", "rcs", import_uri);
-				    new LoadImportListTask().execute(importFile);
 			    }
 			    catch (IOException e)
 			    {
@@ -133,7 +137,6 @@ public class CaseImport extends AppCompatActivity
 		    try
 		    {
 			    importFile = UtilsFile.makeLocalFile(this, downloadsDir, "RadFiles import", "rcs", uri);
-			    new LoadImportListTask().execute(importFile);
 		    }
 		    catch (IOException e)
 		    {
@@ -142,7 +145,7 @@ public class CaseImport extends AppCompatActivity
 	    }
 	    else
 	    {
-		    // Show error message
+		    // Show error message and end activity
 
 		    AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		    builder.setMessage("Unable to open file").setTitle("Error")
@@ -156,6 +159,70 @@ public class CaseImport extends AppCompatActivity
 		    AlertDialog alert = builder.create();
 		    alert.show();
 	    }
+
+		if(importFile != null)
+		{
+			// User prompt for passkey for decryption of JSON file
+			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(activity);
+
+			// Set an EditText view to get user input
+			final EditText input = new EditText(activity);
+			input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+			//input.setHighlightColor(activity.getResources().getColor(R.color.default_colorControlHighlight));
+			input.setHighlightColor(UtilClass.get_attr(activity, R.attr.colorControlHighlight));
+
+			alertBuilder.setTitle("Enter password");
+
+			alertBuilder.setView(input);
+
+			alertBuilder.setPositiveButton(R.string.button_OK, new DialogInterface.OnClickListener()
+			{
+				public void onClick(DialogInterface dialog, int whichButton)
+				{
+					password = input.getText().toString();
+					new LoadImportListTask().execute(importFile.getPath(), password);
+				}
+			});
+
+			alertBuilder.setNegativeButton(R.string.button_cancel, new DialogInterface.OnClickListener()
+			{
+				public void onClick(DialogInterface dialog, int whichButton)
+				{
+					// Canceled.
+					//todo what to do, clean up
+					finish();
+				}
+			});
+
+			AlertDialog dialog = alertBuilder.create();
+			// Show keyboard
+			dialog.setOnShowListener(new DialogInterface.OnShowListener()
+			{
+				@Override
+				public void onShow(DialogInterface dialog)
+				{
+					InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+					imm.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+				}
+			});
+			dialog.show();
+		}
+		else
+		{
+			AlertDialog.Builder alertBuilder = new AlertDialog.Builder(activity);
+			alertBuilder.setTitle("File not found. Check internet connection.");
+
+			alertBuilder.setPositiveButton(R.string.button_OK, new DialogInterface.OnClickListener()
+			{
+				public void onClick(DialogInterface dialog, int whichButton)
+				{
+					  finish();
+				}
+			});
+
+			AlertDialog dialog = alertBuilder.create();
+			dialog.show();
+		}
     }
 
     @Override
@@ -226,40 +293,24 @@ public class CaseImport extends AppCompatActivity
 		// Alert dialog to confirm save
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-		builder.setMessage("Import these cases?")
-				.setPositiveButton(getResources().getString(R.string.button_OK), new DialogInterface.OnClickListener()
+		builder.setMessage("Discard these cases?")
+				.setPositiveButton(getResources().getString(R.string.button_discard), new DialogInterface.OnClickListener()
 				{
 					public void onClick(DialogInterface dialog, int id)
 					{
-						// import confirmed
-						if(importFile != null)
-						{
-							setResult(CaseCardListActivity.REQUEST_ADD_CASE);
-							//UtilClass.importCasesJSON(this, importFile);
-							new ImportCasesTask().execute(importFile);
-						}
-						else
-						{
-							UtilClass.showMessage(activity, "Error: file not found.");
-						}
-
 						finish();
-
 					}
 				})
 				.setNegativeButton(getResources().getString(R.string.button_cancel), new DialogInterface.OnClickListener()
 				{
 					public void onClick(DialogInterface dialog, int id)
 					{
-						// discard
-						moveTaskToBack(true);
-						finish();
+						// cancel
 					}
 				});
 
 		AlertDialog alert = builder.create();
 		alert.show();
-
 
 	}
 
@@ -267,7 +318,7 @@ public class CaseImport extends AppCompatActivity
 	/**
 	 * show list of cases from import file
 	 */
-	private class LoadImportListTask extends AsyncTask<File, Integer, String>
+	private class LoadImportListTask extends AsyncTask<String, Integer, String>
 	{
 		protected void onPreExecute()
 		{
@@ -278,12 +329,10 @@ public class CaseImport extends AppCompatActivity
 		}
 
 		@Override
-		protected String doInBackground(File... inFile)
+		protected String doInBackground(String... params)
 		{
-			if(inFile[0] == null)
-			{
-				return null;
-			}
+			String file_path = params[0];
+			String password = params[1];
 
 			List<Case> importCaseList = new ArrayList<Case>();
 
@@ -291,7 +340,7 @@ public class CaseImport extends AppCompatActivity
 			try
 			{
 				// unzip files to android pictures directory
-				UtilsFile.unzip(inFile[0].getPath(), getCacheDir().getAbsolutePath());
+				UtilsFile.unzip(file_path, getCacheDir().getAbsolutePath());
 			}
 			catch (IOException e)
 			{
@@ -306,16 +355,19 @@ public class CaseImport extends AppCompatActivity
 			{	// open existing file that should have been unzipped
 				tempCasesJSON = new File(getCacheDir(), ImportExportActivity.CASES_JSON_FILENAME);
 
-				// TODO get user passkey, test decrypt JSON file
-				try
+				// decrypt JSON file unless blank password given
+				if (!password.contentEquals(""))
 				{
-					byte[] passkey = UtilsFile.generateKey("passkey");
-					UtilsFile.decryptFile(passkey, tempCasesJSON);
-				}
-				catch(Exception e)
-				{
-					e.printStackTrace();
-					return "Unable to generate encryption key.";
+					try
+					{
+						byte[] passkey = UtilsFile.generateKey(password);
+						UtilsFile.decryptFile(passkey, tempCasesJSON);
+					}
+					catch (Exception e)
+					{
+						e.printStackTrace();
+						return "Unable to generate encryption key.";
+					}
 				}
 
 				FileInputStream cases_in = new FileInputStream(tempCasesJSON);
@@ -325,7 +377,7 @@ public class CaseImport extends AppCompatActivity
 			catch (Exception e)
 			{
 				e.printStackTrace();
-				return "Unable to open JSON file";
+				return "Unable to open JSON file.";
 			}
 
 
@@ -436,10 +488,11 @@ public class CaseImport extends AppCompatActivity
 			catch (IOException e)
 			{
 				e.printStackTrace();
-				return "Unable to parse JSON file";
+				return "Unable to open case file";
 			}
 
-			tempCasesJSON.delete();
+			// leave decrypted json file for actual import function (into database)
+			//tempCasesJSON.delete();
 
 			mCardAdapter.loadCaseList(importCaseList);
 

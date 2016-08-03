@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.view.ViewCompat;
+import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -942,12 +943,12 @@ public class UtilClass extends Activity
 	 * @return
 	 */
 
-	public static File exportCasesJSON(Activity activity, String filename, List<Long> selectedCaseList)
+	public static File exportCasesJSON(Activity activity, String filename, List<Long> selectedCaseList, String password)
 	{
-		return exportCasesJSON(activity, filename, selectedCaseList, null);
+		return exportCasesJSON(activity, filename, selectedCaseList, password, null);
 	}
 
-	public static File exportCasesJSON(Activity activity, String filename, List<Long> selectedCaseList, Handler progressHandler)
+	public static File exportCasesJSON(final Activity activity, String filename, List<Long> selectedCaseList, String password, Handler progressHandler)
 	{
 		File returnFile;
 		int count = 0;
@@ -958,6 +959,9 @@ public class UtilClass extends Activity
 		File cacheDir = activity.getCacheDir();
 		File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+
+		///
 
 		try
 		{
@@ -1077,7 +1081,7 @@ public class UtilClass extends Activity
 			// TODO get user passkey, test encrypt JSON file
 			try
 			{
-				byte[] passkey = UtilsFile.generateKey("passkey");
+				byte[] passkey = UtilsFile.generateKey(password);
 				UtilsFile.encryptFile(passkey, casesJSON);
 			}
 			catch(Exception e)
@@ -1134,7 +1138,9 @@ public class UtilClass extends Activity
 
 		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
-		// unzip image files and JSON files
+
+		// unzip image files and JSON files into pictures dir
+
 		try
 		{
 			// unzip image files to android pictures directory
@@ -1147,34 +1153,24 @@ public class UtilClass extends Activity
 			return 0;
 		}
 
+
 		File tempCasesJSON = null;
+		File decryptedCasesJSON = null;
 		JsonReader reader = null;
 
 		try
 		{
-			// open existing file that should have been unzipped
+			// open existing file that should have been unzipped and decrypted
+			decryptedCasesJSON = new File(activity.getCacheDir(), ImportExportActivity.CASES_JSON_FILENAME);
 			tempCasesJSON = new File(picturesDir, ImportExportActivity.CASES_JSON_FILENAME);
 
-			// TODO get user passkey, test decrypt JSON file
-			try
-			{
-				byte[] passkey = UtilsFile.generateKey("passkey");
-				UtilsFile.decryptFile(passkey, tempCasesJSON);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, "Unable to generate encryption key.");
-				return 0;
-			}
-
-			FileInputStream cases_in = new FileInputStream(tempCasesJSON);
+			FileInputStream cases_in = new FileInputStream(decryptedCasesJSON);
 			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Toast.makeText(activity, "Unable to copy JSON file", Toast.LENGTH_SHORT).show();
+			Toast.makeText(activity, "Unable to open JSON file", Toast.LENGTH_SHORT).show();
 			return 0;
 		}
 
@@ -1297,6 +1293,7 @@ public class UtilClass extends Activity
 		//UtilClass.showMessage(activity, "Imported " + caseCount + " cases");
 		//Toast.makeText(activity, "Imported " + caseCount + " cases", Toast.LENGTH_SHORT).show();
 		tempCasesJSON.delete();
+		decryptedCasesJSON.delete();
 
 		return caseCount;
 	}

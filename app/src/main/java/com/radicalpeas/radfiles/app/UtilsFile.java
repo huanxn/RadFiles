@@ -131,6 +131,8 @@ public class UtilsFile
 		{
 			e.printStackTrace();
 			UtilClass.showMessage(activity, "local file not found");
+			outFile.delete();
+			outFile = null;
 		}
 		catch (IOException e)
 		{

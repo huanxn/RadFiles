@@ -1613,7 +1613,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			@Override
 			protected File doInBackground(Void... v)
 			{
-				return UtilClass.exportCasesJSON(activity, "RadFiles cases", selectList);
+				return UtilClass.exportCasesJSON(activity, "RadFiles cases", selectList, ""); //TODO add password stuff
 			}
 
 			/*
