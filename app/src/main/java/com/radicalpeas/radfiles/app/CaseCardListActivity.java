@@ -48,6 +48,8 @@ import com.gc.materialdesign.widgets.ProgressDialog;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
+//import com.google.firebase.database.DatabaseReference;
+//import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -117,6 +119,9 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 	private static ProgressDialog progressDialog;
 
+	// firebase
+	//DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -154,13 +159,8 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 
 			transitionSet.addTransition(TransitionInflater.from(this).inflateTransition(R.transition.shared_element));
 
-
-
-
-
 			activity.getWindow().setEnterTransition(transitionSet);
 			activity.getWindow().setExitTransition(transitionSet);
-
 
 		}
 

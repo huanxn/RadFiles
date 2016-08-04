@@ -109,4 +109,9 @@
         <item>Wikipedia</item>
     </string-array>
 
+
+    <!--Firebase auth ID-->
+    <string name="facebook_application_id" translatable="false">RADFILES APP</string>
+
+
 </resources>

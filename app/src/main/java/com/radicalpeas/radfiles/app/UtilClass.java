@@ -1651,10 +1651,13 @@ public class UtilClass extends Activity
 		return CaseCardListActivity.appDir;
 	}
 
+	/*
+	// after sdk24, error: cannot override getDataDir() in Context, overriding method is static
 	public static File getDataDir()
 	{
 		return CaseCardListActivity.dataDir;
 	}
+	*/
 
 
 	public static void changeSearchViewTextColor(View view, int color) {

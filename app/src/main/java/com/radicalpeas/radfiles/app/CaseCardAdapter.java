@@ -191,10 +191,11 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 		{
 			Case mCase = caseList.get(i);
 
-			int maxCardHeight = (int)activity.getResources().getDimension(R.dimen.card_thumbnail_height);
 			View cardView = viewHolder.cardView;//.findViewById(R.id.container);
 
-			int height = cardView.getLayoutParams().height;
+			// not used
+//			int height = cardView.getLayoutParams().height;
+//			int maxCardHeight = (int)activity.getResources().getDimension(R.dimen.card_thumbnail_height);
 
 			if(header != null && group_position != null)
 			{
@@ -220,7 +221,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 					viewHolder.cardView.setLayoutParams(layoutParams);
 					*/
 					//animateViewHeightChange(cardContainer, 0, maxCardHeight);
-					setViewHeight(cardView, ViewGroup.LayoutParams.MATCH_PARENT);
+					setViewHeight(cardView, ViewGroup.LayoutParams.WRAP_CONTENT);
 
 					//expandViewHolder(viewHolder, group_position.get(i));
 				}

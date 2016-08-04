@@ -1,4 +1,5 @@
-apply plugin: 'android'
+apply plugin: 'com.android.application'
+//apply plugin: 'android-apt'
 
 android {
     signingConfigs {
@@ -9,12 +10,12 @@ android {
             storePassword 'peaspass'
         }
     }
-    compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.1'
     defaultConfig {
         applicationId "com.radicalpeas.radfiles.app"
         minSdkVersion 17
-        targetSdkVersion 22
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
         signingConfig signingConfigs.config
@@ -36,12 +37,12 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-v13:22.+'
-    compile 'com.android.support:support-v4:22.+'
-    compile 'com.google.android.gms:play-services:7.+'
-    compile 'com.android.support:appcompat-v7:22.+'
-    compile 'com.android.support:cardview-v7:22.+'
-    compile 'com.android.support:recyclerview-v7:22.+'
+    compile 'com.android.support:support-v13:24.+'
+    compile 'com.android.support:support-v4:24.+'
+    compile 'com.android.support:appcompat-v7:24.+'
+    compile 'com.android.support:cardview-v7:24.+'
+    compile 'com.android.support:recyclerview-v7:24.+'
+    compile 'com.google.android.gms:play-services:9.4.0'
 
     //compile 'com.timehop.stickyheadersrecyclerview:library:0.3.6@aar' //buggy
 
@@ -80,5 +81,20 @@ dependencies {
     // image crop
     compile project(':app:libs:simple-crop-image-lib')
 
+    // Butterknife
+ //   compile 'com.jakewharton:butterknife:8.2.1'
+ //   apt 'com.jakewharton:butterknife-compiler:8.2.1'
+
+
+    // firebase
+ //   compile 'com.google.firebase:firebase-core:9.4.0'
+  //  compile 'com.firebaseui:firebase-ui-auth:0.4.4' //contains compile 'com.google.firebase:firebase-auth:9.4.0'
+  //  compile 'com.google.firebase:firebase-database:9.4.0'
+  //  compile 'com.google.firebase:firebase-storage:9.4.0'
+
+//    compile 'com.google.android.gms:play-services-auth:9.4.0'
 
 }
+
+// firebase
+apply plugin: 'com.google.gms.google-services'
