@@ -14,13 +14,6 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
 
-    <!--<uses-library
-        android:name="com.radicalpeas.radfiles.app/eu.janmuller.android.simplecropimage"
-        android:required="true" />
-    <uses-library
-        android:name="com.radicalpeas.radfiles.app/com.android.camera"
-        android:required="true" />-->
-
     <!--tools:replace="android:icon"-->
     <application
         android:allowBackup="true"
@@ -116,8 +109,9 @@
             android:name="android.app.default_searchable"
             android:value="com.radicalpeas.radfiles.app.CaseCardListActivity" />
 
-        <!-- libs simple-crop-image-lib: crop image from camera picture -->
-        <activity android:name="eu.janmuller.android.simplecropimage.CropImage" />
+        <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+                  android:theme="@style/Base.Theme.AppCompat" />
+
 
         <activity
             android:name="com.radicalpeas.radfiles.app.CaseImport"

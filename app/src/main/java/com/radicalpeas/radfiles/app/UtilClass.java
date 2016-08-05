@@ -57,9 +57,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import eu.janmuller.android.simplecropimage.CropImage;
-
-
 /**
  * Created by Huan on 6/10/2014.
  */
@@ -363,82 +360,8 @@ public class UtilClass extends Activity
 			}
 		});
 	}
-
 	/* end zoom from thumb */
 
-	/**
-	 * getPictureFromCamera()
-	 *
-	 * @param activity: calling activity, will return to this activity's <onActivityResult()>
-	 * @param REQUEST_IMAGE_CAPTURE: the onActivityResult() code
-	 * @return
-	 */
-	static public File getPictureFromCamera(Activity activity, int REQUEST_IMAGE_CAPTURE)
-	{
-		File imageFile = null;
-
-		// opens phone's camera
-		Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-		if (takePictureIntent.resolveActivity(activity.getPackageManager()) != null)
-		{
-			// Create the Filename where the photo should go
-			String tempFilename = null;
-
-			// Create an image file name based on timestamp
-			String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-			tempFilename = "JPEG_" + timeStamp + "_";
-
-			// Get the private application storage directory for pictures
-			File storageDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-			// Create the file
-			try
-			{
-				imageFile = File.createTempFile(tempFilename, ".jpg", storageDir);
-			}
-			catch (IOException ex)
-			{
-				Log.e("getPictureFromCamera", "Could not open new image file.");
-			}
-
-			// Continue only if the File was successfully created
-			if (imageFile != null)
-			{
-				// get uri of newly created File and pass to takePictureIntent
-				Uri mImageCaptureUri = Uri.fromFile(imageFile);
-				takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
-
-				// open phone's camera and pass result to the calling activity's onActivityResult()
-				// which will then run UtilClass.CropPicture() if successful
-				activity.startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-			}
-		}
-
-		// returns the File of the new jpg image
-		return imageFile;
-	}
-
-	// called from onActivityResult
-	static public void CropPicture(Activity activity, File imageFile, int REQUEST_CROP_IMAGE)
-	{
-		// new Intent from CropImage class, included as imported library project: simple-crop-image-lib
-		Intent cropPictureIntent = new Intent(activity, CropImage.class);
-
-		// tell CropImage activity to look for image to crop
-		String filePath = imageFile.getPath();
-		cropPictureIntent.putExtra(CropImage.IMAGE_PATH, filePath);
-
-		// allow CropImage activity to rescale image
-		cropPictureIntent.putExtra(CropImage.SCALE, true);
-
-		// aspect ratio is fixed to ratio 1:1
-		cropPictureIntent.putExtra(CropImage.ASPECT_X, 1);
-		cropPictureIntent.putExtra(CropImage.ASPECT_Y, 1);
-
-		// start activity CropImage with request code and listen for result
-		activity.startActivityForResult(cropPictureIntent, REQUEST_CROP_IMAGE);
-	}
 
 	// get file path from data resulted from IO file manager or gallery.  [Uri selectedImageUri = data.getData();]
 	static public String getFilePathFromResult(Activity activity, Uri selectedImageUri)

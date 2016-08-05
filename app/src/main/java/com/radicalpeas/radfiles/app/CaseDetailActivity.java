@@ -15,6 +15,7 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -45,16 +46,14 @@ import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
-//import com.manuelpeinado.fadingactionbar.extras.actionbarcompat.FadingActionBarHelper;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import eu.janmuller.android.simplecropimage.CropImage;
 
 import static android.view.View.GONE;
 
@@ -323,9 +322,14 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 				return true;
 
 			case R.id.menu_camera:
+
+				// start CropImage activity, which returns with onActivityResult
+				com.theartofdev.edmodo.cropper.CropImage.startPickImageActivity(this);
+
+				/*
+
 				SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 				int pref_image_source = Integer.parseInt(sharedPref.getString(getString(R.string.pref_image_source_key), "0"));
-
 				switch(pref_image_source)
 				{
 					// from camera
@@ -347,6 +351,8 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 						choosePictureAlertDialog(item.getActionView());
 						break;
 				}
+
+				*/
 
 				return true;
 
@@ -375,55 +381,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 	}
 
-	/**
-	 * Called when clicking to add new image
-	 * opens alert dialog to choose from file/gallery or take a photo with camera intent
-	 * @param view
-	 */
-	public void choosePictureAlertDialog(View view)
-	{
-		final Activity activity = this;
-
-		// Alert dialog to choose either to take a new photo with camera, or select existing picture from file storage
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		CharSequence[] imageSources = {"Take photo", "Choose file"};
-		builder.setTitle("Add image")
-				.setItems(imageSources, new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int index)
-					{
-
-						switch(index)
-						{
-							// take new photo with the camera intent
-							// then crop photo
-							// store photo and put filename in database
-							case 0:
-								// runs camera intent.  returns result code to onActivityResult, which will run crop intent if successful
-								tempImageFile = UtilClass.getPictureFromCamera(activity, CaseEditActivity.REQUEST_IMAGE_CAPTURE);
-								break;
-
-							// select file from chooser
-							// either local database or TODO cloud storage
-							case 1:
-								// in onCreate or any event where your want the user to
-								// select a file
-								Intent intent = new Intent();
-								intent.setType("image/*");
-								intent.setAction(Intent.ACTION_GET_CONTENT);
-								//intent.putExtra("image_filename", tempImageFilename);
-								startActivityForResult(Intent.createChooser(intent,"Select Picture"), CaseEditActivity.REQUEST_SELECT_IMAGE_FROM_FILE);
-
-								break;
-
-						}
-
-					}
-				});
-
-		AlertDialog alert = builder.create();
-		alert.show();
-	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data)
 	{
@@ -447,94 +404,66 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			}
 
 		}
-
-		// IMAGE CHOOSER (same as CaseEditActivity)
-		else if (requestCode == CaseEditActivity.REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK)
+		// almost same as CaseEditActivity
+		// called when user picks image source (camera vs cloud vs local gallery)
+		else if (requestCode == com.theartofdev.edmodo.cropper.CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == Activity.RESULT_OK)
 		{
-			// successful capture of new photo from camera (called from UtilClass method)
-			// replaces tempImageFile with the new cropped image
-			// if successful, return to onActivityResult(REQUEST_CROP_IMAGE)
-
-			UtilClass.CropPicture(this, tempImageFile, CaseEditActivity.REQUEST_CROP_IMAGE);
-
+			Uri imageUri = com.theartofdev.edmodo.cropper.CropImage.getPickImageResultUri(this, data);
+			com.theartofdev.edmodo.cropper.CropImage.activity(imageUri)
+					.setGuidelines(CropImageView.Guidelines.ON)
+					.setFixAspectRatio(true)
+					.setAspectRatio(1,1)
+					.setInitialCropWindowPaddingRatio(0)
+					.setAllowRotation(true)
+					.setAutoZoomEnabled(true)
+					.start(this);
 		}
-		else if (requestCode == CaseEditActivity.REQUEST_CROP_IMAGE && resultCode == RESULT_OK)
+		// called after user crops image
+		else if (requestCode == com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE)
 		{
-			// successful crop of new photo from the camera (called from onActivityResult(REQUEST_IMAGE_CAPTURE)->UtilClass.CropPicture())
-			String path = data.getStringExtra(CropImage.IMAGE_PATH);
-			if (path != null)
+			com.theartofdev.edmodo.cropper.CropImage.ActivityResult result = com.theartofdev.edmodo.cropper.CropImage.getActivityResult(data);
+			if (resultCode == RESULT_OK)
 			{
-				addNewImageToDatabase(tempImageFile.getPath());
-			}
-			else
-			{
-				// delete tempImageFile since crop was canceled?
-				if (tempImageFile.exists())
+				Uri resultUri = result.getUri();
+				File resultFile = new File(resultUri.getPath());
+
+				// Create the Filename where the photo should go
+				String tempFilename = null;
+
+				// Create an image file name based on timestamp
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+				tempFilename = "IMAGE_" + timeStamp + "_";	// temp file will add extra random numbers to filename
+
+				// Get the private application storage directory for pictures
+				File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+				// Create the file
+				try
 				{
-					tempImageFile.delete();
-					tempImageFile = null;
+					tempImageFile = File.createTempFile(tempFilename, ".jpg", storageDir);
+					UtilsFile.copyFile(tempImageFile, resultFile);
 				}
+				catch (IOException ex)
+				{
+					Log.e("getPictureFromCamera", "Could not open new image file.");
+				}
+
+				// clean up
+				if(resultFile.exists())
+				{
+					resultFile.delete();
+				}
+
+				// imageGridView.addImage(tempImageFile.getPath());
+				addNewImageToDatabase(tempImageFile.getPath());
+
+			} else if (resultCode == com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+				Exception error = result.getError();
 			}
 
 		}
-		else if (requestCode == CaseEditActivity.REQUEST_SELECT_IMAGE_FROM_FILE && resultCode == RESULT_OK)
-		{
-			// successful selection of photo from file explorer
-			Uri selectedImageUri = data.getData();
-			//String originalImageFilename = UtilClass.getFilePathFromResult(this, selectedImageUri);
 
-			// make copy of file into app pictures folder
-			//File originalImageFile = new File(originalImageFilename);
-			//String newImageFilename = originalImageFile.getName();
-			File newImageFile = null;
-			try
-			{
-				newImageFile = File.createTempFile(key_id + "_", ".jpg", CaseCardListActivity.picturesDir);
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				UtilClass.showMessage(this, "Unable to create file.");
-			}
 
-			FileOutputStream outputStream = null;
-			FileInputStream inputStream = null;
-			try
-			{
-				// the selected local or cloud image file
-				inputStream = (FileInputStream) getContentResolver().openInputStream(selectedImageUri);
-
-				// new local file
-				outputStream = new FileOutputStream(newImageFile);
-
-				// copy backup file contents to local file
-				UtilsFile.copyFile(outputStream, inputStream);
-			}
-			catch (FileNotFoundException e)
-			{
-				e.printStackTrace();
-				UtilClass.showMessage(this, "File not found.");
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				UtilClass.showMessage(this, "File IO exception.");
-			}
-
-			addNewImageToDatabase(newImageFile.getPath());
-			//imageGridView.addImage(newImageFile.getPath());
-		}
-		else if (resultCode != RESULT_OK)
-		{
-			// delete tempImageFile if image capture was canceled
-			if (tempImageFile != null && tempImageFile.exists())
-			{
-				tempImageFile.delete();
-				tempImageFile = null;
-			}
-
-			UtilClass.showMessage(this, "Canceled");
-		}
 	}
 
 	private void addNewImageToDatabase(String imageFilepath)

@@ -46,11 +46,14 @@ dependencies {
 
     //compile 'com.timehop.stickyheadersrecyclerview:library:0.3.6@aar' //buggy
 
-    compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.1'
     // advanced recyclerview for drag/drap lists
+    // https://github.com/h6ah4i/android-advancedrecyclerview
+    //compile ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar'){transitive=true}
+    compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.1'
 
-    compile 'com.github.ksoichiro:android-observablescrollview:1.4.0'
     // for parallax view fading toolbar
+    compile 'com.github.ksoichiro:android-observablescrollview:1.4.0'
+
 
     compile 'com.github.amlcurran.showcaseview:library:5.0.0'
     //ShowCaseView tutorials
@@ -78,8 +81,9 @@ dependencies {
     // SQL Cipher for database encryption
     compile 'net.zetetic:android-database-sqlcipher:3.5.2@aar'
 
-    // image crop
-    compile project(':app:libs:simple-crop-image-lib')
+    // image crop (new), also referenced Activity in manifest
+    // https://github.com/ArthurHub/Android-Image-Cropper
+    compile 'com.theartofdev.edmodo:android-image-cropper:2.2.+'
 
     // Butterknife
  //   compile 'com.jakewharton:butterknife:8.2.1'
@@ -97,4 +101,4 @@ dependencies {
 }
 
 // firebase
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'
