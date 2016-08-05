@@ -19,9 +19,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.viewpagerindicator.PageIndicator;
-import com.viewpagerindicator.UnderlinePageIndicator;
-
+import com.github.jrejaud.viewpagerindicator2.PageIndicator;
+import com.github.jrejaud.viewpagerindicator2.UnderlinePageIndicator;
 
 public class ImageGalleryActivity extends AppCompatActivity
 {

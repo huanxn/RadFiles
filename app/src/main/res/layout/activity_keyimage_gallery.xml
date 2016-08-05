@@ -12,7 +12,7 @@
 	    android:layout_height="match_parent"
         android:background="@android:color/black" />
 
-    <com.viewpagerindicator.UnderlinePageIndicator
+    <com.github.jrejaud.viewpagerindicator2.UnderlinePageIndicator
         android:id="@+id/indicator"
         android:layout_alignParentBottom="true"
         android:layout_height="2dp"

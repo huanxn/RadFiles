@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
+import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
 
@@ -364,13 +365,18 @@ public class ManageListsAdapter
 
 	/**
 	 * Drag drop resorting
-	 * @param holder
-	 * @param x
-	 * @param y
-	 * @return
+	 * Called when user is attempt to drag the item.
+	 *
+	 * @param holder The ViewHolder which is associated to item user is attempt to start dragging.
+	 * @param position The position of the item within the adapter's data set.
+	 * @param x Touched X position. Relative from the itemView's top-left.
+	 * @param y Touched Y position. Relative from the itemView's top-left.
+	 *
+	 * @return Whether can start dragging.
 	 */
 	@Override
-	public boolean onCheckCanStartDrag(ManageListsAdapter.ViewHolder holder, int x, int y) {
+	public boolean onCheckCanStartDrag(ManageListsAdapter.ViewHolder holder, int position, int x, int y)
+	{
 
 		// x, y --- relative from the itemView's top-left
 		final View containerView = holder.mContainer;
@@ -380,11 +386,7 @@ public class ManageListsAdapter
 		final int offsetY = containerView.getTop() + (int) (ViewCompat.getTranslationY(containerView) + 0.5f);
 
 		return UtilClass.hitTest(dragHandleView, x - offsetX, y - offsetY);
-
-
-
 		//return true;
-
 	}
 
 	/**
@@ -437,6 +439,27 @@ public class ManageListsAdapter
 
 		// update database in ManageListsActivity
 		notifyItemMoved(fromPosition, toPosition);
+	}
+
+	@Override
+	public boolean onCheckCanDrop(int draggingPosition, int dropPosition)
+	{
+		return true;
+	}
+
+	/**
+	 * Called after the {@link #onCheckCanStartDrag(android.support.v7.widget.RecyclerView.ViewHolder, int, int, int)} method returned true.
+	 *
+	 * @param holder The ViewHolder which is associated to item user is attempt to start dragging.
+	 * @param position The position of the item within the adapter's data set.
+	 *
+	 * @return null: no constraints (= new ItemDraggableRange(0, getItemCount() - 1)),
+	 *         otherwise: the range specified item can be drag-sortable.
+	 */
+	@Override
+	public ItemDraggableRange onGetItemDraggableRange(ManageListsAdapter.ViewHolder holder, int position)
+	{
+		return null;
 	}
 
 
