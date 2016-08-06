@@ -68,7 +68,6 @@ public class MaterialDrawerActivity extends AppCompatActivity
 
     protected SpannableString mTitle;
     protected Toolbar mToolbar = null;
-    protected boolean hasTransparentStatusbar = false;
     protected View mOverflowTarget = null;
     //
 
@@ -144,10 +143,6 @@ public class MaterialDrawerActivity extends AppCompatActivity
             params.setMargins(0, 0, 0, 0);
             findViewById(R.id.container).setLayoutParams(params);
 
-            // must adjust navigation drawer in NavigationDrawerFragment to account for zero margin, which would layer drawer over statusbar
-            hasTransparentStatusbar = true;
-
-            //mNavigationDrawerFragment.getDrawerListView().setPadding(0, 0, 0, UtilClass.getStatusBarHeight(this));
         }
 
 

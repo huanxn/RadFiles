@@ -144,11 +144,6 @@
         </activity>
 
         <activity
-           android:name="com.radicalpeas.radfiles.app.NavigationDrawerActivity"
-           android:label="@string/title_activity_navigation_drawer" >
-        </activity>
-
-        <activity
            android:name="com.radicalpeas.radfiles.app.SettingsActivity"
            android:label="@string/title_activity_settings" >
         </activity>
