@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriveBaseActivity
+public class ImportExportActivity extends MaterialDrawerActivity // GoogleDriveBaseActivity
 {
 	String TAG = "CloudStorageActivity";
 
@@ -102,9 +102,9 @@ public class ImportExportActivity extends NavigationDrawerActivity // GoogleDriv
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		setDrawerPosition(MaterialDrawerActivity.POS_CLOUD_STORAGE);
 		super.onCreate(savedInstanceState);
 		activity = this;
-		setDrawerPosition(NavigationDrawerActivity.POS_CLOUD_STORAGE);
 		//setContentView(R.layout.activity_cloud_storage);
 
 	    /*

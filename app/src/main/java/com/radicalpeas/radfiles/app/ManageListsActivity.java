@@ -33,7 +33,7 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.BasicSwapTargetTransl
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 
 
-public class ManageListsActivity extends NavigationDrawerActivity {
+public class ManageListsActivity extends MaterialDrawerActivity {
 
 	String TAG = "ManageListsActivity";
 	private TabbedFragment fragment;
@@ -41,8 +41,8 @@ public class ManageListsActivity extends NavigationDrawerActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		setDrawerPosition(MaterialDrawerActivity.POS_MANAGE_LISTS);
 		super.onCreate(savedInstanceState);
-		setDrawerPosition(NavigationDrawerActivity.POS_MANAGE_LISTS);
 		//setContentView(R.layout.activity_case_detail);
 
 		if (savedInstanceState == null)

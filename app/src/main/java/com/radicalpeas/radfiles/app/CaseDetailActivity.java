@@ -36,8 +36,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -67,7 +69,7 @@ import static android.view.View.GONE;
  * This activity is mostly just a 'shell' activity containing nothing
  * more than a {@link CaseDetailFragment}.
  */
-public class CaseDetailActivity extends NavigationDrawerActivity
+public class CaseDetailActivity extends AppCompatActivity
 {
 	private static String TAG = "CaseDetail Activity";
 
@@ -84,6 +86,10 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 	boolean hasImage;
 
 	private File tempImageFile;                                 // new image from camera
+
+	private SpannableString mTitle;
+	private Toolbar mToolbar;
+	private View mOverflowTarget = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -103,7 +109,6 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 		String [] image_args = {String.valueOf(key_id)};
 
-
 		// see how many images are linked to this case to determine if fading toolbar image header should be used
 		Cursor imageCursor = getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, null);
 
@@ -113,7 +118,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			// FadingActionBar
 			// translucent and overlying action bar theme set as default for this CaseDetailActivity in manifest XML
 //			super.onCreate_for_FAB(savedInstanceState);
-			super.onCreate(savedInstanceState, false, R.layout.toolbar_fading, true);
+//			super.onCreate(savedInstanceState, false, R.layout.toolbar_fading, true);
 
 			/*
 			// set back icon
@@ -130,15 +135,57 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 			//setTheme(R.style.MaterialTheme_Light);
 			//super.onCreate(savedInstanceState, false);
 
-
-			super.onCreate(savedInstanceState, false);
+			//setDrawerPosition(MaterialDrawerActivity.POS_CASE_LIST_DETAIL_NOIMAGE);
+	//		super.onCreate(savedInstanceState, false);
 
 		}
 
-		setDrawerPosition(NavigationDrawerActivity.POS_NONE);
+		imageCursor.close();
 
-		//super.onCreate(savedInstanceState);
-		//setContentView(R.layout.activity_case_detail);
+	//	setDrawerPosition(NavigationDrawerActivity.POS_NONE);
+
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_case_detail);
+
+		// set appropriate toolbar view
+		FrameLayout toolbarContainer = (FrameLayout) findViewById(R.id.toolbar_container);
+		if(toolbarContainer != null)
+		{
+			toolbarContainer.addView(getLayoutInflater().inflate(R.layout.toolbar_fading, null, false));
+
+		}
+		// set the toolbar layout element
+		mToolbar = (Toolbar) findViewById(R.id.toolbar);
+		if (mToolbar != null)
+		{
+			setSupportActionBar(mToolbar);
+			//toolbar.setElevation(4);
+			//getSupportActionBar().setElevation(10);
+		}
+
+		// show picture under transparent toolbar, ie no margin
+		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+				RelativeLayout.LayoutParams.WRAP_CONTENT,
+				RelativeLayout.LayoutParams.WRAP_CONTENT
+		);
+		params.setMargins(0, 0, 0, 0);
+		findViewById(R.id.container).setLayoutParams(params);
+
+		//mNavigationDrawerFragment.getDrawerListView().setPadding(0, 0, 0, UtilClass.getStatusBarHeight(this));
+
+
+
+		// toolbar title
+		mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
+		mTitle = new SpannableString(getTitle());
+		//	if((mTitle.subSequence(0,3)).toString().equals("RAD"))
+		{
+			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		}
+
+		// for ShowcaseView tutorial
+		mOverflowTarget = findViewById(R.id.overflow_menu_target);
 
 
 		// savedInstanceState is non-null when there is fragment state
@@ -1298,7 +1345,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 					//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 					UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
-
+/*
 					// set back icon
 					//getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
 
@@ -1329,32 +1376,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
 						}
 
-						/*
-						@Override
-						public void onDrawerSlide(View drawerView, float slideOffset)
-						{
-							super.onDrawerSlide(drawerView, slideOffset);
 
-							int baseColorDark = UtilClass.get_attr(getActivity(), R.attr.colorPrimaryDark);
-							int baseColor = UtilClass.get_attr(getActivity(), R.attr.colorPrimary);
-							int textColor = UtilClass.get_attr(getActivity(), R.attr.actionMenuTextColor);
-
-							if(slideOffset > toolbarAlpha)
-							{
-								mToolbar.setBackgroundColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColor));
-								mToolbar.setTitleTextColor(ScrollUtils.getColorWithAlpha(slideOffset, textColor));
-
-								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-								{
-									Window window = getWindow();
-									//window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-									//TODO fix if slideoffset > toolbarapha + minalpha
-									window.setStatusBarColor(ScrollUtils.getColorWithAlpha(slideOffset, baseColorDark));
-								}
-
-							}
-						}
-						*/
 
 					};
 
@@ -1371,7 +1393,7 @@ public class CaseDetailActivity extends NavigationDrawerActivity
 
 					mActivity.setDrawerListener(mDrawerToggle);
 
-
+*/
 					// image grid
 					imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);
 					imageGridView.setThumbnailPosition(thumbnail_pos);

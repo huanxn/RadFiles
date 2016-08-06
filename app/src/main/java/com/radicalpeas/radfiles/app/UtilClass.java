@@ -1597,7 +1597,7 @@ public class UtilClass extends Activity
 		}
 	}
 
-
+/*
 	public static void setMargins(View view, int left, int top, int right, int bottom)
 	{
 		android.support.v4.widget.DrawerLayout.LayoutParams params = new android.support.v4.widget.DrawerLayout.LayoutParams(
@@ -1606,4 +1606,6 @@ public class UtilClass extends Activity
 		params.setMargins(left, top, right, bottom);
 		view.setLayoutParams(params);
 	}
+*/
 }
+

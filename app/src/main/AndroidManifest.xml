@@ -126,6 +126,13 @@
 
         </activity>
 
+        <!-- material drawer test -->
+        <activity
+            android:name=".MaterialDrawerActivity"
+            android:label="Material Drawer"
+            android:theme="@style/MaterialDrawerTheme.Light.DarkToolbar">
+        </activity>
+
         <activity
             android:name="com.radicalpeas.radfiles.app.ImportExportActivity"
             android:label="@string/title_activity_import_export"
@@ -134,25 +141,25 @@
                            android:name="com.google.android.apps.drive.APP_ID"
                            android:value="id=895901757508" />
            -->
-                   </activity>
+        </activity>
 
-                   <activity
-                       android:name="com.radicalpeas.radfiles.app.NavigationDrawerActivity"
-                       android:label="@string/title_activity_navigation_drawer" >
-                   </activity>
+        <activity
+           android:name="com.radicalpeas.radfiles.app.NavigationDrawerActivity"
+           android:label="@string/title_activity_navigation_drawer" >
+        </activity>
 
-                   <activity
-                       android:name="com.radicalpeas.radfiles.app.SettingsActivity"
-                       android:label="@string/title_activity_settings" >
-                   </activity>
+        <activity
+           android:name="com.radicalpeas.radfiles.app.SettingsActivity"
+           android:label="@string/title_activity_settings" >
+        </activity>
 
-                   <activity
-                       android:name="com.radicalpeas.radfiles.app.ManageListsActivity"
-                       android:label="@string/title_activity_manage_lists"
-                       android:screenOrientation="portrait"
-                       android:theme="@style/MaterialTheme.Light">
-                   </activity>
+        <activity
+           android:name="com.radicalpeas.radfiles.app.ManageListsActivity"
+           android:label="@string/title_activity_manage_lists"
+           android:screenOrientation="portrait"
+           android:theme="@style/MaterialTheme.Light">
+        </activity>
 
-               </application>
+    </application>
 
-           </manifest>
+</manifest>

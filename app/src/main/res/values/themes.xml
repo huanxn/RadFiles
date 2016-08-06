@@ -1,6 +1,5 @@
 <resources>
 
-    <!-- extend one of the Theme.AppCompat themes -->
     <style name="MaterialTheme.Light" parent="MaterialTheme.Light.Base"/>
     <style name="MaterialTheme.Light.Base" parent="Theme.AppCompat.Light.DarkActionBar">
 

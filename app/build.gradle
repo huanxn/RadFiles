@@ -1,5 +1,9 @@
 apply plugin: 'com.android.application'
-//apply plugin: 'android-apt'
+apply plugin: 'android-apt'
+
+project.ext.buildtools = '24.0.1'
+project.ext.firebase_version = '9.4.0'
+project.ext.support_library_version = '24.1.1'
 
 android {
     signingConfigs {
@@ -11,13 +15,13 @@ android {
         }
     }
     compileSdkVersion 24
-    buildToolsVersion '24.0.1'
+    buildToolsVersion "${project.ext.buildtools}"
     defaultConfig {
         applicationId "com.radicalpeas.radfiles.app"
         minSdkVersion 17
         targetSdkVersion 24
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "alpha 0.1"
         signingConfig signingConfigs.config
     }
     buildTypes {
@@ -37,12 +41,13 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:support-v13:24.+'
-    compile 'com.android.support:support-v4:24.+'
-    compile 'com.android.support:appcompat-v7:24.+'
-    compile 'com.android.support:cardview-v7:24.+'
-    compile 'com.android.support:recyclerview-v7:24.+'
-    compile 'com.google.android.gms:play-services:9.4.0'
+    compile "com.android.support:support-v13:${project.ext.support_library_version}"
+    compile "com.android.support:support-v4:${project.ext.support_library_version}"
+    compile "com.android.support:appcompat-v7:${project.ext.support_library_version}"
+    compile "com.android.support:cardview-v7:${project.ext.support_library_version}"
+    compile "com.android.support:recyclerview-v7:${project.ext.support_library_version}"
+
+
 
     //compile 'com.timehop.stickyheadersrecyclerview:library:0.3.6@aar' //buggy
 
@@ -54,11 +59,11 @@ dependencies {
     // for parallax view fading toolbar
     compile 'com.github.ksoichiro:android-observablescrollview:1.4.0'
 
-
-    compile 'com.github.amlcurran.showcaseview:library:5.4.3' //5.4.3
     //ShowCaseView tutorials
     /*compile ('com.github.worker8:tourguide:1.0.12-SNAPSHOT@aar')    //TourGuide tutorials
                         {transitive=true}*/
+    compile 'com.github.amlcurran.showcaseview:library:5.4.3' //5.4.3
+
 
     // ViewPager Indicator for gallery view
     // https://github.com/JakeWharton/ViewPagerIndicator
@@ -69,18 +74,18 @@ dependencies {
     // For SlidingTabStrip in Manage Lists
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
 
-
-    compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'
     // Roboto Text font in toolbar title, etc
+    compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'
 
-    compile 'com.nispok:snackbar:2.9.0'
     //snack bar better?  can't compile
+    compile 'com.nispok:snackbar:2.9.0'
 
-    compile 'com.github.navasmdc:MaterialDesign:1.+@aar'
     // snack bar no good, progress bar
+    // compile 'com.github.navasmdc:MaterialDesign:1.+@aar'  // no good because ripple color defined in another library
+    compile 'com.github.vajro:MaterialDesignLibrary:1.6'
 
-    compile 'com.nineoldandroids:library:2.4.0'
     // gradle error?  need for MaterialDesignLibrary indeterminate progress bar
+    compile 'com.nineoldandroids:library:2.4.0'
 
     // SQL Cipher for database encryption
     compile 'net.zetetic:android-database-sqlcipher:3.5.2@aar'
@@ -89,18 +94,34 @@ dependencies {
     // https://github.com/ArthurHub/Android-Image-Cropper
     compile 'com.theartofdev.edmodo:android-image-cropper:2.2.+'
 
+    // navigation drawer
+    // https://github.com/mikepenz/MaterialDrawer
+    compile('com.mikepenz:materialdrawer:5.3.6@aar'){transitive=true}
+    // https://github.com/mikepenz/Android-Iconics
+    compile "com.mikepenz:iconics-core:2.7.2@aar"
+    compile 'com.mikepenz:google-material-typeface:2.2.0.1@aar'
+    compile 'com.mikepenz:fontawesome-typeface:4.6.0.3@aar'
+ //   compile 'com.mikepenz:octicons-typeface:3.0.0.1@aar'
+
+    // used to generate the Open Source section
+    // https://github.com/mikepenz/AboutLibraries
+ //   compile('com.mikepenz:aboutlibraries:5.7.1@aar') {        transitive = true        exclude module: "fastadapter"    }
+    //used to provide different itemAnimators for the RecyclerView
+    //https://github.com/mikepenz/ItemAnimators
+    compile 'com.mikepenz:itemanimators:0.2.4@aar'
+
     // Butterknife
- //   compile 'com.jakewharton:butterknife:8.2.1'
- //   apt 'com.jakewharton:butterknife-compiler:8.2.1'
+    compile 'com.jakewharton:butterknife:8.2.1'
+    apt 'com.jakewharton:butterknife-compiler:8.2.1'
 
 
     // firebase
- //   compile 'com.google.firebase:firebase-core:9.4.0'
-  //  compile 'com.firebaseui:firebase-ui-auth:0.4.4' //contains compile 'com.google.firebase:firebase-auth:9.4.0'
-  //  compile 'com.google.firebase:firebase-database:9.4.0'
-  //  compile 'com.google.firebase:firebase-storage:9.4.0'
+    compile "com.google.android.gms:play-services:${project.ext.firebase_version}"
+    //compile "com.google.firebase:firebase-core:${project.ext.firebase_version}"
+    //compile 'com.firebaseui:firebase-ui-auth:0.4.4' //contains compile 'com.google.firebase:firebase-auth:9.4.0'
+    //compile "com.google.firebase:firebase-database:${project.ext.firebase_version}"
+    //compile "com.google.firebase:firebase-storage:${project.ext.firebase_version}"
 
-//    compile 'com.google.android.gms:play-services-auth:9.4.0'
 
 }
 

@@ -242,6 +242,10 @@ public class NavigationDrawerActivity extends AppCompatActivity
 
 				//setDrawerPosition(POS_CASE_LIST);
 
+				// todo delete this
+				// test
+				intent = new Intent(this, MaterialDrawerActivity.class);
+
 				////
 				break;
 			}

@@ -59,7 +59,7 @@ import java.util.List;
 /**
  * Created by Huan on 6/12/2014.
  */
-public class CaseCardListActivity extends NavigationDrawerActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener
+public class CaseCardListActivity extends MaterialDrawerActivity implements SearchView.OnQueryTextListener, SearchView.OnCloseListener
 {
 	private static String TAG = "CaseCardList Activity";
 	private static Activity activity;
@@ -125,9 +125,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		setDrawerPosition(MaterialDrawerActivity.POS_CASE_LIST_ALL);
+		super.onCreate(savedInstanceState);
+
 		//super.onCreate(savedInstanceState, true);
-		super.onCreate(savedInstanceState, R.layout.toolbar_spinner);
-//		setContentView(R.layout.activity_case_cardlist);
+
+	//	super.onCreate(savedInstanceState, R.layout.toolbar_spinner);
+
+//		setContentView(R.layout.activity_case_cardlist);	// done in fragment
 
 		activity = this;
 
@@ -135,8 +140,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 		appDir = getExternalFilesDir(null);
 		dataDir = Environment.getDataDirectory();
-
-		setDrawerPosition(NavigationDrawerActivity.POS_CASE_LIST);
 
 		// lollipop transitions
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
@@ -174,8 +177,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		}
 		else
 		{
-
-
 			// set the saved filter/spinner state
 			/*
 				UtilClass.showMessage(this, "DEBUG: state: " + savedInstanceState.toString());
@@ -193,41 +194,6 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 					.commit();
 		}
 
-		/* //done in nav drawer class
-		SpannableString mTitle = new SpannableString("RAD Cases");
-		mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		*/
-
-
-		/*
-		// Set up the Action Bar dropdown spinner list
-		// used for sorting the cases per user selected criteria
-		//String [] listArray = getResources().getStringArray(R.array.actionbar_sort_list);
-		SpinnerActionBar actionbarSpinnerAdapter = new SpinnerActionBar(getSupportActionBar().getThemedContext(), R.layout.spinner_toolbar, mTitle, getResources().getStringArray(R.array.actionbar_sort_list));
-		//((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		((ArrayAdapter) actionbarSpinnerAdapter).setDropDownViewResource(R.layout.spinner_popup);
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setDisplayShowTitleEnabled(false);
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-		actionBar.setListNavigationCallbacks(actionbarSpinnerAdapter, new android.support.v7.app.ActionBar.OnNavigationListener()
-		{
-			//String[] strings = getResources().getStringArray(R.array.action_list);
-
-			@Override
-			public boolean onNavigationItemSelected(int itemPosition, long itemId)
-			{
-				// when item position changes, then repopulate cards using the new criteria
-				caseFilterMode = itemPosition;
-
-				if(fragment != null)
-					fragment.new PopulateCardsTask().execute();
-
-				return false;
-			}
-		});
-
-*/
 
 		getSupportActionBar().setDisplayShowTitleEnabled(false);
 		Spinner caseFilterSpinner = (Spinner) mToolbar.findViewById(R.id.case_filter_spinner);
@@ -290,12 +256,14 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 		searchText.setHint(getResources().getString(R.string.search_prompt));
 		searchText.setHintTextColor(getResources().getColor(R.color.text_light_hint));
 
+		/*
 		// hide spinner if drawer is open
 		if (mNavigationDrawerFragment.isDrawerOpen())
 		{
 			mToolbar.findViewById(R.id.case_filter_spinner).setVisibility(View.GONE);
 			return true;
 		}
+		*/
 
 
 		return super.onCreateOptionsMenu(menu);
@@ -338,7 +306,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 			case R.id.menu_search:
 				// TODO check this onSearchRequested
 				//onSearchRequested();
-				restoreActionBar();
+	//			restoreActionBar();
 				return true;
 
 			case R.id.menu_addnew:
@@ -400,7 +368,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 	 * Set up / Restore the spinner action bar after navigation drawer is closed
 	 * override to use NAVIGATION_MODE_LIST instead of NAVIGATION_MODE_STANDARD
 	 */
-	@Override
+/*	@Override
 	public void restoreActionBar()
 	{
 		ActionBar actionBar = getSupportActionBar();
@@ -408,7 +376,7 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 //		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
 		mToolbar.findViewById(R.id.case_filter_spinner).setVisibility(View.VISIBLE);
 	}
-
+*/
 
 	/**
 	 * Save state of the action bar spinner
@@ -950,7 +918,11 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				}
 			});
 
-
+//test
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+			{
+				mActivity.getWindow().setStatusBarColor(0);
+			}
 			return rootView;
 		}
 
@@ -1262,6 +1234,10 @@ public class CaseCardListActivity extends NavigationDrawerActivity implements Se
 				mCardAdapter.setHeaderList(headerList);
 
 				case_cursor.close();
+				for(int i = 0; i < case_cursor_array.length; i++)
+				{
+					case_cursor_array[i].close();
+				}
 
 				return null;
 			}
