@@ -99,7 +99,7 @@ dependencies {
     compile('com.mikepenz:materialdrawer:5.3.6@aar'){transitive=true}
     // https://github.com/mikepenz/Android-Iconics
     compile "com.mikepenz:iconics-core:2.7.2@aar"
-    compile 'com.mikepenz:google-material-typeface:2.2.0.1@aar'
+    compile 'com.mikepenz:google-material-typeface:2.2.0.3.original@aar'
     compile 'com.mikepenz:fontawesome-typeface:4.6.0.3@aar'
  //   compile 'com.mikepenz:octicons-typeface:3.0.0.1@aar'
 

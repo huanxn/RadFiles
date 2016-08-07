@@ -31,7 +31,8 @@
             android:layout_height="match_parent"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
-            android:src="@drawable/ic_menu_grey600_18dp"/>
+        />
+        <!--android:src="@drawable/ic_drag_handle_black_18dp"/> set in adapter code-->
 
     </LinearLayout>
 </FrameLayout>

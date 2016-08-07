@@ -22,6 +22,8 @@ public class SpinnerActionBar extends ArrayAdapter<String>
 	private SpannableString mTitle;
 	private String[] listItems;
 
+	private ViewHolder holder;
+
 	public SpinnerActionBar(Context context, int textViewResourceId, SpannableString title,
 	                        String[] objects) {
 		super(context, textViewResourceId, objects);
@@ -67,7 +69,6 @@ public class SpinnerActionBar extends ArrayAdapter<String>
 		LayoutInflater inflater =
 				( LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		ViewHolder holder;
 
 		if (convertView == null) {
 			convertView = inflater.inflate(R.layout.spinner_toolbar, null);
@@ -87,6 +88,12 @@ public class SpinnerActionBar extends ArrayAdapter<String>
 		holder.txt02.setText(listItems[position]);
 
 		return convertView;
+	}
+
+	public void setTitle(SpannableString title)
+	{
+		mTitle = title;
+		holder.txt01.setText(mTitle);
 	}
 
 	class ViewHolder {

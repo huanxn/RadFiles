@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -21,6 +22,8 @@ import com.h6ah4i.android.widget.advrecyclerview.draggable.DraggableItemAdapter;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.ItemDraggableRange;
 import com.h6ah4i.android.widget.advrecyclerview.draggable.RecyclerViewDragDropManager;
 import com.h6ah4i.android.widget.advrecyclerview.utils.AbstractDraggableSwipeableItemViewHolder;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,14 +114,23 @@ public class ManageListsAdapter
 		//if(holder.mTextView.equals(ADD_CUSTOM_TEXT))
 		if(position >= itemList.size()-1)
 		{
+			// last "Add new" item, change icon to 'plus sign'
 			//holder.mHandle.setImageDrawable(activity.getDrawable(R.drawable.ic_plus_circle_grey600_18dp));
-			holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.radicalpeas.radcases.app:drawable/ic_plus_circle_grey600_18dp", null, null));
+			//holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.radicalpeas.radcases.app:drawable/ic_plus_circle_grey600_18dp", null, null));
+			holder.mHandle.setImageDrawable(new IconicsDrawable(activity)
+					.icon(GoogleMaterial.Icon.gmd_add_circle)
+					.color(Color.GRAY)
+					.sizeDp(18));
 
 			lastViewHolder = holder;
 		}
 		else
 		{
-			holder.mHandle.setImageResource(activity.getResources().getIdentifier("com.radicalpeas.radcases.app:drawable/ic_menu_grey600_18dp", null, null));
+			//mHandle icon set in xml layout
+			holder.mHandle.setImageDrawable(new IconicsDrawable(activity)
+					.icon(GoogleMaterial.Icon.gmd_drag_handle)
+					.color(Color.GRAY)
+					.sizeDp(18));
 		}
 
 		// set background resource (target view ID: container)

@@ -120,12 +120,6 @@ public class CaseDetailActivity extends AppCompatActivity
 //			super.onCreate_for_FAB(savedInstanceState);
 //			super.onCreate(savedInstanceState, false, R.layout.toolbar_fading, true);
 
-			/*
-			// set back icon
-			getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
-			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-			getSupportActionBar().setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-			*/
 		}
 		else
 		{
@@ -135,14 +129,12 @@ public class CaseDetailActivity extends AppCompatActivity
 			//setTheme(R.style.MaterialTheme_Light);
 			//super.onCreate(savedInstanceState, false);
 
-			//setDrawerPosition(MaterialDrawerActivity.POS_CASE_LIST_DETAIL_NOIMAGE);
+			//setDrawerPosition(NavDrawerActivity.POS_CASE_LIST_DETAIL_NOIMAGE);
 	//		super.onCreate(savedInstanceState, false);
 
 		}
 
 		imageCursor.close();
-
-	//	setDrawerPosition(NavigationDrawerActivity.POS_NONE);
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_case_detail);
@@ -152,15 +144,14 @@ public class CaseDetailActivity extends AppCompatActivity
 		if(toolbarContainer != null)
 		{
 			toolbarContainer.addView(getLayoutInflater().inflate(R.layout.toolbar_fading, null, false));
-
 		}
 		// set the toolbar layout element
 		mToolbar = (Toolbar) findViewById(R.id.toolbar);
 		if (mToolbar != null)
 		{
 			setSupportActionBar(mToolbar);
-			//toolbar.setElevation(4);
-			//getSupportActionBar().setElevation(10);
+			getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 		}
 
 		// show picture under transparent toolbar, ie no margin
@@ -171,18 +162,11 @@ public class CaseDetailActivity extends AppCompatActivity
 		params.setMargins(0, 0, 0, 0);
 		findViewById(R.id.container).setLayoutParams(params);
 
-		//mNavigationDrawerFragment.getDrawerListView().setPadding(0, 0, 0, UtilClass.getStatusBarHeight(this));
-
-
-
 		// toolbar title
 		mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
 		mTitle = new SpannableString(getTitle());
-		//	if((mTitle.subSequence(0,3)).toString().equals("RAD"))
-		{
-			mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-			mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-		}
+		mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
 		// for ShowcaseView tutorial
 		mOverflowTarget = findViewById(R.id.overflow_menu_target);
@@ -1345,10 +1329,10 @@ public class CaseDetailActivity extends AppCompatActivity
 					//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 					UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 
-/*
-					// set back icon
-					//getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
 
+					// set back icon (doesn't work)
+			//		mActivity.getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
+/*
 					// fading toolbar with drawer open
 					// ActionBarDrawerToggle ties together the the proper interactions between the navigation drawer and the action bar app icon.
 					final ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(

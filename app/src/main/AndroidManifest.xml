@@ -126,12 +126,7 @@
 
         </activity>
 
-        <!-- material drawer test -->
-        <activity
-            android:name=".MaterialDrawerActivity"
-            android:label="Material Drawer"
-            android:theme="@style/MaterialDrawerTheme.Light.DarkToolbar">
-        </activity>
+
 
         <activity
             android:name="com.radicalpeas.radfiles.app.ImportExportActivity"

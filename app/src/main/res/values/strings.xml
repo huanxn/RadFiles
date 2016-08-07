@@ -67,7 +67,7 @@
     <string name="add_star">Add Star</string>
     <string name="action_clear_cache">Clear cache</string>
 
-    <string name="navigation_drawer_item_cases_header">INTERESTING CASES</string>
+    <string name="navigation_drawer_item_cases_header">RAD FILES</string>
     <string name="navigation_drawer_item_cases_all">All Cases</string>
     <string name="navigation_drawer_item_cases_fav">Favorites</string>
     <string name="navigation_drawer_item_cases_section">Sections</string>

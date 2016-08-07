@@ -3,8 +3,10 @@ package com.radicalpeas.radfiles.app;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
@@ -39,19 +41,22 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 /**
  * Created by huanx on 8/5/2016.
  */
-public class MaterialDrawerActivity extends AppCompatActivity
+public class NavDrawerActivity extends AppCompatActivity
 {
     private static final int PROFILE_SETTING = 100000;
 
     final static protected int POS_CASE_LIST_ALL = 1;
     final static protected int POS_CASE_LIST_FAV = 2;
     final static protected int POS_CASE_LIST_SECTION = 3;
+    final static protected int POS_CASE_LIST_SUBSECTION = 300;
     final static protected int POS_CASE_LIST_DETAIL_IMAGE = 41;
     final static protected int POS_CASE_LIST_DETAIL_NOIMAGE = 42;
     final static protected int POS_CLOUD_STORAGE = 5;
@@ -75,44 +80,33 @@ public class MaterialDrawerActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_material_drawer);
+        setContentView(R.layout.activity_nav_drawer);
 
         // Handle Toolbar
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
-
-        boolean showDrawerIndicator;
         int toolbar_layout;
         boolean isTransparentToolbar;
 
         if(drawerPosition == POS_CASE_LIST_ALL)
         {
-            showDrawerIndicator = true;
             toolbar_layout = R.layout.toolbar_spinner;
             isTransparentToolbar = false;
         }
         else if(drawerPosition == POS_CASE_LIST_DETAIL_IMAGE)
         {
-            showDrawerIndicator = false;
             toolbar_layout = R.layout.toolbar_fading;
             isTransparentToolbar = true;
         }
         else if(drawerPosition == POS_CASE_LIST_DETAIL_NOIMAGE)
         {
-            showDrawerIndicator = false;
             toolbar_layout = R.layout.toolbar_default;
             isTransparentToolbar = false;
         }
         else
         {
-            showDrawerIndicator = true;
             toolbar_layout = R.layout.toolbar_default;
             isTransparentToolbar = false;
 
         }
-
-        //setContentView(R.layout.activity_navigation_drawer_fab);
 
         // set appropriate toolbar view
         FrameLayout toolbarContainer = (FrameLayout) findViewById(R.id.toolbar_container);
@@ -122,15 +116,22 @@ public class MaterialDrawerActivity extends AppCompatActivity
 
         }
 
+
+
         // set the toolbar layout element
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar != null)
         {
             setSupportActionBar(mToolbar);
-            //toolbar.setElevation(4);
-            //getSupportActionBar().setElevation(10);
-        }
 
+            // toolbar title
+            mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
+            mTitle = new SpannableString(getTitle());
+            mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            getSupportActionBar().setTitle(mTitle);
+        }
 
         // transparent toolbar
         if(isTransparentToolbar)
@@ -143,16 +144,6 @@ public class MaterialDrawerActivity extends AppCompatActivity
             params.setMargins(0, 0, 0, 0);
             findViewById(R.id.container).setLayoutParams(params);
 
-        }
-
-
-        // toolbar title
-        mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
-        mTitle = new SpannableString(getTitle());
-        //	if((mTitle.subSequence(0,3)).toString().equals("RAD"))
-        {
-            mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            mTitle.setSpan(new TypefaceSpan(this, "RobotoCondensed-Bold.ttf"), "RAD".length(), mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         // for ShowcaseView tutorial
@@ -174,7 +165,7 @@ public class MaterialDrawerActivity extends AppCompatActivity
                         profile2,
 
                         //don't ask but google uses 14dp for the add account icon in gmail but 20dp for the normal icons (like manage account)
-                        new ProfileSettingDrawerItem().withName("Add Account").withDescription("Add new account").withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_plus).actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text)).withIdentifier(PROFILE_SETTING),
+                        new ProfileSettingDrawerItem().withName("Add Account").withDescription("Add new account").withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add).actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text)).withIdentifier(PROFILE_SETTING),
                         new ProfileSettingDrawerItem().withName("Manage Account").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(100001)
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
@@ -212,6 +203,26 @@ public class MaterialDrawerActivity extends AppCompatActivity
                 .withSavedInstance(savedInstanceState)
                 .build();
 
+        // get cursor of "Radiology Section List", in order determined by user list preferences
+        Cursor section_cursor = getBaseContext().getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+
+        List<IDrawerItem> sectionList = new ArrayList<IDrawerItem>();
+
+        if(section_cursor.moveToFirst())
+        {
+            int i = 0;  // section/group counter
+
+            do
+            {
+                // get the KEY_SECTION name
+                String mSection = section_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE);
+                sectionList.add(new SecondaryDrawerItem().withName(mSection).withLevel(2).withIcon(FontAwesome.Icon.faw_minus).withIdentifier(POS_CASE_LIST_SUBSECTION + i));
+
+                i = i + 1;
+            } while (section_cursor.moveToNext());
+        }
+        section_cursor.close();
+
         //Create the drawer
         drawerResult = new DrawerBuilder()
                 .withActivity(this)
@@ -225,10 +236,7 @@ public class MaterialDrawerActivity extends AppCompatActivity
                         new PrimaryDrawerItem().withName(R.string.navigation_drawer_item_cases_all).withIcon(FontAwesome.Icon.faw_book).withIdentifier(POS_CASE_LIST_ALL).withSelectable(false),
                         new PrimaryDrawerItem().withName(R.string.navigation_drawer_item_cases_fav).withIcon(GoogleMaterial.Icon.gmd_favorite).withIdentifier(POS_CASE_LIST_FAV).withSelectable(false),
 
-                        new ExpandableDrawerItem().withName(R.string.navigation_drawer_item_cases_section).withIcon(FontAwesome.Icon.faw_folder_open).withIdentifier(POS_CASE_LIST_SECTION).withSelectable(false).withSubItems(
-                                new SecondaryDrawerItem().withName("CollapsableItem").withLevel(2).withIcon(GoogleMaterial.Icon.gmd_8tracks).withIdentifier(2000),
-                                new SecondaryDrawerItem().withName("CollapsableItem 2").withLevel(2).withIcon(GoogleMaterial.Icon.gmd_8tracks).withIdentifier(2001)
-                        ),
+                        new ExpandableDrawerItem().withName(R.string.navigation_drawer_item_cases_section).withIcon(FontAwesome.Icon.faw_folder_open).withIdentifier(POS_CASE_LIST_SECTION).withSelectable(false).withSubItems(sectionList),
 
                         new DividerDrawerItem(),
 
@@ -262,19 +270,29 @@ public class MaterialDrawerActivity extends AppCompatActivity
                             }
                             else if (drawerItem.getIdentifier() == POS_CASE_LIST_ALL)
                             {
-                                intent = new Intent(MaterialDrawerActivity.this, CaseCardListActivity.class);
+                                intent = new Intent(NavDrawerActivity.this, CaseCardListActivity.class);
+                            }
+                            else if (drawerItem.getIdentifier() == POS_CASE_LIST_FAV)
+                            {
+                                intent = new Intent(NavDrawerActivity.this, CaseCardListActivity.class);
+                                intent.putExtra(CaseCardListActivity.ARG_CASE_SUBSET, drawerItem.getIdentifier());
+                            }
+                            else if(drawerItem.getIdentifier() >= POS_CASE_LIST_SUBSECTION)
+                            {
+                                intent = new Intent(NavDrawerActivity.this, CaseCardListActivity.class);
+                                intent.putExtra(CaseCardListActivity.ARG_CASE_SUBSET, drawerItem.getIdentifier());
                             }
                             else if (drawerItem.getIdentifier() == POS_CLOUD_STORAGE)
                             {
-                                intent = new Intent(MaterialDrawerActivity.this, ImportExportActivity.class);
+                                intent = new Intent(NavDrawerActivity.this, ImportExportActivity.class);
                             }
                             else if (drawerItem.getIdentifier() == POS_MANAGE_LISTS)
                             {
-                                intent = new Intent(MaterialDrawerActivity.this, ManageListsActivity.class);
+                                intent = new Intent(NavDrawerActivity.this, ManageListsActivity.class);
                             }
                             else if (drawerItem.getIdentifier() == POS_SETTINGS)
                             {
-                                intent = new Intent(MaterialDrawerActivity.this, SettingsActivity.class);
+                                intent = new Intent(NavDrawerActivity.this, SettingsActivity.class);
                             }
                             else if (drawerItem.getIdentifier() == POS_ABOUT)
                             {
@@ -290,7 +308,7 @@ public class MaterialDrawerActivity extends AppCompatActivity
                                     buildDate = SimpleDateFormat.getInstance().format(new java.util.Date(time));
                                     zf.close();
 
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(MaterialDrawerActivity.this);
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(NavDrawerActivity.this);
                                     builder.setTitle("RadFiles");
                                     builder.setMessage("Developed by Huan T. Nguyen\n\nBuild date: " + buildDate);
                                     AlertDialog alert = builder.create();
@@ -299,30 +317,41 @@ public class MaterialDrawerActivity extends AppCompatActivity
                                 }
                                 catch(Exception e)
                                 {
-                                    UtilClass.showMessage(MaterialDrawerActivity.this, e.getMessage());
+                                    UtilClass.showMessage(NavDrawerActivity.this, e.getMessage());
                                 }
 
                             }
 
+
                             if (intent != null)
                             {
                                 drawerResult.closeDrawer();
-                                MaterialDrawerActivity.this.startActivity(intent);
+                               // NavDrawerActivity.this.startActivity(intent);
 
+                               // delay opening next activity to avoid stuttering
+                                final Intent navigationIntent = intent;
+                                new Handler().postDelayed(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        startActivity(navigationIntent);
+                                    }
+
+                                },200);
                             }
-
                         }
 
-
-
                         return false;
-
                     }
 
                 })
                 .withSavedInstance(savedInstanceState)
                 .withShowDrawerOnFirstLaunch(true)
                 .build();
+
+
+        //drawerResult.addItemAtPosition(new SecondaryDrawerItem().withName("test insert 5").withLevel(2).withIcon(GoogleMaterial.Icon.gmd_8tracks).withIdentifier(2000), 5);
 
         //if you have many different types of DrawerItems you can magically pre-cache those items to get a better scroll performance
         //make sure to init the cache after the DrawerBuilder was created as this will first clear the cache to make sure no old elements are in
@@ -344,7 +373,6 @@ public class MaterialDrawerActivity extends AppCompatActivity
     public void setDrawerPosition(int position)
     {
         drawerPosition = position;
-        //mNavigationDrawerFragment.setDrawerPosition(position);
     }
 
     private OnCheckedChangeListener onCheckedChangeListener = new OnCheckedChangeListener()
