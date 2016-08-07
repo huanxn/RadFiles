@@ -55,14 +55,15 @@ public class NavDrawerActivity extends AppCompatActivity
 
     final static protected int POS_CASE_LIST_ALL = 1;
     final static protected int POS_CASE_LIST_FAV = 2;
-    final static protected int POS_CASE_LIST_SECTION = 3;
-    final static protected int POS_CASE_LIST_SUBSECTION = 300;
-    final static protected int POS_CASE_LIST_DETAIL_IMAGE = 41;
-    final static protected int POS_CASE_LIST_DETAIL_NOIMAGE = 42;
-    final static protected int POS_CLOUD_STORAGE = 5;
-    final static protected int POS_MANAGE_LISTS = 6;
-    final static protected int POS_SETTINGS = 7;
-    final static protected int POS_ABOUT = 8;
+    final static protected int POS_CASE_LIST_FOLLOWUP = 3;
+    final static protected int POS_CASE_LIST_SECTION = 4;
+    final static protected int POS_CASE_LIST_SUBSECTION = 400;
+    final static protected int POS_CASE_LIST_DETAIL_IMAGE = 51;
+    final static protected int POS_CASE_LIST_DETAIL_NOIMAGE = 52;
+    final static protected int POS_CLOUD_STORAGE = 6;
+    final static protected int POS_MANAGE_LISTS = 7;
+    final static protected int POS_SETTINGS = 8;
+    final static protected int POS_ABOUT = 9;
     final static protected int POS_NONE = -1;
 
     static protected int drawerPosition = POS_NONE;    // later set by inherited class to remember its position and determine onCreate parameters
@@ -234,9 +235,10 @@ public class NavDrawerActivity extends AppCompatActivity
                         new SectionDrawerItem().withName(R.string.navigation_drawer_item_cases_header),
 
                         new PrimaryDrawerItem().withName(R.string.navigation_drawer_item_cases_all).withIcon(FontAwesome.Icon.faw_book).withIdentifier(POS_CASE_LIST_ALL).withSelectable(false),
-                        new PrimaryDrawerItem().withName(R.string.navigation_drawer_item_cases_fav).withIcon(GoogleMaterial.Icon.gmd_favorite).withIdentifier(POS_CASE_LIST_FAV).withSelectable(false),
 
                         new ExpandableDrawerItem().withName(R.string.navigation_drawer_item_cases_section).withIcon(FontAwesome.Icon.faw_folder_open).withIdentifier(POS_CASE_LIST_SECTION).withSelectable(false).withSubItems(sectionList),
+                        new PrimaryDrawerItem().withName(R.string.navigation_drawer_item_cases_fav).withIcon(GoogleMaterial.Icon.gmd_favorite).withIdentifier(POS_CASE_LIST_FAV).withSelectable(false),
+                        new PrimaryDrawerItem().withName(R.string.navigation_drawer_item_cases_followup).withIcon(GoogleMaterial.Icon.gmd_flag).withIdentifier(POS_CASE_LIST_FOLLOWUP).withSelectable(false),
 
                         new DividerDrawerItem(),
 
@@ -273,6 +275,11 @@ public class NavDrawerActivity extends AppCompatActivity
                                 intent = new Intent(NavDrawerActivity.this, CaseCardListActivity.class);
                             }
                             else if (drawerItem.getIdentifier() == POS_CASE_LIST_FAV)
+                            {
+                                intent = new Intent(NavDrawerActivity.this, CaseCardListActivity.class);
+                                intent.putExtra(CaseCardListActivity.ARG_CASE_SUBSET, drawerItem.getIdentifier());
+                            }
+                            else if (drawerItem.getIdentifier() == POS_CASE_LIST_FOLLOWUP)
                             {
                                 intent = new Intent(NavDrawerActivity.this, CaseCardListActivity.class);
                                 intent.putExtra(CaseCardListActivity.ARG_CASE_SUBSET, drawerItem.getIdentifier());

@@ -17,13 +17,13 @@
     <string name="action_help">Help</string>
 
     <!-- Activity Titles -->
-    <string name="title_activity_search">Search</string>
-    <string name="title_case_detail">Case Detail</string>
-    <string name="title_activity_add_case">Add Case</string>
-    <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
-    <string name="title_activity_edit_case">Edit Case</string>
-    <string name="title_activity_import_export">RAD Import &amp; Export</string>
     <string name="title_activity_case_card_list">RAD Files</string>
+    <string name="title_activity_search">Search</string>
+    <string name="title_case_detail">RAD Files</string>
+    <string name="title_activity_add_case">Add Case</string>
+    <string name="title_activity_edit_case">Edit Case</string>
+    <string name="title_activity_date_picker_fragment">DatePickerFragment</string>
+    <string name="title_activity_import_export">RAD Import &amp; Export</string>
     <string name="title_activity_manage_lists">RAD Lists</string>
     <string name="title_activity_case_import">RAD Import</string>
 
@@ -52,8 +52,6 @@
         <item>Study Date</item>
         <item>Modality</item>
         <item>Key Words</item>
-        <item>Follow Up</item>
-        <item>Favorites</item>
     </string-array>
 
     <!-- Searchview prompt -->
@@ -63,13 +61,15 @@
     <string name="title_activity_navigation_drawer">NavigationDrawerActivity</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="remove_star">Remove Star</string>
-    <string name="add_star">Add Star</string>
+
+    <string name="unlike">Unlike</string>
+    <string name="like">Like</string>
     <string name="action_clear_cache">Clear cache</string>
 
     <string name="navigation_drawer_item_cases_header">RAD FILES</string>
     <string name="navigation_drawer_item_cases_all">All Cases</string>
     <string name="navigation_drawer_item_cases_fav">Favorites</string>
+    <string name="navigation_drawer_item_cases_followup">Follow Up</string>
     <string name="navigation_drawer_item_cases_section">Sections</string>
     <string name="navigation_drawer_item_import_export">Import &amp; Export</string>
     <string name="navigation_drawer_item_lists">Manage Lists</string>

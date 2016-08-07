@@ -74,8 +74,8 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 	private static final int FILTER_STUDYDATE = 2;
 	private static final int FILTER_MODALITY = 3;
 	private static final int FILTER_KEYWORDS = 4;
-	private static final int FILTER_FOLLOWUP = 5;
-	private static final int FILTER_FAVORITE = 6;
+//	private static final int FILTER_FOLLOWUP = 5;
+//	private static final int FILTER_FAVORITE = 6;
 
 	private static final List<Long> filterGroupCollapsedList = new ArrayList<Long>();
 
@@ -136,7 +136,6 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 		setDrawerPosition(NavDrawerActivity.POS_CASE_LIST_ALL);
 		super.onCreate(savedInstanceState);
 
-		//super.onCreate(savedInstanceState, true);
 
 	//	super.onCreate(savedInstanceState, R.layout.toolbar_spinner);
 
@@ -149,13 +148,18 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 		if(intent.hasExtra(ARG_CASE_SUBSET))
 		{
 			case_subset = intent.getLongExtra(ARG_CASE_SUBSET, NavDrawerActivity.POS_CASE_LIST_ALL);
+			setDrawerPosition((int)case_subset);
 
 			// change title of spinner to reflect subset
 			if(case_subset == POS_CASE_LIST_FAV)
 			{
 				mTitle = new SpannableString(getResources().getString(R.string.navigation_drawer_item_cases_fav));
 				mTitle.setSpan(new TypefaceSpan(this, "Roboto-Bold.ttf"), 0, mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
+			}
+			else if(case_subset == POS_CASE_LIST_FOLLOWUP)
+			{
+				mTitle = new SpannableString(getResources().getString(R.string.navigation_drawer_item_cases_followup));
+				mTitle.setSpan(new TypefaceSpan(this, "Roboto-Bold.ttf"), 0, mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 			}
 			else if(case_subset >= POS_CASE_LIST_SUBSECTION)
 			{
@@ -168,8 +172,6 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 
 				subsection_cursor.close();
 			}
-
-			setDrawerPosition(NavDrawerActivity.POS_CASE_LIST_SECTION);
 		}
 		else
 		{
@@ -213,7 +215,6 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, fragment)
 					.commit();
-
 		}
 		else
 		{
@@ -1027,16 +1028,21 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				if(case_subset == NavDrawerActivity.POS_CASE_LIST_FAV)
 				{
 					subset_query_string = new String(CasesProvider.KEY_FAVORITE + " = '1'");
-					subset_query_string_and = new String(CasesProvider.KEY_FAVORITE + " = '1' AND ");
-
+					subset_query_string_and = subset_query_string + " AND ";
+				}
+				else if(case_subset == NavDrawerActivity.POS_CASE_LIST_FOLLOWUP)
+				{
+					subset_query_string = new String(CasesProvider.KEY_FOLLOWUP + " = '1'");
+					subset_query_string_and = subset_query_string + " AND ";
 				}
 				else if(case_subset >= NavDrawerActivity.POS_CASE_LIST_SUBSECTION)
 				{
 					// get cursor of "Radiology Section List", in order determined by user list preferences
 					Cursor subsection_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+
 					subsection_cursor.moveToPosition((int)case_subset-POS_CASE_LIST_SUBSECTION);
 					subset_query_string = new String(CasesProvider.KEY_SECTION + " = '" + subsection_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE) + "'");
-					subset_query_string_and = new String(CasesProvider.KEY_SECTION + " = '" + subsection_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE)) + "' AND ";
+					subset_query_string_and = subset_query_string + " AND ";
 
 					subsection_cursor.close();
 
@@ -1073,7 +1079,6 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 							for (int c = 0; c < case_cursor_array[i].getCount(); c++)
 							{
 								headerList.add(mSection);
-								//headerIdList.add(i);
 							}
 
 							i = i + 1;
@@ -1085,7 +1090,6 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 						for (int c = 0; c < case_cursor_array[i].getCount(); c++)
 						{
 							headerList.add(EMPTY_FIELD_GROUP_HEADER);
-							//headerIdList.add(i);
 						}
 
 					}
@@ -1251,6 +1255,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 					}
 					keywords_cursor.close();
 				}
+				/*
 				else if(caseFilterMode == FILTER_FOLLOWUP)
 				{
 					case_cursor_array = new Cursor[1];
@@ -1275,6 +1280,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 					}
 
 				}
+				*/
 				else
 				{
 					case_cursor_array = new Cursor[1];

@@ -83,7 +83,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				new_case.study_type = cursor.getString(CasesProvider.COL_STUDY_TYPE);
 				new_case.db_date_str = cursor.getString(CasesProvider.COL_DATE);
 				new_case.key_words = cursor.getString(CasesProvider.COL_KEYWORDS);
-				new_case.favorite = cursor.getInt(CasesProvider.COL_FAVORITE);
+				new_case.favorite = cursor.getString(CasesProvider.COL_FAVORITE);
 
 				new_case.thumbnail = 0;
 				String thumbnailString = cursor.getString(CasesProvider.COL_THUMBNAIL);

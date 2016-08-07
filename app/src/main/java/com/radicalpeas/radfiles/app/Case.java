@@ -19,7 +19,7 @@ public class Case
 	public String study_type;
 	public String db_date_str;
 
-	public int favorite;
+	public String favorite;
 
 
 	String thumbnail_filename;

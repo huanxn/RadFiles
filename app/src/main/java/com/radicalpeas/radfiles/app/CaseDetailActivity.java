@@ -9,16 +9,14 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
@@ -48,6 +46,8 @@ import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
@@ -219,19 +219,25 @@ public class CaseDetailActivity extends AppCompatActivity
 	{
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.case_detail, menu);
-		MenuItem star = menu.findItem(R.id.menu_star);
+		MenuItem star = menu.findItem(R.id.menu_like);
 
 		// Set the starred icon and text in action bar
 		// also done in onOptionsItemSelected  //todo change?
 		if (fragment.isStarred())
 		{
-			star.setTitle(getResources().getString(R.string.remove_star));
-			star.setIcon(R.drawable.ic_star_white_24dp);
+			star.setTitle(getResources().getString(R.string.unlike));
+			star.setIcon(new IconicsDrawable(activity)
+					.icon(GoogleMaterial.Icon.gmd_favorite)
+					.color(Color.WHITE)
+					.sizeDp(24));
 		}
 		else
 		{
-			star.setTitle(getResources().getString(R.string.add_star));
-			star.setIcon(R.drawable.ic_star_outline_white_24dp);
+			star.setTitle(getResources().getString(R.string.like));
+			star.setIcon(new IconicsDrawable(activity)
+					.icon(GoogleMaterial.Icon.gmd_favorite_border)
+					.color(Color.WHITE)
+					.sizeDp(24));
 		}
 
 		return super.onCreateOptionsMenu(menu);
@@ -307,7 +313,7 @@ public class CaseDetailActivity extends AppCompatActivity
 				finish();
 				return true;
 
-			case R.id.menu_star:
+			case R.id.menu_like:
 				if (key_id != -1)
 				{
 //					findViewById(R.id.action_star);
@@ -316,12 +322,12 @@ public class CaseDetailActivity extends AppCompatActivity
 
 					if(fragment.isStarred())
 					{
-						item.setTitle(getResources().getString(R.string.remove_star));
+						item.setTitle(getResources().getString(R.string.unlike));
 						item.setIcon(R.drawable.ic_star_white_24dp);
 					}
 					else
 					{
-						item.setTitle(getResources().getString(R.string.add_star));
+						item.setTitle(getResources().getString(R.string.like));
 						item.setIcon(R.drawable.ic_star_outline_white_24dp);
 					}
 
@@ -1107,36 +1113,15 @@ public class CaseDetailActivity extends AppCompatActivity
 				//int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
 
 				// set global variable isStarred for Activity action bar menu toggle
-				favorite = case_cursor.getInt(CasesProvider.COL_FAVORITE);
-
-
-				// ACTION BAR Title
-				// mTitle declared in super NavigationDrawerActivity, and used to restore the same title after nav drawer is closed
-				if(patient_id != null && !patient_id.isEmpty())
+				String fav_string = case_cursor.getString(CasesProvider.COL_FAVORITE);
+				if(fav_string != null && !fav_string.isEmpty())
 				{
-					mActivity.mTitle = new SpannableString(patient_id);
-					mActivity.mTitle.setSpan(new TypefaceSpan(getActivity(), "RobotoCondensed-Bold.ttf"), 0, mActivity.mTitle.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-					//if(section != null && !section.isEmpty())
-					//	actionBar.setSubtitle(section);
-				}
-				/*
-				else if(section != null && !section.isEmpty())
-				{
-					mTitle = section + " Case";
-				}
-				else if(diagnosis != null && !diagnosis.isEmpty())
-				{
-					mTitle = diagnosis;
+					favorite = Integer.parseInt(fav_string);
 				}
 				else
 				{
-					mTitle = "Case Details";
+					favorite = 0;
 				}
-				*/
-
-				else
-					mActivity.mTitle = new SpannableString("");
 
 				ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
 				actionBar.setTitle(mActivity.mTitle);

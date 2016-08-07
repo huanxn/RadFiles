@@ -4,8 +4,9 @@
           xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
-    <!-- Toggle favorites "star", should appear as action button -->
-    <item android:title="@string/add_star" app:showAsAction="ifRoom" android:icon="@drawable/ic_star_outline_white_24dp" android:id="@+id/menu_star"/>
+    <!-- Toggle favorites "star", should appear as action button ////  icon actually set in code-->
+    <item android:title="@string/like" app:showAsAction="ifRoom"  android:id="@+id/menu_like"
+          android:icon="@drawable/ic_star_outline_white_24dp"/>
 
     <!-- Edit this case, should appear as action button -->
     <item android:title="@string/action_edit" app:showAsAction="ifRoom" android:icon="@drawable/ic_pencil_white_24dp" android:id="@+id/menu_edit"/>
