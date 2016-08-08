@@ -84,29 +84,14 @@ public class CaseImport extends AppCompatActivity
 	    mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
 	    mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
+		// Setup FastScroller
+		FastScroller fastScroller=(FastScroller)findViewById(R.id.case_import_fastscroller);
+		fastScroller.setRecyclerView(mRecyclerView);
+
 	    // Setup CaseCardAdapter
 	    mCardAdapter = new CaseCardAdapter(this, null, R.layout.card_case);
 
 	    mRecyclerView.setAdapter(mCardAdapter);
-
-			/*
-			//sticky headers
-			StickyRecyclerHeadersDecoration headersDecor = new StickyRecyclerHeadersDecoration(mCardAdapter);
-
-			mRecyclerView.addItemDecoration(headersDecor);
-
-
-			mRecyclerView.setOnTouchListener(new View.OnTouchListener()
-			{
-				@Override
-				public boolean onTouch(View v, MotionEvent event)
-				{
-					UtilClass.hideKeyboard(getActivity());
-					return false;
-				}
-			});
-
-			*/
 
 	    // Get intent, action and MIME type
 	    Intent intent = getIntent();

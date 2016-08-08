@@ -59,6 +59,16 @@
         android:layout_above="@+id/buttonBar"
         />
 
+    <com.radicalpeas.radfiles.app.FastScroller
+        android:id="@+id/case_import_fastscroller"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@id/swipe_container"
+        android:layout_alignBottom="@id/swipe_container"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        tools:ignore="RtlCompat"/>
+
     <!-- BUTTON BAR -->
     <LinearLayout
         android:id="@+id/buttonBar"

@@ -153,14 +153,14 @@ public class NavDrawerActivity extends AppCompatActivity
 
         // Create a few sample profile
         // NOTE you have to define the loader logic too. See the CustomApplication for more details
-        final IProfile profile = new ProfileDrawerItem().withName("Mike Penz").withEmail("mikepenz@gmail.com").withIcon("https://avatars3.githubusercontent.com/u/1476232?v=3&s=460").withIdentifier(100);
+        final IProfile profile = new ProfileDrawerItem().withName("Mike Penz").withEmail("mikepenz@gmail.com").withIcon(GoogleMaterial.Icon.gmd_account_circle).withIdentifier(100);
         final IProfile profile2 = new ProfileDrawerItem().withName("Bernat Borras").withEmail("alorma@github.com").withIcon(FontAwesome.Icon.faw_user_md).withIdentifier(101);
 
         // Create the AccountHeader
         headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withTranslucentStatusBar(true)
-                .withHeaderBackground(R.drawable.drawer_header)
+                .withHeaderBackground(R.drawable.drawer_header_blue)
                 .addProfiles(
                         profile,
                         profile2,

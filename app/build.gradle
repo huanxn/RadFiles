@@ -48,18 +48,16 @@ dependencies {
     compile "com.android.support:recyclerview-v7:${project.ext.support_library_version}"
 
 
-
     //compile 'com.timehop.stickyheadersrecyclerview:library:0.3.6@aar' //buggy
 
     // advanced recyclerview for drag/drap lists
     // https://github.com/h6ah4i/android-advancedrecyclerview
     compile ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar'){transitive=true}
-    //compile 'com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.6.1'
 
-    // for parallax view fading toolbar
+    // for parallax view fading toolbar in CaseDetailActivity
     compile 'com.github.ksoichiro:android-observablescrollview:1.4.0'
 
-    //ShowCaseView tutorials
+    // ShowCaseView tutorials
     /*compile ('com.github.worker8:tourguide:1.0.12-SNAPSHOT@aar')    //TourGuide tutorials
                         {transitive=true}*/
     compile 'com.github.amlcurran.showcaseview:library:5.4.3' //5.4.3
@@ -70,11 +68,10 @@ dependencies {
     //compile 'com.viewpagerindicator:library:2.4.1@aar' deprecated after api 23
     compile 'com.github.jrejaud:ViewPagerIndicator2:0.0.1'
 
-
     // For SlidingTabStrip in Manage Lists
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
 
-    // Roboto Text font in toolbar title, etc
+    // Roboto Text font in toolbar title, etc - ImportActivity
     compile 'com.github.johnkil.android-robototextview:robototextview:2.2.0'
 
     //snack bar better?  can't compile

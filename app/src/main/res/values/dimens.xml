@@ -30,7 +30,7 @@
 
     <dimen name="statusbar_size">25dp</dimen>
 
-    <dimen name="fastscroller_width">25dp</dimen>
+    <dimen name="fastscroller_width">48dp</dimen>
 
 
 

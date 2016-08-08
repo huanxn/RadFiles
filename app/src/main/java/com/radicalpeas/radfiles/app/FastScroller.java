@@ -1,5 +1,6 @@
 package com.radicalpeas.radfiles.app;
 
+import android.util.DisplayMetrics;
 import android.widget.LinearLayout;
 
 /*
@@ -27,8 +28,8 @@ import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 
 public class FastScroller extends LinearLayout
 {
-	private static final int HANDLE_HIDE_DELAY = 1000;
-	private static final int HANDLE_ANIMATION_DURATION = 100;
+	private static final int HANDLE_HIDE_DELAY = 800;
+	private static final int HANDLE_ANIMATION_DURATION = 200;
 	private static final String SCALE_X = "scaleX";
 	private static final String SCALE_Y = "scaleY";
 	private static final String ALPHA = "alpha";
@@ -46,6 +47,8 @@ public class FastScroller extends LinearLayout
 	private final HandleHider handleHider = new HandleHider();
 	private int height; // height of fast scroll track
 	private int handle_position; // y position
+
+	private float handle_translation_distance = 0;
 
 	private ObjectAnimator currentAnimator=null;
 
@@ -76,6 +79,13 @@ public class FastScroller extends LinearLayout
 		bubble=(TextView)findViewById(R.id.fastscroller_bubble);
 		handle=findViewById(R.id.fastscroller_handle);
 		bubble.setVisibility(INVISIBLE);
+
+		// move circle off screen move 30 dp, convert to float
+		DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+		//handle_translation_distance = (float)0.625 * context.getResources().getDimension(R.dimen.fastscroller_width) * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT);
+		handle_translation_distance = (float)0.66 * context.getResources().getDimension(R.dimen.fastscroller_width);
+		//handle_translation_distance = 24 * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT);
+
 	}
 
 	@Override
@@ -110,7 +120,9 @@ public class FastScroller extends LinearLayout
 						showHandle();
 					}
 
-					*//*if(bubble.getVisibility()==INVISIBLE)
+					*/
+
+					/*if(bubble.getVisibility()==INVISIBLE)
 						showBubble();*/
 
 					handle.setSelected(true);
@@ -241,8 +253,12 @@ public class FastScroller extends LinearLayout
 		handle.setVisibility(VISIBLE);
 		Animator growerX = ObjectAnimator.ofFloat(handle, SCALE_X, 0f, 1f).setDuration(HANDLE_ANIMATION_DURATION);
 		Animator growerY = ObjectAnimator.ofFloat(handle, SCALE_Y, 0f, 1f).setDuration(HANDLE_ANIMATION_DURATION);
-		Animator alpha = ObjectAnimator.ofFloat(handle, ALPHA, 0f, 1f).setDuration(HANDLE_ANIMATION_DURATION);
-		animatorSet.playTogether(growerX, growerY, alpha);
+
+		Animator translaterX = ObjectAnimator.ofFloat(handle, "translationX", 0-handle_translation_distance);
+		//Animator translaterZ = ObjectAnimator.ofFloat(handle, "translationZ", handle_translation_distance);
+		Animator alpha = ObjectAnimator.ofFloat(handle, ALPHA, 0f, 1.0f).setDuration(HANDLE_ANIMATION_DURATION);
+		//animatorSet.playTogether(growerX, growerY, alpha);
+		animatorSet.playTogether(translaterX, alpha);
 		animatorSet.start();
 	}
 
@@ -250,7 +266,8 @@ public class FastScroller extends LinearLayout
 	{
 		if(currentAnimator!=null)
 			currentAnimator.cancel();
-		currentAnimator=ObjectAnimator.ofFloat(handle,"alpha",1f,0f).setDuration(BUBBLE_ANIMATION_DURATION);
+		//currentAnimator=ObjectAnimator.ofFloat(handle,"alpha",1f,0f).setDuration(BUBBLE_ANIMATION_DURATION);
+		currentAnimator = ObjectAnimator.ofFloat(handle, "translationX", handle_translation_distance);
 		currentAnimator.addListener(new AnimatorListenerAdapter(){
 			@Override
 			public void onAnimationEnd(Animator animation)
