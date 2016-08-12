@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">RAD Files</string>
+    <string name="app_name">RadFiles</string>
 
     <!-- Action Bar menu items-->
     <string name="action_settings">Settings</string>
@@ -17,7 +17,7 @@
     <string name="action_help">Help</string>
 
     <!-- Activity Titles -->
-    <string name="title_activity_case_card_list">RAD Files</string>
+    <string name="title_activity_case_card_list">RadFiles</string>
     <string name="title_activity_search">Search</string>
     <string name="title_case_detail">RAD Files</string>
     <string name="title_activity_add_case">Add Case</string>
@@ -120,7 +120,7 @@
 
 
     <!--Firebase auth ID-->
-    <string name="facebook_application_id" translatable="false">RADFILES APP</string>
+    <string name="facebook_app_id">973701769395589</string>
 
 
     <!-- test for material drawer -->

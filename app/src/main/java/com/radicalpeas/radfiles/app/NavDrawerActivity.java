@@ -1,12 +1,16 @@
 package com.radicalpeas.radfiles.app;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Spannable;
@@ -15,9 +19,21 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
 import com.mikepenz.fastadapter.utils.RecyclerViewCacheUtil;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -39,6 +55,9 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
+import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
+import com.mikepenz.materialdrawer.util.DrawerImageLoader;
+import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,7 +70,10 @@ import java.util.zip.ZipFile;
  */
 public class NavDrawerActivity extends AppCompatActivity
 {
-    private static final int PROFILE_SETTING = 100000;
+    public static final String TAG = "NavDrawerActivity";
+
+    private static final int ADD_ACCOUNT = 100000;
+    private static final int MANAGE_ACCOUNTS = 100001;
 
     final static protected int POS_CASE_LIST_ALL = 1;
     final static protected int POS_CASE_LIST_FAV = 2;
@@ -68,6 +90,10 @@ public class NavDrawerActivity extends AppCompatActivity
 
     static protected int drawerPosition = POS_NONE;    // later set by inherited class to remember its position and determine onCreate parameters
 
+    // Request Codes
+    private static final int RC_SIGN_IN = 10000;
+    private static final int RC_ADD_ACCOUNT = 10001;
+
     //save our header or drawerResult
     private AccountHeader headerResult = null;
     private Drawer drawerResult = null;
@@ -75,11 +101,23 @@ public class NavDrawerActivity extends AppCompatActivity
     protected SpannableString mTitle;
     protected Toolbar mToolbar = null;
     protected View mOverflowTarget = null;
-    //
+
+    // Firebase user info
+    private String userName;
+    private String userEmail;
+    private Uri userPhotoUri;
+    private String userID;  // maybe don't need?
+    private String providerId;  // email vs google.com
+
+    private FirebaseAuth mAuth = null;
+    private DatabaseReference mDatabaseRef = null;
+
+    private AppCompatActivity mActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        mActivity = this;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nav_drawer);
 
@@ -117,8 +155,6 @@ public class NavDrawerActivity extends AppCompatActivity
 
         }
 
-
-
         // set the toolbar layout element
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mToolbar != null)
@@ -150,11 +186,39 @@ public class NavDrawerActivity extends AppCompatActivity
         // for ShowcaseView tutorial
         mOverflowTarget = findViewById(R.id.overflow_menu_target);
 
+        //initialize and create the image loader logic
+        DrawerImageLoader.init(new AbstractDrawerImageLoader()
+        {
+            @Override
+            public void set(ImageView imageView, Uri uri, Drawable placeholder)
+            {
+                Glide.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
+            }
+
+            @Override
+            public void cancel(ImageView imageView)
+            {
+                Glide.clear(imageView);
+            }
+
+        });
+
+        // get sign in data
+        authSignIn();
+
 
         // Create a few sample profile
         // NOTE you have to define the loader logic too. See the CustomApplication for more details
-        final IProfile profile = new ProfileDrawerItem().withName("Mike Penz").withEmail("mikepenz@gmail.com").withIcon(GoogleMaterial.Icon.gmd_account_circle).withIdentifier(100);
-        final IProfile profile2 = new ProfileDrawerItem().withName("Bernat Borras").withEmail("alorma@github.com").withIcon(FontAwesome.Icon.faw_user_md).withIdentifier(101);
+        final IProfile profile1 = new ProfileDrawerItem().withName(userName).withEmail(userEmail).withIdentifier(100);
+        if(userPhotoUri != null)
+        {
+            profile1.withIcon(userPhotoUri);
+        }
+        else
+        {
+            profile1.withIcon(GoogleMaterial.Icon.gmd_account_circle);
+        }
+        //final IProfile profile2 = new ProfileDrawerItem().withName("Bernat Borras").withEmail("alorma@github.com").withIcon(FontAwesome.Icon.faw_user_md).withIdentifier(102);
 
         // Create the AccountHeader
         headerResult = new AccountHeaderBuilder()
@@ -162,26 +226,30 @@ public class NavDrawerActivity extends AppCompatActivity
                 .withTranslucentStatusBar(true)
                 .withHeaderBackground(R.drawable.drawer_header_blue)
                 .addProfiles(
-                        profile,
-                        profile2,
+                        profile1,
+                      //  profile2,
 
                         //don't ask but google uses 14dp for the add account icon in gmail but 20dp for the normal icons (like manage account)
-                        new ProfileSettingDrawerItem().withName("Add Account").withDescription("Add new account").withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add).actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text)).withIdentifier(PROFILE_SETTING),
-                        new ProfileSettingDrawerItem().withName("Manage Account").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(100001)
+                        new ProfileSettingDrawerItem().withName("Add Account").withDescription("Add new account").withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add).actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text)).withIdentifier(ADD_ACCOUNT),
+                        new ProfileSettingDrawerItem().withName("Manage Accounts").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(MANAGE_ACCOUNTS)
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
 
                     @Override
                     public boolean onProfileChanged(View view, IProfile profile, boolean current)
                     {
+
                         //sample usage of the onProfileChanged listener
-                        //if the clicked item has the identifier 1 add a new profile ;)
-                        if (profile instanceof IDrawerItem && profile.getIdentifier() == PROFILE_SETTING)
+                        //if the clicked item has the identifier "Add Account": add a new profile
+                        if (profile instanceof IDrawerItem && profile.getIdentifier() == ADD_ACCOUNT)
                         {
-/*
+
+                            addAccount();
+
+                            /*
                             int count = 100 + headerResult.getProfiles().size() + 1;
 
-                            IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName("Batman" + count).withEmail("batman" + count + "@gmail.com").withIcon(R.drawable.profile5).withIdentifier(count);
+                            IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName("Batman" + count).withEmail("batman" + count + "@gmail.com").withIcon(GoogleMaterial.Icon.gmd_account_circle).withIdentifier(count);
 
                             if (headerResult.getProfiles() != null) {
 
@@ -194,11 +262,27 @@ public class NavDrawerActivity extends AppCompatActivity
                                 headerResult.addProfiles(newProfile);
 
                             }
+
 */
+
+                            //false if you have not consumed the event and it should close the drawer
+                            // close drawer
+                            return false;
+                        }
+                        else if(profile instanceof IDrawerItem && profile.getIdentifier() == MANAGE_ACCOUNTS)
+                        {
+                            // close drawer
+                            return false;
+                        }
+                        else
+                        {
+                            // change Profile
+
+                            // leave drawer open
+                            return true;
                         }
 
-                        //false if you have not consumed the event and it should close the drawer
-                        return false;
+
                     }
                 })
                 .withSavedInstance(savedInstanceState)
@@ -372,7 +456,7 @@ public class NavDrawerActivity extends AppCompatActivity
             drawerResult.setSelection(POS_NONE, false);
 
             //set the active profile
-            headerResult.setActiveProfile(profile); // first profile
+            headerResult.setActiveProfile(profile1); // first profile
         }
         //drawerResult.updateBadge(POS_CASE_LIST_ALL, new StringHolder(10 + ""));
     }
@@ -420,6 +504,367 @@ public class NavDrawerActivity extends AppCompatActivity
         else
         {
             super.onBackPressed();
+        }
+    }
+
+    /*
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // Default Database rules do not allow unauthenticated reads, so we need to
+        // sign in before attaching the RecyclerView adapter otherwise the Adapter will
+        // not be able to read any data from the Database.
+        if (!isSignedIn())
+        {
+            signInAnonymously();
+        }
+        else
+        {
+            //attachRecyclerViewAdapter();
+        }
+    }
+    */
+
+
+    // Firebase sign in auth
+    public boolean isSignedIn()
+    {
+        if(FirebaseAuth.getInstance().getCurrentUser() != null)
+            return true;
+        else
+            return false;
+    }
+
+    /*
+    private void signInAnonymously()
+    {
+        Toast.makeText(this, "Signing in...", Toast.LENGTH_SHORT).show();
+        mAuth.signInAnonymously()
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task)
+                    {
+                        Log.d(TAG, "signInAnonymously:onComplete:" + task.isSuccessful());
+                        if (task.isSuccessful())
+                        {
+                            Toast.makeText(mActivity, "Signed In",
+                                    Toast.LENGTH_SHORT).show();
+                            attachRecyclerViewAdapter();
+                        }
+                        else
+                        {
+                            Toast.makeText(mActivity, "Sign In Failed",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+    */
+
+    private void setUserInfo(FirebaseUser user)
+    {
+        if (user != null)
+        {
+            // already signed in
+            // Name, email address, and profile photo Url
+            userName = user.getDisplayName();
+            userEmail = user.getEmail();
+            userPhotoUri = user.getPhotoUrl();
+
+            // The user's ID, unique to the Firebase project. Do NOT use this value to
+            // authenticate with your backend server, if you have one. Use
+            // FirebaseUser.getToken() instead.
+            userID = user.getUid();
+
+            // get provider ie. email vs google.com
+            providerId = user.getProviderId();
+            for (UserInfo i: FirebaseAuth.getInstance().getCurrentUser().getProviderData()) {
+                if (i.getProviderId().equals("google.com"))
+                {
+                    providerId = "google.com";
+                }
+            }
+        }
+    }
+
+
+    protected void authSignIn()
+    {
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        if (user != null)
+        {
+            setUserInfo(user);
+        }
+        else
+        {
+            // not signed in
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setProviders(
+                                    AuthUI.FACEBOOK_PROVIDER,
+                                    AuthUI.GOOGLE_PROVIDER,
+                                    AuthUI.EMAIL_PROVIDER
+                            )
+                            //.setTosUrl("https://superapp.example.com/terms-of-service.html")
+                            .setTheme(R.style.FirebaseBlueTheme)
+                            .build(),
+                    RC_SIGN_IN);
+        }
+
+    }
+
+    public void authSignOut()
+    {
+        AuthUI.getInstance()
+                .signOut(this)
+                .addOnCompleteListener(new OnCompleteListener<Void>()
+                {
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        if (task.isSuccessful())
+                        {
+                            // user is now signed out
+                            //startActivity(new Intent(mActivity, SignInActivity.class));
+                            //finish();
+                        }
+                        else
+                        {
+                            //showSnackbar(R.string.sign_out_failed);
+                        }
+                    }
+                });
+
+    }
+
+
+
+    protected void addAccount()
+    {
+        if(mAuth.getCurrentUser() != null)
+        {
+            authSignOut();
+        }
+
+        // not signed in
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setProviders(
+                                AuthUI.FACEBOOK_PROVIDER,
+                                AuthUI.GOOGLE_PROVIDER,
+                                AuthUI.EMAIL_PROVIDER
+                        )
+                        //.setTosUrl("https://superapp.example.com/terms-of-service.html")
+                        .setTheme(R.style.FirebaseBlueTheme)
+                        .build(),
+                RC_ADD_ACCOUNT);
+    }
+
+    protected void updateUser(String name, Uri photoUri)
+    {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (user != null)
+        {
+            // Name, email address, and profile photo Url
+            userName = name;
+            userPhotoUri = photoUri;
+
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(userName)
+                    .setPhotoUri(userPhotoUri)
+                    .build();
+
+            user.updateProfile(profileUpdates)
+                    .addOnCompleteListener(new OnCompleteListener<Void>()
+                    {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task)
+                        {
+                            if (task.isSuccessful())
+                            {
+                                //Log.d(TAG, "User profile updated.");
+                            }
+                        }
+                    });
+        }
+    }
+
+    protected void updateUserEmail(String emailAddress)
+    {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        userEmail = emailAddress;
+
+        if(user != null)
+        {
+            user.updateEmail(emailAddress)
+                    .addOnCompleteListener(new OnCompleteListener<Void>()
+                    {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task)
+                        {
+                            if (task.isSuccessful())
+                            {
+                                //  Log.d(TAG, "User email address updated.");
+                            }
+                        }
+                    });
+        }
+    }
+
+    protected void updateUserPassword(final String new_password, final String userEmail, final String userPassword)
+    {
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(user != null)
+        {
+            reauthenticateUser();
+            user.updatePassword(new_password);
+        }
+
+
+    }
+
+    protected void sendPasswordResetEmail(String userEmail)
+    {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        auth.sendPasswordResetEmail(userEmail)
+                .addOnCompleteListener(new OnCompleteListener<Void>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        if (task.isSuccessful())
+                        {
+                            //Log.d(TAG, "Email sent.");
+                        }
+                    }
+                });
+    }
+
+    protected void deleteAccount()
+    {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if(user != null)
+        {
+            reauthenticateUser();
+
+            user.delete()
+                    .addOnCompleteListener(new OnCompleteListener<Void>()
+                    {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task)
+                        {
+                            if (task.isSuccessful())
+                            {
+                                // Log.d(TAG, "User account deleted.");
+                            }
+                        }
+                    });
+        }
+    }
+
+    protected void reauthenticateUser()
+    {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        // Get auth credentials from the user for re-authentication. The example below shows
+        // email and password credentials but there are multiple possible providers,
+        // such as GoogleAuthProvider or FacebookAuthProvider.
+        AuthCredential credential = EmailAuthProvider.getCredential(user.getDisplayName(), "password");
+
+
+        // Prompt the user to re-provide their sign-in credentials
+        user.reauthenticate(credential)
+                .addOnCompleteListener(new OnCompleteListener<Void>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        //Log.d(TAG, "User re-authenticated.");
+                    }
+                });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                // user is signed in!
+                //startActivity(new Intent(this, WelcomeBackActivity.class));
+                //finish();
+
+                mAuth = FirebaseAuth.getInstance();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if(user != null)
+                {
+                    setUserInfo(user);
+                }
+            }
+            else
+            {
+                // user is not signed in. Maybe just wait for the user to press
+                // "sign in" again, or show a message
+            }
+        }
+        else if(requestCode == RC_ADD_ACCOUNT)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                // user is signed in!
+                //startActivity(new Intent(this, WelcomeBackActivity.class));
+                //finish();
+
+                mAuth = FirebaseAuth.getInstance();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if(user != null)
+                {
+                    setUserInfo(user);
+
+                    // add to drawer header
+                    int count = 100 + headerResult.getProfiles().size() + 1;
+
+                    IProfile newProfile = new ProfileDrawerItem().withNameShown(true).withName(userName).withEmail(userEmail).withIdentifier(count);
+
+                    if (userPhotoUri != null)
+                    {
+                        newProfile.withIcon(userPhotoUri);
+                    }
+                    else
+                    {
+                        newProfile.withIcon(GoogleMaterial.Icon.gmd_account_circle);
+                    }
+
+                    if (headerResult.getProfiles() != null)
+                    {
+                        //we know that there are 2 setting elements. set the new profile above them ;)
+                        headerResult.addProfile(newProfile, headerResult.getProfiles().size() - 2);
+
+                        headerResult.setActiveProfile(newProfile);
+                    }
+                    else
+                    {
+                        headerResult.addProfiles(newProfile);
+                    }
+
+                }
+
+
+            }
         }
     }
 }

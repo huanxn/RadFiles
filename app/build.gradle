@@ -3,6 +3,7 @@ apply plugin: 'android-apt'
 
 project.ext.buildtools = '24.0.1'
 project.ext.firebase_version = '9.4.0'
+project.ext.firebase_ui_version = '0.4.4'
 project.ext.support_library_version = '24.1.1'
 
 android {
@@ -111,11 +112,17 @@ dependencies {
     compile 'com.jakewharton:butterknife:8.2.1'
     apt 'com.jakewharton:butterknife-compiler:8.2.1'
 
+    // Glide image library
+    // https://github.com/bumptech/glide
+    compile 'com.github.bumptech.glide:glide:3.7.0'
 
-    // firebase
+    // FIREBASE
     compile "com.google.android.gms:play-services:${project.ext.firebase_version}"
     //compile "com.google.firebase:firebase-core:${project.ext.firebase_version}"
-    //compile 'com.firebaseui:firebase-ui-auth:0.4.4' //contains compile 'com.google.firebase:firebase-auth:9.4.0'
+
+    // https://github.com/firebase/FirebaseUI-Android
+    compile "com.firebaseui:firebase-ui:${project.ext.firebase_ui_version}" //contains com.google.firebase:firebase-auth, com.google.android.gms:play-services-auth, com.google.firebase:firebase-database
+
     //compile "com.google.firebase:firebase-database:${project.ext.firebase_version}"
     //compile "com.google.firebase:firebase-storage:${project.ext.firebase_version}"
 
@@ -123,4 +130,4 @@ dependencies {
 }
 
 // firebase
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
