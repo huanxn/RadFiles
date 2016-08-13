@@ -235,9 +235,6 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
 	private void exportCases()
 	{
-///
-		// TODO get user passkey, test encrypt JSON file
-
 
 		String filename;
 
@@ -282,6 +279,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 		final EditText pw_input = new EditText(this);
 		final Activity activity = this;
 
+		// user sets filename and encryption password
 		input.setText(filename);
 		input.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
 		input.setHint("File name");

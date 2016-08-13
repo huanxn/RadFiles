@@ -15,6 +15,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.view.ViewCompat;
 import android.text.InputType;
 import android.util.DisplayMetrics;
@@ -39,6 +41,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 
@@ -883,7 +892,6 @@ public class UtilClass extends Activity
 		File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
 		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
-
 		///
 
 		try
@@ -1001,7 +1009,7 @@ public class UtilClass extends Activity
 				cases_writer.close();
 			}
 
-			// TODO get user passkey, test encrypt JSON file
+			// encrypt casesJSON file
 			try
 			{
 				byte[] passkey = UtilsFile.generateKey(password);
@@ -1013,6 +1021,80 @@ public class UtilClass extends Activity
 				Log.d(TAG, "Unable to generate encryption key.");
 				return null;
 			}
+
+			// Firebase: upload images and JSON files
+			FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+			if(user != null)
+			{
+				// set up Firebase storage reference
+				FirebaseStorage mStorage = FirebaseStorage.getInstance();
+				StorageReference mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
+
+				// put in userID folder, name file based on user input
+				String userID = user.getUid();
+				StorageReference storageCasesJSON = mStorageRef.child(userID + "/" + filename + "_cases.txt");	// filename entered by user in alertdialog
+
+				// upload encrypted casesJSON file to Firebase server
+				UploadTask casesJSON_uploadTask = storageCasesJSON.putFile(Uri.fromFile(casesJSON));
+
+				// Register observers to listen for when the download is done or if it fails
+				casesJSON_uploadTask.addOnFailureListener(new OnFailureListener()
+				{
+					@Override
+					public void onFailure(@NonNull Exception exception)
+					{
+						// Handle unsuccessful uploads
+
+						//				showMessage(activity, "Failed uploading case info.");
+					}
+				}).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+				{
+					@Override
+					public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+					{
+						// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+						Uri downloadUrl = taskSnapshot.getDownloadUrl();
+						//				makeToast(activity, "Upload case info successful.");
+					}
+				});
+
+				// upload case images
+				// image file fullpath stored in zip_files_array[]
+				StorageReference storageImages;
+
+				for (int i = 0; i < zip_files_array.length; i++)
+				{
+					// put in userID/pictures folder
+					File filePath = new File(zip_files_array[i]);
+					storageImages = mStorageRef.child(userID + "/pictures/" + filePath.getName());
+
+					// open FileInputStream based on image fullpath stored in zip_files_array[], and upload to Firebase server
+					FileInputStream fi = new FileInputStream(zip_files_array[i]);
+					UploadTask image_uploadTask = storageImages.putStream(fi);
+
+					// Register observers to listen for when the download is done or if it fails
+					image_uploadTask.addOnFailureListener(new OnFailureListener()
+					{
+						@Override
+						public void onFailure(@NonNull Exception exception)
+						{
+							// Handle unsuccessful uploads
+							//				showMessage(activity, "Failed uploading images.");
+						}
+					}).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+					{
+						@Override
+						public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+						{
+							// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+							Uri downloadUrl = taskSnapshot.getDownloadUrl();
+							//				showMessage(activity, "Upload images successful.");
+						}
+					});
+				}
+
+			}
+
 
 			// zip image and JSON files
 			String zip_filename = downloadsDir.getPath() + "/" + filename + ImportExportActivity.RCS_EXTENSION;

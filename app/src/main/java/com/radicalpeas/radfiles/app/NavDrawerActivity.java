@@ -34,6 +34,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.mikepenz.fastadapter.utils.RecyclerViewCacheUtil;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -110,7 +113,11 @@ public class NavDrawerActivity extends AppCompatActivity
     private String providerId;  // email vs google.com
 
     private FirebaseAuth mAuth = null;
-    private DatabaseReference mDatabaseRef = null;
+    //private DatabaseReference mDatabaseRef = null;
+    private FirebaseStorage mStorage;
+    private StorageReference mStorageRef;
+    private StorageReference mStorageImages;
+
 
     private AppCompatActivity mActivity;
 
@@ -203,8 +210,13 @@ public class NavDrawerActivity extends AppCompatActivity
 
         });
 
+        // FIREBASE
         // get sign in data
         authSignIn();
+
+        // Create Firebase storage references
+        mStorage = FirebaseStorage.getInstance();
+        mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
 
 
         // Create a few sample profile
