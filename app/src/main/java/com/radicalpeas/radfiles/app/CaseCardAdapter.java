@@ -12,6 +12,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -227,7 +231,6 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				}
 			}
 
-
 			viewHolder.key_id = mCase.key_id;
 
 			viewHolder.card_title.setText(mCase.patient_id);
@@ -236,6 +239,15 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			viewHolder.card_text3.setText(mCase.key_words);
 			//viewHolder.thumbnail.setImageDrawable(activity.getDrawable(country.getImageResourceId(mContext)));
 
+			Glide.with(activity).load(mCase.thumbnail_filename)
+					/*
+					.placeholder(new IconicsDrawable(activity, GoogleMaterial.Icon.gmd_error_outline))
+					.error(new IconicsDrawable(activity, GoogleMaterial.Icon.gmd_error_outline))
+					.fallback(new IconicsDrawable(activity, GoogleMaterial.Icon.gmd_sync))	//null
+					*/
+					.into(viewHolder.thumbnail)
+					;
+			/*
 			if(UtilClass.setPic(viewHolder.thumbnail, mCase.thumbnail_filename, UtilClass.IMAGE_THUMB_SIZE))
 			{
 				viewHolder.thumbnail.setVisibility(View.VISIBLE);
@@ -244,6 +256,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			{
 				viewHolder.thumbnail.setVisibility(View.GONE);
 			}
+			*/
 
 			if(mActionMode == null || !mCase.isSelected)
 			{

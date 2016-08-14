@@ -10,6 +10,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.io.File;
 
 /**
@@ -109,7 +111,8 @@ public class ImageAdapter extends BaseAdapter
 			holder.captionTextView.setVisibility(View.GONE);
 		}
 
-		UtilClass.setPic(holder.imageView, imageFilepaths[position], UtilClass.IMAGE_SIZE);
+		//UtilClass.setPic(holder.imageView, imageFilepaths[position], UtilClass.IMAGE_SIZE);
+		Glide.with(mContext).load(imageFilepaths[position]).into(holder.imageView);
 		holder.captionTextView.setText(getImageCaption(position));
 
 		return view;

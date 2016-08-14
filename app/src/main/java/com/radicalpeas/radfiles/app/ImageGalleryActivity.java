@@ -8,6 +8,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.method.Touch;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.github.jrejaud.viewpagerindicator2.PageIndicator;
 import com.github.jrejaud.viewpagerindicator2.UnderlinePageIndicator;
 
@@ -126,7 +128,7 @@ public class ImageGalleryActivity extends AppCompatActivity
 		getSupportActionBar().setTitle("");
 
 		ExtendedViewPager mViewPager = (ExtendedViewPager) findViewById(R.id.viewpager);
-		TouchImageAdapter mAdapter = new TouchImageAdapter();
+		TouchImageAdapter mAdapter = new TouchImageAdapter(this);
 
 		//if(case_id == -1)   //using imageGrid instead of using db
 		{
@@ -176,11 +178,18 @@ public class ImageGalleryActivity extends AppCompatActivity
 		*/
     }
 
-    static class TouchImageAdapter extends PagerAdapter {
+    static class TouchImageAdapter extends PagerAdapter
+	{
 
       //  private static int[] images = { R.drawable.nature_1, R.drawable.nature_2, R.drawable.nature_3, R.drawable.nature_4, R.drawable.nature_5 };
 	    private static String[] imageFilepaths;
 	    private String[] imageCaptions;
+		private Context mContext;
+
+		public TouchImageAdapter(Context context)
+		{
+			mContext = context;
+		}
 
         @Override
         public int getCount() {
@@ -195,7 +204,13 @@ public class ImageGalleryActivity extends AppCompatActivity
 	        View view = inflater.inflate(R.layout.key_image_full, container, false);
 
 	        TouchImageView imageView = (TouchImageView)view.findViewById(R.id.key_image);
-	        UtilClass.setPic(imageView, imageFilepaths[position], 500);
+
+			// resize to full screen
+			imageView.requestLayout();
+			imageView.getLayoutParams().height = (int) UtilClass.getDisplayHeightPx(mContext);
+			imageView.getLayoutParams().width = (int) UtilClass.getDisplayWidthPx(mContext);
+
+			Glide.with(mContext).load(imageFilepaths[position]).into(imageView);
 
 	        if(imageCaptions != null)
 	        {

@@ -40,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
@@ -1046,7 +1047,9 @@ public class CaseDetailActivity extends AppCompatActivity
 				String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
 				//ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
 				//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
-				UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+
+				//UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+				Glide.with(this).load(headerImageFilename).into(mImageView);
 
 				imageCursor.close();
 			}
@@ -1310,9 +1313,9 @@ public class CaseDetailActivity extends AppCompatActivity
 
 					// fading action bar
 					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-					//ImageView headerImageView = (ImageView) headerView.findViewById(R.id.thumbnail);
-					//UtilClass.setPic(headerImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
-					UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+
+					//UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
+					Glide.with(this).load(headerImageFilename).into(mImageView);
 
 
 					// set back icon (doesn't work)

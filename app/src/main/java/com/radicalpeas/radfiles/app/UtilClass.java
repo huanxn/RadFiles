@@ -112,110 +112,11 @@ public class UtilClass extends Activity
 	}
 
 
-	/**
-	 * Sets ImageView picture from file
-	 * @param mImageView: Layout ImageView that will display the picture
-	 * @param mCurrentPhotoPath: full file path of image to be displayed
-	 * @param size: scale down size of displayed picture (square)
-	 * @return boolean: false if no image is set
-	 */
-
-	static public boolean setPic(ImageView mImageView, String mCurrentPhotoPath, int size)
-	{
-		if(mCurrentPhotoPath== null || mCurrentPhotoPath.isEmpty())
-		{
-			mImageView.setImageBitmap(null);
-			return false;
-		}
-
-		// Get the dimensions of the View
-		int targetW = mImageView.getWidth();
-		int targetH = mImageView.getHeight();
-
-		if (targetW == 0 || targetH == 0)
-		{
-			targetW = targetH = size;
-		}
-
-		// Get the dimensions of the bitmap
-		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-		bmOptions.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-		int photoW = bmOptions.outWidth;
-		int photoH = bmOptions.outHeight;
-
-		// Determine how much to scale down the image
-		int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-		// Decode the image file into a Bitmap sized to fill the View
-		bmOptions.inJustDecodeBounds = false;
-		bmOptions.inSampleSize = scaleFactor;
-		bmOptions.inPurgeable = true;
-
-		Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-		mImageView.setImageBitmap(bitmap);
-
-		return true;
-	}
-
-	static public Bitmap getBitmapFromFile(String mCurrentPhotoPath, int size)
-	{
-		// Scale down to given size
-		int targetW = size;
-		int targetH = size;
-
-		// Get the dimensions of the bitmap
-		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-		bmOptions.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-		int photoW = bmOptions.outWidth;
-		int photoH = bmOptions.outHeight;
-
-		// Determine how much to scale down the image
-		int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-		// Decode the image file into a Bitmap sized to fill the View
-		bmOptions.inJustDecodeBounds = false;
-		bmOptions.inSampleSize = scaleFactor;
-		bmOptions.inPurgeable = true;
-
-		return BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-	}
-
-	static private int BITMAP_DRAWABLE_SIZE = 100;
-/*
-	static public void setPic(BitmapDrawable bitmapDrawable, String mCurrentPhotoPath)
-	{
-		int size = BITMAP_DRAWABLE_SIZE;
-
-		int targetW = size;
-		int targetH = size;
-
-
-		// Get the dimensions of the bitmap
-		BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-		bmOptions.inJustDecodeBounds = true;
-		BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-		int photoW = bmOptions.outWidth;
-		int photoH = bmOptions.outHeight;
-
-		// Determine how much to scale down the image
-		int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-		// Decode the image file into a Bitmap sized to fill the View
-		bmOptions.inJustDecodeBounds = false;
-		bmOptions.inSampleSize = scaleFactor;
-		bmOptions.inPurgeable = true;
-
-		Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
-		return new BitmapDrawable(getResources(), bitmap);
-	}*/
-
 
 	/**
 	 * Zoom image from thumbnail image view
 	 */
-
+/*
 	static Animator mCurrentAnimator;
 
 	static public void zoomImageFromThumb(View view, Animator mAnimator, final int mShortAnimationDuration, final View container, final View thumbView, final View expandedImageView)
@@ -370,9 +271,10 @@ public class UtilClass extends Activity
 			}
 		});
 	}
+	*/
 	/* end zoom from thumb */
 
-
+/*
 	// get file path from data resulted from IO file manager or gallery.  [Uri selectedImageUri = data.getData();]
 	static public String getFilePathFromResult(Activity activity, Uri selectedImageUri)
 	{
@@ -402,6 +304,7 @@ public class UtilClass extends Activity
 			return filemanagerstring;
 
 	}
+*/
 
 /*
 	@Override
@@ -439,6 +342,7 @@ public class UtilClass extends Activity
 
 */
 
+	/*
 	// get path for image selector
 	static private String getPath(Activity activity, Uri uri)
 	{
@@ -456,6 +360,7 @@ public class UtilClass extends Activity
 		else
 			return null;
 	}
+	*/
 /*
 	public static String getPath(Context context, Uri uri) throws URISyntaxException {
 		if ("content".equalsIgnoreCase(uri.getScheme())) {
@@ -568,20 +473,15 @@ public class UtilClass extends Activity
 		return displayMetrics.heightPixels / displayMetrics.density;
 	}
 
-	public static int getDisplayWidthPx(Activity activity)
+	public static int getDisplayWidthPx(Context context)
 	{
-		Point size = new Point();
-		activity.getWindowManager().getDefaultDisplay().getSize(size);
-
-		return size.x;
+		DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+		return displayMetrics.widthPixels;
 	}
-
-	public static int getDisplayHeightPx(Activity activity)
+	public static int getDisplayHeightPx(Context context)
 	{
-		Point size = new Point();
-		activity.getWindowManager().getDefaultDisplay().getSize(size);
-
-		return size.y;
+		DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+		return displayMetrics.heightPixels;
 	}
 
 	public static int getStatusBarHeight(Activity activity)
