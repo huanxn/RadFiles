@@ -45,6 +45,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -1022,80 +1023,6 @@ public class UtilClass extends Activity
 				return null;
 			}
 
-			// Firebase: upload images and JSON files
-			FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-			if(user != null)
-			{
-				// set up Firebase storage reference
-				FirebaseStorage mStorage = FirebaseStorage.getInstance();
-				StorageReference mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
-
-				// put in userID folder, name file based on user input
-				String userID = user.getUid();
-				StorageReference storageCasesJSON = mStorageRef.child(userID + "/" + filename + "_cases.txt");	// filename entered by user in alertdialog
-
-				// upload encrypted casesJSON file to Firebase server
-				UploadTask casesJSON_uploadTask = storageCasesJSON.putFile(Uri.fromFile(casesJSON));
-
-				// Register observers to listen for when the download is done or if it fails
-				casesJSON_uploadTask.addOnFailureListener(new OnFailureListener()
-				{
-					@Override
-					public void onFailure(@NonNull Exception exception)
-					{
-						// Handle unsuccessful uploads
-
-						//				showMessage(activity, "Failed uploading case info.");
-					}
-				}).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
-				{
-					@Override
-					public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
-					{
-						// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-						Uri downloadUrl = taskSnapshot.getDownloadUrl();
-						//				makeToast(activity, "Upload case info successful.");
-					}
-				});
-
-				// upload case images
-				// image file fullpath stored in zip_files_array[]
-				StorageReference storageImages;
-
-				for (int i = 0; i < zip_files_array.length; i++)
-				{
-					// put in userID/pictures folder
-					File filePath = new File(zip_files_array[i]);
-					storageImages = mStorageRef.child(userID + "/pictures/" + filePath.getName());
-
-					// open FileInputStream based on image fullpath stored in zip_files_array[], and upload to Firebase server
-					FileInputStream fi = new FileInputStream(zip_files_array[i]);
-					UploadTask image_uploadTask = storageImages.putStream(fi);
-
-					// Register observers to listen for when the download is done or if it fails
-					image_uploadTask.addOnFailureListener(new OnFailureListener()
-					{
-						@Override
-						public void onFailure(@NonNull Exception exception)
-						{
-							// Handle unsuccessful uploads
-							//				showMessage(activity, "Failed uploading images.");
-						}
-					}).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
-					{
-						@Override
-						public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
-						{
-							// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-							Uri downloadUrl = taskSnapshot.getDownloadUrl();
-							//				showMessage(activity, "Upload images successful.");
-						}
-					});
-				}
-
-			}
-
-
 			// zip image and JSON files
 			String zip_filename = downloadsDir.getPath() + "/" + filename + ImportExportActivity.RCS_EXTENSION;
 			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesJSON.getPath());
@@ -1125,6 +1052,448 @@ public class UtilClass extends Activity
 		//alertDialog.dismiss();
 
 		return returnFile;
+	}
+
+	public static boolean uploadToCloud(Activity activity)
+	{
+		File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+		File casesJSON;
+
+		// Firebase: upload images and JSON files
+		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+		if(user != null)
+		{
+
+			String password = user.getUid().substring(0,10);
+
+			try
+			{
+				casesJSON = new File(downloadsDir.getPath(), ImportExportActivity.CASES_JSON_FILENAME);
+			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+				//showMessage(activity, "Unable to create local backup file.");
+				Log.d(TAG, "Unable to create local backup file.");
+				return false;
+			}
+
+			// filepath of images to upload to firebase storage
+			String imageFilepaths[] = new String[0];
+
+			// create local JSON files
+			try
+			{
+				FileOutputStream cases_out = new FileOutputStream(casesJSON);
+
+				// Get cases to export from cases table into a cursor
+				Cursor caseCursor;
+				// get all cases
+				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
+
+				if (caseCursor != null && caseCursor.moveToFirst())
+				{
+					JsonWriter cases_writer = new JsonWriter(new OutputStreamWriter(cases_out, "UTF-8"));
+					cases_writer.setIndent("  ");
+
+					cases_writer.beginArray();
+
+					// loop through all cases
+					do
+					{
+						cases_writer.beginObject();
+
+						// output all case columns/fields for this case
+						for (int i = 0; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
+						{
+							if (caseCursor.getString(i) != null && !caseCursor.getString(i).isEmpty())
+							{
+								cases_writer.name(CasesProvider.CASES_TABLE_ALL_KEYS[i]).value(caseCursor.getString(i));
+							}
+						}
+
+						// output all linked images for this case (via parent_case_id)
+						String[] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
+						Cursor imageCursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+
+						// loop through all images of this case
+						if (imageCursor.moveToFirst())
+						{
+							cases_writer.name("IMAGES");
+							cases_writer.beginArray();
+							do
+							{
+								cases_writer.beginObject();
+								for (int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
+								{
+									cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
+								}
+								cases_writer.endObject();
+
+								// add image filename to zip list
+								imageFilepaths = UtilClass.addArrayElement(imageFilepaths, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+
+							} while (imageCursor.moveToNext());
+
+							cases_writer.endArray();
+						}
+						else
+						{
+							cases_writer.name("IMAGES").nullValue();
+						}
+
+						imageCursor.close();
+
+						cases_writer.endObject();
+
+					} while (caseCursor.moveToNext());
+
+					//count = caseCursor.getCount(); // for progress bar
+					caseCursor.close();
+
+					cases_writer.endArray();
+					cases_writer.close();
+				}
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				Log.d(TAG, "IOException: " + e.getMessage());
+				return false;
+			}
+
+			// encrypt casesJSON file
+			try
+			{
+				byte[] passkey = UtilsFile.generateKey(password);
+				UtilsFile.encryptFile(passkey, casesJSON);
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				Log.d(TAG, "Unable to generate encryption key.");
+				return false;
+			}
+
+
+			// set up Firebase storage reference
+			FirebaseStorage mStorage = FirebaseStorage.getInstance();
+			StorageReference mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
+
+			// put in userID folder
+			String userID = user.getUid();
+			StorageReference storageCasesJSON = mStorageRef.child(userID + "/" + ImportExportActivity.CASES_JSON_FILENAME);	// filename entered by user in alertdialog
+
+			// upload encrypted casesJSON file to Firebase server
+			UploadTask casesJSON_uploadTask = storageCasesJSON.putFile(Uri.fromFile(casesJSON));
+
+			// Register observers to listen for when the download is done or if it fails
+			casesJSON_uploadTask.addOnFailureListener(new OnFailureListener()
+			{
+				@Override
+				public void onFailure(@NonNull Exception exception)
+				{
+					// Handle unsuccessful uploads
+
+					//				showMessage(activity, "Failed uploading case info.");
+				}
+			}).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+			{
+				@Override
+				public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+				{
+					// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+					Uri downloadUrl = taskSnapshot.getDownloadUrl();
+					//				makeToast(activity, "Upload case info successful.");
+				}
+			});
+
+			// upload case images
+			// image file fullpath stored in imageFilepaths[]
+			StorageReference storageImages;
+
+			for (int i = 0; i < imageFilepaths.length; i++)
+			{
+				// put in userID/pictures folder
+				File filePath = new File(imageFilepaths[i]);
+				storageImages = mStorageRef.child(userID + "/pictures/" + filePath.getName());
+
+				// open FileInputStream based on image fullpath stored in zip_files_array[], and upload to Firebase server
+				try
+				{
+					FileInputStream fi = new FileInputStream(imageFilepaths[i]);
+					UploadTask image_uploadTask = storageImages.putStream(fi);
+
+					// Register observers to listen for when the download is done or if it fails
+					image_uploadTask.addOnFailureListener(new OnFailureListener()
+					{
+						@Override
+						public void onFailure(@NonNull Exception exception)
+						{
+							// Handle unsuccessful uploads
+							//				showMessage(activity, "Failed uploading images.");
+						}
+					}).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+					{
+						@Override
+						public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+						{
+							// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+							Uri downloadUrl = taskSnapshot.getDownloadUrl();
+							//				showMessage(activity, "Upload images successful.");
+						}
+					});
+
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					Log.d(TAG, "IOException: " + e.getMessage());
+					return false;
+				}
+			} //loop imageFilepaths[]
+
+			// delete temporary files
+			casesJSON.delete();
+
+			return true;
+
+		} // end if Firebase user != null
+		else
+		{
+			return false;
+		}
+
+
+	}
+
+	public static int downloadFromCloud(final Activity activity)
+	{
+		final File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+		final File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+		int caseCount = 0;
+
+		// Firebase: upload images and JSON files
+		final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+		if(user != null)
+		{
+			// set up Firebase storage reference
+			final FirebaseStorage mStorage = FirebaseStorage.getInstance();
+			final StorageReference mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
+
+			// get casesJSON file in userID folder
+			final String userID = user.getUid();
+			final StorageReference storageCasesJSON = mStorageRef.child(userID + "/" + ImportExportActivity.CASES_JSON_FILENAME);	// filename entered by user in alertdialog
+
+			try
+			{
+				// download casesJSON from Firebase storage
+				final File localCasesJSON = File.createTempFile(ImportExportActivity.CASES_JSON_FILENAME, "_temp");
+
+				storageCasesJSON.getFile(localCasesJSON).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>()
+				{
+					@Override
+					public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot)
+					{
+						// Local temp file has been created
+						// decrypt casesJSON file
+						try
+						{
+							byte[] passkey = UtilsFile.generateKey(user.getUid().substring(0,10));
+							UtilsFile.decryptFile(passkey, localCasesJSON);
+
+							// set up JSON reader from decrypted casesJSON
+							final FileInputStream cases_in = new FileInputStream(localCasesJSON);
+							final JsonReader reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
+
+							///////////
+							// CASES TABLE
+							//	try
+							//	{
+							Uri rowUri = null;
+							int parent_id;
+
+							ContentValues insertCaseValues = new ContentValues();
+							ContentValues insertImageValues = new ContentValues();
+
+							reader.beginArray();
+
+							// loop through all cases
+							while (reader.hasNext())
+							{
+								insertCaseValues.clear();
+								reader.beginObject();
+
+								while (reader.hasNext())
+								{
+									String field_name = reader.nextName();
+
+									if (field_name.contentEquals("IMAGES"))    // IMAGES are at the end of the row, after other fields
+									{
+										// update LAST_MODIFIED_DATE
+										SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
+										String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
+										insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
+
+										// insert the set of case info into the DB cases table
+										rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
+
+										// get parent key information
+										if(rowUri != null)
+										{
+											parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+
+											// increment count
+											//caseCount += 1;
+
+											// insert images ("IMAGES" is not null)
+											if (reader.peek() != JsonToken.NULL)
+											{
+												reader.beginArray();
+
+												// loop through all images of this case
+												while (reader.hasNext())
+												{
+													insertImageValues.clear();
+													reader.beginObject();
+
+													while (reader.hasNext())
+													{
+														String image_field_name = reader.nextName();
+
+														if (reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+														{
+															reader.skipValue();
+														}
+														else if (image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
+														{
+															// put new parent_id of newly added case
+															insertImageValues.put(image_field_name, parent_id);
+															reader.skipValue();
+														}
+														else if (Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
+														{
+															// image filename
+															String image_filename = reader.nextString();
+															insertImageValues.put(image_field_name, image_filename);
+
+															// download file from Firebase storage
+															StorageReference storageImageRef = mStorageRef.child(userID + "/pictures/" + image_filename);
+															try
+															{
+																// download image file from Firebase storage
+																final File localImageFile = new File(picturesDir, image_filename);
+
+																storageImageRef.getFile(localImageFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>()
+																{
+																	@Override
+																	public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot)
+																	{
+
+																	}
+																}).addOnFailureListener(new OnFailureListener()
+																{
+
+																	@Override
+																	public void onFailure(@NonNull Exception exception)
+																	{
+																		// Handle any errors
+																	}
+																});
+
+															}
+															catch (Exception e)
+															{
+																e.printStackTrace();
+																Toast.makeText(activity, "Unable to create image file", Toast.LENGTH_SHORT).show();
+																return;
+															}
+														}
+														else
+														{
+															reader.skipValue();
+														}
+													}
+
+													reader.endObject();
+
+													// insert the set of image info into the DB images table
+													activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+
+												}
+
+												reader.endArray();
+
+											}
+											else
+											{
+												// skip "IMAGES" NULL value
+												reader.skipValue();
+											}
+										}// end if rowID != null
+									}
+									else if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+									{
+										// ignore NULL values (except if "IMAGES) and row_id
+										reader.skipValue();
+									}
+									else if (Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
+									{
+										// valid field name, enter in database
+										insertCaseValues.put(field_name, reader.nextString());
+									}
+									else
+									{
+										// unrecognized field name
+										reader.skipValue();
+									}
+								}
+
+								reader.endObject();
+							}
+
+							reader.endArray();
+						}
+						catch (Exception e)
+						{
+							e.printStackTrace();
+							Toast.makeText(activity, "Unable to read Cases JSON file", Toast.LENGTH_SHORT).show();
+							return;
+						}
+
+						localCasesJSON.delete();
+
+					}
+				}).addOnFailureListener(new OnFailureListener()
+				{
+					@Override
+					public void onFailure(@NonNull Exception exception)
+					{
+						// Handle any errors
+					}
+				});
+
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+				Log.d(TAG, "IOException: " + e.getMessage());
+				Toast.makeText(activity, "Unable to creat local Cases JSON file", Toast.LENGTH_SHORT).show();
+				return -1;
+			} //localJSON file open
+
+
+		}
+		else
+		{
+			// user is null
+			Toast.makeText(activity, "User not logged in", Toast.LENGTH_SHORT).show();
+			return -1;
+		}
+
+		return caseCount;
 	}
 
 	/**
@@ -1159,7 +1528,7 @@ public class UtilClass extends Activity
 		}
 
 
-		File tempCasesJSON = null;
+	//	File tempCasesJSON = null;
 		File decryptedCasesJSON = null;
 		JsonReader reader = null;
 
@@ -1167,7 +1536,7 @@ public class UtilClass extends Activity
 		{
 			// open existing file that should have been unzipped and decrypted
 			decryptedCasesJSON = new File(activity.getCacheDir(), ImportExportActivity.CASES_JSON_FILENAME);
-			tempCasesJSON = new File(picturesDir, ImportExportActivity.CASES_JSON_FILENAME);
+	//		tempCasesJSON = new File(picturesDir, ImportExportActivity.CASES_JSON_FILENAME);
 
 			FileInputStream cases_in = new FileInputStream(decryptedCasesJSON);
 			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
@@ -1297,7 +1666,7 @@ public class UtilClass extends Activity
 
 		//UtilClass.showMessage(activity, "Imported " + caseCount + " cases");
 		//Toast.makeText(activity, "Imported " + caseCount + " cases", Toast.LENGTH_SHORT).show();
-		tempCasesJSON.delete();
+	//	tempCasesJSON.delete();
 		decryptedCasesJSON.delete();
 
 		return caseCount;

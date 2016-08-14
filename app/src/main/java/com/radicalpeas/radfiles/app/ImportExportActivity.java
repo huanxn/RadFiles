@@ -638,6 +638,28 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
 		public void setOnClickListeners(View view)
 		{
+			// CASE SAVE / BACKUP TO CLOUD
+			view.findViewById(R.id.case_upload_button).setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					if(UtilClass.uploadToCloud(activity))
+						UtilClass.showMessage(activity, "Cases uploaded.");
+				}
+			});
+
+			view.findViewById(R.id.case_download_button).setOnClickListener(new View.OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					int count = UtilClass.downloadFromCloud(activity);
+					if(count >= 0)
+						UtilClass.showMessage(activity, count + " cases downloaded.");
+				}
+			});
+
 			// CASE IMPORT
 			view.findViewById(R.id.case_import_button).setOnClickListener(new View.OnClickListener()
 			{

@@ -311,6 +311,12 @@
         <item name="android:background">@color/text_dark_divider</item>
     </style>
 
+    <style name="big_divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">4px</item>
+        <item name="android:background">@color/text_dark_divider</item>
+    </style>
+
 
     <style name="FirebaseBlueTheme" parent="FirebaseUI">
         <item name="colorPrimary">@color/md_grey_800</item>
