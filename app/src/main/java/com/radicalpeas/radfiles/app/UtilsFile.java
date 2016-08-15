@@ -160,6 +160,7 @@ public class UtilsFile
 		return zip(files, filename, null);
 	}
 
+	// TODO fix crash if duplicate file
 	public static File zip(String[] files, String filename, Handler progressHandler) throws IOException
 	{
 		BufferedInputStream origin = null;

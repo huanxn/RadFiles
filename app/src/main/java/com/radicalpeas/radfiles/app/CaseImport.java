@@ -2,6 +2,7 @@ package com.radicalpeas.radfiles.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -23,7 +24,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import com.gc.materialdesign.widgets.ProgressDialog;
+//import com.gc.materialdesign.widgets.ProgressDialog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +51,7 @@ public class CaseImport extends AppCompatActivity
 
 	private Activity activity;
 
-	private ProgressDialog progressWheelDialog = null;
+	private android.app.ProgressDialog progressWheelDialog = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -307,9 +308,10 @@ public class CaseImport extends AppCompatActivity
 	{
 		protected void onPreExecute()
 		{
-			progressWheelDialog = new ProgressDialog(activity, "Opening import file", getResources().getColor(R.color.default_colorAccent));
+			progressWheelDialog = new android.app.ProgressDialog(activity, R.style.ProgressDialogTheme);
+			progressWheelDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+			progressWheelDialog.setMessage("Opening import file");
 			progressWheelDialog.setCancelable(false);
-			progressWheelDialog.setCanceledOnTouchOutside(false);
 			progressWheelDialog.show();
 		}
 
@@ -506,7 +508,9 @@ public class CaseImport extends AppCompatActivity
 	{
 		protected void onPreExecute()
 		{
-			progressWheelDialog = new ProgressDialog(activity, "Importing cases", getResources().getColor(R.color.default_colorAccent));
+			progressWheelDialog = new ProgressDialog(activity, R.style.ProgressDialogTheme);
+			progressWheelDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+			progressWheelDialog.setMessage("Importing cases...");
 			progressWheelDialog.setCancelable(false);
 			progressWheelDialog.setCanceledOnTouchOutside(false);
 			progressWheelDialog.show();

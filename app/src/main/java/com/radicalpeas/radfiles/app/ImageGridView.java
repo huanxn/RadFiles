@@ -353,11 +353,8 @@ public class ImageGridView
 
 		ViewGroup.LayoutParams layoutParams = gridView.getLayoutParams();
 
-
 		//layoutParams.height = convertDpToPixels(context, IMAGE_GRID_SIZE*numRows); //this is in pixels
 		layoutParams.height = (itemHeight)*numRows; //this is in pixels
-
-
 		gridView.setLayoutParams(layoutParams);
 	}
 

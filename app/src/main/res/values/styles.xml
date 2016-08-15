@@ -328,6 +328,29 @@
         <item name="android:windowBackground">@color/md_blue_50</item>
     </style>
 
+    <style name="ProgressDialogTheme" parent="android:Theme.Material.Dialog">
+        <item name="android:alertDialogStyle">@style/CustomAlertDialogStyle</item>
+        <item name="android:windowBackground">@color/default_card_background</item>
+        <item name="android:textColorPrimary">@color/text_dark</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:textColor">@color/text_dark</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textSize">@dimen/veryLargeTextSize</item>
+    </style>
+
+    <style name="CustomAlertDialogStyle">
+        <item name="android:bottomBright">@color/transparent</item>
+        <item name="android:bottomDark">@color/transparent</item>
+        <item name="android:bottomMedium">@color/transparent</item>
+        <item name="android:centerBright">@color/md_white_1000</item>
+        <item name="android:centerDark">@color/md_grey_300</item>
+        <item name="android:centerMedium">@color/md_grey_50</item>
+        <item name="android:fullBright">@color/translucent_grey</item>
+        <item name="android:fullDark">@color/translucent_grey</item>
+        <item name="android:topBright">@color/transparent</item>
+        <item name="android:topDark">@color/transparent</item>
+    </style>
+
 </resources>
 
 

@@ -1,7 +1,6 @@
 package com.radicalpeas.radfiles.app;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.database.Cursor;
@@ -33,8 +32,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.mikepenz.fastadapter.utils.RecyclerViewCacheUtil;
@@ -60,7 +57,6 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
-import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -76,7 +72,8 @@ public class NavDrawerActivity extends AppCompatActivity
     public static final String TAG = "NavDrawerActivity";
 
     private static final int ADD_ACCOUNT = 100000;
-    private static final int MANAGE_ACCOUNTS = 100001;
+    private static final int MANAGE_ACCOUNT = 100001;
+    private static final int SIGN_OUT_ACCOUNT = 100002;
 
     final static protected int POS_CASE_LIST_ALL = 1;
     final static protected int POS_CASE_LIST_FAV = 2;
@@ -112,11 +109,11 @@ public class NavDrawerActivity extends AppCompatActivity
     private String userID;  // maybe don't need?
     private String providerId;  // email vs google.com
 
-    private FirebaseAuth mAuth = null;
+    protected FirebaseAuth mAuth = null;
     //private DatabaseReference mDatabaseRef = null;
-    private FirebaseStorage mStorage;
-    private StorageReference mStorageRef;
-    private StorageReference mStorageImages;
+    protected FirebaseStorage mStorage;
+    protected StorageReference mStorageRef = null;
+    protected StorageReference mStorageImages;
 
 
     private AppCompatActivity mActivity;
@@ -242,9 +239,10 @@ public class NavDrawerActivity extends AppCompatActivity
                       //  profile2,
 
                         //don't ask but google uses 14dp for the add account icon in gmail but 20dp for the normal icons (like manage account)
-                        new ProfileSettingDrawerItem().withName("Add Account").withDescription("Add new account").withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add).actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text)).withIdentifier(ADD_ACCOUNT),
-                        new ProfileSettingDrawerItem().withName("Manage Accounts").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(MANAGE_ACCOUNTS)
-                )
+                        new ProfileSettingDrawerItem().withName("Manage Account").withIcon(GoogleMaterial.Icon.gmd_settings).withIdentifier(MANAGE_ACCOUNT),
+                        new ProfileSettingDrawerItem().withName("Sign Out").withDescription("Sign out").withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_add).actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text)).withIdentifier(SIGN_OUT_ACCOUNT)
+
+        )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
 
                     @Override
@@ -281,8 +279,12 @@ public class NavDrawerActivity extends AppCompatActivity
                             // close drawer
                             return false;
                         }
-                        else if(profile instanceof IDrawerItem && profile.getIdentifier() == MANAGE_ACCOUNTS)
+
+                        else if(profile instanceof IDrawerItem && profile.getIdentifier() == SIGN_OUT_ACCOUNT)
                         {
+
+                            authSignOut();
+
                             // close drawer
                             return false;
                         }
@@ -361,9 +363,9 @@ public class NavDrawerActivity extends AppCompatActivity
                         {
                             Intent intent = null;
 
-                            if(drawerItem.getIdentifier() == drawerPosition || drawerItem.getIdentifier() == POS_NONE)
+                            if(drawerItem.getIdentifier() == POS_NONE)
                             {
-                                // same position, do nothing
+                                // do nothing
                                 intent = null;
                             }
                             else if (drawerItem.getIdentifier() == POS_CASE_LIST_ALL)
@@ -643,6 +645,21 @@ public class NavDrawerActivity extends AppCompatActivity
                             // user is now signed out
                             //startActivity(new Intent(mActivity, SignInActivity.class));
                             //finish();
+
+                            // not signed in
+                            startActivityForResult(
+                                    AuthUI.getInstance()
+                                            .createSignInIntentBuilder()
+                                            .setProviders(
+                                                    AuthUI.FACEBOOK_PROVIDER,
+                                                    AuthUI.GOOGLE_PROVIDER,
+                                                    AuthUI.EMAIL_PROVIDER
+                                            )
+                                            //.setTosUrl("https://superapp.example.com/terms-of-service.html")
+                                            .setTheme(R.style.FirebaseBlueTheme)
+                                            .build(),
+                                    RC_ADD_ACCOUNT);
+
                         }
                         else
                         {
@@ -659,7 +676,7 @@ public class NavDrawerActivity extends AppCompatActivity
     {
         if(mAuth.getCurrentUser() != null)
         {
-            authSignOut();
+     //       authSignOut();
         }
 
         // not signed in

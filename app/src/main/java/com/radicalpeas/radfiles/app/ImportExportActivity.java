@@ -3,6 +3,7 @@ package com.radicalpeas.radfiles.app;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,8 +26,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.gc.materialdesign.views.ProgressBarIndeterminateDeterminate;
-import com.gc.materialdesign.widgets.ProgressDialog;
+//import com.gc.materialdesign.views.ProgressBarIndeterminateDeterminate;
+//import com.gc.materialdesign.widgets.ProgressDialog;
 import com.nispok.snackbar.Snackbar;
 import com.nispok.snackbar.SnackbarManager;
 import com.nispok.snackbar.enums.SnackbarType;
@@ -92,12 +93,8 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
 	private static File backupDir;
 
-	private ProgressBarIndeterminateDeterminate progressBar = null;
-	private AlertDialog progressBarDialog = null;
-
-	// default
-	//private ProgressDialog progressWheelDialog = null;
-
+	private android.app.ProgressDialog progressBar = null; // ProgressBarIndeterminateDeterminate progressBar = null;
+	//private AlertDialog progressBarDialog = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -193,7 +190,8 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 			case R.id.menu_clear_cache:
 
 				final File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-				ProgressDialog progressWheelDialog = new ProgressDialog(activity, "Clearing cache...", activity.getResources().getColor(R.color.default_colorAccent));
+				android.app.ProgressDialog progressWheelDialog = new android.app.ProgressDialog(activity, activity.getResources().getColor(R.color.default_colorAccent));
+				progressWheelDialog.setTitle("Clearing cache...");
 				new ClearDirectoryTask(this, progressWheelDialog).execute(downloadsDir);
 
 				break;
@@ -308,6 +306,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
 				final String password = pw_input.getText().toString();
 
+				/*
 				LayoutInflater inflater = activity.getLayoutInflater();
 				View dialoglayout = inflater.inflate(R.layout.alertdialog_progress, null);
 				AlertDialog.Builder progressBuilder = new AlertDialog.Builder(activity).setCancelable(false);
@@ -317,6 +316,15 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
 				progressBar = (ProgressBarIndeterminateDeterminate) dialoglayout.findViewById(R.id.progress_bar);
 				progressBar.setMin(0);
+*/
+				progressBar = new ProgressDialog(activity, R.style.ProgressDialogTheme);
+				progressBar.setTitle("Please wait.");
+				progressBar.setMessage("Exporting cases...");
+				//progressBar.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+				progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+				//progressBar.setIndeterminate(true);
+				progressBar.setCancelable(false);
+				progressBar.show();
 
 				Thread exportThread = new Thread() {
 					@Override
@@ -352,7 +360,9 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 						}
 						else
 						{
-							UtilClass.showMessage(activity, "Unable to export cases to a file.");
+						//	UtilClass.showMessage(activity, "Unable to export cases to a file.");
+							progressBar.dismiss();
+//							Toast.makeText(activity, "Unable to export cases to a file.", Toast.LENGTH_LONG);
 						}
 					}
 				};
@@ -594,9 +604,9 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 				case PROGRESS_MSG_INCREMENT:
 					progressBar.setProgress(progress++);
 					break;
-				case PROGRESS_MSG_MIN:
-					progressBar.setMin(msg.arg2);
-					break;
+	//			case PROGRESS_MSG_MIN:
+	//				progressBar.setMin(msg.arg2);
+	//				break;
 				case PROGRESS_MSG_MAX:
 					progressBar.setMax(msg.arg2);
 					break;
@@ -605,7 +615,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 					break;
 
 				case PROGRESS_MSG_EXPORT_FINISHED:
-					progressBarDialog.dismiss();
+					progressBar.dismiss();
 					UtilClass.showMessage(activity, "Exported " + msg.arg2 + " cases.");
 					break;
 
@@ -621,6 +631,9 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
 	public static class CloudStorageFragment extends Fragment
 	{
+
+		// spinning wheel: upload task
+		private android.app.ProgressDialog progressWheelDialog = null;
 
 		public CloudStorageFragment()
 		{
@@ -644,8 +657,9 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 				@Override
 				public void onClick(View v)
 				{
-					if(UtilClass.uploadToCloud(activity))
-						UtilClass.showMessage(activity, "Cases uploaded.");
+					//if(UtilClass.uploadToCloud(activity))
+					//	UtilClass.showMessage(activity, "Cases uploaded.");
+					new UploadCasesTask().execute();
 				}
 			});
 
@@ -654,9 +668,13 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 				@Override
 				public void onClick(View v)
 				{
-					int count = UtilClass.downloadFromCloud(activity);
-					if(count >= 0)
-						UtilClass.showMessage(activity, count + " cases downloaded.");
+
+					//int count = UtilClass.downloadFromCloud(activity);
+					//if(count >= 0)
+					//	UtilClass.showMessage(activity, count + " cases downloaded.");
+
+					new DownloadCasesTask().execute();
+
 				}
 			});
 
@@ -746,14 +764,84 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 			});
 
 		}
+
+		/**
+		 * Complete upload of all cases into firebase storage
+		 */
+		private class UploadCasesTask extends AsyncTask<Void, Integer, Integer>
+		{
+			protected void onPreExecute()
+			{
+				//progressWheelDialog = new android.app.ProgressDialog(activity, "Uploading cases", getResources().getColor(R.color.default_colorAccent)); //UtilClass.get_attr(activity, R.color.default_colorAccent));
+				progressWheelDialog = new android.app.ProgressDialog(activity, R.style.ProgressDialogTheme); //UtilClass.get_attr(activity, R.color.default_colorAccent));
+				progressWheelDialog.setMessage("Uploading cases...");
+				progressWheelDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+				progressWheelDialog.show();
+				progressWheelDialog.setCancelable(false);
+				// progressWheelDialog.setCanceledOnTouchOutside(false);
+
+			}
+
+			@Override
+			protected Integer doInBackground(Void... params)
+			{
+				// upload to firebase storage
+				int count =  UtilClass.uploadToCloud(activity);
+
+				return count;
+			}
+
+			protected void onPostExecute(Integer count)
+			{
+				progressWheelDialog.dismiss();
+				UtilClass.showToast(activity, "Finished uploading " + count + " cases.");
+
+				//finish();
+			}
+		}
+
+		/**
+		 * Complete download of all cases into firebase storage
+		 */
+		private class DownloadCasesTask extends AsyncTask<Void, Integer, Integer>
+		{
+			protected void onPreExecute()
+			{
+				//progressWheelDialog = new android.app.ProgressDialog(activity, "Uploading cases", getResources().getColor(R.color.default_colorAccent)); //UtilClass.get_attr(activity, R.color.default_colorAccent));
+				progressWheelDialog = new android.app.ProgressDialog(activity, R.style.ProgressDialogTheme); //UtilClass.get_attr(activity, R.color.default_colorAccent));
+				progressWheelDialog.setMessage("Downloading cases...");
+				progressWheelDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+				progressWheelDialog.show();
+				progressWheelDialog.setCancelable(false);
+				// progressWheelDialog.setCanceledOnTouchOutside(false);
+
+			}
+
+			@Override
+			protected Integer doInBackground(Void... params)
+			{
+				// upload to firebase storage
+				int count =  UtilClass.downloadFromCloud(activity);
+
+				return count;
+			}
+
+			protected void onPostExecute(Integer count)
+			{
+				progressWheelDialog.dismiss();
+				UtilClass.showToast(activity, "Finished downloading " + count + " cases.");
+
+				//finish();
+			}
+		}
 	}
 
 	private class ClearDirectoryTask extends AsyncTask<File, Integer, Boolean>
 	{
 		private Activity activity;
-		private ProgressDialog progressWheelDialog;
+		private android.app.ProgressDialog progressWheelDialog;
 
-		ClearDirectoryTask(Activity activity, ProgressDialog progressWheelDialog)
+		ClearDirectoryTask(Activity activity, android.app.ProgressDialog progressWheelDialog)
 		{
 			this.activity = activity;
 			this.progressWheelDialog = progressWheelDialog;
@@ -785,4 +873,6 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 			}
 		}
 	}
+
+
 }

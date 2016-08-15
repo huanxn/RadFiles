@@ -30,6 +30,8 @@
 
     <color name="default_colorSelected">#AAb3e5fc</color> <!-- translucent md_light_blue_100 -->
 
+    <color name="translucent_grey">#AAeeeeee</color> <!-- translucent grey -->
+
     <!-- Drawer colors -->
     <!-- Material DEFAULT colors -->
     <color name="material_drawer_primary">#2196F3</color>

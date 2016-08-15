@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.ContentUris;
 import android.content.Context;
@@ -45,7 +46,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.gc.materialdesign.widgets.ProgressDialog;
+//import com.gc.materialdesign.widgets.ProgressDialog;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
@@ -124,7 +125,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 	public static File appDir;             // internal app data directory
 	public static File dataDir;            // private data directory (with SQL database)
 
-	private static ProgressDialog progressDialog;
+	private static android.app.ProgressDialog progressDialog;
 
 	// firebase
 	//DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
@@ -1570,9 +1571,10 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 			protected void onPreExecute()
 			{
 				// show progress wheel dialog
-				progressDialog = new ProgressDialog(activity, "Deleting cases", getResources().getColor(R.color.default_colorAccent));
+				progressDialog = new ProgressDialog(activity, R.style.ProgressDialogTheme);
+				progressDialog.setMessage("Deleting cases...");
+				progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
 				progressDialog.setCancelable(false);
-				progressDialog.setCanceledOnTouchOutside(false);
 				progressDialog.show();
 			}
 
@@ -1647,9 +1649,10 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 			protected void onPreExecute()
 			{
 				// show progress wheel dialog
-				progressDialog = new ProgressDialog(activity, "Exporting cases", getResources().getColor(R.color.default_colorAccent));
+				progressDialog = new android.app.ProgressDialog(activity, R.style.ProgressDialogTheme);
+				progressDialog.setMessage("Exporting cases...");
+				progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
 				progressDialog.setCancelable(false);
-				progressDialog.setCanceledOnTouchOutside(false);
 				progressDialog.show();
 			}
 

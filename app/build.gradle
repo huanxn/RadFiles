@@ -19,7 +19,7 @@ android {
     buildToolsVersion "${project.ext.buildtools}"
     defaultConfig {
         applicationId "com.radicalpeas.radfiles.app"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 24
         versionCode 2
         versionName "alpha 0.1"
@@ -80,7 +80,7 @@ dependencies {
 
     // snack bar no good, progress bar
     // compile 'com.github.navasmdc:MaterialDesign:1.+@aar'  // no good because ripple color defined in another library
-    compile 'com.github.vajro:MaterialDesignLibrary:1.6'
+    //compile 'com.github.vajro:MaterialDesignLibrary:1.6'
 
     // gradle error?  need for MaterialDesignLibrary indeterminate progress bar
     compile 'com.nineoldandroids:library:2.4.0'

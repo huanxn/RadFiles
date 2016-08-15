@@ -179,13 +179,16 @@ public class ImageAdapter extends BaseAdapter
 		notifyDataSetChanged();
 	}
 
+	// TODO fix for different screen sizes
 	private void setImageSize(Context context)
 	{
 		//get margin/padding from layout
-		int padding = Math.round(UtilClass.convertDpToPixels(context, 20)); // approx 40 on Galaxy Nexus
+		int padding = Math.round(UtilClass.convertDpToPixels(context, 25)); // approx 40 on Galaxy Nexus
 		int numCols = 2;
-		float dp_width = UtilClass.getDisplayWidth(context);
-		float px_width = UtilClass.convertDpToPx(context, dp_width);
+		//float dp_width = UtilClass.getDisplayWidth(context);
+		//float px_width = UtilClass.convertDpToPx(context, dp_width);
+		float px_width = UtilClass.getDisplayWidthPx(context);
+
 		imageSizePx = Math.round((px_width-padding)/numCols);
 	}
 

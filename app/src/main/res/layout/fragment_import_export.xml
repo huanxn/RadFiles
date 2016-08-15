@@ -22,29 +22,11 @@
             android:text="SAVE AND RESTORE CASES"
             />
 
-        <!-- Download -->
-        <RelativeLayout
-            android:id="@+id/case_download_button"
-            style="@style/textButtonStyle"
-            android:layout_below="@id/firebase_header">
-
-        <TextView
-            android:id="@+id/case_download_title"
-            style="@style/textButtonName"
-            android:text="Restore from cloud"/>
-
-        <TextView
-            style="@style/textButtonDescription"
-            android:layout_below="@id/case_download_title"
-            android:text="Download all cases from your personal RadFiles cloud storage."/>
-
-        </RelativeLayout>
-
         <!-- Upload -->
         <RelativeLayout
             android:id="@+id/case_upload_button"
             style="@style/textButtonStyle"
-            android:layout_below="@id/case_download_button">
+            android:layout_below="@id/firebase_header">
 
             <TextView
                 android:id="@+id/case_upload_title"
@@ -58,10 +40,29 @@
 
         </RelativeLayout>
 
+        <!-- Download -->
+        <RelativeLayout
+            android:id="@+id/case_download_button"
+            style="@style/textButtonStyle"
+            android:layout_below="@id/case_upload_button">
+
+            <TextView
+                android:id="@+id/case_download_title"
+                style="@style/textButtonName"
+                android:text="Restore from cloud"/>
+
+            <TextView
+                style="@style/textButtonDescription"
+                android:layout_below="@id/case_download_title"
+                android:text="Download all cases from your personal RadFiles cloud storage."/>
+
+        </RelativeLayout>
+
+
         <TextView
             android:id="@+id/export_header"
             style="@style/sectionHeader"
-            android:layout_below="@id/case_upload_button"
+            android:layout_below="@id/case_download_button"
             android:text="SHARE CASES"
             />
 
