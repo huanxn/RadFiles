@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +19,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.JsonReader;
 import android.util.JsonToken;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +38,7 @@ import java.util.List;
 
 public class CaseImport extends AppCompatActivity
 {
+	public static final String TAG = "CaseImport";
 
 	RecyclerView mRecyclerView;
 	CaseCardAdapter mCardAdapter;
@@ -167,6 +170,7 @@ public class CaseImport extends AppCompatActivity
 				{
 					password = input.getText().toString();
 					new LoadImportListTask().execute(importFile.getPath(), password);
+				//	new ImportCasesTask().execute(importFile.getPath(), password);
 				}
 			});
 
@@ -265,7 +269,7 @@ public class CaseImport extends AppCompatActivity
 				}
 				else
 				{
-					UtilClass.showMessage(this, "Error: file not found.");
+					UtilClass.showSnackbar(this, "Error: file not found.");
 				}
 				break;
 		}
@@ -320,6 +324,7 @@ public class CaseImport extends AppCompatActivity
 		{
 			String file_path = params[0];
 			String password = params[1];
+			int numCases = 0;
 
 			List<Case> importCaseList = new ArrayList<Case>();
 
@@ -360,6 +365,10 @@ public class CaseImport extends AppCompatActivity
 				FileInputStream cases_in = new FileInputStream(tempCasesJSON);
 				reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
 
+	//			CasesDB casesDB = new CasesDB();
+	//			casesDB.parseJSON(new InputStreamReader(cases_in));
+
+
 			}
 			catch (Exception e)
 			{
@@ -367,114 +376,147 @@ public class CaseImport extends AppCompatActivity
 				return "Unable to open JSON file.";
 			}
 
-
 			// CASES TABLE
 			try
 			{
-				reader.beginArray();
+				reader.beginObject();
 
-				// loop through all cases
+				// get metadata
+
+				String user;
+				String date_created;
+
 				while(reader.hasNext())
 				{
-					reader.beginObject();
 
-					Case mCase = new Case();
-					mCase.thumbnail = -1;    //default
+					String metadata_field = reader.nextName();
 
-					while(reader.hasNext())
+					if(metadata_field.contentEquals("NUM_CASES"))
 					{
-						String field_name = reader.nextName();
+						numCases = Integer.valueOf(reader.nextString());
+					}
+					else if(metadata_field.contentEquals("DATE_CREATED"))
+					{
+						date_created = reader.nextString();
+					}
+					else if(metadata_field.contentEquals("USER"))
+					{
+						user = reader.nextString();
+					}
+					else if(metadata_field.contentEquals("DATA"))
+					{
+						// loop through all cases
+						reader.beginArray();
+						while(reader.hasNext())
+						{
+							reader.beginObject();
 
-						if(reader.peek() == JsonToken.NULL)
-						{
-							reader.skipValue();
-						}
-						else if(field_name.contentEquals(CasesProvider.KEY_ROWID))
-						{
-							mCase.key_id = Long.valueOf(reader.nextString());
-						}
-						else if(field_name.contentEquals(CasesProvider.KEY_PATIENT_ID))
-						{
-							mCase.patient_id = reader.nextString();
-						}
-						else if(field_name.contentEquals(CasesProvider.KEY_DIAGNOSIS))
-						{
-							mCase.diagnosis = reader.nextString();
-						}
-						else if(field_name.contentEquals(CasesProvider.KEY_FINDINGS))
-						{
-							mCase.findings = reader.nextString();
-						}
-						else if(field_name.contentEquals(CasesProvider.KEY_THUMBNAIL))
-						{
-							mCase.thumbnail = Integer.valueOf(reader.nextString());
-						}
-						else if(field_name.contentEquals("IMAGES"))
-						{
-							List<String> image_filenames = new ArrayList<String>();
-							int image_order;
-							reader.beginArray();
+							Case mCase = new Case();
+							mCase.thumbnail = -1;    //default
 
-							// loop through all images of this case
 							while(reader.hasNext())
 							{
-								reader.beginObject();
+								String field_name = reader.nextName();
 
-								while(reader.hasNext())
+								if(reader.peek() == JsonToken.NULL)
 								{
-									String image_field_name = reader.nextName();
+									reader.skipValue();
+								}
+								else if(field_name.contentEquals(CasesProvider.KEY_ROWID))
+								{
+									mCase.key_id = Long.valueOf(reader.nextString());
+								}
+								else if(field_name.contentEquals(CasesProvider.KEY_PATIENT_ID))
+								{
+									mCase.patient_id = reader.nextString();
+								}
+								else if(field_name.contentEquals(CasesProvider.KEY_DIAGNOSIS))
+								{
+									mCase.diagnosis = reader.nextString();
+								}
+								else if(field_name.contentEquals(CasesProvider.KEY_FINDINGS))
+								{
+									mCase.findings = reader.nextString();
+								}
+								else if(field_name.contentEquals(CasesProvider.KEY_THUMBNAIL))
+								{
+									mCase.thumbnail = Integer.valueOf(reader.nextString());
+								}
+								else if(field_name.contentEquals("IMAGES"))
+								{
+									List<String> image_filenames = new ArrayList<String>();
+									int image_order;
+									reader.beginArray();
 
-									if(reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+									// loop through all images of this case
+									while(reader.hasNext())
 									{
-										reader.skipValue();
-									}
-									else if(image_field_name.contentEquals(CasesProvider.KEY_IMAGE_FILENAME))
-									{
-										image_filenames.add(reader.nextString());
-									}
-									else if(image_field_name.contentEquals(CasesProvider.KEY_ORDER))
-									{
-										image_order = Integer.valueOf(reader.nextString());
+										reader.beginObject();
 
-										if(mCase.thumbnail == image_order)
+										while(reader.hasNext())
 										{
-											mCase.thumbnail_filename = getCacheDir().getAbsolutePath() + "/" + image_filenames.get(image_filenames.size()-1);   // use last one that was just added
+											String image_field_name = reader.nextName();
+
+											if(reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+											{
+												reader.skipValue();
+											}
+											else if(image_field_name.contentEquals(CasesProvider.KEY_IMAGE_FILENAME))
+											{
+												image_filenames.add(reader.nextString());
+											}
+											else if(image_field_name.contentEquals(CasesProvider.KEY_ORDER))
+											{
+												image_order = Integer.valueOf(reader.nextString());
+
+												if(mCase.thumbnail == image_order)
+												{
+													mCase.thumbnail_filename = getCacheDir().getAbsolutePath() + "/" + image_filenames.get(image_filenames.size()-1);   // use last one that was just added
+												}
+											}
+											else
+											{
+												reader.skipValue();
+											}
 										}
-									}
-									else
-									{
-										reader.skipValue();
-									}
-								}
 
-								if(mCase.thumbnail == -1)   // default: use first image
+										if(mCase.thumbnail == -1)   // default: use first image
+										{
+											mCase.thumbnail_filename = getCacheDir().getAbsolutePath() + "/" + image_filenames.get(0);
+										}
+
+										reader.endObject();
+									}
+
+									reader.endArray();
+
+								}
+								else
 								{
-									mCase.thumbnail_filename = getCacheDir().getAbsolutePath() + "/" + image_filenames.get(0);
+									reader.skipValue();
 								}
-
-								reader.endObject();
 							}
 
-							reader.endArray();
+							reader.endObject();
 
+							importCaseList.add(mCase);
 						}
-						else
-						{
-							reader.skipValue();
-						}
+
+						reader.endArray();
+					}
+					else
+					{
+						reader.skipValue();
 					}
 
-					reader.endObject();
+				} // end while
 
-					importCaseList.add(mCase);
-				}
-
-				reader.endArray();
-
+				reader.endObject();
 			}
 			catch (IOException e)
 			{
 				e.printStackTrace();
+				Log.d(TAG, e.getMessage());
 				return "Unable to open case file";
 			}
 
@@ -496,7 +538,7 @@ public class CaseImport extends AppCompatActivity
 			}
 			else
 			{
-				UtilClass.showMessage(activity, error_msg);
+				UtilClass.showSnackbar(activity, error_msg);
 			}
 		}
 	}
@@ -512,7 +554,6 @@ public class CaseImport extends AppCompatActivity
 			progressWheelDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
 			progressWheelDialog.setMessage("Importing cases...");
 			progressWheelDialog.setCancelable(false);
-			progressWheelDialog.setCanceledOnTouchOutside(false);
 			progressWheelDialog.show();
 		}
 
@@ -531,7 +572,7 @@ public class CaseImport extends AppCompatActivity
 		protected void onPostExecute(Integer count)
 		{
 			progressWheelDialog.dismiss();
-			UtilClass.showToast(activity, "RadFiles imported " + count + " cases.");
+			UtilClass.showSnackbar(activity, "RadFiles imported " + count + " cases.", Snackbar.LENGTH_INDEFINITE);
 
 			finish();
 		}

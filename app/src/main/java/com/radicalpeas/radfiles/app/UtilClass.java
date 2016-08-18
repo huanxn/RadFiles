@@ -1,31 +1,20 @@
 package com.radicalpeas.radfiles.app;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Path;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewCompat;
-import android.text.InputType;
 import android.util.DisplayMetrics;
 import android.util.JsonReader;
 import android.util.JsonToken;
@@ -34,10 +23,8 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,8 +39,6 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.nispok.snackbar.Snackbar;
-import com.nispok.snackbar.SnackbarManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -99,19 +84,21 @@ public class UtilClass extends Activity
 	{
 		Toast.makeText(context, String.valueOf(message), Toast.LENGTH_LONG).show();
 	}
-	public static void showMessage(Context context, String message)
+	public static void showSnackbar(Activity activity, String message)
 	{
-		SnackbarManager.show(Snackbar.with(context)
-				       .text(message));
 
-
+		showSnackbar(activity, message, Snackbar.LENGTH_SHORT);
 
 		//Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-		/*
-		SnackBar snackbar = new SnackBar(activity, message, null, null);
-		snackbar.show();
-		*/
+	}
+	public static void showSnackbar(Activity activity, String message, int length)
+	{
 
+		Snackbar snackbar = Snackbar
+				.make(activity.findViewById(android.R.id.content), message, length);
+		snackbar.show();
+
+		//Toast.makeText(context, message, Toast.LENGTH_LONG).show();
 	}
 
 
@@ -805,7 +792,7 @@ public class UtilClass extends Activity
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			//showMessage(activity, "Unable to create local backup file.");
+			//showSnackbar(activity, "Unable to create local backup file.");
 			Log.d(TAG, "Unable to create local backup file.");
 			return null;
 		}
@@ -854,8 +841,25 @@ public class UtilClass extends Activity
 				JsonWriter cases_writer = new JsonWriter(new OutputStreamWriter(cases_out, "UTF-8"));
 				cases_writer.setIndent("  ");
 
-				cases_writer.beginArray();
 
+				// write metadata
+				cases_writer.beginObject();
+				cases_writer.name("NUM_CASES").value(caseCursor.getCount());
+				cases_writer.name("DATE_CREATED").value(new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date()));
+
+				FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+				if(user != null)
+				{
+					cases_writer.name("USER").value(user.getEmail());
+				}
+				else
+				{
+					cases_writer.name("USER").value("ANONYMOUS");
+				}
+
+				cases_writer.name("DATA");
+
+				cases_writer.beginArray();
 				// loop through all cases
 				do
 				{
@@ -910,20 +914,24 @@ public class UtilClass extends Activity
 				caseCursor.close();
 
 				cases_writer.endArray();
+				cases_writer.endObject();
 				cases_writer.close();
 			}
 
-			// encrypt casesJSON file
-			try
+			// encrypt casesJSON file, if nonblank password
+			if(!password.contentEquals(""))
 			{
-				byte[] passkey = UtilsFile.generateKey(password);
-				UtilsFile.encryptFile(passkey, casesJSON);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, "Unable to generate encryption key.");
-				return null;
+				try
+				{
+					byte[] passkey = UtilsFile.generateKey(password);
+					UtilsFile.encryptFile(passkey, casesJSON);
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					Log.d(TAG, "Unable to generate encryption key.");
+					return null;
+				}
 			}
 
 			// zip image and JSON files
@@ -939,7 +947,7 @@ public class UtilClass extends Activity
 			if(progressHandler != null)
 			{
 				Message msg = new Message();
-				msg.arg1 = ImportExportActivity.PROGRESS_MSG_EXPORT_FINISHED;
+				msg.arg1 = ImportExportActivity.PROGRESS_MSG_FINISHED;
 				msg.arg2 = count;
 				progressHandler.sendMessage(msg);
 			}
@@ -957,518 +965,6 @@ public class UtilClass extends Activity
 		return returnFile;
 	}
 
-	public static int uploadToCloud(final Context context)
-	{
-		File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-		File picturesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-		File casesJSON;
-		int count = 0;
-
-		// Firebase: upload images and JSON files
-		FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-		if(user != null)
-		{
-
-			String password = user.getUid().substring(0,10);
-
-			try
-			{
-				casesJSON = new File(downloadsDir.getPath(), ImportExportActivity.CASES_JSON_FILENAME);
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				//showMessage(activity, "Unable to create local backup file.");
-				Log.d(TAG, "Unable to create local backup file.");
-				return -1;
-			}
-
-			// filepath of images to upload to firebase storage
-			String imageFilepaths[] = new String[0];
-
-			// create local JSON files
-			try
-			{
-				FileOutputStream cases_out = new FileOutputStream(casesJSON);
-
-				// Get cases to export from cases table into a cursor
-				Cursor caseCursor;
-				// get all cases
-				caseCursor = context.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
-
-				if (caseCursor != null && caseCursor.moveToFirst())
-				{
-					JsonWriter cases_writer = new JsonWriter(new OutputStreamWriter(cases_out, "UTF-8"));
-					cases_writer.setIndent("  ");
-
-					cases_writer.beginArray();
-
-					// loop through all cases
-					do
-					{
-						cases_writer.beginObject();
-
-						// output all case columns/fields for this case
-						for (int i = 0; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
-						{
-							if (caseCursor.getString(i) != null && !caseCursor.getString(i).isEmpty())
-							{
-								cases_writer.name(CasesProvider.CASES_TABLE_ALL_KEYS[i]).value(caseCursor.getString(i));
-							}
-						}
-
-						// output all linked images for this case (via parent_case_id)
-						String[] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
-						Cursor imageCursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-
-						// loop through all images of this case
-						if (imageCursor.moveToFirst())
-						{
-							cases_writer.name("IMAGES");
-							cases_writer.beginArray();
-							do
-							{
-								cases_writer.beginObject();
-								for (int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
-								{
-									cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
-								}
-								cases_writer.endObject();
-
-								// add image filename to zip list
-								imageFilepaths = UtilClass.addArrayElement(imageFilepaths, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-
-							} while (imageCursor.moveToNext());
-
-							cases_writer.endArray();
-						}
-						else
-						{
-							cases_writer.name("IMAGES").nullValue();
-						}
-
-						imageCursor.close();
-
-						cases_writer.endObject();
-
-					} while (caseCursor.moveToNext());
-
-					// number of cases
-					count = caseCursor.getCount();
-
-					caseCursor.close();
-
-					cases_writer.endArray();
-					cases_writer.close();
-				}
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, "IOException: " + e.getMessage());
-				return -1;
-			}
-
-			// encrypt casesJSON file
-			try
-			{
-				byte[] passkey = UtilsFile.generateKey(password);
-				UtilsFile.encryptFile(passkey, casesJSON);
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, "Unable to generate encryption key.");
-				return -1;
-			}
-
-
-			// set up Firebase storage reference
-
-//			Toast.makeText(context, "Uploading files", Toast.LENGTH_LONG).show();
-
-			FirebaseStorage mStorage = FirebaseStorage.getInstance();
-			StorageReference mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
-
-			// put in userID folder
-			String userID = user.getUid();
-			StorageReference storageCasesJSON = mStorageRef.child(userID + "/" + ImportExportActivity.CASES_JSON_FILENAME);	// filename entered by user in alertdialog
-
-			// upload encrypted casesJSON file to Firebase server
-			UploadTask casesJSON_uploadTask = storageCasesJSON.putFile(Uri.fromFile(casesJSON));
-
-			// Register observers to listen for when the upload is done or if it fails
-			casesJSON_uploadTask.addOnFailureListener(new OnFailureListener()
-			{
-				@Override
-				public void onFailure(@NonNull Exception exception)
-				{
-					// Handle unsuccessful uploads
-	//				showMessage(context, "Failed uploading case info.");
-				}
-			}).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
-			{
-				@Override
-				public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
-				{
-					// taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-					Uri downloadUrl = taskSnapshot.getDownloadUrl();
-	//				showMessage(context, "Successfully uploaded case info.");
-				}
-			});
-
-			// upload case images
-			// image file fullpath stored in imageFilepaths[]
-			StorageReference storageImages;
-			// Create the file metadata
-			StorageMetadata metadata = new StorageMetadata.Builder()
-					.setContentType("image/jpeg")
-					.build();
-
-			for (int i = 0; i < imageFilepaths.length; i++)
-			{
-				// put in userID/pictures folder
-				File filePath = new File(imageFilepaths[i]);
-				storageImages = mStorageRef.child(userID + "/pictures/" + filePath.getName());
-
-				// open FileInputStream based on image fullpath stored in zip_files_array[], and upload to Firebase server
-				try
-				{
-					final FileInputStream fi = new FileInputStream(imageFilepaths[i]);
-					UploadTask image_uploadTask = storageImages.putStream(fi, metadata);
-
-					// limit of 128 total asynctasks
-					List tasks = mStorageRef.getActiveUploadTasks();
-					while (tasks.size() > 64)
-					{
-						Thread.sleep(500);
-						tasks = mStorageRef.getActiveUploadTasks();
-					}
-					// Register observers to listen for when the download is done or if it fails
-					image_uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
-					{
-						@Override
-						public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-							// Handle successful uploads on complete
-							Uri downloadUrl = taskSnapshot.getMetadata().getDownloadUrl();
-//							showMessage(context, "Upload images successful.");
-						}
-					}).addOnFailureListener(new OnFailureListener()
-					{
-						@Override
-						public void onFailure(@NonNull Exception exception)
-						{
-							// Handle unsuccessful uploads
-							//				showMessage(activity, "Failed uploading images.");
-
-//							showMessage(context, "Failed uploading images.");
-						}
-					}).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-						@Override
-						public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-							double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
-							System.out.println("Upload is " + progress + "% done");
-						}
-					}).addOnPausedListener(new OnPausedListener<UploadTask.TaskSnapshot>() {
-						@Override
-						public void onPaused(UploadTask.TaskSnapshot taskSnapshot) {
-							System.out.println("Upload is paused");
-						}
-					});
-
-
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
-					Log.d(TAG, "IOException: " + e.getMessage());
-					return -1;
-				}
-				catch (InterruptedException e)
-				{
-					e.printStackTrace();
-					Log.d(TAG, "InterruptedException: " + e.getMessage());
-					return -1;
-				}
-			} //loop imageFilepaths[]
-
-			// delete temporary files
-			casesJSON.delete();
-
-			return count;
-
-		} // end if Firebase user != null
-		else
-		{
-			return -1;
-		}
-
-
-	}
-
-	public static int downloadFromCloud(final Activity activity)
-	{
-		final File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-		final File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-		int caseCount = 0;
-
-		// Firebase: upload images and JSON files
-		final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-		if(user != null)
-		{
-			// set up Firebase storage reference
-			final FirebaseStorage mStorage = FirebaseStorage.getInstance();
-			final StorageReference mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
-
-			// get casesJSON file in userID folder
-			final String userID = user.getUid();
-			final StorageReference storageCasesJSON = mStorageRef.child(userID + "/" + ImportExportActivity.CASES_JSON_FILENAME);	// filename entered by user in alertdialog
-
-			File localCasesJSON = null;
-
-			try
-			{
-				// download casesJSON from Firebase storage
-				localCasesJSON = File.createTempFile(ImportExportActivity.CASES_JSON_FILENAME, "_temp");
-
-				storageCasesJSON.getFile(localCasesJSON).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>()
-				{
-					@Override
-					public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot)
-					{
-						// success
-
-					}
-				}).addOnFailureListener(new OnFailureListener()
-				{
-					@Override
-					public void onFailure(@NonNull Exception exception)
-					{
-						// Handle any errors
-					}
-				});
-
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, "IOException: " + e.getMessage());
-		//		Toast.makeText(activity, "Unable to create local Cases JSON file", Toast.LENGTH_SHORT).show();
-				return -1;
-			} //localJSON file open
-
-			// wait until localJSON finished downloading
-			try
-			{
-				List tasks = mStorageRef.getActiveDownloadTasks();
-				while (tasks.size() > 0)
-				{
-					Thread.sleep(500);
-					tasks = mStorageRef.getActiveUploadTasks();
-				}
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, "InterruptedException: " + e.getMessage());
-				return -1;
-			}
-
-			// Local temp file has been created
-			// decrypt casesJSON file
-			try
-			{
-				byte[] passkey = UtilsFile.generateKey(user.getUid().substring(0,10));
-				UtilsFile.decryptFile(passkey, localCasesJSON);
-
-				// set up JSON reader from decrypted casesJSON
-				final FileInputStream cases_in = new FileInputStream(localCasesJSON);
-				final JsonReader reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
-
-				///////////
-				// CASES TABLE
-
-				Uri rowUri = null;
-				int parent_id;
-
-				ContentValues insertCaseValues = new ContentValues();
-				ContentValues insertImageValues = new ContentValues();
-
-				reader.beginArray();
-
-				// loop through all cases
-				while (reader.hasNext())
-				{
-					insertCaseValues.clear();
-					reader.beginObject();
-
-					while (reader.hasNext())
-					{
-						String field_name = reader.nextName();
-
-						if (field_name.contentEquals("IMAGES"))    // IMAGES are at the end of the row, after other fields
-						{
-							// update LAST_MODIFIED_DATE
-							SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
-							String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
-							insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
-
-							// insert the set of case info into the DB cases table
-							rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
-
-							// get parent key information
-							if(rowUri != null)
-							{
-								parent_id = Integer.valueOf(rowUri.getLastPathSegment());
-
-								// increment count
-								//caseCount += 1;
-
-								// insert images ("IMAGES" is not null)
-								if (reader.peek() != JsonToken.NULL)
-								{
-									reader.beginArray();
-
-									// loop through all images of this case
-									while (reader.hasNext())
-									{
-										insertImageValues.clear();
-										reader.beginObject();
-
-										while (reader.hasNext())
-										{
-											String image_field_name = reader.nextName();
-
-											if (reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
-											{
-												reader.skipValue();
-											}
-											else if (image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
-											{
-												// put new parent_id of newly added case
-												insertImageValues.put(image_field_name, parent_id);
-												reader.skipValue();
-											}
-											else if (Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
-											{
-												String field_contents = reader.nextString();
-												insertImageValues.put(image_field_name, field_contents);
-
-												// limit of 128 total asynctasks
-												List tasks = mStorageRef.getActiveDownloadTasks();
-												while (tasks.size() > 64)
-												{
-													Thread.sleep(500);
-													tasks = mStorageRef.getActiveDownloadTasks();
-												}
-
-												if(image_field_name.contentEquals(CasesProvider.KEY_IMAGE_FILENAME))
-												{
-													// download image file
-
-													// image filename
-													String image_filename = field_contents;
-
-													// download file from Firebase storage
-													StorageReference storageImageRef = mStorageRef.child(userID + "/pictures/" + image_filename);
-													try
-													{
-														// download image file from Firebase storage
-														final File localImageFile = new File(picturesDir, image_filename);
-
-														storageImageRef.getFile(localImageFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>()
-														{
-															@Override
-															public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot)
-															{
-
-															}
-														}).addOnFailureListener(new OnFailureListener()
-														{
-
-															@Override
-															public void onFailure(@NonNull Exception exception)
-															{
-																// Handle any errors
-															}
-														});
-
-													}
-													catch (Exception e)
-													{
-														e.printStackTrace();
-														//													Toast.makeText(activity, "Unable to create image file", Toast.LENGTH_SHORT).show();
-														return -1;
-													}
-												} // end KEY_IMAGE_FILENAME
-											}
-											else
-											{
-												reader.skipValue();
-											}
-										}
-
-										reader.endObject();
-
-										// insert the set of image info into the DB images table
-										activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
-
-									}
-
-									reader.endArray();
-
-								}
-								else
-								{
-									// skip "IMAGES" NULL value
-									reader.skipValue();
-								}
-							}// end if rowID != null
-						}
-						else if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
-						{
-							// ignore NULL values (except if "IMAGES) and row_id
-							reader.skipValue();
-						}
-						else if (Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
-						{
-							// valid field name, enter in database
-							insertCaseValues.put(field_name, reader.nextString());
-						}
-						else
-						{
-							// unrecognized field name
-							reader.skipValue();
-						}
-					}
-
-					reader.endObject();
-				}
-
-				reader.endArray();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-				//					Toast.makeText(activity, "Unable to read Cases JSON file", Toast.LENGTH_SHORT).show();
-				return -1;
-			}
-
-			localCasesJSON.delete();
-
-
-		}
-		else
-		{
-			// user is null
-	//		Toast.makeText(activity, "User not logged in", Toast.LENGTH_SHORT).show();
-			return -1;
-		}
-
-		return caseCount;
-	}
-
 	/**
 	 * Called from async task of CaseImport.java
 	 *
@@ -1482,6 +978,7 @@ public class UtilClass extends Activity
 		Uri rowUri = null;
 		int parent_id;
 		int caseCount = 0;
+		int numCases = 0;
 
 		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
@@ -1527,107 +1024,144 @@ public class UtilClass extends Activity
 			ContentValues insertCaseValues = new ContentValues();
 			ContentValues insertImageValues = new ContentValues();
 
-			reader.beginArray();
+			reader.beginObject();
 
-			// loop through all cases
+			// get metadata
+
+			String user;
+			String date_created;
+
 			while(reader.hasNext())
 			{
-				insertCaseValues.clear();
-				reader.beginObject();
+				String metadata_field = reader.nextName();
 
-				while(reader.hasNext())
+				if (metadata_field.contentEquals("NUM_CASES"))
 				{
-					String field_name = reader.nextName();
-
-					if(field_name.contentEquals("IMAGES"))	// IMAGES are at the end of the row, after other fields
+					numCases = Integer.valueOf(reader.nextString());
+				}
+				else if (metadata_field.contentEquals("DATE_CREATED"))
+				{
+					date_created = reader.nextString();
+				}
+				else if (metadata_field.contentEquals("USER"))
+				{
+					user = reader.nextString();
+				}
+				else if (metadata_field.contentEquals("DATA"))
+				{
+					// loop through all cases
+					reader.beginArray();
+					while (reader.hasNext())
 					{
+						insertCaseValues.clear();
+						reader.beginObject();
+
+						while (reader.hasNext())
+						{
+							String field_name = reader.nextName();
+
+							if (field_name.contentEquals("IMAGES"))    // IMAGES are at the end of the row, after other fields
+							{
+						/*
 						// update LAST_MODIFIED_DATE
 						SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
 						String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
 						insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
+						*/
 
-						// insert the set of case info into the DB cases table
-						rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
+								// Since "IMAGES" is at the end, insertCaseValues will have been filled
+								// insert the set of case info into the DB cases table
+								rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
 
-						// get parent key information
-						parent_id = Integer.valueOf(rowUri.getLastPathSegment());
 
-						// increment count
-						caseCount += 1;
+								// get parent key information
+								parent_id = Integer.valueOf(rowUri.getLastPathSegment());
 
-						// insert images ("IMAGES" is not null)
-						if(reader.peek() != JsonToken.NULL)
-						{
-							reader.beginArray();
+								// increment count
+								caseCount += 1;
 
-							// loop through all images of this case
-							while (reader.hasNext())
-							{
-								insertImageValues.clear();
-								reader.beginObject();
-
-								while (reader.hasNext())
+								// insert images ("IMAGES" is not null)
+								if (reader.peek() != JsonToken.NULL)
 								{
-									String image_field_name = reader.nextName();
+									reader.beginArray();
 
-									if (reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+									// loop through all images of this case
+									while (reader.hasNext())
 									{
-										reader.skipValue();
+										insertImageValues.clear();
+										reader.beginObject();
+
+										while (reader.hasNext())
+										{
+											String image_field_name = reader.nextName();
+
+											if (reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
+											{
+												reader.skipValue();
+											}
+											else if (image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
+											{
+												// put new parent_id of newly added case
+												insertImageValues.put(image_field_name, parent_id);
+												reader.skipValue();
+											}
+											else if (Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
+											{
+												insertImageValues.put(image_field_name, reader.nextString());
+											}
+											else
+											{
+												reader.skipValue();
+											}
+										}
+
+										reader.endObject();
+
+										// insert the set of image info into the DB images table
+										activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+
 									}
-									else if (image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
-									{
-										// put new parent_id of newly added case
-										insertImageValues.put(image_field_name, parent_id);
-										reader.skipValue();
-									}
-									else if (Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
-									{
-										insertImageValues.put(image_field_name, reader.nextString());
-									}
-									else
-									{
-										reader.skipValue();
-									}
+
+									reader.endArray();
+
+								}
+								else
+								{
+									// skip "IMAGES" NULL value
+									reader.skipValue();
 								}
 
-								reader.endObject();
-
-								// insert the set of image info into the DB images table
-								activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
-
 							}
-
-							reader.endArray();
-
+							else if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
+							{
+								// ignore NULL values (except if "IMAGES) and row_id
+								reader.skipValue();
+							}
+							else if (Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
+							{
+								// valid field name, enter in database
+								insertCaseValues.put(field_name, reader.nextString());
+							}
+							else
+							{
+								// unrecognized field name
+								reader.skipValue();
+							}
 						}
-						else
-						{
-							// skip "IMAGES" NULL value
-							reader.skipValue();
-						}
 
+						reader.endObject();
 					}
-					else if(reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
-					{
-						// ignore NULL values (except if "IMAGES) and row_id
-						reader.skipValue();
-					}
-					else if(Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
-					{
-						// valid field name, enter in database
-						insertCaseValues.put(field_name, reader.nextString());
-					}
-					else
-					{
-						// unrecognized field name
-						reader.skipValue();
-					}
+
+					reader.endArray();
+				}
+				else
+				{
+					reader.skipValue();
 				}
 
-				reader.endObject();
-			}
+			} // end while
 
-			reader.endArray();
+			reader.endObject();
 
 		}
 		catch (IOException e)
@@ -1637,7 +1171,7 @@ public class UtilClass extends Activity
 			return 0;
 		}
 
-		//UtilClass.showMessage(activity, "Imported " + caseCount + " cases");
+		//UtilClass.showSnackbar(activity, "Imported " + caseCount + " cases");
 		//Toast.makeText(activity, "Imported " + caseCount + " cases", Toast.LENGTH_SHORT).show();
 	//	tempCasesJSON.delete();
 		decryptedCasesJSON.delete();
@@ -1659,7 +1193,7 @@ public class UtilClass extends Activity
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			showMessage(activity, "Unable to create local JSON backup files.");
+			showSnackbar(activity, "Unable to create local JSON backup files.");
 			return null;
 		}
 

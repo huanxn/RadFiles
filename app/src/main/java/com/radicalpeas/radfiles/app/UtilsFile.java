@@ -111,7 +111,7 @@ public class UtilsFile
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			UtilClass.showMessage(activity, "Unable to create temporary file.");
+			UtilClass.showSnackbar(activity, "Unable to create temporary file.");
 		}
 
 		FileOutputStream outputStream = null;
@@ -130,15 +130,15 @@ public class UtilsFile
 		catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
-			UtilClass.showMessage(activity, "local file not found");
+			UtilClass.showSnackbar(activity, "local file not found");
 			outFile.delete();
 			outFile = null;
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
-			UtilClass.showMessage(activity, "Copy backup to Google Drive: IO exception");
-			UtilClass.showMessage(activity, "cannot open input stream from selected uri");
+			UtilClass.showSnackbar(activity, "Copy backup to Google Drive: IO exception");
+			UtilClass.showSnackbar(activity, "cannot open input stream from selected uri");
 		}
 
 		return outFile;
@@ -399,11 +399,11 @@ public class UtilsFile
 
 			if(isSuccessful)
 			{
-				UtilClass.showMessage(activity, "Cleared cache files.");
+				UtilClass.showSnackbar(activity, "Cleared cache files.");
 			}
 			else
 			{
-				UtilClass.showMessage(activity, "Clear directory failed.");
+				UtilClass.showSnackbar(activity, "Clear directory failed.");
 			}
 		}
 	}

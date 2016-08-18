@@ -165,7 +165,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 			else if(case_subset >= POS_CASE_LIST_SUBSECTION)
 			{
 				// get cursor of "Radiology Section List", in order determined by user list preferences
-				Cursor subsection_cursor = this.getBaseContext().getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+				Cursor subsection_cursor = this.getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
 				subsection_cursor.moveToPosition((int) case_subset - POS_CASE_LIST_SUBSECTION);
 
 				mTitle = new SpannableString(subsection_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
@@ -221,10 +221,10 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 		{
 			// set the saved filter/spinner state
 			/*
-				UtilClass.showMessage(this, "DEBUG: state: " + savedInstanceState.toString());
+				UtilClass.showSnackbar(this, "DEBUG: state: " + savedInstanceState.toString());
 
 			caseFilterMode = savedInstanceState.getInt(CURRENT_SPINNER_STATE);
-			UtilClass.showMessage(this, "OnCreate savedInstanceState != null: filterMode " + caseFilterMode);
+			UtilClass.showSnackbar(this, "OnCreate savedInstanceState != null: filterMode " + caseFilterMode);
 			//fragment.populateCards();
 			*/
 
@@ -1039,7 +1039,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				else if(case_subset >= NavDrawerActivity.POS_CASE_LIST_SUBSECTION)
 				{
 					// get cursor of "Radiology Section List", in order determined by user list preferences
-					Cursor subsection_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+					Cursor subsection_cursor = mActivity.getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
 
 					subsection_cursor.moveToPosition((int)case_subset-POS_CASE_LIST_SUBSECTION);
 					subset_query_string = new String(CasesProvider.KEY_SECTION + " = '" + subsection_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE) + "'");
@@ -1057,7 +1057,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				if(caseFilterMode == FILTER_SECTION)
 				{
 					// get cursor of "Radiology Section List", in order determined by user list preferences
-					Cursor section_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+					Cursor section_cursor = mActivity.getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
 
 					// instantiate case cursor array with size of section_cursor.getCount() + 1.  Added one for those cases with empty "Radiology Section" field, ie Unknown
 					// will use MergeCursor afterwards.  must use cursor array this since a case may be in more than one section
@@ -1074,7 +1074,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 							String mSection = section_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE);
 
 							// find all cases with this KEY_SECTION
-							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_SECTION + " LIKE ?", new String[]{"%" + mSection + "%"}, CasesProvider.KEY_DATE + " DESC", null);
+							case_cursor_array[i] = mActivity.getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_SECTION + " LIKE ?", new String[]{"%" + mSection + "%"}, CasesProvider.KEY_DATE + " DESC", null);
 
 							// set KEY_SECTION as headers in each list position in headerList, with same IDs
 							for (int c = 0; c < case_cursor_array[i].getCount(); c++)
@@ -1086,7 +1086,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 						} while (section_cursor.moveToNext());
 
 						// last filter group is the cases with empty "Radiology Section" fields, find all cases with this KEY_SECTION
-						case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_SECTION + " IS NULL OR " + CasesProvider.KEY_SECTION + " = ?", new String[]{""}, CasesProvider.KEY_DATE + " DESC", null);
+						case_cursor_array[i] = mActivity.getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_SECTION + " IS NULL OR " + CasesProvider.KEY_SECTION + " = ?", new String[]{""}, CasesProvider.KEY_DATE + " DESC", null);
 
 						for (int c = 0; c < case_cursor_array[i].getCount(); c++)
 						{
@@ -1100,7 +1100,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				else if(caseFilterMode == FILTER_LAST_MODIFIED)
 				{
 					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string, null, CasesProvider.KEY_LAST_MODIFIED_DATE + " DESC, " + CasesProvider.KEY_ROWID + " DESC", null);
+					case_cursor_array[0] = mActivity.getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string, null, CasesProvider.KEY_LAST_MODIFIED_DATE + " DESC, " + CasesProvider.KEY_ROWID + " DESC", null);
 
 					/*
 					for(int c = 0; c < case_cursor_array[0].getCount(); c++)
@@ -1147,7 +1147,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				else if(caseFilterMode == FILTER_STUDYDATE)
 				{
 					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string, null, CasesProvider.KEY_DATE + " DESC", null);
+					case_cursor_array[0] = mActivity.getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string, null, CasesProvider.KEY_DATE + " DESC", null);
 
 					if (case_cursor_array[0].moveToFirst())
 					{
@@ -1185,7 +1185,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				else if(caseFilterMode == FILTER_MODALITY)
 				{
 					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_STUDY_TYPE + " is not null and " + CasesProvider.KEY_STUDY_TYPE + " != ?", new String[]{""}, CasesProvider.KEY_STUDY_TYPE, null);
+					case_cursor_array[0] = mActivity.getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_STUDY_TYPE + " is not null and " + CasesProvider.KEY_STUDY_TYPE + " != ?", new String[]{""}, CasesProvider.KEY_STUDY_TYPE, null);
 
 					if (case_cursor_array[0].moveToFirst())
 					{
@@ -1225,7 +1225,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 					//case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, CasesProvider.KEY_KEYWORDS + " is not null and " + CasesProvider.KEY_KEYWORDS + " != ?", new String[] {""}, CasesProvider.KEY_KEYWORDS, null);
 
 					// get cursor of "Radiology Keywords List", in order determined by user list preferences
-					Cursor keywords_cursor = getActivity().getBaseContext().getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
+					Cursor keywords_cursor = mActivity.getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
 
 					// instantiate case cursor array with size of section_cursor.getCount().
 					// will use MergeCursor afterwards.  must use cursor array this since a case may be in more than one section
@@ -1242,7 +1242,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 							String mKeyword = keywords_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE);
 
 							// find all cases with this KEY_KEYWORDS
-							case_cursor_array[i] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_KEYWORDS + " LIKE ?", new String[]{"%" + mKeyword + "%"}, CasesProvider.KEY_ROWID + " DESC", null);
+							case_cursor_array[i] = mActivity.getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string_and + CasesProvider.KEY_KEYWORDS + " LIKE ?", new String[]{"%" + mKeyword + "%"}, CasesProvider.KEY_ROWID + " DESC", null);
 
 							// set KEY_KEYWORDS as headers in each list position in headerList, with same IDs
 							for(int c = 0; c < case_cursor_array[i].getCount(); c++)
@@ -1285,7 +1285,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				else
 				{
 					case_cursor_array = new Cursor[1];
-					case_cursor_array[0] = getActivity().getBaseContext().getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string, null, null, null);
+					case_cursor_array[0] = mActivity.getContentResolver().query(CasesProvider.CASES_URI, null, subset_query_string, null, null, null);
 
 					for (int c = 0; c < case_cursor_array[0].getCount(); c++)
 					{
@@ -1623,11 +1623,11 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 
 				if(numDeleted == 1)
 				{
-					UtilClass.showMessage(activity, "Deleted 1 case.");
+					UtilClass.showSnackbar(activity, "Deleted 1 case.");
 				}
 				else
 				{
-					UtilClass.showMessage(activity, "Deleted " + numDeleted + " cases.");
+					UtilClass.showSnackbar(activity, "Deleted " + numDeleted + " cases.");
 				}
 			}
 		} // end DeleteCasesTask
@@ -1672,7 +1672,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				if(shareFile == null)
 				{
 					progressDialog.dismiss();
-					UtilClass.showMessage(activity, "Unable to create share file.");
+					UtilClass.showSnackbar(activity, "Unable to create share file.");
 					return;
 				}
 

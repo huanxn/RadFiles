@@ -776,6 +776,11 @@ public class CasesProvider extends ContentProvider
 			initialValues.put(KEY_ORDER, 7);
 			_db.insert(SECTION_LIST_TABLE, null, initialValues);
 
+			initialValues.clear();
+			initialValues.put(KEY_SECTION, "PEDIATRIC");
+			initialValues.put(KEY_ORDER, 7);
+			_db.insert(SECTION_LIST_TABLE, null, initialValues);
+
 			return;
 		}
 

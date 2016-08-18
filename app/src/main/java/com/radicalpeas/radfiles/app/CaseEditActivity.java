@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -310,7 +309,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 			/*
 			case R.id.add_new_study_button:
-				UtilClass.showMessage(this, "add new");
+				UtilClass.showSnackbar(this, "add new");
 				LinearLayout linearLayout = (LinearLayout)findViewById(R.id.study_types_container);
 
 
@@ -721,7 +720,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 				tempImageFile = null;
 			}
 
-			UtilClass.showMessage(this, "Canceled");
+			UtilClass.showSnackbar(this, "Canceled");
 		}
 	}
 

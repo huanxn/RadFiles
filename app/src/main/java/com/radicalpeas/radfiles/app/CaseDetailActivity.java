@@ -103,7 +103,7 @@ public class CaseDetailActivity extends AppCompatActivity
 
 		if(key_id == -1)
 		{
-			UtilClass.showMessage(this, "debug: CaseDetail key_id = -1");
+			UtilClass.showSnackbar(this, "debug: CaseDetail key_id = -1");
 			finish();
 			return;
 		}
@@ -1180,7 +1180,7 @@ public class CaseDetailActivity extends AppCompatActivity
 											}
 											catch (ActivityNotFoundException e)
 											{
-												UtilClass.showMessage(mActivity, "No application can handle this request. Please install a browser");
+												UtilClass.showSnackbar(mActivity, "No application can handle this request. Please install a browser");
 												e.printStackTrace();
 											}
 

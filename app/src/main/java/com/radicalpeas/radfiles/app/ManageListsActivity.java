@@ -78,7 +78,7 @@ public class ManageListsActivity extends NavDrawerActivity
 		int id = item.getItemId();
 		if (id == R.id.menu_addnew)
 		{
-			UtilClass.showMessage(this, "placeholder: add new item");
+			UtilClass.showSnackbar(this, "placeholder: add new item");
 			return true;
 		}
 		else if(id == R.id.menu_help)
@@ -424,7 +424,7 @@ public class ManageListsActivity extends NavDrawerActivity
 					public void onItemRangeChanged(int positionStart, int itemCount)
 					{
 						super.onItemRangeChanged(positionStart, itemCount);
-						//UtilClass.showMessage(getActivity(), "item Changed: position: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
+						//UtilClass.showSnackbar(getActivity(), "item Changed: position: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
 
 						// changed item text
 						String newItemString = mListAdapter.getItem(positionStart);
@@ -444,7 +444,7 @@ public class ManageListsActivity extends NavDrawerActivity
 					public void onItemRangeInserted(int positionStart, int itemCount)
 					{
 						super.onItemRangeInserted(positionStart, itemCount);
-						//UtilClass.showMessage(getActivity(), "onItemRangeInserted: positionStart: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
+						//UtilClass.showSnackbar(getActivity(), "onItemRangeInserted: positionStart: " + positionStart + ", item: " + mListAdapter.getItem(positionStart));
 
 						// new item text
 						String newItemString = mListAdapter.getItem(positionStart);
@@ -473,7 +473,7 @@ public class ManageListsActivity extends NavDrawerActivity
 					//		return;
 
 						super.onItemRangeMoved(fromPosition, toPosition, itemCount);
-						//UtilClass.showMessage(getActivity(), "onItemRangeMoved: fromPosition: " + fromPosition + ", toPosition: " + toPosition + ", itemCount: " + itemCount);
+						//UtilClass.showSnackbar(getActivity(), "onItemRangeMoved: fromPosition: " + fromPosition + ", toPosition: " + toPosition + ", itemCount: " + itemCount);
 
 						ContentValues values = new ContentValues();
 
@@ -497,7 +497,7 @@ public class ManageListsActivity extends NavDrawerActivity
 							Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(i));
 							activity.getContentResolver().update(row_uri, values, null, null);
 
-							//UtilClass.showMessage(getActivity(), "item moved: Position: " + i + ", item: " + mListAdapter.getItem(i));
+							//UtilClass.showSnackbar(getActivity(), "item moved: Position: " + i + ", item: " + mListAdapter.getItem(i));
 						}
 
 						// tell adapter to keep animated list changes
@@ -509,7 +509,7 @@ public class ManageListsActivity extends NavDrawerActivity
 					public void onItemRangeRemoved(int positionStart, int itemCount)
 					{
 						super.onItemRangeRemoved(positionStart, itemCount);
-					//	UtilClass.showMessage(getActivity(), "onItemRangeRemoved: positionStart: " + positionStart + ", itemCount: " + itemCount);
+					//	UtilClass.showSnackbar(getActivity(), "onItemRangeRemoved: positionStart: " + positionStart + ", itemCount: " + itemCount);
 
 						// delete from database
 						Uri row_uri = ContentUris.withAppendedId(tableURI, mListAdapter.getKey(positionStart));

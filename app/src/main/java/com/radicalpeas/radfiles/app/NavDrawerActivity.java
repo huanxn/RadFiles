@@ -422,7 +422,7 @@ public class NavDrawerActivity extends AppCompatActivity
                                 }
                                 catch(Exception e)
                                 {
-                                    UtilClass.showMessage(NavDrawerActivity.this, e.getMessage());
+                                    UtilClass.showSnackbar(NavDrawerActivity.this, e.getMessage());
                                 }
 
                             }

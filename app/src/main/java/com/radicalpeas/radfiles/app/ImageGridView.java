@@ -299,7 +299,7 @@ public class ImageGridView
 													// update last modified date field
 													UtilClass.updateLastModifiedDate(act, case_id);
 
-													UtilClass.showMessage(activity, "Image deleted.");
+													UtilClass.showSnackbar(activity, "Image deleted.");
 
 													act.setResult(CaseCardListActivity.RESULT_EDITED);
 												}
@@ -374,7 +374,7 @@ public class ImageGridView
 		notifyDataSetChanged();
 		Resize();
 
-		UtilClass.showMessage(activity, "New image saved.");
+		UtilClass.showSnackbar(activity, "New image saved.");
 	}
 
 	public int getCount()
