@@ -31,10 +31,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
@@ -52,8 +50,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.RejectedExecutionException;
 
 public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseActivity
 {
@@ -338,6 +338,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                 progressBar.setMessage("Exporting cases...");
                 //progressBar.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
                 progressBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressBar.setProgressNumberFormat(null);
                 //progressBar.setIndeterminate(true);
                 progressBar.setCancelable(false);
                 progressBar.show();
@@ -607,7 +608,8 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
     final public static int PROGRESS_MSG_INCREMENT = 3;
     final public static int PROGRESS_MSG_FINISHED = 5;
     final public static int PROGRESS_MSG_SET_TEXT = 6;
-    final public static int PROGRESS_MSG_CASE_COUNT = 7;
+    final public static int PROGRESS_MSG_INCREMENT_ACTIVE_TASKS = 7;
+    final public static int PROGRESS_MSG_DECREMENT_ACTIVE_TASKS = 8;
 
     Handler progressHandler = new Handler(new Handler.Callback()
     {
@@ -1162,7 +1164,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
         {
             private static final String TAG = "DownloadCasesTask";
             private static final int DOWNLOADING_CASE_INFO = 0;
-            private static final int UNENCRYPTING_CASE_INFO = 1;
+            private static final int READING_CASE_INFO = 1;
             private static final int DOWNLOADING_CASES = 2;
 
             private final Context context = activity;
@@ -1195,6 +1197,8 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
                 final File downloadsDir = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
                 final File picturesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+                final List <String> imageDownloadList = new ArrayList<String>();
 
                 int caseCount = 0;
                 pendingTaskCount = 0;
@@ -1234,25 +1238,12 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                                 // decrypt casesJSON file
                                 try
                                 {
-                                    publishProgress(PROGRESS_MSG_SET_TEXT, UNENCRYPTING_CASE_INFO);
+                                    publishProgress(PROGRESS_MSG_SET_TEXT, READING_CASE_INFO);
 
 									byte[] passkey = UtilsFile.generateKey(user.getUid().substring(PW_START,PW_END));
 									UtilsFile.decryptFile(passkey, localCasesJSON);
 
-                                    // set up JSON reader from decrypted casesJSON
-                                    //final FileInputStream cases_in = new FileInputStream(localCasesJSON);
-                    //                final JsonReader reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
-                                    /*
-                                    final Gson gsonReader = new Gson();
-                                    gsonReader.fromJson(cases_in.toString(), CasesDB.class);
-*/
-                                    // pass JSON File to be parsed by GSON in CasesDB class
-                                    //CasesDB cases_info = new CasesDB().parseJSON(new InputStreamReader(new FileInputStream(localCasesJSON)));
                                     CasesDB cases_info = new CasesDB().parseJSON(localCasesJSON);
-
-
-                                    ///////////
-                                    // CASES TABLE
 
                                     Uri rowUri = null;
                                     int parent_id;
@@ -1266,8 +1257,11 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
                                     List<Case> caseList = cases_info.getCaseList();
 
-                                    publishProgress(PROGRESS_MSG_SET_TEXT, DOWNLOADING_CASES);
-                                    publishProgress(PROGRESS_MSG_MAX, caseList.size());
+                                    if(caseList == null)    // no cases
+                                    {
+                                        publishProgress(PROGRESS_MSG_FINISHED, 0);
+                                        return;
+                                    }
 
                                     for(int c = 0; c < caseList.size(); c++)
                                     {
@@ -1301,93 +1295,38 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                                             caseCount += 1;
 
                                             // Images
-                                            List<CaseImage> imageList = caseList.get(c).caseImageList;
-                                            for (int i = 0; i < imageList.size(); i++)
+                                            if(caseList.get(c).caseImageList != null)
                                             {
-                                                insertImageValues.clear();
+                                                List<CaseImage> imageList = caseList.get(c).caseImageList;
 
-                                                // put new parent_id of newly added case
-                                                insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, parent_id);
-                                                insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageList.get(i).getFilename());
-                                                insertImageValues.put(CasesProvider.KEY_ORDER, imageList.get(i).getOrder());
-                                                insertImageValues.put(CasesProvider.KEY_IMAGE_DETAILS, imageList.get(i).getDetails());
-                                                insertImageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageList.get(i).getCaption());
-
-                                                // insert the set of image info into the DB images table
-                                                context.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
-
-
-                                                // download image file
-
-                                                // image filename
-                                                final String image_filename = imageList.get(i).getFilename();
-
-                                                // download file from Firebase storage
-                                                StorageReference storageImageRef = mStorageRef.child(userID + "/pictures/" + image_filename);
-                                                try
+                                                for (int i = 0; i < imageList.size(); i++)
                                                 {
-                                                    // limit of 128 total asynctasks, wait while other tasks finish
-                                                    /*
-                                                    List tasks = mStorageRef.getActiveDownloadTasks();
-                                                    while (pendingTaskCount > 100)
-                                                    {
-                                                        Thread.sleep(500);
-                                                        tasks = mStorageRef.getActiveDownloadTasks();
-                                                    }
-                                                    */
+                                                    insertImageValues.clear();
 
-                                                    // download image file from Firebase storage
-                                                    pendingTaskCount += 1;
-                                                    final File localImageFile = new File(picturesDir, image_filename);
+                                                    // put new parent_id of newly added case
+                                                    insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, parent_id);
+                                                    insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageList.get(i).getFilename());
+                                                    insertImageValues.put(CasesProvider.KEY_ORDER, imageList.get(i).getOrder());
+                                                    insertImageValues.put(CasesProvider.KEY_IMAGE_DETAILS, imageList.get(i).getDetails());
+                                                    insertImageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageList.get(i).getCaption());
 
-                                                    storageImageRef.getFile(localImageFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>()
-                                                    {
-                                                        @Override
-                                                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot)
-                                                        {
-                                                            pendingTaskCount -= 1;
+                                                    // insert the set of image info into the DB images table
+                                                    context.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
 
-                                                            System.out.println("Successfully downloaded image: " + image_filename);
-                                                            Log.d(TAG, "Successfully downloaded image: " + image_filename);
-                                                        }
-                                                    }).addOnFailureListener(new OnFailureListener()
-                                                    {
-                                                        @Override
-                                                        public void onFailure(@NonNull Exception exception)
-                                                        {
-                                                            pendingTaskCount -= 1;
-
-                                                            // Handle any errors
-                                                            System.out.println("Failed to download image: " + image_filename);
-                                                            Log.d(TAG, "Failed to download image: " + image_filename);
-
-                                                        }
-                                                    });
+                                                    // add image filename to list, all images to be downloaded later
+                                                    imageDownloadList.add(imageList.get(i).getFilename());
 
                                                 }
-                                                catch (Exception e)
-                                                {
-                                                    e.printStackTrace();
-                                                    Log.d(TAG, "Exception: " + e.getMessage() + ". Failed to create file for image: " + image_filename);
-                                                    System.out.println("Failed to create file for image: " + image_filename);
-
-                                                    return;
-                                                }
-
                                             }
-
                                         }
 
-                                        publishProgress(PROGRESS_MSG_SET_PROGRESS, caseCount);
                                     } // end for loop caseList
 
-                                    // finished looped through all cases
-                                    publishProgress(PROGRESS_MSG_FINISHED, caseCount);
                                 }
                                 catch (Exception e)
                                 {
                                     e.printStackTrace();
-                                    //					Toast.makeText(activity, "Unable to read Cases JSON file", Toast.LENGTH_SHORT).show();
+
                                     Log.d(TAG, "Exception: " + e.getMessage() + ". Unable to read Cases JSON file.");
 
                                     // Exception, but need to close progressDialog
@@ -1396,9 +1335,15 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                                     return;
                                 }
 
-    //                            localCasesJSON.delete();
+                                localCasesJSON.delete();
 
-                            }
+
+                                publishProgress(PROGRESS_MSG_SET_TEXT, DOWNLOADING_CASES);
+                                publishProgress(PROGRESS_MSG_MAX, imageDownloadList.size());
+                                // start download recursion
+                                downloadFiles(mStorageRef, userID, caseCount, imageDownloadList);
+
+                            } // end onSuccess downloading JSON
                         }).addOnFailureListener(new OnFailureListener()
                         {
                             @Override
@@ -1424,24 +1369,6 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                         return -1;
                     } //localJSON file open/create
 
-			/*
-			// wait until almost finished downloading
-			try
-			{
-				List tasks = mStorageRef.getActiveDownloadTasks();
-				while (tasks.size() > 1)
-				{
-					Thread.sleep(500);
-					tasks = mStorageRef.getActiveUploadTasks();
-				}
-			}
-			catch (InterruptedException e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, "InterruptedException: " + e.getMessage());
-				return -1;
-			}
-			*/
 
                 }
                 else
@@ -1488,14 +1415,25 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                         {
                             progressDialog.setMessage("Downloading case info...");
                         }
-                        else if (params[1] == UNENCRYPTING_CASE_INFO)
+                        else if (params[1] == READING_CASE_INFO)
                         {
-                            progressDialog.setMessage("Unencrypting case info...");
+                            progressDialog.setMessage("Reading case info...");
                         }
                         else if (params[1] == DOWNLOADING_CASES)
                         {
-                            progressDialog.setMessage("Loading cases...");
+                            progressDialog.setMessage("Downloading images...");
                         }
+                        break;
+
+                    case PROGRESS_MSG_INCREMENT:
+                        progressDialog.incrementProgressBy(1);
+                        break;
+
+                    case PROGRESS_MSG_INCREMENT_ACTIVE_TASKS:
+                        pendingTaskCount += 1;
+                        break;
+                    case PROGRESS_MSG_DECREMENT_ACTIVE_TASKS:
+                        pendingTaskCount -= 1;
                         break;
 
                     default:
@@ -1515,6 +1453,87 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                     UtilClass.showSnackbar(activity, "Error occurred during download.", Snackbar.LENGTH_INDEFINITE);
                 }
             }
+
+            private void downloadFiles(final StorageReference storageRef, final String userID, final int caseCount, final List<String> filenameList)
+            {
+                if(filenameList.size() > 0)
+                {
+                    // download the first file on the list
+                    final String image_filename = filenameList.get(0);
+                    File localImageFile;
+
+                    // create file
+                    StorageReference storageImageRef = storageRef.child(userID + "/pictures/" + image_filename);
+                    try
+                    {
+                        localImageFile = new File(picturesDir, image_filename);
+                    }
+                    catch (Exception e)
+                    {
+                        e.printStackTrace();
+                        Log.d(TAG, "Exception: " + e.getMessage() + ". Failed to create file for image: " + image_filename);
+                        System.out.println("Failed to create file for image: " + image_filename);
+
+                        return;
+                    }
+
+                    try
+                    {
+                        storageImageRef.getFile(localImageFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>()
+                        {
+                            @Override
+                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot)
+                            {
+                                // successfully downloaded, remove this filename off the list
+                                filenameList.remove(0);
+
+                                publishProgress(PROGRESS_MSG_INCREMENT);
+
+                                System.out.println("Successfully downloaded image: " + image_filename);
+                                Log.d(TAG, "Successfully downloaded image: " + image_filename);
+
+                                // download the rest of the files
+                                downloadFiles(storageRef, userID, caseCount, filenameList);
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener()
+                        {
+                            @Override
+                            public void onFailure(@NonNull Exception exception)
+                            {
+                                // Handle any errors
+                                System.out.println("Failed to download image: " + image_filename);
+                                Log.d(TAG, "Failed to download image: " + image_filename);
+
+                            }
+                        }).addOnPausedListener(new OnPausedListener<FileDownloadTask.TaskSnapshot>()
+                        {
+                            @Override
+                            public void onPaused(FileDownloadTask.TaskSnapshot taskSnapshot)
+                            {
+
+                                System.out.println("Download is paused");
+
+                            }
+                        });
+                    }
+                    catch (RejectedExecutionException e)    //doesn't catch e, not in the right place?
+                    {
+                        e.printStackTrace();
+                        Log.d(TAG, "Exception: " + e.getMessage() + ". Failed to create file for image: " + image_filename);
+                        System.out.println("Failed to create file for image: " + image_filename);
+
+                        publishProgress(PROGRESS_MSG_FINISHED, -1);
+
+                        return;
+                    }
+                }
+                else
+                {
+                    publishProgress(PROGRESS_MSG_FINISHED, caseCount);
+                }
+            } // end downloadFiles()
+
         } // end Class DownloadCasesTask
     }
 
