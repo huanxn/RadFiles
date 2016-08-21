@@ -12,7 +12,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewCompat;
 import android.util.DisplayMetrics;
@@ -28,17 +27,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.storage.FileDownloadTask;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnPausedListener;
-import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -521,7 +511,6 @@ public class UtilClass extends Activity
 		}
 		catch (ParseException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -844,20 +833,21 @@ public class UtilClass extends Activity
 
 				// write metadata
 				cases_writer.beginObject();
-				cases_writer.name("NUM_CASES").value(caseCursor.getCount());
-				cases_writer.name("DATE_CREATED").value(new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date()));
+				cases_writer.name(CasesDB.NUM_CASES).value(caseCursor.getCount());
+				cases_writer.name(CasesDB.DATE_CREATED).value(new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date()));
 
 				FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 				if(user != null)
 				{
-					cases_writer.name("USER").value(user.getEmail());
+					cases_writer.name(CasesDB.USER).value(user.getEmail());
+					cases_writer.name(CasesDB.USER_ID).value(user.getUid());
 				}
 				else
 				{
-					cases_writer.name("USER").value("ANONYMOUS");
+					cases_writer.name(CasesDB.USER).value("ANONYMOUS");
 				}
 
-				cases_writer.name("DATA");
+				cases_writer.name(CasesDB.DATA);
 
 				cases_writer.beginArray();
 				// loop through all cases
@@ -888,7 +878,10 @@ public class UtilClass extends Activity
 							cases_writer.beginObject();
 							for(int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
 							{
-								cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
+								if (imageCursor.getString(i) != null && !imageCursor.getString(i).isEmpty())
+								{
+									cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
+								}
 							}
 							cases_writer.endObject();
 
@@ -965,219 +958,7 @@ public class UtilClass extends Activity
 		return returnFile;
 	}
 
-	/**
-	 * Called from async task of CaseImport.java
-	 *
-	 * @param activity
-	 * @param inFile
-	 */
-	public static int importCasesJSON(Activity activity, File inFile)
-	{
-		BufferedReader br = null;
-		String line;
-		Uri rowUri = null;
-		int parent_id;
-		int caseCount = 0;
-		int numCases = 0;
 
-		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-
-		// unzip image files and JSON files into pictures dir
-
-		try
-		{
-			// unzip image files to android pictures directory
-			UtilsFile.unzip(inFile.getPath(),picturesDir.getPath());
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Toast.makeText(activity, "Unable to open zip file:", Toast.LENGTH_SHORT).show();
-			return 0;
-		}
-
-
-	//	File tempCasesJSON = null;
-		File decryptedCasesJSON = null;
-		JsonReader reader = null;
-
-		try
-		{
-			// open existing file that should have been unzipped and decrypted
-			decryptedCasesJSON = new File(activity.getCacheDir(), ImportExportActivity.CASES_JSON_FILENAME);
-	//		tempCasesJSON = new File(picturesDir, ImportExportActivity.CASES_JSON_FILENAME);
-
-			FileInputStream cases_in = new FileInputStream(decryptedCasesJSON);
-			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			Toast.makeText(activity, "Unable to open JSON file", Toast.LENGTH_SHORT).show();
-			return 0;
-		}
-
-		// CASES TABLE
-		try
-		{
-			ContentValues insertCaseValues = new ContentValues();
-			ContentValues insertImageValues = new ContentValues();
-
-			reader.beginObject();
-
-			// get metadata
-
-			String user;
-			String date_created;
-
-			while(reader.hasNext())
-			{
-				String metadata_field = reader.nextName();
-
-				if (metadata_field.contentEquals("NUM_CASES"))
-				{
-					numCases = Integer.valueOf(reader.nextString());
-				}
-				else if (metadata_field.contentEquals("DATE_CREATED"))
-				{
-					date_created = reader.nextString();
-				}
-				else if (metadata_field.contentEquals("USER"))
-				{
-					user = reader.nextString();
-				}
-				else if (metadata_field.contentEquals("DATA"))
-				{
-					// loop through all cases
-					reader.beginArray();
-					while (reader.hasNext())
-					{
-						insertCaseValues.clear();
-						reader.beginObject();
-
-						while (reader.hasNext())
-						{
-							String field_name = reader.nextName();
-
-							if (field_name.contentEquals("IMAGES"))    // IMAGES are at the end of the row, after other fields
-							{
-						/*
-						// update LAST_MODIFIED_DATE
-						SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
-						String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
-						insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
-						*/
-
-								// Since "IMAGES" is at the end, insertCaseValues will have been filled
-								// insert the set of case info into the DB cases table
-								rowUri = activity.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
-
-
-								// get parent key information
-								parent_id = Integer.valueOf(rowUri.getLastPathSegment());
-
-								// increment count
-								caseCount += 1;
-
-								// insert images ("IMAGES" is not null)
-								if (reader.peek() != JsonToken.NULL)
-								{
-									reader.beginArray();
-
-									// loop through all images of this case
-									while (reader.hasNext())
-									{
-										insertImageValues.clear();
-										reader.beginObject();
-
-										while (reader.hasNext())
-										{
-											String image_field_name = reader.nextName();
-
-											if (reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
-											{
-												reader.skipValue();
-											}
-											else if (image_field_name.contentEquals(CasesProvider.KEY_IMAGE_PARENT_CASE_ID))
-											{
-												// put new parent_id of newly added case
-												insertImageValues.put(image_field_name, parent_id);
-												reader.skipValue();
-											}
-											else if (Arrays.asList(CasesProvider.IMAGES_TABLE_ALL_KEYS).contains(image_field_name))
-											{
-												insertImageValues.put(image_field_name, reader.nextString());
-											}
-											else
-											{
-												reader.skipValue();
-											}
-										}
-
-										reader.endObject();
-
-										// insert the set of image info into the DB images table
-										activity.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
-
-									}
-
-									reader.endArray();
-
-								}
-								else
-								{
-									// skip "IMAGES" NULL value
-									reader.skipValue();
-								}
-
-							}
-							else if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
-							{
-								// ignore NULL values (except if "IMAGES) and row_id
-								reader.skipValue();
-							}
-							else if (Arrays.asList(CasesProvider.CASES_TABLE_ALL_KEYS).contains(field_name))
-							{
-								// valid field name, enter in database
-								insertCaseValues.put(field_name, reader.nextString());
-							}
-							else
-							{
-								// unrecognized field name
-								reader.skipValue();
-							}
-						}
-
-						reader.endObject();
-					}
-
-					reader.endArray();
-				}
-				else
-				{
-					reader.skipValue();
-				}
-
-			} // end while
-
-			reader.endObject();
-
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Toast.makeText(activity, "Unable to open Cases JSON file", Toast.LENGTH_SHORT).show();
-			return 0;
-		}
-
-		//UtilClass.showSnackbar(activity, "Imported " + caseCount + " cases");
-		//Toast.makeText(activity, "Imported " + caseCount + " cases", Toast.LENGTH_SHORT).show();
-	//	tempCasesJSON.delete();
-		decryptedCasesJSON.delete();
-
-		return caseCount;
-	}
 
 	public static File exportListsJSON(Activity activity, String filename)
 	{

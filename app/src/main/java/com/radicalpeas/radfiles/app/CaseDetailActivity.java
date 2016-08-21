@@ -1090,7 +1090,7 @@ public class CaseDetailActivity extends AppCompatActivity
 			if (case_cursor.moveToFirst())
 			{
 				int key_id = case_cursor.getInt(CasesProvider.COL_ROWID);
-				String patient_id = case_cursor.getString(CasesProvider.COL_PATIENT_ID);
+				String case_id = case_cursor.getString(CasesProvider.COL_CASE_NUMBER);
 				final String diagnosis = case_cursor.getString(CasesProvider.COL_DIAGNOSIS);
 				String findings = case_cursor.getString(CasesProvider.COL_FINDINGS);
 				String section = case_cursor.getString(CasesProvider.COL_SECTION);

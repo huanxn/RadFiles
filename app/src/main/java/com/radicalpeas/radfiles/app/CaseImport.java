@@ -3,6 +3,7 @@ package com.radicalpeas.radfiles.app;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -25,8 +26,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 //import com.gc.materialdesign.widgets.ProgressDialog;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,7 +59,12 @@ public class CaseImport extends AppCompatActivity
 
 	private Activity activity;
 
-	private android.app.ProgressDialog progressWheelDialog = null;
+	private String userID;  // firebase userID
+	private String userEmail;
+
+	private android.app.ProgressDialog progressDialog = null;
+
+	private CasesDB cases_info;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -80,6 +90,17 @@ public class CaseImport extends AppCompatActivity
 	    // Inflate a menu to be displayed in the toolbar
 	    toolbar.inflateMenu(R.menu.case_import);
 
+		// Firebase user log in
+		FirebaseAuth mAuth = FirebaseAuth.getInstance();
+		if(mAuth != null)
+		{
+			FirebaseUser firebaseUser = mAuth.getCurrentUser();
+			if(firebaseUser != null)
+			{
+				userID = firebaseUser.getUid();
+				userEmail = firebaseUser.getEmail();
+			}
+		}
 
 	    // Find RecyclerView
 	    mRecyclerView = (RecyclerView)findViewById(R.id.cards_list);
@@ -312,11 +333,11 @@ public class CaseImport extends AppCompatActivity
 	{
 		protected void onPreExecute()
 		{
-			progressWheelDialog = new android.app.ProgressDialog(activity, R.style.ProgressDialogTheme);
-			progressWheelDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
-			progressWheelDialog.setMessage("Opening import file");
-			progressWheelDialog.setCancelable(false);
-			progressWheelDialog.show();
+			progressDialog = new ProgressDialog(activity, R.style.ProgressDialogTheme);
+			progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+			progressDialog.setMessage("Opening import file");
+			progressDialog.setCancelable(false);
+			progressDialog.show();
 		}
 
 		@Override
@@ -328,24 +349,34 @@ public class CaseImport extends AppCompatActivity
 
 			List<Case> importCaseList = new ArrayList<Case>();
 
-			// unzip image files and csv files
-			try
+			File picturesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+			if(picturesDir != null)
 			{
-				// unzip files to android pictures directory
-				UtilsFile.unzip(file_path, getCacheDir().getAbsolutePath());
+				// unzip image files and JSON files into pictures dir
+				try
+				{
+					// unzip image files to android pictures directory
+					UtilsFile.unzip(file_path, picturesDir.getPath());
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+					Toast.makeText(activity, "Unable to open zip file.", Toast.LENGTH_SHORT).show();
+					return "Unable to open rcs zip file.";
+				}
 			}
-			catch (IOException e)
+			else
 			{
-				e.printStackTrace();
-				return "Unable to open rcs zip file.";
+				Toast.makeText(activity, "Unable to open pictures folder.", Toast.LENGTH_SHORT).show();
+				return "Unable to open pictures folder.";
 			}
 
 			File tempCasesJSON = null;
-			JsonReader reader = null;
 
 			try
 			{	// open existing file that should have been unzipped
-				tempCasesJSON = new File(getCacheDir(), ImportExportActivity.CASES_JSON_FILENAME);
+				tempCasesJSON = new File(picturesDir, ImportExportActivity.CASES_JSON_FILENAME);
 
 				// decrypt JSON file unless blank password given
 				if (!password.contentEquals(""))
@@ -362,13 +393,35 @@ public class CaseImport extends AppCompatActivity
 					}
 				}
 
-				FileInputStream cases_in = new FileInputStream(tempCasesJSON);
-				reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
+				// read data from JSON
+				cases_info = new CasesDB().parseJSON(tempCasesJSON);
 
-	//			CasesDB casesDB = new CasesDB();
-	//			casesDB.parseJSON(new InputStreamReader(cases_in));
+				// get case list to pass to UI card adapter
+				importCaseList = cases_info.getCaseList();
 
+				if(importCaseList == null)    // no cases
+				{
+					publishProgress(ImportExportActivity.PROGRESS_MSG_FINISHED, 0);
+					return "No cases found.";
+				}
 
+				// get thumbnail image for each case
+				for(int c = 0; c < importCaseList.size(); c++)
+				{
+					Case mCase = importCaseList.get(c);
+
+					if(mCase.caseImageList.size() > 0)
+					{
+						if (mCase.thumbnail == -1 || mCase.thumbnail >= mCase.caseImageList.size())   // default: use first image
+						{
+							mCase.thumbnail_filename = picturesDir + "/" + mCase.caseImageList.get(0);
+						}
+						else
+						{
+							mCase.thumbnail_filename = picturesDir + "/" + mCase.caseImageList.get(mCase.thumbnail).getFilename();
+						}
+					}
+				}
 			}
 			catch (Exception e)
 			{
@@ -376,152 +429,7 @@ public class CaseImport extends AppCompatActivity
 				return "Unable to open JSON file.";
 			}
 
-			// CASES TABLE
-			try
-			{
-				reader.beginObject();
-
-				// get metadata
-
-				String user;
-				String date_created;
-
-				while(reader.hasNext())
-				{
-
-					String metadata_field = reader.nextName();
-
-					if(metadata_field.contentEquals("NUM_CASES"))
-					{
-						numCases = Integer.valueOf(reader.nextString());
-					}
-					else if(metadata_field.contentEquals("DATE_CREATED"))
-					{
-						date_created = reader.nextString();
-					}
-					else if(metadata_field.contentEquals("USER"))
-					{
-						user = reader.nextString();
-					}
-					else if(metadata_field.contentEquals("DATA"))
-					{
-						// loop through all cases
-						reader.beginArray();
-						while(reader.hasNext())
-						{
-							reader.beginObject();
-
-							Case mCase = new Case();
-							mCase.thumbnail = -1;    //default
-
-							while(reader.hasNext())
-							{
-								String field_name = reader.nextName();
-
-								if(reader.peek() == JsonToken.NULL)
-								{
-									reader.skipValue();
-								}
-								else if(field_name.contentEquals(CasesProvider.KEY_ROWID))
-								{
-									mCase.key_id = Long.valueOf(reader.nextString());
-								}
-								else if(field_name.contentEquals(CasesProvider.KEY_PATIENT_ID))
-								{
-									mCase.patient_id = reader.nextString();
-								}
-								else if(field_name.contentEquals(CasesProvider.KEY_DIAGNOSIS))
-								{
-									mCase.diagnosis = reader.nextString();
-								}
-								else if(field_name.contentEquals(CasesProvider.KEY_FINDINGS))
-								{
-									mCase.findings = reader.nextString();
-								}
-								else if(field_name.contentEquals(CasesProvider.KEY_THUMBNAIL))
-								{
-									mCase.thumbnail = Integer.valueOf(reader.nextString());
-								}
-								else if(field_name.contentEquals("IMAGES"))
-								{
-									List<String> image_filenames = new ArrayList<String>();
-									int image_order;
-									reader.beginArray();
-
-									// loop through all images of this case
-									while(reader.hasNext())
-									{
-										reader.beginObject();
-
-										while(reader.hasNext())
-										{
-											String image_field_name = reader.nextName();
-
-											if(reader.peek() == JsonToken.NULL || image_field_name.contentEquals(CasesProvider.KEY_ROWID))
-											{
-												reader.skipValue();
-											}
-											else if(image_field_name.contentEquals(CasesProvider.KEY_IMAGE_FILENAME))
-											{
-												image_filenames.add(reader.nextString());
-											}
-											else if(image_field_name.contentEquals(CasesProvider.KEY_ORDER))
-											{
-												image_order = Integer.valueOf(reader.nextString());
-
-												if(mCase.thumbnail == image_order)
-												{
-													mCase.thumbnail_filename = getCacheDir().getAbsolutePath() + "/" + image_filenames.get(image_filenames.size()-1);   // use last one that was just added
-												}
-											}
-											else
-											{
-												reader.skipValue();
-											}
-										}
-
-										if(mCase.thumbnail == -1)   // default: use first image
-										{
-											mCase.thumbnail_filename = getCacheDir().getAbsolutePath() + "/" + image_filenames.get(0);
-										}
-
-										reader.endObject();
-									}
-
-									reader.endArray();
-
-								}
-								else
-								{
-									reader.skipValue();
-								}
-							}
-
-							reader.endObject();
-
-							importCaseList.add(mCase);
-						}
-
-						reader.endArray();
-					}
-					else
-					{
-						reader.skipValue();
-					}
-
-				} // end while
-
-				reader.endObject();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-				Log.d(TAG, e.getMessage());
-				return "Unable to open case file";
-			}
-
-			// leave decrypted json file for actual import function (into database)
-			//tempCasesJSON.delete();
+			tempCasesJSON.delete();
 
 			mCardAdapter.loadCaseList(importCaseList);
 
@@ -530,7 +438,7 @@ public class CaseImport extends AppCompatActivity
 
 		protected void onPostExecute(String error_msg)
 		{
-			progressWheelDialog.dismiss();
+			progressDialog.dismiss();
 
 			if(error_msg == null)
 			{
@@ -548,30 +456,163 @@ public class CaseImport extends AppCompatActivity
 	 */
 	private class ImportCasesTask extends AsyncTask<File, Integer, Integer>
 	{
+		private static final String TAG = "ImportCasesTask";
+		private static final int DOWNLOADING_CASE_INFO = 0;
+		private static final int READING_CASE_INFO = 1;
+		private static final int DOWNLOADING_CASES = 2;
+
+		Context context = activity;
+
 		protected void onPreExecute()
 		{
-			progressWheelDialog = new ProgressDialog(activity, R.style.ProgressDialogTheme);
-			progressWheelDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
-			progressWheelDialog.setMessage("Importing cases...");
-			progressWheelDialog.setCancelable(false);
-			progressWheelDialog.show();
+			progressDialog = new ProgressDialog(activity, R.style.ProgressDialogTheme);
+			progressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Small);
+			progressDialog.setMessage("Importing cases...");
+			progressDialog.setCancelable(false);
+			progressDialog.show();
 		}
 
 		@Override
 		protected Integer doInBackground(File... files)
 		{
-			// process file: unzip images, add csv info to database
-			int count = UtilClass.importCasesJSON(activity, files[0]);
+			int caseCount = 0;
 
-			// delete the temporary file
+			Uri rowUri = null;
+			int parent_id;
+
+			ContentValues insertCaseValues = new ContentValues();
+			ContentValues insertImageValues = new ContentValues();
+
+			// get metadata
+			String user = cases_info.getUser();
+			String date_created = cases_info.getDateCreated();
+
+			List<Case> caseList = cases_info.getCaseList();
+
+			if (caseList == null)    // no cases
+			{
+				publishProgress(ImportExportActivity.PROGRESS_MSG_FINISHED, 0);
+				return 0;
+			}
+
+			for (int c = 0; c < caseList.size(); c++)
+			{
+				insertCaseValues.clear();
+
+				insertCaseValues.put(CasesProvider.KEY_CASE_NUMBER, caseList.get(c).case_id);
+				insertCaseValues.put(CasesProvider.KEY_DIAGNOSIS, caseList.get(c).diagnosis);
+				insertCaseValues.put(CasesProvider.KEY_SECTION, caseList.get(c).section);
+				insertCaseValues.put(CasesProvider.KEY_FINDINGS, caseList.get(c).findings);
+				insertCaseValues.put(CasesProvider.KEY_BIOPSY, caseList.get(c).biopsy);
+				insertCaseValues.put(CasesProvider.KEY_FOLLOWUP, caseList.get(c).followup);
+				insertCaseValues.put(CasesProvider.KEY_FOLLOWUP_COMMENT, caseList.get(c).followup_comment);
+				insertCaseValues.put(CasesProvider.KEY_KEYWORDS, caseList.get(c).key_words);
+				insertCaseValues.put(CasesProvider.KEY_COMMENTS, caseList.get(c).comments);
+				insertCaseValues.put(CasesProvider.KEY_STUDY_TYPE, caseList.get(c).study_type);
+				insertCaseValues.put(CasesProvider.KEY_STUDY_DATE, caseList.get(c).db_date_str);
+				insertCaseValues.put(CasesProvider.KEY_IMAGE_COUNT, caseList.get(c).image_count);
+				insertCaseValues.put(CasesProvider.KEY_THUMBNAIL, caseList.get(c).thumbnail);
+				insertCaseValues.put(CasesProvider.KEY_FAVORITE, caseList.get(c).favorite);
+				insertCaseValues.put(CasesProvider.KEY_CLINICAL_HISTORY, caseList.get(c).clinical_history);
+				insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, caseList.get(c).last_modified_date);
+				insertCaseValues.put(CasesProvider.KEY_ORIGINAL_CREATOR, caseList.get(c).original_creator);
+				insertCaseValues.put(CasesProvider.KEY_IS_SHARED, caseList.get(c).is_shared);
+
+				// insert current user, may have been shared from another user
+				insertCaseValues.put(CasesProvider.KEY_USER_ID, userID);
+
+				rowUri = context.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
+
+				if (rowUri != null)
+				{
+					// get parent key information
+					parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+
+					// increment count
+					caseCount += 1;
+
+					// Images
+					if (caseList.get(c).caseImageList != null)
+					{
+						List<CaseImage> imageList = caseList.get(c).caseImageList;
+
+						for (int i = 0; i < imageList.size(); i++)
+						{
+							insertImageValues.clear();
+
+							// put new parent_id of newly added case
+							insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, parent_id);
+							insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageList.get(i).getFilename());
+							insertImageValues.put(CasesProvider.KEY_ORDER, imageList.get(i).getOrder());
+							insertImageValues.put(CasesProvider.KEY_IMAGE_DETAILS, imageList.get(i).getDetails());
+							insertImageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageList.get(i).getCaption());
+
+							// insert the set of image info into the DB images table
+							context.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+						}
+					}
+				}
+
+			} // end for loop caseList
+
+			// delete the temporary downlaoded file
 			files[0].delete();
 
-			return count;
+			return caseCount;
+		}
+
+		protected void onProgressUpdate(Integer... params)
+		{
+			// 0: type, 1: param
+			switch (params[0])
+			{
+				case ImportExportActivity.PROGRESS_MSG_MAX:
+					progressDialog.setMax(params[1]);
+					progressDialog.setIndeterminate(false);
+					break;
+
+				case ImportExportActivity.PROGRESS_MSG_SET_PROGRESS:
+					progressDialog.setProgress(params[1]);
+					break;
+
+				case ImportExportActivity.PROGRESS_MSG_FINISHED:
+					progressDialog.dismiss();
+					//progressDialog.dismiss();
+					if (params[1] >= 0)
+						UtilClass.showSnackbar(activity, "Downloaded " + params[1] + " cases.");
+					else
+						UtilClass.showSnackbar(activity, "Error downloading cases.", Snackbar.LENGTH_INDEFINITE);
+
+					break;
+
+				case ImportExportActivity.PROGRESS_MSG_SET_TEXT:
+					//progressDialog.setMessage((String)msg.obj);
+					if (params[1] == DOWNLOADING_CASE_INFO)
+					{
+						progressDialog.setMessage("Downloading case info...");
+					}
+					else if (params[1] == READING_CASE_INFO)
+					{
+						progressDialog.setMessage("Reading case info...");
+					}
+					else if (params[1] == DOWNLOADING_CASES)
+					{
+						progressDialog.setMessage("Loading images...");
+					}
+					break;
+
+				case ImportExportActivity.PROGRESS_MSG_INCREMENT:
+					progressDialog.incrementProgressBy(1);
+					break;
+
+				default:
+					break;
+			}
 		}
 
 		protected void onPostExecute(Integer count)
 		{
-			progressWheelDialog.dismiss();
+			progressDialog.dismiss();
 			UtilClass.showSnackbar(activity, "RadFiles imported " + count + " cases.", Snackbar.LENGTH_INDEFINITE);
 
 			finish();

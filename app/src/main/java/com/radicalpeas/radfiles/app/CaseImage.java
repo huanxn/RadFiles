@@ -25,6 +25,16 @@ public class CaseImage
     @SerializedName(CasesProvider.KEY_IMAGE_CAPTION)
     private String caption;
 
+    @SerializedName(CasesProvider.KEY_IMAGE_INFO1)
+    private String image_info1;
+
+    @SerializedName(CasesProvider.KEY_IMAGE_INFO2)
+    private String image_info2;
+
+    @SerializedName(CasesProvider.KEY_IMAGE_INFO3)
+    private int image_info3;
+
+
     public int get_id()
     {
         return _id;

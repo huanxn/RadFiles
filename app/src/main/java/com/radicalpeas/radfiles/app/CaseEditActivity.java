@@ -59,7 +59,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 	static Cursor selected_row_cursor;
 	static long key_id;
 
-	static String patient_ID;
+	static String case_ID;
 	static String diagnosis;
 	static String findings;
 
@@ -378,7 +378,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		ContentValues values = new ContentValues();
 
 		// PATIENT ID
-		values.put(CasesProvider.KEY_PATIENT_ID, ((EditText)findViewById(R.id.edit_patient_id)).getText().toString());
+		values.put(CasesProvider.KEY_CASE_NUMBER, ((EditText)findViewById(R.id.edit_case_id)).getText().toString());
 
 		// DIAGNOSIS
 		values.put(CasesProvider.KEY_DIAGNOSIS, ((EditText)findViewById(R.id.edit_diagnosis)).getText().toString());
@@ -437,11 +437,11 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		if (new_date_str != null && !new_date_str.isEmpty())
 		{
 			// displayed date format in new_date_str button is different than db_date_str
-			values.put(CasesProvider.KEY_DATE, db_date_str);
+			values.put(CasesProvider.KEY_STUDY_DATE, db_date_str);
 		}
 		else
 		{
-			values.put(CasesProvider.KEY_DATE, (String) null);
+			values.put(CasesProvider.KEY_STUDY_DATE, (String) null);
 		}
 
 		// SECTIONS
@@ -827,7 +827,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 			actionBar.setDisplayShowTitleEnabled(false);
 
 
-			((EditText) view.findViewById(R.id.edit_patient_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
+			((EditText) view.findViewById(R.id.edit_case_id)).setRawInputType(Configuration.KEYBOARD_QWERTY);
 
 			// hide soft keyboard if click off keyboard
 			view.findViewById(R.id.edit_scrollview).setOnTouchListener(new View.OnTouchListener()
@@ -919,7 +919,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 			if (case_cursor.moveToFirst())
 			{
 				//int key_id = case_cursor.getInt(CasesProvider.COL_ROWID);
-				patient_ID = case_cursor.getString(CasesProvider.COL_PATIENT_ID);
+				case_ID = case_cursor.getString(CasesProvider.COL_CASE_NUMBER);
 				diagnosis = case_cursor.getString(CasesProvider.COL_DIAGNOSIS);
 				findings = case_cursor.getString(CasesProvider.COL_FINDINGS);
 				String original_sections = case_cursor.getString(CasesProvider.COL_SECTION);
@@ -937,10 +937,10 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 				db_date_str = case_cursor.getString(CasesProvider.COL_DATE);
 
 
-				if (patient_ID != null)
+				if (case_ID != null)
 				{
-					((EditText) view.findViewById(R.id.edit_patient_id)).setText(patient_ID);
-					// getActivity().setTitle(patient_ID);
+					((EditText) view.findViewById(R.id.edit_case_id)).setText(case_ID);
+					// getActivity().setTitle(case_ID);
 				}
 
 				// Case Information (Diagnosis and Findings)
@@ -1040,9 +1040,9 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 				/*
 				ActionBar actionBar = getActivity().getActionBar();
-				if(patient_ID != null && !patient_ID.isEmpty())
+				if(case_ID != null && !case_ID.isEmpty())
 				{
-					actionBar.setTitle(patient_ID);
+					actionBar.setTitle(case_ID);
 
 					if(section != null)
 						actionBar.setSubtitle(section);

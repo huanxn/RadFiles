@@ -13,8 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-import com.mikepenz.iconics.IconicsDrawable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -80,7 +78,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				Case new_case = new Case();
 
 				new_case.key_id = cursor.getInt(CasesProvider.COL_ROWID);
-				new_case.patient_id = cursor.getString(CasesProvider.COL_PATIENT_ID);
+				new_case.case_id = cursor.getString(CasesProvider.COL_CASE_NUMBER);
 				new_case.diagnosis = cursor.getString(CasesProvider.COL_DIAGNOSIS);
 				new_case.findings = cursor.getString(CasesProvider.COL_FINDINGS);
 				new_case.section = cursor.getString(CasesProvider.COL_SECTION);
@@ -233,7 +231,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 			viewHolder.key_id = mCase.key_id;
 
-			viewHolder.card_title.setText(mCase.patient_id);
+			viewHolder.card_title.setText(mCase.case_id);
 			viewHolder.card_text1.setText(mCase.diagnosis);
 			viewHolder.card_text2.setText(mCase.findings);
 			viewHolder.card_text3.setText(mCase.key_words);
@@ -581,7 +579,7 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 			container = itemView.findViewById(R.id.container);
 
-			card_title = (TextView) itemView.findViewById(R.id.patient_id);
+			card_title = (TextView) itemView.findViewById(R.id.card_title);
 			card_text1 = (TextView) itemView.findViewById(R.id.case_info1);
 			card_text2 = (TextView) itemView.findViewById(R.id.case_info2);
 			card_text3 = (TextView) itemView.findViewById(R.id.case_info3);

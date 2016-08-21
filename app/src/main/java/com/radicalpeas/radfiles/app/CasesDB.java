@@ -17,16 +17,25 @@ import java.util.List;
  */
 public class CasesDB
 {
-    @SerializedName("NUM_CASES")
+    public static final String NUM_CASES = "NUM_CASES";
+    public static final String DATE_CREATED = "DATE_CREATED";
+    public static final String USER = "USER";
+    public static final String USER_ID = "USER_ID";
+    public static final String DATA = "DATA";
+
+    @SerializedName(NUM_CASES)
     private int num_cases;
 
-    @SerializedName("DATE_CREATED")
+    @SerializedName(DATE_CREATED)
     private String date_created;
 
-    @SerializedName("USER")
+    @SerializedName(USER)
     private String user;
 
-    @SerializedName("DATA")
+    @SerializedName(USER_ID)
+    private String userID;
+
+    @SerializedName(DATA)
     public List<Case> caseList;
 
     public CasesDB() {

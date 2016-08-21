@@ -53,23 +53,25 @@ public class CasesProvider extends ContentProvider
 	// fields for my content provider
 	static final String PROVIDER_NAME = "com.radicalpeas.radfiles.app.CasesProvider";
 
+	// CASES TABLE
 	static final String cases_URL = "content://" + PROVIDER_NAME + "/cases";
 	static final Uri CASES_URI = Uri.parse(cases_URL);
 
+	// IMAGES TABLE: linked to a row in CASES TABLE
 	static final String images_URL = "content://" + PROVIDER_NAME + "/images";
 	static final Uri IMAGES_URI = Uri.parse(images_URL);
 
+	// SECTION LIST TABLE
 	static final String sectionList_URL = "content://" + PROVIDER_NAME + "/section_list";
 	static final Uri SECTION_LIST_URI = Uri.parse(sectionList_URL);
 
+	// SECTION LIST TABLE
 	static final String keyWordList_URL = "content://" + PROVIDER_NAME + "/keyWord_list";
 	static final Uri KEYWORD_LIST_URI = Uri.parse(keyWordList_URL);
 
+	// SECTION LIST TABLE
 	static final String studyTypeList_URL = "content://" + PROVIDER_NAME + "/studyType_list";
 	static final Uri STUDYTYPE_LIST_URI = Uri.parse(studyTypeList_URL);
-
-
-	static final int MAX_NUM_IMAGES = 32;
 
 
 	// maps content URI "patterns" to the integer values that were set above
@@ -101,7 +103,8 @@ public class CasesProvider extends ContentProvider
 
 
 	// Cases Table
-	public static final String KEY_PATIENT_ID = "PATIENT_ID";
+	// 1. define String KEY_ = "..."
+	public static final String KEY_CASE_NUMBER = "CASE_NUMBER";		// changed from PATIENT_ID for HIPAA reasons
 	public static final String KEY_DIAGNOSIS = "DIAGNOSIS";
 	public static final String KEY_SECTION = "SECTION";     // re-used in section_list table
 	public static final String KEY_FINDINGS = "FINDINGS";       // comma-separated list
@@ -111,8 +114,8 @@ public class CasesProvider extends ContentProvider
 	public static final String KEY_KEYWORDS = "KEYWORDS";   // re-used in keyword_list table, // comma-separated list
 	public static final String KEY_COMMENTS = "COMMENTS";
 
-	public static final String KEY_STUDY_TYPE = "STUDYTYPE";    // re-used in studytype_list table
-	public static final String KEY_DATE = "DATE";               // comma-separated list??
+	public static final String KEY_STUDY_TYPE = "STUDY_TYPE";    // re-used in studytype_list table
+	public static final String KEY_STUDY_DATE = "STUDY_DATE";               // comma-separated list??
 	public static final String KEY_IMAGE_COUNT = "IMAGE_COUNT";
 	public static final String KEY_THUMBNAIL = "THUMBNAIL";
 	public static final String KEY_FAVORITE = "FAVORITE";
@@ -120,12 +123,27 @@ public class CasesProvider extends ContentProvider
 
 	public static final String KEY_LAST_MODIFIED_DATE = "LAST_MODIFIED_DATE";
 
+	public static final String KEY_USER_ID = "USER_ID";	// RadFiles userID
+	public static final String KEY_ORIGINAL_CREATOR = "ORIGINAL_CREATOR";	// RadFiles user name who first submitted this case
+	public static final String KEY_IS_SHARED = "IS_SHARED";	// flag if shared publicly
+
+	public static final String KEY_CASE_INFO1 = "CASE_INFO1";	// extra rows in case need for future
+	public static final String KEY_CASE_INFO2 = "CASE_INFO2";
+	public static final String KEY_CASE_INFO3 = "CASE_INFO3";
+	public static final String KEY_CASE_INFO4 = "CASE_INFO4";
+	public static final String KEY_CASE_INFO5 = "CASE_INFO5";
+
 	// Images Table
+	// 1. define String KEY_ = "..."
 	public static final String KEY_IMAGE_PARENT_CASE_ID = "IMAGE_PARENT_CASE_ID";
 	public static final String KEY_IMAGE_FILENAME = "IMAGE_FILENAME";
 	public static final String KEY_ORDER = "ROW_ORDER";    // re-used in images,  section_list, studytype_list, keyword_list tables
 	public static final String KEY_IMAGE_DETAILS = "IMAGE_DETAILS";
 	public static final String KEY_IMAGE_CAPTION = "IMAGE_CAPTION";
+
+	public static final String KEY_IMAGE_INFO1 = "CASE_INFO1";
+	public static final String KEY_IMAGE_INFO2 = "CASE_INFO2";
+	public static final String KEY_IMAGE_INFO3 = "CASE_INFO3";
 
 	// list tables
 	// KEY_ // keywords, modality, section
@@ -141,8 +159,9 @@ public class CasesProvider extends ContentProvider
 	 * followup comment
 	 */
 
-	// TODO: Setup your field numbers here (0 = KEY_ROWID, 1=...)
-	public static final int COL_PATIENT_ID = 1;
+	// Setup field numbers here (0 = KEY_ROWID, 1=...)
+	// 2. define int COL_ = "..."
+	public static final int COL_CASE_NUMBER = 1;
 	public static final int COL_DIAGNOSIS = 2;
 	public static final int COL_SECTION = 3;
 	public static final int COL_FINDINGS = 4;
@@ -158,6 +177,15 @@ public class CasesProvider extends ContentProvider
 	public static final int COL_FAVORITE = 14;
 	public static final int COL_CLINICAL_HISTORY = 15;
 	public static final int COL_LAST_MODIFIED_DATE = 16;
+	public static final int COL_USER_ID = 17;	// RadFiles user
+	public static final int COL_ORIGINAL_CREATOR = 18;	// RadFiles user who first submitted this case
+	public static final int COL_IS_SHARED = 19;	// flag if shared publicly
+
+	public static final int COL_CASE_INFO1 = 20;	// extra rows in case need for future
+	public static final int COL_CASE_INFO2 = 21;
+	public static final int COL_CASE_INFO3 = 22;
+	public static final int COL_CASE_INFO4 = 23;
+	public static final int COL_CASE_INFO5 = 24;
 
 	// for secondary list tables.  study_type tables
 	public static final int COL_LIST_ITEM_VALUE = 1;
@@ -171,10 +199,18 @@ public class CasesProvider extends ContentProvider
 	public static final int COL_IMAGE_DETAILS = 4;
 	public static final int COL_IMAGE_CAPTION = 5;
 
+	public static final int COL_IMAGE_INFO1 = 6;
+	public static final int COL_IMAGE_INFO2 = 7;
+	public static final int COL_IMAGE_INFO3 = 8;
 
-	public static final String[] CASES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_PATIENT_ID, KEY_DIAGNOSIS,
+
+	// array of all table key strings
+	// 3. add KEY_ string to _ALL_KEYS array
+	public static final String[] CASES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_CASE_NUMBER, KEY_DIAGNOSIS,
 		KEY_SECTION, KEY_FINDINGS, KEY_BIOPSY, KEY_FOLLOWUP, KEY_FOLLOWUP_COMMENT, KEY_KEYWORDS, KEY_COMMENTS, KEY_STUDY_TYPE,
-		KEY_DATE, KEY_IMAGE_COUNT, KEY_THUMBNAIL, KEY_FAVORITE, KEY_CLINICAL_HISTORY, KEY_LAST_MODIFIED_DATE};
+			KEY_STUDY_DATE, KEY_IMAGE_COUNT, KEY_THUMBNAIL, KEY_FAVORITE, KEY_CLINICAL_HISTORY, KEY_LAST_MODIFIED_DATE,
+			KEY_USER_ID, KEY_ORIGINAL_CREATOR, KEY_IS_SHARED,
+			KEY_CASE_INFO1, KEY_CASE_INFO2, KEY_CASE_INFO3, KEY_CASE_INFO4, KEY_CASE_INFO5};
 
 	// DB info: it's name, and the table we are using.
 	public static final String DATABASE_NAME = "MyDB";
@@ -199,54 +235,69 @@ public class CasesProvider extends ContentProvider
 	public static final String KEYWORD_LIST_TABLE = "KeyWordListTable";
 	public static final String STUDYTYPE_LIST_TABLE = "StudyTypeListTable";
 
-
-	// Track DB version if a new version of your app changes the format.
-	public static final int DATABASE_VERSION = 38;
-
+	// 4. SQL string to create _TABLE with _ALL_KEYS matched with COL_ defined above
 	private static final String CASES_TABLE_CREATE_SQL =
 			"create table " + CASES_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
 
-			/*
-			 * CHANGE 2:
-			 */
-					// TODO: Place your fields here!
 					// + KEY_{...} + " {type} not null"
 					//	- Key is the column name you created above.
 					//	- {type} is one of: text, integer, real, blob
 					//		(http://www.sqlite.org/datatype3.html)
 					//  - "not null" means it is a required field (must be given a value).
 					// NOTE: All must be comma separated (end of line!) Last one must have NO comma!!
-					+ CASES_TABLE_ALL_KEYS[1] + " text, "
-					+ CASES_TABLE_ALL_KEYS[2] + " text, "
-					+ CASES_TABLE_ALL_KEYS[3] + " text, "
-					+ CASES_TABLE_ALL_KEYS[4] + " text, "
-					+ CASES_TABLE_ALL_KEYS[5] + " text, "
-					+ CASES_TABLE_ALL_KEYS[6] + " integer, "    //followup
-					+ CASES_TABLE_ALL_KEYS[7] + " text, "
-					+ CASES_TABLE_ALL_KEYS[8] + " text, "
-					+ CASES_TABLE_ALL_KEYS[9] + " text, "
-					+ CASES_TABLE_ALL_KEYS[10] + " text, "
-					+ CASES_TABLE_ALL_KEYS[11] + " text, "
-					+ CASES_TABLE_ALL_KEYS[12] + " integer, " //imagecount
-					+ CASES_TABLE_ALL_KEYS[13] + " text, "
-					+ CASES_TABLE_ALL_KEYS[14] + " text, "
-					+ CASES_TABLE_ALL_KEYS[15] + " text, "
-					+ CASES_TABLE_ALL_KEYS[16] + " text"
+					+ CASES_TABLE_ALL_KEYS[COL_CASE_NUMBER] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_DIAGNOSIS] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_SECTION] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_FINDINGS] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_BIOPSY] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_FOLLOWUP] + " integer, "    // boolean
+					+ CASES_TABLE_ALL_KEYS[COL_FOLLOWUP_COMMENT] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_KEYWORDS] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_COMMENTS] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_STUDY_TYPE] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_DATE] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_IMAGE_COUNT] + " integer, " 	// int
+					+ CASES_TABLE_ALL_KEYS[COL_THUMBNAIL] + " integer, "	// int image list position to be used as thumbnail
+					+ CASES_TABLE_ALL_KEYS[COL_FAVORITE] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_CLINICAL_HISTORY] + " text, "
+					+ CASES_TABLE_ALL_KEYS[COL_LAST_MODIFIED_DATE] + " text, "
+					+ KEY_USER_ID + " text, "
+					+ KEY_ORIGINAL_CREATOR + " text, "
+					+ KEY_IS_SHARED + " integer, "							// boolean
+
+					+ KEY_CASE_INFO1 + " text, "
+					+ KEY_CASE_INFO2 + " text, "
+					+ KEY_CASE_INFO3 + " text, "
+					+ KEY_CASE_INFO4 + " integer, "	//int
+					+ KEY_CASE_INFO5 + " integer"	//int
 
 					// Rest  of creation:
 					+ ");";
 
 	// list of image files, with links to parent "Cases" table
-	public static final String[] IMAGES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_IMAGE_PARENT_CASE_ID, KEY_IMAGE_FILENAME, KEY_ORDER, KEY_IMAGE_DETAILS, KEY_IMAGE_CAPTION};
+	// 3. add KEY_ string to _ALL_KEYS array
+	public static final String[] IMAGES_TABLE_ALL_KEYS = new String[]{KEY_ROWID, KEY_IMAGE_PARENT_CASE_ID, KEY_IMAGE_FILENAME, KEY_ORDER, KEY_IMAGE_DETAILS, KEY_IMAGE_CAPTION, KEY_IMAGE_INFO1, KEY_IMAGE_INFO2, KEY_IMAGE_INFO3};
+	// 4. SQL string to create _TABLE with _KEYS defined above
 	private static final String IMAGES_TABLE_CREATE_SQL =
 			"create table " + IMAGES_TABLE
 					+ " (" + KEY_ROWID + " integer primary key autoincrement, "
+
+					// + KEY_{...} + " {type} not null"
+					//	- Key is the column name you created above.
+					//	- {type} is one of: text, integer, real, blob
+					//		(http://www.sqlite.org/datatype3.html)
+					//  - "not null" means it is a required field (must be given a value).
+					// NOTE: All must be comma separated (end of line!) Last one must have NO comma!!
 					+ KEY_IMAGE_PARENT_CASE_ID + " integer, "
 					+ KEY_IMAGE_FILENAME + " text, "
 					+ KEY_ORDER + " integer, "
 					+ KEY_IMAGE_DETAILS + " text, "
-					+ KEY_IMAGE_CAPTION + " text"
+					+ KEY_IMAGE_CAPTION + " text, "
+					+ KEY_IMAGE_INFO1 + " text, "
+					+ KEY_IMAGE_INFO2 + " text, "
+					+ KEY_IMAGE_INFO3 + " integer"
+
 					+ ");";
 
 	// to generate list of available Sections
@@ -277,9 +328,9 @@ public class CasesProvider extends ContentProvider
 					+ ");";
 
 
-
-
-
+	// Track DB version if a new version of your app changes the format.
+	// 5. update DATABASE_VERSION
+	public static final int DATABASE_VERSION = 46;
 
 	// Context of application who uses us.
 	//	private final Context context;

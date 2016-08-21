@@ -874,11 +874,12 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
                             // write metadata
                             cases_writer.beginObject();
-                            cases_writer.name("NUM_CASES").value(caseCursor.getCount());
-                            cases_writer.name("DATE_CREATED").value(new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date()));
-                            cases_writer.name("USER").value(user.getEmail());
+                            cases_writer.name(CasesDB.NUM_CASES).value(caseCursor.getCount());
+                            cases_writer.name(CasesDB.DATE_CREATED).value(new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date()));
+                            cases_writer.name(CasesDB.USER).value(user.getEmail());
+                            cases_writer.name(CasesDB.USER_ID).value(user.getUid());
 
-                            cases_writer.name("DATA");
+                            cases_writer.name(CasesDB.DATA);
 
                             // loop through all cases
                             cases_writer.beginArray();
@@ -909,7 +910,10 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                                         cases_writer.beginObject();
                                         for (int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
                                         {
-                                            cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
+                                            if (imageCursor.getString(i) != null && !imageCursor.getString(i).isEmpty())
+                                            {
+                                                cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
+                                            }
                                         }
                                         cases_writer.endObject();
 
@@ -1168,7 +1172,6 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
             private static final int DOWNLOADING_CASES = 2;
 
             private final Context context = activity;
-            private int pendingTaskCount;
 
 
             protected void onPreExecute()
@@ -1201,7 +1204,6 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                 final List <String> imageDownloadList = new ArrayList<String>();
 
                 int caseCount = 0;
-                pendingTaskCount = 0;
 
                 // Firebase: upload images and JSON files
                 final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -1267,7 +1269,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                                     {
                                         insertCaseValues.clear();
 
-                                        insertCaseValues.put(CasesProvider.KEY_PATIENT_ID, caseList.get(c).patient_id);
+                                        insertCaseValues.put(CasesProvider.KEY_CASE_NUMBER, caseList.get(c).case_id);
                                         insertCaseValues.put(CasesProvider.KEY_DIAGNOSIS, caseList.get(c).diagnosis);
                                         insertCaseValues.put(CasesProvider.KEY_SECTION, caseList.get(c).section);
                                         insertCaseValues.put(CasesProvider.KEY_FINDINGS, caseList.get(c).findings);
@@ -1277,12 +1279,17 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                                         insertCaseValues.put(CasesProvider.KEY_KEYWORDS, caseList.get(c).key_words);
                                         insertCaseValues.put(CasesProvider.KEY_COMMENTS, caseList.get(c).comments);
                                         insertCaseValues.put(CasesProvider.KEY_STUDY_TYPE, caseList.get(c).study_type);
-                                        insertCaseValues.put(CasesProvider.KEY_DATE, caseList.get(c).db_date_str);
+                                        insertCaseValues.put(CasesProvider.KEY_STUDY_DATE, caseList.get(c).db_date_str);
                                         insertCaseValues.put(CasesProvider.KEY_IMAGE_COUNT, caseList.get(c).image_count);
                                         insertCaseValues.put(CasesProvider.KEY_THUMBNAIL, caseList.get(c).thumbnail);
                                         insertCaseValues.put(CasesProvider.KEY_FAVORITE, caseList.get(c).favorite);
                                         insertCaseValues.put(CasesProvider.KEY_CLINICAL_HISTORY, caseList.get(c).clinical_history);
                                         insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, caseList.get(c).last_modified_date);
+                                        insertCaseValues.put(CasesProvider.KEY_ORIGINAL_CREATOR, caseList.get(c).original_creator);
+                                        insertCaseValues.put(CasesProvider.KEY_IS_SHARED, caseList.get(c).is_shared);
+
+                                        // insert current user, may have been shared from another user
+                                        insertCaseValues.put(CasesProvider.KEY_USER_ID, userID);
 
                                         rowUri = context.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
 
@@ -1427,13 +1434,6 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
                     case PROGRESS_MSG_INCREMENT:
                         progressDialog.incrementProgressBy(1);
-                        break;
-
-                    case PROGRESS_MSG_INCREMENT_ACTIVE_TASKS:
-                        pendingTaskCount += 1;
-                        break;
-                    case PROGRESS_MSG_DECREMENT_ACTIVE_TASKS:
-                        pendingTaskCount -= 1;
                         break;
 
                     default:
