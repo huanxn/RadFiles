@@ -18,9 +18,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.JsonReader;
-import android.util.JsonToken;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,11 +29,11 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -478,7 +475,7 @@ public class CaseImport extends AppCompatActivity
 			int caseCount = 0;
 
 			Uri rowUri = null;
-			int parent_id;
+			int newCase_KEYID;
 
 			ContentValues insertCaseValues = new ContentValues();
 			ContentValues insertImageValues = new ContentValues();
@@ -499,34 +496,36 @@ public class CaseImport extends AppCompatActivity
 			{
 				insertCaseValues.clear();
 
+				// insert into local SQL database
 				insertCaseValues.put(CasesProvider.KEY_CASE_NUMBER, caseList.get(c).case_id);
 				insertCaseValues.put(CasesProvider.KEY_DIAGNOSIS, caseList.get(c).diagnosis);
-				insertCaseValues.put(CasesProvider.KEY_SECTION, caseList.get(c).section);
 				insertCaseValues.put(CasesProvider.KEY_FINDINGS, caseList.get(c).findings);
+				insertCaseValues.put(CasesProvider.KEY_SECTION, caseList.get(c).section);
+				insertCaseValues.put(CasesProvider.KEY_STUDY_TYPE, caseList.get(c).study_type);
+				insertCaseValues.put(CasesProvider.KEY_STUDY_DATE, caseList.get(c).db_date_str);
+				insertCaseValues.put(CasesProvider.KEY_KEYWORDS, caseList.get(c).key_words);
 				insertCaseValues.put(CasesProvider.KEY_BIOPSY, caseList.get(c).biopsy);
 				insertCaseValues.put(CasesProvider.KEY_FOLLOWUP, caseList.get(c).followup);
 				insertCaseValues.put(CasesProvider.KEY_FOLLOWUP_COMMENT, caseList.get(c).followup_comment);
-				insertCaseValues.put(CasesProvider.KEY_KEYWORDS, caseList.get(c).key_words);
+				insertCaseValues.put(CasesProvider.KEY_CLINICAL_HISTORY, caseList.get(c).clinical_history);
 				insertCaseValues.put(CasesProvider.KEY_COMMENTS, caseList.get(c).comments);
-				insertCaseValues.put(CasesProvider.KEY_STUDY_TYPE, caseList.get(c).study_type);
-				insertCaseValues.put(CasesProvider.KEY_STUDY_DATE, caseList.get(c).db_date_str);
+				insertCaseValues.put(CasesProvider.KEY_FAVORITE, caseList.get(c).favorite);
 				insertCaseValues.put(CasesProvider.KEY_IMAGE_COUNT, caseList.get(c).image_count);
 				insertCaseValues.put(CasesProvider.KEY_THUMBNAIL, caseList.get(c).thumbnail);
-				insertCaseValues.put(CasesProvider.KEY_FAVORITE, caseList.get(c).favorite);
-				insertCaseValues.put(CasesProvider.KEY_CLINICAL_HISTORY, caseList.get(c).clinical_history);
 				insertCaseValues.put(CasesProvider.KEY_LAST_MODIFIED_DATE, caseList.get(c).last_modified_date);
 				insertCaseValues.put(CasesProvider.KEY_ORIGINAL_CREATOR, caseList.get(c).original_creator);
 				insertCaseValues.put(CasesProvider.KEY_IS_SHARED, caseList.get(c).is_shared);
 
-				// insert current user, may have been shared from another user
+				// use current userID, may have been shared from another user
 				insertCaseValues.put(CasesProvider.KEY_USER_ID, userID);
 
 				rowUri = context.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
 
+
 				if (rowUri != null)
 				{
 					// get parent key information
-					parent_id = Integer.valueOf(rowUri.getLastPathSegment());
+					newCase_KEYID = Integer.valueOf(rowUri.getLastPathSegment());
 
 					// increment count
 					caseCount += 1;
@@ -540,8 +539,8 @@ public class CaseImport extends AppCompatActivity
 						{
 							insertImageValues.clear();
 
-							// put new parent_id of newly added case
-							insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, parent_id);
+							// put new newCase_KEYID of newly added case
+							insertImageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, newCase_KEYID);
 							insertImageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageList.get(i).getFilename());
 							insertImageValues.put(CasesProvider.KEY_ORDER, imageList.get(i).getOrder());
 							insertImageValues.put(CasesProvider.KEY_IMAGE_DETAILS, imageList.get(i).getDetails());
@@ -551,11 +550,99 @@ public class CaseImport extends AppCompatActivity
 							context.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
 						}
 					}
-				}
+
+
+					// insert into cloud Firebase database
+					// Create Firebase storage references
+					FirebaseAuth mAuth = FirebaseAuth.getInstance();
+					if(mAuth != null)
+					{
+						FirebaseUser firebaseUser = mAuth.getCurrentUser();
+						FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+
+						if(firebaseDatabase != null)
+						{
+							DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
+
+							// use SQL key _id as node of case in firebase database
+							DatabaseReference caseRef = databaseRef.child("Cases/" + newCase_KEYID);
+
+							DatabaseReference diagnosisRef = caseRef.child(CasesProvider.KEY_DIAGNOSIS);
+							diagnosisRef.setValue(caseList.get(c).diagnosis);
+
+							DatabaseReference findingsRef = caseRef.child(CasesProvider.KEY_FINDINGS);
+							findingsRef.setValue(caseList.get(c).findings);
+
+							DatabaseReference sectionRef = caseRef.child(CasesProvider.KEY_SECTION);
+							sectionRef.setValue(caseList.get(c).section);
+
+							DatabaseReference studytypeRef = caseRef.child(CasesProvider.KEY_STUDY_TYPE);
+							studytypeRef.setValue(caseList.get(c).study_type);
+
+							DatabaseReference keywordsRef = caseRef.child(CasesProvider.KEY_KEYWORDS);
+							keywordsRef.setValue(caseList.get(c).key_words);
+
+							DatabaseReference biopsyRef = caseRef.child(CasesProvider.KEY_BIOPSY);
+							biopsyRef.setValue(caseList.get(c).biopsy);
+
+							DatabaseReference followupRef = caseRef.child(CasesProvider.KEY_FOLLOWUP);
+							followupRef.setValue(caseList.get(c).followup);
+
+							DatabaseReference followupCommentRef = caseRef.child(CasesProvider.KEY_FOLLOWUP_COMMENT);
+							followupCommentRef.setValue(caseList.get(c).followup_comment);
+
+							DatabaseReference commentsRef = caseRef.child(CasesProvider.KEY_COMMENTS);
+							commentsRef.setValue(caseList.get(c).comments);
+
+							DatabaseReference favoriteRef = caseRef.child(CasesProvider.KEY_FAVORITE);
+							favoriteRef.setValue(caseList.get(c).favorite);
+
+							DatabaseReference imageCountRef = caseRef.child(CasesProvider.KEY_IMAGE_COUNT);
+							imageCountRef.setValue(caseList.get(c).image_count);
+
+							DatabaseReference thumbnailRef = caseRef.child(CasesProvider.KEY_THUMBNAIL);
+							thumbnailRef.setValue(caseList.get(c).thumbnail);
+
+							DatabaseReference originalCreatorRef = caseRef.child(CasesProvider.KEY_ORIGINAL_CREATOR);
+							originalCreatorRef.setValue(caseList.get(c).original_creator);
+
+							DatabaseReference isSharedRef = caseRef.child(CasesProvider.KEY_IS_SHARED);
+							isSharedRef.setValue(caseList.get(c).is_shared);
+
+							// Images
+							if (caseList.get(c).caseImageList != null)
+							{
+								List<CaseImage> imageList = caseList.get(c).caseImageList;
+
+								for (int i = 0; i < imageList.size(); i++)
+								{
+									DatabaseReference imageRef = caseRef.child("Images/" + i);
+
+									DatabaseReference imageFilenameRef = imageRef.child(CasesProvider.KEY_IMAGE_FILENAME);
+									imageFilenameRef.setValue(imageList.get(i).getFilename());
+
+									DatabaseReference imageCaptionRef = imageRef.child(CasesProvider.KEY_IMAGE_CAPTION);
+									imageCaptionRef.setValue(imageList.get(i).getCaption());
+
+									DatabaseReference imageDetailsRef = imageRef.child(CasesProvider.KEY_IMAGE_DETAILS);
+									imageDetailsRef.setValue(imageList.get(i).getDetails());
+
+									DatabaseReference imageOrderRef = imageRef.child(CasesProvider.KEY_ORDER);
+									imageOrderRef.setValue(imageList.get(i).getOrder());
+
+								}
+							} // end loop imageList for firebase db
+
+						} // end if firebase user exists
+					} // end if auth exists
+				} // end if successfully placed into SQL db
+
+
+
 
 			} // end for loop caseList
 
-			// delete the temporary downlaoded file
+			// delete the temporary downloaded file
 			files[0].delete();
 
 			return caseCount;

@@ -19,6 +19,7 @@ import android.widget.GridView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Huan on 9/23/2014.
@@ -67,6 +68,24 @@ public class ImageGridView
 		gridView.setAdapter(mAdapter);
 
 		mAdapter.setImages(image_cursor);
+		Resize();
+
+		SetClickListeners();
+	}
+
+	// Constructor for ImageGridView, set up with images
+	public ImageGridView(Activity activity, GridView gView, long _id, List<CaseImage> imageList)
+	{
+		this.activity = activity;
+		gridView = gView;
+		case_key_id = _id;
+
+		deletedImageList = new ArrayList<String>();
+
+		mAdapter = new ImageAdapter(activity);
+		gridView.setAdapter(mAdapter);
+
+		mAdapter.setImages(imageList);
 		Resize();
 
 		SetClickListeners();

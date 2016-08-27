@@ -32,6 +32,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserInfo;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.mikepenz.fastadapter.utils.RecyclerViewCacheUtil;
@@ -106,7 +108,7 @@ public class NavDrawerActivity extends AppCompatActivity
     private String userName;
     private String userEmail;
     private Uri userPhotoUri;
-    private String userID;  // maybe don't need?
+    static protected String userID;  // maybe don't need?
     private String providerId;  // email vs google.com
 
     protected FirebaseAuth mAuth = null;
@@ -114,6 +116,8 @@ public class NavDrawerActivity extends AppCompatActivity
     protected FirebaseStorage mStorage;
     protected StorageReference mStorageRef = null;
     protected StorageReference mStorageImages;
+    protected FirebaseDatabase mDatabase;
+    protected DatabaseReference mDatabaseRef = null;
 
 
     private AppCompatActivity mActivity;
@@ -215,6 +219,12 @@ public class NavDrawerActivity extends AppCompatActivity
         mStorage = FirebaseStorage.getInstance();
         mStorageRef = mStorage.getReferenceFromUrl("gs://rad-files.appspot.com");
 
+        mDatabase = FirebaseDatabase.getInstance();
+        // should be set with authSignIn()
+        // user node by userID
+        mDatabaseRef = mDatabase.getReference("users/" + userID);
+
+        DatabaseReference mCasesRef = mDatabaseRef.child("Cases");
 
         // Create a few sample profile
         // NOTE you have to define the loader logic too. See the CustomApplication for more details

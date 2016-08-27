@@ -1031,7 +1031,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				}
 				else if(case_subset == NavDrawerActivity.POS_CASE_LIST_FOLLOWUP)
 				{
-					subset_query_string = new String(CasesProvider.KEY_FOLLOWUP + " = '1'");
+					subset_query_string = CasesProvider.KEY_FOLLOWUP + " = '1'";
 					subset_query_string_and = subset_query_string + " AND ";
 				}
 				else if(case_subset >= NavDrawerActivity.POS_CASE_LIST_SUBSECTION)
@@ -1040,7 +1040,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 					Cursor subsection_cursor = mActivity.getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
 
 					subsection_cursor.moveToPosition((int)case_subset-POS_CASE_LIST_SUBSECTION);
-					subset_query_string = new String(CasesProvider.KEY_SECTION + " = '" + subsection_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE) + "'");
+					subset_query_string = CasesProvider.KEY_SECTION + " = '" + subsection_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE) + "'";
 					subset_query_string_and = subset_query_string + " AND ";
 
 					subsection_cursor.close();
@@ -1048,8 +1048,11 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				}
 				else
 				{
-					subset_query_string = null;
-					subset_query_string_and = new String("");
+					//subset_query_string = null;
+					//subset_query_string_and = new String("");
+
+					subset_query_string = CasesProvider.KEY_USER_ID + " = '" + userID + "'";
+					subset_query_string_and = subset_query_string + " AND ";
 				}
 
 				if(caseFilterMode == FILTER_SECTION)

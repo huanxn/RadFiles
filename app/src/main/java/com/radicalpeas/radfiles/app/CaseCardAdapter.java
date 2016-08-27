@@ -440,8 +440,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 	/**
 	 * setHeaderLiest
-	 * @param text: headers for each item in list
-	 * @param IDs
+	 * //@param text: headers for each item in list
+	 * //@param IDs
 	 */
 /*
 	public void setHeaderList(List<String> text, List<Integer> IDs)

@@ -578,7 +578,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
 		values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
 
-		// UPDATE DATABASE
+		// WRITE TO DATABASE
 		if(key_id == -1)
 		{
 			// Add a new case into the database
@@ -586,6 +586,9 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 			// get the key_id of the new case
 			key_id = ContentUris.parseId(new_case_uri);
+
+			// FIREBASE
+
 		}
 		else
 		{

@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by Huan on 6/28/2014.
@@ -142,6 +143,21 @@ public class ImageAdapter extends BaseAdapter
 		{
 //			initialize();
 		}
+	}
+
+	public void setImages(List<CaseImage> imageList)
+	{
+		imageFilepaths = new String[imageList.size()];
+		imageCaptions = new String[imageList.size()];
+		imageIDs = new long[imageList.size()];
+
+		for(int i = 0; i < imageList.size(); i++)
+		{
+			imageFilepaths[i] = CaseCardListActivity.picturesDir + "/" + imageList.get(i).getFilename();
+			imageCaptions[i] = imageList.get(i).getCaption();
+			imageIDs[i] = imageList.get(i).get_id();
+		}
+		return;
 	}
 
 	/*

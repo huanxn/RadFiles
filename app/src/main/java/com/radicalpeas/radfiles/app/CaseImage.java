@@ -34,12 +34,6 @@ public class CaseImage
     @SerializedName(CasesProvider.KEY_IMAGE_INFO3)
     private int image_info3;
 
-
-    public int get_id()
-    {
-        return _id;
-    }
-
     public int getParent_id()
     {
         return parent_id;
@@ -63,6 +57,41 @@ public class CaseImage
     public String getCaption()
     {
         return caption;
+    }
+
+    public int get_id()
+    {
+        return _id;
+    }
+
+    public void set_id(int _id)
+    {
+        this._id = _id;
+    }
+
+    public void setParent_id(int parent_id)
+    {
+        this.parent_id = parent_id;
+    }
+
+    public void setFilename(String filename)
+    {
+        this.filename = filename;
+    }
+
+    public void setOrder(int order)
+    {
+        this.order = order;
+    }
+
+    public void setDetails(String details)
+    {
+        this.details = details;
+    }
+
+    public void setCaption(String caption)
+    {
+        this.caption = caption;
     }
 }
 

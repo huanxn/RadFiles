@@ -559,7 +559,7 @@ public class CaseDetailActivity extends AppCompatActivity
 				Intent imageGalleryIntent = new Intent(this, ImageGalleryActivity.class);
 				//imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
 				imageGalleryIntent.putExtra(CaseCardListActivity.ARG_KEY_ID, key_id);
-				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, fragment.thumbnail_pos);
+				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_POSITION, fragment.mCase.thumbnail);
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_FILES, fragment.imageGridView.getImageFilepaths());
 				imageGalleryIntent.putExtra(ImageGalleryActivity.ARG_IMAGE_CAPTIONS, fragment.imageGridView.getImageCaptions());
 /*
@@ -860,8 +860,10 @@ public class CaseDetailActivity extends AppCompatActivity
 		final private float statusbarMinAlpha = (float)0.2;
 		//private int mParallaxImageHeight;
 
-		private int thumbnail_pos;
+		//private int thumbnail_pos;
 		private ImageGridView imageGridView = null;
+
+		private Case mCase;
 
 		// Hold a reference to the current animator,
 		// so that it can be canceled mid-way.
@@ -873,6 +875,7 @@ public class CaseDetailActivity extends AppCompatActivity
 		 */
 		public CaseDetailFragment()
 		{
+			mCase = new Case();
 		}
 
 		@Override
@@ -978,13 +981,8 @@ public class CaseDetailActivity extends AppCompatActivity
 				mActivity.getWindow().setExitTransition(set);
 				mActivity.getWindow().setEnterTransition(set);
 			}
-
-
-
 			return view;
 		}
-
-
 
 		@Override
 		public void onSaveInstanceState(Bundle outState)
@@ -1000,14 +998,12 @@ public class CaseDetailActivity extends AppCompatActivity
 			//populateFields();
 		}
 
-
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState) {
 			super.onViewCreated(view, savedInstanceState);
 
 			populateFields();
 		}
-
 
 		/**
 		 * //todo use the at the beginning of populate fields?
@@ -1017,13 +1013,15 @@ public class CaseDetailActivity extends AppCompatActivity
 		{
 			View rootView = getView();
 
+			// get images of this case (by case key_id)
 			String [] image_args = {String.valueOf(mActivity.key_id)};
 			Cursor imageCursor = mActivity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 
 			if ((hasImage == false && imageCursor.getCount() > 0) || hasImage == true && imageCursor.getCount() == 0)
 			{
 				mImageView.setVisibility(View.GONE);
-				rootView.findViewById(R.id.anchor).setVisibility(View.GONE);
+				if(rootView != null)
+					rootView.findViewById(R.id.anchor).setVisibility(View.GONE);
 
 				// reload activity theme
 				mActivity.setResult(CaseCardListActivity.RESULT_EDITED);
@@ -1057,22 +1055,27 @@ public class CaseDetailActivity extends AppCompatActivity
 
 		public void populateFields()
 		{
-
 			View rootView = getView();
+
+			if(rootView == null)
+			{
+				Log.d(TAG, "Can't get rootView in populateFields()");
+				return;
+			}
 
 			// get the CASE key_id
 			if (getArguments().containsKey(CaseCardListActivity.ARG_KEY_ID))
 			{
-				selected_key_id = getArguments().getLong(CaseCardListActivity.ARG_KEY_ID);
-
+				mCase.key_id = selected_key_id = getArguments().getLong(CaseCardListActivity.ARG_KEY_ID);
 			}
 			else    //TODO show error message (no selected key id from listview)
 			{
 				selected_key_id = -1;
+				mCase.key_id = -1;
 				return;
 			}
 
-			String [] image_args = {String.valueOf(selected_key_id)};
+			String [] image_args = {String.valueOf(mCase.key_id)};
 			Cursor imageCursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
 
 			if ((hasImage == false && imageCursor.getCount() > 0) || hasImage == true && imageCursor.getCount() == 0)
@@ -1084,42 +1087,23 @@ public class CaseDetailActivity extends AppCompatActivity
 			}
 
 			// get db row of clicked case
-			Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
+			Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, mCase.key_id);
 			Cursor case_cursor = getActivity().getContentResolver().query(uri, null, null, null, null, null);
 
-			if (case_cursor.moveToFirst())
+			if (case_cursor != null && case_cursor.moveToFirst())
 			{
-				int key_id = case_cursor.getInt(CasesProvider.COL_ROWID);
-				String case_id = case_cursor.getString(CasesProvider.COL_CASE_NUMBER);
-				final String diagnosis = case_cursor.getString(CasesProvider.COL_DIAGNOSIS);
-				String findings = case_cursor.getString(CasesProvider.COL_FINDINGS);
-				String section = case_cursor.getString(CasesProvider.COL_SECTION);
-				String comments = case_cursor.getString(CasesProvider.COL_COMMENTS);
-				String key_words = case_cursor.getString(CasesProvider.COL_KEYWORDS);
-				String biopsy = case_cursor.getString(CasesProvider.COL_BIOPSY);
-				String followup = case_cursor.getString(CasesProvider.COL_FOLLOWUP_COMMENT);
-
-				thumbnail_pos = 0;
-				String thumbnailString = case_cursor.getString(CasesProvider.COL_THUMBNAIL);
-				if(thumbnailString != null && !thumbnailString.isEmpty())
-					thumbnail_pos = Integer.parseInt(thumbnailString);
+				mCase.setCaseFromCursor(getActivity(), case_cursor);
 
 				boolean followup_bool;
-				if(case_cursor.getInt(CasesProvider.COL_FOLLOWUP)==1)
+				if(mCase.followup==1)
 					followup_bool=true;
 				else
 					followup_bool=false;
 
-				String study_type = case_cursor.getString(CasesProvider.COL_STUDY_TYPE);
-				String date_str = case_cursor.getString(CasesProvider.COL_DATE);
-				//String[] imageFilename = new String[CasesProvider.MAX_NUM_IMAGES];
-				//int imageCount = case_cursor.getInt(CasesProvider.COL_IMAGE_COUNT);
-
 				// set global variable isStarred for Activity action bar menu toggle
-				String fav_string = case_cursor.getString(CasesProvider.COL_FAVORITE);
-				if(fav_string != null && !fav_string.isEmpty())
+				if(mCase.favorite != null && !mCase.favorite.isEmpty())
 				{
-					favorite = Integer.parseInt(fav_string);
+					favorite = Integer.parseInt(mCase.favorite);
 				}
 				else
 				{
@@ -1127,15 +1111,16 @@ public class CaseDetailActivity extends AppCompatActivity
 				}
 
 				ActionBar actionBar = ((AppCompatActivity)getActivity()).getSupportActionBar();
-				actionBar.setTitle(mActivity.mTitle);
+				if(actionBar != null)
+					actionBar.setTitle(mActivity.mTitle);
 
 				// Case Information (DIAGNOSIS and FINDINGS)
 				TextView TV_case_info1 = (TextView) rootView.findViewById(R.id.case_info1);
 				TextView TV_case_info2 = (TextView) rootView.findViewById(R.id.detail_case_info2);
 
-				if(diagnosis != null && !diagnosis.isEmpty())
+				if(mCase.diagnosis != null && !mCase.diagnosis.isEmpty())
 				{
-					TV_case_info1.setText(diagnosis);
+					TV_case_info1.setText(mCase.diagnosis);
 					TV_case_info1.setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.CaseInfoLabel).setVisibility(View.VISIBLE);
 
@@ -1146,7 +1131,7 @@ public class CaseDetailActivity extends AppCompatActivity
 						{
 							AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-							SpannableString alertTitle = new SpannableString("Search \"" + diagnosis +"\"");
+							SpannableString alertTitle = new SpannableString("Search \"" + mCase.diagnosis +"\"");
 
 							//mTitle.setSpan(new TypefaceSpan(this, "Roboto-BlackItalic.ttf"), 0, "RAD".length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 							alertTitle.setSpan(new TypefaceSpan(mActivity, "RobotoCondensed-Bold.ttf"), "Search \"".length(), alertTitle.length()-1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1175,7 +1160,7 @@ public class CaseDetailActivity extends AppCompatActivity
 
 											try
 											{
-												Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri + diagnosis.replace(' ', '+')));
+												Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri + mCase.diagnosis.replace(' ', '+')));
 												startActivity(browserIntent);
 											}
 											catch (ActivityNotFoundException e)
@@ -1183,7 +1168,6 @@ public class CaseDetailActivity extends AppCompatActivity
 												UtilClass.showSnackbar(mActivity, "No application can handle this request. Please install a browser");
 												e.printStackTrace();
 											}
-
 										}
 									});
 							builder.create().show();
@@ -1192,9 +1176,9 @@ public class CaseDetailActivity extends AppCompatActivity
 					});
 
 					// if both Diagnosis and Findings fields retrieved, set subtext as the Findings
-					if(findings != null && !findings.isEmpty())    // diagnosis and findings
+					if(mCase.findings != null && !mCase.findings.isEmpty())    // diagnosis and findings
 					{
-						TV_case_info2.setText(findings);
+						TV_case_info2.setText(mCase.findings);
 						TV_case_info2.setVisibility(View.VISIBLE);
 					}
 					else    // Diagnosis and no Findings
@@ -1202,14 +1186,14 @@ public class CaseDetailActivity extends AppCompatActivity
 						TV_case_info2.setVisibility(GONE);
 					}
 				}
-				else if(findings != null && !findings.isEmpty())   // no Diagnosis, there are Findings
+				else if(mCase.findings != null && !mCase.findings.isEmpty())   // no Diagnosis, there are Findings
 				{
 					// if no Diagnosis, only Findings
 					// set label to say "FINDINGS"
 					((TextView) rootView.findViewById(R.id.CaseInfoLabel)).setText("FINDINGS");
 					rootView.findViewById(R.id.CaseInfoLabel).setVisibility(View.VISIBLE);
 					// set the main CaseInfo text to be the Findings
-					TV_case_info1.setText(findings);
+					TV_case_info1.setText(mCase.findings);
 					TV_case_info1.setVisibility(View.VISIBLE);
 
 					// don't put anything in the subtext
@@ -1225,9 +1209,9 @@ public class CaseDetailActivity extends AppCompatActivity
 
 				// SECTION
 				TextView TV_section = (TextView) rootView.findViewById(R.id.detail_section);
-				if(section != null && !section.isEmpty())
+				if(mCase.section != null && !mCase.section.isEmpty())
 				{
-					TV_section.setText(section);
+					TV_section.setText(mCase.section);
 					TV_section.setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.SectionLabel).setVisibility(View.VISIBLE);
 				}
@@ -1240,28 +1224,27 @@ public class CaseDetailActivity extends AppCompatActivity
 				// STUDY TYPE and STUDY DATE
 				TextView TV_study_text1 = (TextView) rootView.findViewById(R.id.detail_study_type);
 				TextView TV_study_text2 = (TextView) rootView.findViewById(R.id.detail_date);
-				if(study_type != null && !study_type.isEmpty())
+				if(mCase.study_type != null && !mCase.study_type.isEmpty())
 				{
-					TV_study_text1.setText(study_type);
+					TV_study_text1.setText(mCase.study_type);
 					TV_study_text1.setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.StudyLabel).setVisibility(View.VISIBLE);
 
 					// STUDY DATE
-					if(date_str != null && !date_str.isEmpty())
+					if(mCase.db_date_str != null && !mCase.db_date_str.isEmpty())
 					{
-						TV_study_text2.setText(UtilClass.convertDateString(date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
+						TV_study_text2.setText(UtilClass.convertDateString(mCase.db_date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
 						TV_study_text2.setVisibility(View.VISIBLE);
 					}
 					else
 					{
 						TV_study_text2.setVisibility(GONE);
 					}
-
 				}
-				else if(date_str != null && !date_str.isEmpty())
+				else if(mCase.db_date_str != null && !mCase.db_date_str.isEmpty())
 				{
 					// only study date known
-					TV_study_text1.setText(UtilClass.convertDateString(date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
+					TV_study_text1.setText(UtilClass.convertDateString(mCase.db_date_str, "yyyy-MM-dd", "MMMM d, yyyy"));
 					TV_study_text1.setVisibility(View.VISIBLE);
 
 					rootView.findViewById(R.id.StudyLabel).setVisibility(View.VISIBLE);
@@ -1275,15 +1258,13 @@ public class CaseDetailActivity extends AppCompatActivity
 					rootView.findViewById(R.id.StudyLabel).setVisibility(GONE);
 					TV_study_text2.setVisibility(GONE);
 					TV_study_text1.setVisibility(GONE);
-
 				}
-
 
 				// BIOPSY
 				TextView TV_biopsy = (TextView) rootView.findViewById(R.id.detail_biopsy);
-				if (biopsy != null && !biopsy.isEmpty())
+				if (mCase.biopsy != null && !mCase.biopsy.isEmpty())
 				{
-					TV_biopsy.setText(biopsy);
+					TV_biopsy.setText(mCase.biopsy);
 					TV_biopsy.setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.BiopsyLabel).setVisibility(View.VISIBLE);
 				}
@@ -1294,81 +1275,20 @@ public class CaseDetailActivity extends AppCompatActivity
 				}
 
 				// KEY IMAGES
-				// get all of the images linked to this case _id
-				//String [] image_args = {String.valueOf(selected_key_id)};
-				//Cursor imageCursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-
-				if (imageCursor != null && imageCursor.getCount() > 0 && imageCursor.moveToFirst())  //hasImage to keep crash if FadingActionBar hasn't been done yet
+				if(mCase.image_count > 0)
 				{
 					rootView.findViewById(R.id.ImagesLabel).setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.key_image).setVisibility(View.VISIBLE);
 					mImageView.setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.anchor).setVisibility(View.VISIBLE);
 
-					// set image for FadingActionBar.  first image in cursor array
-					if(thumbnail_pos < imageCursor.getCount())
-					{
-						imageCursor.move(thumbnail_pos);
-					}
+					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + mCase.thumbnail_filename;
 
-					// fading action bar
-					String headerImageFilename = CaseCardListActivity.picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME);
-
-					//UtilClass.setPic(mImageView, headerImageFilename, UtilClass.IMAGE_SIZE);
 					Glide.with(this).load(headerImageFilename).into(mImageView);
 
-
-					// set back icon (doesn't work)
-			//		mActivity.getSupportActionBar().setDefaultDisplayHomeAsUpEnabled(true);
-/*
-					// fading toolbar with drawer open
-					// ActionBarDrawerToggle ties together the the proper interactions between the navigation drawer and the action bar app icon.
-					final ActionBarDrawerToggle mDrawerToggle = new ActionBarDrawerToggle(
-							                                         getActivity(),
-							                                                                     mActivity.getDrawerLayout(),
-							                                         //R.drawable.ic_drawer,
-							                                         R.string.navigation_drawer_open,
-							                                         R.string.navigation_drawer_close
-					) {
-						@Override
-						public void onDrawerClosed(View drawerView) {
-							super.onDrawerClosed(drawerView);
-							if (!isAdded()) {
-								return;
-							}
-							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-						}
-
-						@Override
-						public void onDrawerOpened(View drawerView) {
-							super.onDrawerOpened(drawerView);
-							if (!isAdded()) {
-								return;
-							}
-							getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-						}
-
-
-
-					};
-
-					// Defer code dependent on restoration of previous instance state.
-					mActivity.getDrawerLayout().post(new Runnable() {
-						@Override
-						public void run() {
-							mDrawerToggle.syncState();
-						}
-					});
-
-					mDrawerToggle.setDrawerIndicatorEnabled(false);
-					//mDrawerToggle.setHomeAsUpIndicator(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-
-					mActivity.setDrawerListener(mDrawerToggle);
-
-*/
 					// image grid
-					imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, imageCursor);
-					imageGridView.setThumbnailPosition(thumbnail_pos);
+					imageGridView = new ImageGridView(getActivity(), (GridView) rootView.findViewById(R.id.key_image), selected_key_id, mCase.caseImageList);
+					imageGridView.setThumbnailPosition(mCase.thumbnail);
 					imageGridView.setMode(ImageGridView.DETAIL_ACTIVITY);
 
 					imageCursor.close();
@@ -1384,9 +1304,9 @@ public class CaseDetailActivity extends AppCompatActivity
 
 				// KEYWORD_LIST
 				TextView TV_key_words = (TextView) rootView.findViewById(R.id.detail_key_words);
-				if (key_words != null && !key_words.isEmpty())
+				if (mCase.key_words != null && !mCase.key_words.isEmpty())
 				{
-					TV_key_words.setText(key_words);
+					TV_key_words.setText(mCase.key_words);
 					TV_key_words.setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.KeyWordsLabel).setVisibility(View.VISIBLE);
 				}
@@ -1400,9 +1320,9 @@ public class CaseDetailActivity extends AppCompatActivity
 				TextView TV_followup = (TextView) rootView.findViewById(R.id.detail_followup);
 				if(followup_bool)
 				{
-					if (followup != null && !followup.isEmpty())
+					if (mCase.followup_comment != null && !mCase.followup_comment.isEmpty())
 					{
-						TV_followup.setText(followup);
+						TV_followup.setText(mCase.followup_comment);
 						TV_followup.setVisibility(View.VISIBLE);
 					}
 					else
@@ -1421,9 +1341,9 @@ public class CaseDetailActivity extends AppCompatActivity
 
 				// COMMENTS
 				TextView TV_comments = (TextView) rootView.findViewById(R.id.detail_comments);
-				if (comments != null && !comments.isEmpty())
+				if (mCase.comments != null && !mCase.comments.isEmpty())
 				{
-					TV_comments.setText(comments);
+					TV_comments.setText(mCase.comments);
 					TV_comments.setVisibility(View.VISIBLE);
 					rootView.findViewById(R.id.CommentsLabel).setVisibility(View.VISIBLE);
 				}
