@@ -348,7 +348,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                     @Override
                     public void run()
                     {
-                        local_file_to_cloud = UtilClass.exportCasesJSON(activity, value, null, password, progressHandler); //exportCasesCSV(value);
+                        local_file_to_cloud = UtilsDatabase.exportCasesJSON(activity, value, null, password, progressHandler); //exportCasesCSV(value);
 
                         if (local_file_to_cloud != null)
                         {
@@ -442,7 +442,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                 exportMIMEtype = LIST_MIMETYPE;
 
                 // create CSV file
-                local_file_to_cloud = UtilClass.exportListsJSON(activity, value);
+                local_file_to_cloud = UtilsDatabase.exportListsJSON(activity, value);
 
 
                 Uri uriShareFile = Uri.fromFile(local_file_to_cloud);
@@ -584,9 +584,8 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
                         UtilClass.showSnackbar(this, "cannot open input stream from selected uri");
                     }
 
-
                     // process file: unzip images, add csv info to database
-                    UtilClass.importListsJSON(this, tempCSV_File);
+                    UtilsDatabase.importListsJSON(this, tempCSV_File);
 
                     // delete the temporary file
                     tempCSV_File.delete();

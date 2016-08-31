@@ -55,7 +55,7 @@ public class UtilClass extends Activity
 	public static final int IMAGE_THUMB_SIZE = 125;
 	public static final int IMAGE_GRID_SIZE = 330;
 
-	public static final String TAG = "UtilClass";
+	private static final String TAG = "UtilClass";
 
 	// standard directories
 	//private static File downloadsDir = CaseCardListActivity.downloadsDir;
@@ -548,8 +548,9 @@ public class UtilClass extends Activity
 						if (key_id != -1)
 						{
 							// delete case from CASES table
-							Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().delete(case_delete_uri, null, null);
+							//Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+							//context.getContentResolver().delete(case_delete_uri, null, null);
+							UtilsDatabase.deleteCase(context, key_id);
 
 							// delete all linked images files
 							Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
@@ -560,6 +561,8 @@ public class UtilClass extends Activity
 								{
 									imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 									imageFile.delete();
+
+									UtilsDatabase.deleteCaseImageFile(context, image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 								} while (image_cursor.moveToNext());
 							}
 							image_cursor.close();
@@ -611,8 +614,9 @@ public class UtilClass extends Activity
 							long key_id = caseList.get(i);
 
 							// delete case from CASES table
-							Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().delete(case_delete_uri, null, null);
+							//Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+							//context.getContentResolver().delete(case_delete_uri, null, null);
+							UtilsDatabase.deleteCase(context, key_id);
 
 							// delete all linked images files
 							Cursor image_cursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
@@ -623,6 +627,8 @@ public class UtilClass extends Activity
 								{
 									imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 									imageFile.delete();
+
+									UtilsDatabase.deleteCaseImageFile(context, image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 								} while (image_cursor.moveToNext());
 							}
 							image_cursor.close();
@@ -647,20 +653,7 @@ public class UtilClass extends Activity
 		alert.show();
 	}
 
-	public static void updateLastModifiedDate(Activity activity, long key_id)
-	{
-		// put data into "values" for database insert/update
-		ContentValues values = new ContentValues();
 
-		// format string for database
-		SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
-		String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
-		values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
-
-		// Update the existing case in the database
-		Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-		activity.getContentResolver().update(row_uri, values, null, null);
-	}
 
 	/**
 	 *
@@ -746,532 +739,6 @@ public class UtilClass extends Activity
 	}
 
 
-	/**
-	 * Creates zip file of images and JSON of database rows of select cases
-	 * used by CloudStorageActivity, CardCaseListActivity
-	 * @param activity: context of calling activity
-	 * @param filename: filename of zip to be created (do not include path or extension)
-	 * @param selectedCaseList: list of unique case id of cases to be included
-	 * @return
-	 */
-
-	public static File exportCasesJSON(Activity activity, String filename, List<Long> selectedCaseList, String password)
-	{
-		return exportCasesJSON(activity, filename, selectedCaseList, password, null);
-	}
-
-	public static File exportCasesJSON(final Activity activity, String filename, List<Long> selectedCaseList, String password, Handler progressHandler)
-	{
-		File returnFile;
-		int count = 0;
-
-		// attempt to create json file
-		File casesJSON = null;
-
-		File cacheDir = activity.getCacheDir();
-		File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-		File picturesDir = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-		///
-
-		try
-		{
-			casesJSON = new File(downloadsDir.getPath(), ImportExportActivity.CASES_JSON_FILENAME);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			//showSnackbar(activity, "Unable to create local backup file.");
-			Log.d(TAG, "Unable to create local backup file.");
-			return null;
-		}
-
-		// to zip all images into a file for backup
-		String zip_files_array[] = new String[0];
-
-		// create local JSON files
-		try
-		{
-			FileOutputStream cases_out = new FileOutputStream(casesJSON);
-
-			// Get cases to export from cases table into a cursor
-			Cursor caseCursor;
-			if(selectedCaseList == null)
-			{
-				// get all cases
-				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, null, null, null, null);
-			}
-			else
-			{
-				// get select cases
-				// convert list of integers into array
-				int j=0;
-				String[] selectionArgs;
-				selectionArgs = new String[selectedCaseList.size()];
-
-				String selection = CasesProvider.KEY_ROWID + " = ?";
-
-				for(Long case_id : selectedCaseList)
-				{
-					if(j>0)
-						selection += " OR " + CasesProvider.KEY_ROWID + " = ?";
-
-					selectionArgs[j] = String.valueOf(case_id);
-
-					j++;
-
-				}
-
-				caseCursor = activity.getContentResolver().query(CasesProvider.CASES_URI, null, selection, selectionArgs, null);
-			}
-
-			if (caseCursor != null && caseCursor.moveToFirst())
-			{
-				JsonWriter cases_writer = new JsonWriter(new OutputStreamWriter(cases_out, "UTF-8"));
-				cases_writer.setIndent("  ");
-
-
-				// write metadata
-				cases_writer.beginObject();
-				cases_writer.name(CasesDB.NUM_CASES).value(caseCursor.getCount());
-				cases_writer.name(CasesDB.DATE_CREATED).value(new SimpleDateFormat("yyyy-MM-dd HHmm").format(new Date()));
-
-				FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-				if(user != null)
-				{
-					cases_writer.name(CasesDB.USER).value(user.getEmail());
-					cases_writer.name(CasesDB.USER_ID).value(user.getUid());
-				}
-				else
-				{
-					cases_writer.name(CasesDB.USER).value("ANONYMOUS");
-				}
-
-				cases_writer.name(CasesDB.DATA);
-
-				cases_writer.beginArray();
-				// loop through all cases
-				do
-				{
-					cases_writer.beginObject();
-
-					// output all case columns/fields for this case
-					for (int i = 0; i < CasesProvider.CASES_TABLE_ALL_KEYS.length; i++)
-					{
-						if(caseCursor.getString(i) != null && !caseCursor.getString(i).isEmpty())
-						{
-							cases_writer.name(CasesProvider.CASES_TABLE_ALL_KEYS[i]).value(caseCursor.getString(i));
-						}
-					}
-
-					// output all linked images for this case (via parent_case_id)
-					String [] image_args = {String.valueOf(caseCursor.getInt(CasesProvider.COL_ROWID))};
-					Cursor imageCursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-
-					// loop through all images of this case
-					if(imageCursor.moveToFirst())
-					{
-						cases_writer.name("IMAGES");
-						cases_writer.beginArray();
-						do
-						{
-							cases_writer.beginObject();
-							for(int i = 0; i < CasesProvider.IMAGES_TABLE_ALL_KEYS.length; i++)
-							{
-								if (imageCursor.getString(i) != null && !imageCursor.getString(i).isEmpty())
-								{
-									cases_writer.name(CasesProvider.IMAGES_TABLE_ALL_KEYS[i]).value(imageCursor.getString(i));
-								}
-							}
-							cases_writer.endObject();
-
-							// add image filename to zip list
-							zip_files_array = UtilClass.addArrayElement(zip_files_array, picturesDir + "/" + imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-
-						} while (imageCursor.moveToNext());
-
-						cases_writer.endArray();
-					}
-					else
-					{
-						cases_writer.name("IMAGES").nullValue();
-					}
-
-					imageCursor.close();
-
-					cases_writer.endObject();
-
-				} while (caseCursor.moveToNext());
-
-				count = caseCursor.getCount();
-				caseCursor.close();
-
-				cases_writer.endArray();
-				cases_writer.endObject();
-				cases_writer.close();
-			}
-
-			// encrypt casesJSON file, if nonblank password
-			if(!password.contentEquals(""))
-			{
-				try
-				{
-					byte[] passkey = UtilsFile.generateKey(password);
-					UtilsFile.encryptFile(passkey, casesJSON);
-				}
-				catch (Exception e)
-				{
-					e.printStackTrace();
-					Log.d(TAG, "Unable to generate encryption key.");
-					return null;
-				}
-			}
-
-			// zip image and JSON files
-			String zip_filename = downloadsDir.getPath() + "/" + filename + ImportExportActivity.RCS_EXTENSION;
-			zip_files_array = UtilClass.addArrayElement(zip_files_array, casesJSON.getPath());
-
-			// create zip file.  return link to that file.
-			returnFile = UtilsFile.zip(zip_files_array, zip_filename, progressHandler);
-
-			// delete temporary files
-			casesJSON.delete();
-
-			if(progressHandler != null)
-			{
-				Message msg = new Message();
-				msg.arg1 = ImportExportActivity.PROGRESS_MSG_FINISHED;
-				msg.arg2 = count;
-				progressHandler.sendMessage(msg);
-			}
-
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Log.d(TAG, "IOException: " + e.getMessage());
-			return null;
-		}
-
-		//alertDialog.dismiss();
-
-		return returnFile;
-	}
-
-
-
-	public static File exportListsJSON(Activity activity, String filename)
-	{
-		// attempt to create json file
-		File listsJSON = null;
-		File cacheDir = activity.getCacheDir();
-		File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-
-		try
-		{
-			listsJSON = new File(downloadsDir.getPath(), filename+ ImportExportActivity.LIST_EXTENSION);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			showSnackbar(activity, "Unable to create local JSON backup files.");
-			return null;
-		}
-
-		// create local JSON files
-		try
-		{
-			FileOutputStream lists_out = new FileOutputStream(listsJSON);
-
-			JsonWriter lists_writer = new JsonWriter(new OutputStreamWriter(lists_out, "UTF-8"));
-			lists_writer.setIndent("  ");
-
-			Cursor cursor;
-
-			lists_writer.beginArray();
-
-			// get KEYWORD list
-			cursor = activity.getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
-			lists_writer.beginObject();
-			lists_writer.name("KEYWORDS");
-			lists_writer.beginArray();
-
-			if (cursor != null && cursor.moveToFirst())
-			{
-				// loop through all rows
-				do
-				{
-					lists_writer.beginObject();
-
-					lists_writer.name(CasesProvider.KEY_KEYWORDS).value(cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
-					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_LIST_ITEM_ORDER));
-					lists_writer.name(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN).value(cursor.getString(CasesProvider.COL_LIST_ITEM_IS_HIDDEN));
-
-					lists_writer.endObject();
-
-				} while (cursor.moveToNext());
-
-				cursor.close();
-			}
-
-			lists_writer.endArray();
-			lists_writer.endObject();
-
-			// get modality list
-			cursor = activity.getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
-			lists_writer.beginObject();
-			lists_writer.name("MODALITY");
-			lists_writer.beginArray();
-
-			if (cursor != null && cursor.moveToFirst())
-			{
-				// loop through all rows
-				do
-				{
-					lists_writer.beginObject();
-
-					lists_writer.name(CasesProvider.KEY_STUDY_TYPE).value(cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
-					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_LIST_ITEM_ORDER));
-					lists_writer.name(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN).value(cursor.getString(CasesProvider.COL_LIST_ITEM_IS_HIDDEN));
-
-					lists_writer.endObject();
-
-				} while (cursor.moveToNext());
-
-				cursor.close();
-			}
-
-			lists_writer.endArray();
-			lists_writer.endObject();
-
-			// get KEYWORD list
-			cursor = activity.getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, null, null, CasesProvider.KEY_ORDER, null);
-			lists_writer.beginObject();
-			lists_writer.name("SECTION");
-			lists_writer.beginArray();
-
-			if (cursor != null && cursor.moveToFirst())
-			{
-				// loop through all rows
-				do
-				{
-					lists_writer.beginObject();
-
-					lists_writer.name(CasesProvider.KEY_SECTION).value(cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
-					lists_writer.name(CasesProvider.KEY_ORDER).value(cursor.getString(CasesProvider.COL_LIST_ITEM_ORDER));
-					lists_writer.name(CasesProvider.KEY_LIST_ITEM_IS_HIDDEN).value(cursor.getString(CasesProvider.COL_LIST_ITEM_IS_HIDDEN));
-
-					lists_writer.endObject();
-
-				} while (cursor.moveToNext());
-
-				cursor.close();
-			}
-
-			lists_writer.endArray();
-			lists_writer.endObject();
-
-
-			lists_writer.endArray();
-			lists_writer.close();
-
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Log.d(TAG, "IOException: " + e.getMessage());
-			return null;
-		}
-
-		return listsJSON;
-	}
-
-	public static void importListsJSON(Activity activity, File inFile)
-	{
-		BufferedReader br = null;
-		String line;
-		Uri rowUri = null;
-		int parent_id;
-		int imageCount = 0;
-
-
-		File tempListsJSON = null;
-		JsonReader reader = null;
-
-		try
-		{
-			// open existing file that should have been unzipped
-			tempListsJSON = inFile;
-			FileInputStream cases_in = new FileInputStream(tempListsJSON);
-			reader = new JsonReader(new InputStreamReader(cases_in, "UTF-8"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			Toast.makeText(activity, "Unable to copy JSON file", Toast.LENGTH_SHORT).show();
-			return;
-		}
-
-		// LIST TABLES
-		try
-		{
-			ContentValues insertListValues = new ContentValues();
-
-			reader.beginArray();
-
-			// loop through all lists
-			while(reader.hasNext())
-			{
-				reader.beginObject();
-
-				while(reader.hasNext())
-				{
-					insertListValues.clear();
-
-					String list_name = reader.nextName();
-
-					if(list_name.contentEquals("KEYWORDS"))
-					{
-						activity.getContentResolver().delete(CasesProvider.KEYWORD_LIST_URI, null, null);
-
-						reader.beginArray();
-
-						while (reader.hasNext())
-						{
-							reader.beginObject();
-
-							while (reader.hasNext())
-							{
-
-								String field_name = reader.nextName();
-
-								if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
-								{
-									// ignore NULL values and row_id
-									reader.skipValue();
-								}
-								else if (field_name.contentEquals(CasesProvider.KEY_KEYWORDS) || field_name.contentEquals(CasesProvider.KEY_ORDER))
-								{
-									// valid field name, enter in database
-									insertListValues.put(field_name, reader.nextString());
-								}
-								else
-								{
-									// unrecognized field name
-									reader.skipValue();
-								}
-							}
-
-							reader.endObject();
-
-							// insert the set of case info into the DB cases table
-							rowUri = activity.getContentResolver().insert(CasesProvider.KEYWORD_LIST_URI, insertListValues);
-						}
-
-						reader.endArray();
-
-
-					}
-					else if(list_name.contentEquals("MODALITY"))
-					{
-						activity.getContentResolver().delete(CasesProvider.STUDYTYPE_LIST_URI, null, null);
-
-						reader.beginArray();
-
-						while (reader.hasNext())
-						{
-							reader.beginObject();
-
-							while (reader.hasNext())
-							{
-
-								String field_name = reader.nextName();
-
-								if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
-								{
-									// ignore NULL values and row_id
-									reader.skipValue();
-								}
-								else if (field_name.contentEquals(CasesProvider.KEY_STUDY_TYPE) || field_name.contentEquals(CasesProvider.KEY_ORDER))
-								{
-									// valid field name, enter in database
-									insertListValues.put(field_name, reader.nextString());
-								}
-								else
-								{
-									// unrecognized field name
-									reader.skipValue();
-								}
-							}
-
-							reader.endObject();
-
-							// insert the set of case info into the DB cases table
-							rowUri = activity.getContentResolver().insert(CasesProvider.STUDYTYPE_LIST_URI, insertListValues);
-						}
-
-						reader.endArray();
-					}
-					else if(list_name.contentEquals("SECTION"))
-					{
-						activity.getContentResolver().delete(CasesProvider.SECTION_LIST_URI, null, null);
-
-						reader.beginArray();
-
-						while (reader.hasNext())
-						{
-							reader.beginObject();
-
-							while (reader.hasNext())
-							{
-
-								String field_name = reader.nextName();
-
-								if (reader.peek() == JsonToken.NULL || field_name.contentEquals(CasesProvider.KEY_ROWID))
-								{
-									// ignore NULL values and row_id
-									reader.skipValue();
-								}
-								else if (field_name.contentEquals(CasesProvider.KEY_SECTION) || field_name.contentEquals(CasesProvider.KEY_ORDER))
-								{
-									// valid field name, enter in database
-									insertListValues.put(field_name, reader.nextString());
-								}
-								else
-								{
-									// unrecognized field name
-									reader.skipValue();
-								}
-							}
-
-							reader.endObject();
-
-							// insert the set of case info into the DB cases table
-							rowUri = activity.getContentResolver().insert(CasesProvider.SECTION_LIST_URI, insertListValues);
-
-						}
-
-						reader.endArray();
-					}
-
-				}
-
-				reader.endObject();
-			}
-
-			reader.endArray();
-
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-			Toast.makeText(activity, "Unable to open Cases JSON file", Toast.LENGTH_SHORT).show();
-			return;
-		}
-
-		Toast.makeText(activity, "Imported lists", Toast.LENGTH_SHORT).show();
-		//tempListsJSON.delete();
-	}
 
 
 	// attr values

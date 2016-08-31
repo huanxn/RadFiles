@@ -518,9 +518,7 @@ public class CaseImport extends AppCompatActivity
 
 				// use current userID, may have been shared from another user
 				insertCaseValues.put(CasesProvider.KEY_USER_ID, userID);
-
-				rowUri = context.getContentResolver().insert(CasesProvider.CASES_URI, insertCaseValues);
-
+				rowUri = UtilsDatabase.insertCase(context, insertCaseValues);
 
 				if (rowUri != null)
 				{
@@ -547,98 +545,11 @@ public class CaseImport extends AppCompatActivity
 							insertImageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageList.get(i).getCaption());
 
 							// insert the set of image info into the DB images table
-							context.getContentResolver().insert(CasesProvider.IMAGES_URI, insertImageValues);
+							UtilsDatabase.insertImage(context, insertImageValues, i);
 						}
 					}
 
-
-					// insert into cloud Firebase database
-					// Create Firebase storage references
-					FirebaseAuth mAuth = FirebaseAuth.getInstance();
-					if(mAuth != null)
-					{
-						FirebaseUser firebaseUser = mAuth.getCurrentUser();
-						FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-
-						if(firebaseDatabase != null)
-						{
-							DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
-
-							// use SQL key _id as node of case in firebase database
-							DatabaseReference caseRef = databaseRef.child("Cases/" + newCase_KEYID);
-
-							DatabaseReference diagnosisRef = caseRef.child(CasesProvider.KEY_DIAGNOSIS);
-							diagnosisRef.setValue(caseList.get(c).diagnosis);
-
-							DatabaseReference findingsRef = caseRef.child(CasesProvider.KEY_FINDINGS);
-							findingsRef.setValue(caseList.get(c).findings);
-
-							DatabaseReference sectionRef = caseRef.child(CasesProvider.KEY_SECTION);
-							sectionRef.setValue(caseList.get(c).section);
-
-							DatabaseReference studytypeRef = caseRef.child(CasesProvider.KEY_STUDY_TYPE);
-							studytypeRef.setValue(caseList.get(c).study_type);
-
-							DatabaseReference keywordsRef = caseRef.child(CasesProvider.KEY_KEYWORDS);
-							keywordsRef.setValue(caseList.get(c).key_words);
-
-							DatabaseReference biopsyRef = caseRef.child(CasesProvider.KEY_BIOPSY);
-							biopsyRef.setValue(caseList.get(c).biopsy);
-
-							DatabaseReference followupRef = caseRef.child(CasesProvider.KEY_FOLLOWUP);
-							followupRef.setValue(caseList.get(c).followup);
-
-							DatabaseReference followupCommentRef = caseRef.child(CasesProvider.KEY_FOLLOWUP_COMMENT);
-							followupCommentRef.setValue(caseList.get(c).followup_comment);
-
-							DatabaseReference commentsRef = caseRef.child(CasesProvider.KEY_COMMENTS);
-							commentsRef.setValue(caseList.get(c).comments);
-
-							DatabaseReference favoriteRef = caseRef.child(CasesProvider.KEY_FAVORITE);
-							favoriteRef.setValue(caseList.get(c).favorite);
-
-							DatabaseReference imageCountRef = caseRef.child(CasesProvider.KEY_IMAGE_COUNT);
-							imageCountRef.setValue(caseList.get(c).image_count);
-
-							DatabaseReference thumbnailRef = caseRef.child(CasesProvider.KEY_THUMBNAIL);
-							thumbnailRef.setValue(caseList.get(c).thumbnail);
-
-							DatabaseReference originalCreatorRef = caseRef.child(CasesProvider.KEY_ORIGINAL_CREATOR);
-							originalCreatorRef.setValue(caseList.get(c).original_creator);
-
-							DatabaseReference isSharedRef = caseRef.child(CasesProvider.KEY_IS_SHARED);
-							isSharedRef.setValue(caseList.get(c).is_shared);
-
-							// Images
-							if (caseList.get(c).caseImageList != null)
-							{
-								List<CaseImage> imageList = caseList.get(c).caseImageList;
-
-								for (int i = 0; i < imageList.size(); i++)
-								{
-									DatabaseReference imageRef = caseRef.child("Images/" + i);
-
-									DatabaseReference imageFilenameRef = imageRef.child(CasesProvider.KEY_IMAGE_FILENAME);
-									imageFilenameRef.setValue(imageList.get(i).getFilename());
-
-									DatabaseReference imageCaptionRef = imageRef.child(CasesProvider.KEY_IMAGE_CAPTION);
-									imageCaptionRef.setValue(imageList.get(i).getCaption());
-
-									DatabaseReference imageDetailsRef = imageRef.child(CasesProvider.KEY_IMAGE_DETAILS);
-									imageDetailsRef.setValue(imageList.get(i).getDetails());
-
-									DatabaseReference imageOrderRef = imageRef.child(CasesProvider.KEY_ORDER);
-									imageOrderRef.setValue(imageList.get(i).getOrder());
-
-								}
-							} // end loop imageList for firebase db
-
-						} // end if firebase user exists
-					} // end if auth exists
 				} // end if successfully placed into SQL db
-
-
-
 
 			} // end for loop caseList
 

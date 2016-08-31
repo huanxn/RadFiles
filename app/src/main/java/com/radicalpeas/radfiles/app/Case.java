@@ -1,7 +1,9 @@
 package com.radicalpeas.radfiles.app;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -103,58 +105,89 @@ public class Case
 		caseImageList = new ArrayList<CaseImage>();
 	}
 
+	public boolean setCase(Context context, long key_id)
+	{
+		this.key_id = key_id;
+
+		// get db row of clicked case
+		Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+		Cursor caseCursor = context.getContentResolver().query(uri, null, null, null, null, null);
+
+		if (caseCursor != null && caseCursor.moveToFirst())
+		{
+			setCaseFromCursor(context, caseCursor);
+
+			caseCursor.close();
+
+			return true;
+		}
+		else
+		{
+			return false;	// failure
+		}
+
+	}
+
 	public void setCaseFromCursor(Context context, Cursor caseCursor)
 	{
 		case_id = caseCursor.getString(CasesProvider.COL_CASE_NUMBER);
 		diagnosis = caseCursor.getString(CasesProvider.COL_DIAGNOSIS);
-		section = caseCursor.getString(CasesProvider.COL_SECTION);
 		findings = caseCursor.getString(CasesProvider.COL_FINDINGS);
+		section = caseCursor.getString(CasesProvider.COL_SECTION);
+		study_type = caseCursor.getString(CasesProvider.COL_STUDY_TYPE);
+		key_words = caseCursor.getString(CasesProvider.COL_KEYWORDS);
 		biopsy = caseCursor.getString(CasesProvider.COL_BIOPSY);
 		followup = caseCursor.getInt(CasesProvider.COL_FOLLOWUP);
 		followup_comment = caseCursor.getString(CasesProvider.COL_FOLLOWUP_COMMENT);
-		key_words = caseCursor.getString(CasesProvider.COL_KEYWORDS);
 		comments = caseCursor.getString(CasesProvider.COL_COMMENTS);
-		study_type = caseCursor.getString(CasesProvider.COL_STUDY_TYPE);
-		db_date_str = caseCursor.getString(CasesProvider.COL_DATE);
+		favorite = caseCursor.getString(CasesProvider.COL_FAVORITE);
 		image_count = caseCursor.getInt(CasesProvider.COL_IMAGE_COUNT);;
 		thumbnail = caseCursor.getInt(CasesProvider.COL_THUMBNAIL);
-		favorite = caseCursor.getString(CasesProvider.COL_FAVORITE);
-		clinical_history = caseCursor.getString(CasesProvider.COL_CLINICAL_HISTORY);
 		last_modified_date = caseCursor.getString(CasesProvider.COL_LAST_MODIFIED_DATE);
+
+		db_date_str = caseCursor.getString(CasesProvider.COL_DATE);					// not included in firebase
+		clinical_history = caseCursor.getString(CasesProvider.COL_CLINICAL_HISTORY);// not included in firebase
+
 		userID = caseCursor.getString(CasesProvider.COL_USER_ID);
 		original_creator = caseCursor.getString(CasesProvider.COL_ORIGINAL_CREATOR);
 		is_shared = caseCursor.getInt(CasesProvider.COL_IS_SHARED);
 
-		String [] image_args = {String.valueOf(key_id)};
-		Cursor imageCursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-		if (imageCursor != null && imageCursor.moveToFirst())
+		if(image_count > 0)
 		{
-			caseImageList = new ArrayList<CaseImage>();
-
-			do
+			String[] image_args = {String.valueOf(key_id)};
+			Cursor imageCursor = context.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
+			if (imageCursor != null && imageCursor.moveToFirst())
 			{
-				CaseImage caseImage = new CaseImage();
-				caseImage.set_id(imageCursor.getInt(CasesProvider.COL_ROWID));
-				caseImage.setParent_id(imageCursor.getInt(CasesProvider.COL_IMAGE_PARENT_CASE_ID));
-				caseImage.setFilename(imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
-				caseImage.setCaption(imageCursor.getString(CasesProvider.COL_IMAGE_CAPTION));
-				caseImage.setDetails(imageCursor.getString(CasesProvider.COL_IMAGE_DETAILS));
+				caseImageList = new ArrayList<CaseImage>();
 
-				caseImageList.add(caseImage);
+				do
+				{
+					CaseImage caseImage = new CaseImage();
+					caseImage.set_id(imageCursor.getInt(CasesProvider.COL_ROWID));
+					caseImage.setParent_id(imageCursor.getInt(CasesProvider.COL_IMAGE_PARENT_CASE_ID));
+					caseImage.setFilename(imageCursor.getString(CasesProvider.COL_IMAGE_FILENAME));
+					caseImage.setCaption(imageCursor.getString(CasesProvider.COL_IMAGE_CAPTION));
+					caseImage.setDetails(imageCursor.getString(CasesProvider.COL_IMAGE_DETAILS));
 
-			} while (imageCursor.moveToNext());
+					caseImageList.add(caseImage);
 
-			imageCursor.close();
-		}
+				} while (imageCursor.moveToNext());
 
-		if(thumbnail >= 0)
-		{
-			thumbnail_filename = caseImageList.get(thumbnail).getFilename();
-		}
-		else
-		{
-			// default is first image used as thumbnail
-			thumbnail_filename = caseImageList.get(0).getFilename();
+				imageCursor.close();
+
+				if (thumbnail >= 0)
+				{
+					thumbnail_filename = caseImageList.get(thumbnail).getFilename();
+				}
+				else
+				{
+					// default is first image used as thumbnail
+					thumbnail_filename = caseImageList.get(0).getFilename();
+				}
+
+			}
+
+
 		}
 
 	}

@@ -80,6 +80,7 @@ public class CaseDetailActivity extends AppCompatActivity
 	private long key_id = -1;
 
 	public static final String ARG_HAS_IMAGE = "com.radicalpeas.radcases.ARG_HAS_IMAGE";
+	public static final String ARG_CASE_INFO = "com.radicalpeas.radcases.ARG_CASE_INFO";
 
 	static final int REQUEST_EDIT_CASE = 21;
 
@@ -504,6 +505,7 @@ public class CaseDetailActivity extends AppCompatActivity
 
 	}
 
+	// called after cropping camera picture
 	private void addNewImageToDatabase(String imageFilepath)
 	{
 		int new_image_index = 0;
@@ -523,11 +525,12 @@ public class CaseDetailActivity extends AppCompatActivity
 		imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, new File(imageFilepath).getName());
 		imageValues.put(CasesProvider.KEY_ORDER, new_image_index);      // set order to display images.  new files last.  //todo user reodering
 
-		Uri row_uri = getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+		//Uri row_uri = getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+		Uri row_uri = UtilsDatabase.insertImage(this, imageValues, new_image_index);
 		long new_image_id = Long.parseLong(row_uri.getLastPathSegment());
 
 		// update last modified date field
-		UtilClass.updateLastModifiedDate(this, key_id);
+		UtilsDatabase.updateLastModifiedDate(this, key_id);
 
 		setResult(CaseCardListActivity.RESULT_EDITED);
 
@@ -542,7 +545,6 @@ public class CaseDetailActivity extends AppCompatActivity
 			startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
 
 			finish();
-			return;
 		}
 	}
 
@@ -1086,13 +1088,15 @@ public class CaseDetailActivity extends AppCompatActivity
 				return;
 			}
 
-			// get db row of clicked case
-			Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, mCase.key_id);
-			Cursor case_cursor = getActivity().getContentResolver().query(uri, null, null, null, null, null);
 
-			if (case_cursor != null && case_cursor.moveToFirst())
+			// get db row of clicked case
+	//		Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, mCase.key_id);
+	//		Cursor case_cursor = getActivity().getContentResolver().query(uri, null, null, null, null, null);
+
+		//	if (case_cursor != null && case_cursor.moveToFirst())
+			if(mCase.setCase(getActivity(), mCase.key_id))	// if set case info is successful
 			{
-				mCase.setCaseFromCursor(getActivity(), case_cursor);
+		//		mCase.setCaseFromCursor(getActivity(), case_cursor);
 
 				boolean followup_bool;
 				if(mCase.followup==1)
@@ -1355,7 +1359,7 @@ public class CaseDetailActivity extends AppCompatActivity
 
 			}
 
-			case_cursor.close();
+//			case_cursor.close();
 
 		}// end populateFields
 
@@ -1378,8 +1382,9 @@ public class CaseDetailActivity extends AppCompatActivity
 
 			// put data into "values" for database insert/update
 			values.put(CasesProvider.KEY_FAVORITE, favorite);
-			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
-			getActivity().getContentResolver().update(row_uri, values, null, null);
+			//Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
+			//getActivity().getContentResolver().update(row_uri, values, null, null);
+			UtilsDatabase.updateCase(getActivity(), selected_key_id, values);
 		}
 
 

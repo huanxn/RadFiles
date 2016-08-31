@@ -1588,8 +1588,9 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 					long key_id = deleteIdList.get(i);
 
 					// delete case from CASES table
-					Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-					activity.getContentResolver().delete(case_delete_uri, null, null);
+					UtilsDatabase.deleteCase(activity, key_id);
+					//Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+					//activity.getContentResolver().delete(case_delete_uri, null, null);
 
 					// delete all linked images files
 					Cursor image_cursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
@@ -1600,6 +1601,8 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 						{
 							imageFile = new File(image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 							imageFile.delete();
+
+							UtilsDatabase.deleteCaseImageFile(activity, image_cursor.getString(CasesProvider.COL_IMAGE_FILENAME));
 						} while (image_cursor.moveToNext());
 					}
 					image_cursor.close();
@@ -1660,7 +1663,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 			@Override
 			protected File doInBackground(Void... v)
 			{
-				return UtilClass.exportCasesJSON(activity, "RadFiles cases", selectList, ""); //TODO add password stuff
+				return UtilsDatabase.exportCasesJSON(activity, "RadFiles cases", selectList, ""); //TODO add password stuff
 			}
 
 			/*

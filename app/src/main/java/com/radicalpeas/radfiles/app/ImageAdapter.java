@@ -119,6 +119,7 @@ public class ImageAdapter extends BaseAdapter
 		return view;
 	}
 
+	/*
 	// set initial images with cursor
 	public void setImages(Cursor cursor)
 	{
@@ -144,6 +145,7 @@ public class ImageAdapter extends BaseAdapter
 //			initialize();
 		}
 	}
+	*/
 
 	public void setImages(List<CaseImage> imageList)
 	{

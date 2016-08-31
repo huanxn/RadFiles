@@ -39,6 +39,9 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 
+import com.bumptech.glide.util.Util;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -56,26 +59,15 @@ import java.util.List;
 
 public class CaseEditActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener
 {
-	static Cursor selected_row_cursor;
 	static long key_id;
 
-	static String case_ID;
-	static String diagnosis;
-	static String findings;
-
-	static String section;
-
 	static Cursor study_types_cursor;
-	static String study_type;
 	static Calendar selected_date;
 	static String db_date_str = null;
 
 	static Cursor key_words_cursor;
 	static Cursor section_cursor;
 
-	static String biopsy;
-	static String comments;
-	static String followup_comment;
 	static boolean followup_bool = false;
 
 	private static ImageGridView imageGridView;                 // Grid of images. Also contains image filepaths to be saved into database
@@ -105,14 +97,8 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		{
 			final EditCaseFragment fragment = new EditCaseFragment();
 
-			if(fragment != null)
-			{
-				getFragmentManager().beginTransaction().remove(fragment).commit();
-			}
-
-			getFragmentManager().beginTransaction()
-					.add(R.id.container, fragment).commit();
-
+			getFragmentManager().beginTransaction().remove(fragment).commit();
+			getFragmentManager().beginTransaction().add(R.id.container, fragment).commit();
 		}
 
 		selected_date = Calendar.getInstance();
@@ -135,8 +121,8 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		else
 		{
 			// UpdateData activity
-			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-			selected_row_cursor = getContentResolver().query(row_uri, null, null, null, null);
+	//		Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+	//		selected_row_cursor = getContentResolver().query(row_uri, null, null, null, null);
 		}
 
 		// get study types list for the spinner
@@ -150,12 +136,6 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 	protected void onDestroy()
 	{
 		super.onDestroy();
-
-		if (selected_row_cursor != null)
-		{
-			selected_row_cursor.close();
-			selected_row_cursor = null;
-		}
 
 		if (section_cursor != null)
 		{
@@ -180,7 +160,6 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
-
 		getMenuInflater().inflate(R.menu.case_edit, menu);
 
 		return true;
@@ -431,7 +410,6 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 			}
 		}
 
-
 		// STUDY DATE
 		String new_date_str = ((Button)findViewById(R.id.edit_date)).getText().toString();
 		if (new_date_str != null && !new_date_str.isEmpty())
@@ -578,11 +556,32 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
 		values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
 
+		FirebaseAuth mAuth = FirebaseAuth.getInstance();
+		if (mAuth != null)
+		{
+			FirebaseUser firebaseUser = mAuth.getCurrentUser();
+			if (firebaseUser != null)
+			{
+				values.put(CasesProvider.KEY_USER_ID, firebaseUser.getUid());
+
+				values.put(CasesProvider.KEY_ORIGINAL_CREATOR, firebaseUser.getEmail());
+			}
+			else
+			{
+				values.put(CasesProvider.KEY_USER_ID, "ANONYMOUS");
+			}
+		}
+		else
+		{
+			values.put(CasesProvider.KEY_USER_ID, "ANONYMOUS");
+		}
+
 		// WRITE TO DATABASE
 		if(key_id == -1)
 		{
 			// Add a new case into the database
-			Uri new_case_uri = getContentResolver().insert(CasesProvider.CASES_URI, values);
+			//Uri new_case_uri = getContentResolver().insert(CasesProvider.CASES_URI, values);
+			Uri new_case_uri = UtilsDatabase.insertCase(this, values);
 
 			// get the key_id of the new case
 			key_id = ContentUris.parseId(new_case_uri);
@@ -593,8 +592,9 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		else
 		{
 			// Update the existing case in the database
-			Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-			getContentResolver().update(row_uri, values, null, null);
+			//Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+			//getContentResolver().update(row_uri, values, null, null);
+			UtilsDatabase.updateCase(this, key_id, values);
 		}
 
 
@@ -608,6 +608,8 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 			for (int i = 0; i < imageGridView.getCount(); i++)
 			{
+				imageValues.clear();
+
 				// new images in imageGridView have invalid row ID (ie -1)
 				if (imageGridView.getImageID(i) == -1)
 				{
@@ -617,15 +619,21 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 					imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
 					imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
-					getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+					//getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+					UtilsDatabase.insertImage(this, imageValues, i);
 				}
 				else
 				{
+					//store in image table
+					imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
+					imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, imageGridView.getImageFilename(i));
 					imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageGridView.getImageCaption(i));
 					imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
-					Uri uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, imageGridView.getImageID(i));
-					getContentResolver().update(uri, imageValues, null, null);
+				//	Uri uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, imageGridView.getImageID(i));
+				//	getContentResolver().update(uri, imageValues, null, null);
+
+					UtilsDatabase.updateImage(this, imageValues, imageGridView.getImageID(i));
 				}
 			}
 
@@ -644,6 +652,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 				if (deleteFile != null && deleteFile.exists())
 				{
 					deleteFile.delete();
+					UtilsDatabase.deleteCaseImageFile(this, deleteFile.getName());
 				}
 			}
 
@@ -813,8 +822,11 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		private Activity activity;
 		private View rootView;
 
+		private Case mCase;
+
 		public EditCaseFragment()
 		{
+			mCase = new Case();
 		}
 
 		@Override
@@ -895,12 +907,9 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 			key_words_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_key_words);
 			key_words_spinner.setItems(key_words_cursor, CasesProvider.COL_LIST_ITEM_VALUE);
 
-			// Fetch and display data
-			// Fetch and display data
-			if (selected_row_cursor != null)
+			if(key_id > 0)
 			{
-				selected_row_cursor.moveToFirst();
-				populateFields(getView(), Long.parseLong(selected_row_cursor.getString(CasesProvider.COL_ROWID)));
+				populateFields(getView(), key_id);
 			}
 			// else selected_row_cursor==null, then adding new data row.  no data to fetch
 			else
@@ -915,73 +924,56 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 		public void populateFields(View view, final long selected_key_id)
 		{
-			// get db row of clicked case
-			Uri uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, selected_key_id);
-			case_cursor = getActivity().getContentResolver().query(uri, null, null, null, null, null);
-
-			if (case_cursor.moveToFirst())
+			if(mCase.setCase(getActivity(), selected_key_id))
 			{
-				//int key_id = case_cursor.getInt(CasesProvider.COL_ROWID);
-				case_ID = case_cursor.getString(CasesProvider.COL_CASE_NUMBER);
-				diagnosis = case_cursor.getString(CasesProvider.COL_DIAGNOSIS);
-				findings = case_cursor.getString(CasesProvider.COL_FINDINGS);
-				String original_sections = case_cursor.getString(CasesProvider.COL_SECTION);
-				comments = case_cursor.getString(CasesProvider.COL_COMMENTS);
-				String original_keyWords = case_cursor.getString(CasesProvider.COL_KEYWORDS);
-				biopsy = case_cursor.getString(CasesProvider.COL_BIOPSY);
-				followup_comment = case_cursor.getString(CasesProvider.COL_FOLLOWUP_COMMENT);
-
-				if(case_cursor.getInt(CasesProvider.COL_FOLLOWUP)== 1)
+				if(mCase.followup == 1)
 					followup_bool = true;
 				else
-					followup_bool=false;
+					followup_bool = false;
 
-				study_type = case_cursor.getString(CasesProvider.COL_STUDY_TYPE);
-				db_date_str = case_cursor.getString(CasesProvider.COL_DATE);
+				db_date_str = mCase.db_date_str;
 
 
-				if (case_ID != null)
+				if (mCase.case_id != null)
 				{
-					((EditText) view.findViewById(R.id.edit_case_id)).setText(case_ID);
+					((EditText) view.findViewById(R.id.edit_case_id)).setText(mCase.case_id);
 					// getActivity().setTitle(case_ID);
 				}
 
 				// Case Information (Diagnosis and Findings)
-				if(diagnosis != null)
+				if(mCase.diagnosis != null)
 				{
 					EditText TV_diagnosis = (EditText) view.findViewById(R.id.edit_diagnosis);
-					TV_diagnosis.setText(diagnosis);
+					TV_diagnosis.setText(mCase.diagnosis);
 				}
-				if(findings != null)
+				if(mCase.findings != null)
 				{
 					EditText TV_findings = (EditText) view.findViewById(R.id.edit_findings);
-					TV_findings.setText(findings);
+					TV_findings.setText(mCase.findings);
 				}
 
 				// SECTION LIST
-				if (original_sections != null && !original_sections.isEmpty())
+				if (mCase.section != null && !mCase.section.isEmpty())
 				{
-					section_spinner.setSelection(original_sections);
+					section_spinner.setSelection(mCase.section);
 				}
-
 
 				// STUDY TYPE
-				if (study_type != null)
+				if (mCase.study_type != null)
 				{
-					study_type_spinner.setSelection(study_type);
+					study_type_spinner.setSelection(mCase.study_type);
 				}
-
 
 				// STUDY DATE
 				// date picker in a button
-				if (db_date_str != null && !db_date_str.isEmpty())
+				if (mCase.db_date_str != null && !mCase.db_date_str.isEmpty())
 				{
 					SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd");
 					SimpleDateFormat display_sdf = new SimpleDateFormat("MMMM d, yyyy");
 
 					try
 					{
-						selected_date.setTime(db_sdf.parse(db_date_str));
+						selected_date.setTime(db_sdf.parse(mCase.db_date_str));
 					}
 					catch (ParseException e)
 					{
@@ -989,36 +981,28 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 						e.printStackTrace();
 					}
 
-					String displayDate = UtilClass.convertDateString(db_date_str, db_sdf, display_sdf);
+					String displayDate = UtilClass.convertDateString(mCase.db_date_str, db_sdf, display_sdf);
 
 					Button date_button = (Button) view.findViewById(R.id.edit_date);
 					date_button.setText(displayDate);
 				}
 
-
 				// BIOPSY
-				if (biopsy != null)
+				if (mCase.biopsy != null)
 				{
 					EditText TV_biopsy = (EditText) view.findViewById(R.id.edit_biopsy);
-					TV_biopsy.setText(biopsy);
+					TV_biopsy.setText(mCase.biopsy);
 				}
 
 				// KEY IMAGES
-				String [] image_args = {String.valueOf(selected_key_id)};
-				Cursor image_cursor = getActivity().getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", image_args, CasesProvider.KEY_ORDER);
-				//numImages = image_cursor.getCount();
-
-				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.key_image), selected_key_id, image_cursor);
-				imageGridView.setThumbnailPosition(Integer.parseInt(case_cursor.getString(CasesProvider.COL_THUMBNAIL)));
+				imageGridView = new ImageGridView(getActivity(),(GridView)view.findViewById(R.id.key_image), selected_key_id, mCase.caseImageList);
+				imageGridView.setThumbnailPosition(mCase.thumbnail);
 				imageGridView.notifyDataSetChanged();
 
-				image_cursor.close();
-
-
 				// KEYWORD_LIST
-				if (original_keyWords != null && !original_keyWords.isEmpty())
+				if (mCase.key_words != null && !mCase.key_words.isEmpty())
 				{
-					key_words_spinner.setSelection(original_keyWords);
+					key_words_spinner.setSelection(mCase.key_words);
 				}
 
 				// FOLLOWUP
@@ -1026,45 +1010,20 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 				if(followup_bool)
 				{
-					if(followup_comment != null && !followup_comment.isEmpty())
+					if(mCase.followup_comment != null && !mCase.followup_comment.isEmpty())
 					{
 						EditText TV_followup = (EditText) view.findViewById(R.id.edit_followup);
-						TV_followup.setText(followup_comment);
+						TV_followup.setText(mCase.followup_comment);
 					}
 				}
 
 				// COMMENTS
-				if (comments != null)
+				if (mCase.comments != null)
 				{
 					EditText TV_comments = (EditText) view.findViewById(R.id.edit_comments);
-					TV_comments.setText(comments);
+					TV_comments.setText(mCase.comments);
 				}
 
-
-				/*
-				ActionBar actionBar = getActivity().getActionBar();
-				if(case_ID != null && !case_ID.isEmpty())
-				{
-					actionBar.setTitle(case_ID);
-
-					if(section != null)
-						actionBar.setSubtitle(section);
-				}
-				else if(section != null)
-				{
-					actionBar.setTitle(section + " Case");
-				}
-				else if(diagnosis != null)
-				{
-					actionBar.setTitle(diagnosis);
-				}
-				else
-				{
-					actionBar.setTitle(getResources().getString(R.string.title_activity_edit_case));
-				}
-				*/
-
-				case_cursor.close();
 			}
 
 		} //end populateFields
