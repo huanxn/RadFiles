@@ -407,7 +407,7 @@ public class CaseImport extends AppCompatActivity
 				{
 					Case mCase = importCaseList.get(c);
 
-					if(mCase.caseImageList.size() > 0)
+					if(mCase.caseImageList != null && mCase.caseImageList.size() > 0)
 					{
 						if (mCase.thumbnail == -1 || mCase.thumbnail >= mCase.caseImageList.size())   // default: use first image
 						{
@@ -544,8 +544,12 @@ public class CaseImport extends AppCompatActivity
 							insertImageValues.put(CasesProvider.KEY_IMAGE_DETAILS, imageList.get(i).getDetails());
 							insertImageValues.put(CasesProvider.KEY_IMAGE_CAPTION, imageList.get(i).getCaption());
 
+							boolean isThumbnail = false;
+							if(i == caseList.get(c).thumbnail)
+								isThumbnail = true;
+
 							// insert the set of image info into the DB images table
-							UtilsDatabase.insertImage(context, insertImageValues, i);
+							UtilsDatabase.insertImage(context, insertImageValues, i, isThumbnail);
 						}
 					}
 

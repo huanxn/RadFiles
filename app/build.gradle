@@ -67,6 +67,10 @@ dependencies {
                         {transitive=true}*/
     compile 'com.github.amlcurran.showcaseview:library:5.4.3' //5.4.3
 
+    // TapTargetView feature discovery
+    // https://github.com/KeepSafe/TapTargetView
+    compile 'com.getkeepsafe.taptargetview:taptargetview:1.0.0'
+
 
     // ViewPager Indicator for gallery view
     // https://github.com/JakeWharton/ViewPagerIndicator

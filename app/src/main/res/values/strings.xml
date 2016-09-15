@@ -11,6 +11,7 @@
     <string name="action_discard">Discard changes</string>
     <string name="action_edit">Edit case</string>
     <string name="action_camera">Add image</string>
+    <string name="action_share">Share</string>
     <string name="action_star">Favorite</string>
     <string name="action_select_all">Select all</string>
     <string name="action_edit_caption">Edit caption</string>

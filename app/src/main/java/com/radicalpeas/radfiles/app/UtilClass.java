@@ -2,12 +2,15 @@ package com.radicalpeas.radfiles.app;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
@@ -35,6 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
@@ -464,23 +468,23 @@ public class UtilClass extends Activity
 		return displayMetrics.heightPixels;
 	}
 
-	public static int getStatusBarHeight(Activity activity)
+	public static int getStatusBarHeight(Context context)
 	{
 		int result = 0;
-		int resourceId = activity.getResources().getIdentifier("status_bar_height", "dimen", "android");
+		int resourceId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
 		if (resourceId > 0) {
-			result = activity.getResources().getDimensionPixelSize(resourceId);
+			result = context.getResources().getDimensionPixelSize(resourceId);
 		}
 		return result;
 	}
 
-	public static int getToolbarHeight(Activity activity)
+	public static int getToolbarHeight(Context context)
 	{
 		//return (int)activity.getResources().getDimension(R.dimen.toolbar_size);
 		TypedValue tv = new TypedValue();
-		if (activity.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true))
+		if (context.getTheme().resolveAttribute(R.attr.actionBarSize, tv, true))
 		{
-			return TypedValue.complexToDimensionPixelSize(tv.data, activity.getResources().getDisplayMetrics());
+			return TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
 		}
 		else
 		{
@@ -523,6 +527,124 @@ public class UtilClass extends Activity
 		SimpleDateFormat display_sdf = new SimpleDateFormat(display_sdf_str);
 
 		return convertDateString(original_date_str, original_sdf, display_sdf);
+	}
+
+
+	public static File getScaledImageFile(Context context, Uri old_uri, String new_filename) throws IOException
+	{
+		// Get the private application storage directory for pictures
+		File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+		//File resultFile = File.createTempFile(new_filename, ".png", storageDir);
+		File resultFile = new File(storageDir + "/" + new_filename);
+
+		Bitmap scaledBitmap = getScaledBitmap(context, old_uri);
+		saveBitmap(scaledBitmap, resultFile.getPath());
+
+		return resultFile;
+	}
+
+	public static void saveBitmap(Bitmap bitmap, String path)
+	{
+		if(bitmap!=null){
+			try {
+				FileOutputStream outputStream = null;
+				try {
+					outputStream = new FileOutputStream(path); //here is set your file path where you want to save or also here you can set file object directly
+
+					bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream); // bitmap is your Bitmap instance, if you want to compress it you can compress reduce percentage
+					// PNG is a lossless format, the compression factor (100) is ignored
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					try {
+						if (outputStream != null) {
+							outputStream.close();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public static Bitmap getScaledBitmap(Context context, Uri uri) //, String path)
+	{
+		ContentResolver contentResolver = context.getContentResolver();
+
+		//Uri uri = Uri.fromFile(new File(path));
+		InputStream in = null;
+		try {
+			final int IMAGE_MAX_SIZE = 300000;
+			//final int IMAGE_MAX_SIZE = 1200000; // 1.2MP
+			//final int IMAGE_MAX_SIZE = 512; //single dimension
+
+
+			in = contentResolver.openInputStream(uri);
+
+			// Decode image size
+			BitmapFactory.Options o = new BitmapFactory.Options();
+			o.inJustDecodeBounds = true;
+			BitmapFactory.decodeStream(in, null, o);
+			in.close();
+
+			int scale = 1;
+
+			while ((o.outWidth * o.outHeight) * (1 / Math.pow(scale, 2)) >	IMAGE_MAX_SIZE) {
+				scale++;
+			}
+
+			/*
+			if (o.outHeight > IMAGE_MAX_SIZE || o.outWidth > IMAGE_MAX_SIZE) {
+				scale = (int) Math.pow(2, (int) Math.round(Math.log(IMAGE_MAX_SIZE / (double) Math.max(o.outHeight, o.outWidth)) / Math.log(0.5)));
+			}
+			*/
+
+			Log.d(TAG, "scale = " + scale + ", orig-width: " + o.outWidth + ", orig-height: " + o.outHeight);
+
+			Bitmap bitmap = null;
+			in = contentResolver.openInputStream(uri);
+			if (scale > 1) {
+				scale--;
+				// scale to max possible inSampleSize that still yields an image
+				// larger than target
+				o = new BitmapFactory.Options();
+				o.inSampleSize = scale;
+				bitmap = BitmapFactory.decodeStream(in, null, o);
+
+				/*
+				// resize to desired dimensions
+				int height = bitmap.getHeight();
+				int width = bitmap.getWidth();
+				Log.d(TAG, "1th scale operation dimenions - width: " + width + ", height: " + height);
+
+				double y = Math.sqrt(IMAGE_MAX_SIZE
+						/ (((double) width) / height));
+				double x = (y / height) * width;
+
+				Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) x,	(int) y, true);
+				bitmap.recycle();
+				bitmap = scaledBitmap;
+
+				*/
+
+				System.gc();
+			} else {
+				bitmap = BitmapFactory.decodeStream(in);
+			}
+			in.close();
+
+			Log.d(TAG, "bitmap size - width: " +bitmap.getWidth() + ", height: " + bitmap.getHeight());
+			return bitmap;
+		}
+		catch (IOException e)
+		{
+			Log.e(TAG, e.getMessage(),e);
+			return null;
+		}
 	}
 
 	/**

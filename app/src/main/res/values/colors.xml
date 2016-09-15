@@ -76,6 +76,7 @@
 
     <color name="showcase_background">#CC101010</color>
     <color name="showcase_circle">@color/md_amber_500</color>
+    <color name="taptarget_circle">@color/default_colorAccent</color>
 
     <!-- Draggable List Item -->
     <color name="bg_item_dragging_active_state">@color/default_colorSelected</color>

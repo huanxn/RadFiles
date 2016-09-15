@@ -103,6 +103,7 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.firebaseui/firebase-ui-auth/0.4.4/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.firebaseui/firebase-ui-database/0.4.4/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.firebaseui/firebase-ui/0.4.4/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.getkeepsafe.taptargetview/taptargetview/1.0.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.github.amlcurran.showcaseview/library/5.4.3/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.github.johnkil.android-robototextview/robototextview/2.2.0/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.github.jrejaud/ViewPagerIndicator2/0.0.1/jars" />
@@ -195,6 +196,7 @@
     <orderEntry type="library" exported="" name="firebase-database-9.4.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-wearable-9.4.0" level="project" />
     <orderEntry type="library" exported="" name="design-24.0.0" level="project" />
+    <orderEntry type="library" exported="" name="taptargetview-1.0.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-drive-9.4.0" level="project" />
     <orderEntry type="library" exported="" name="google-material-typeface-2.2.0.3.original" level="project" />
     <orderEntry type="library" exported="" name="firebase-common-9.4.0" level="project" />
@@ -221,7 +223,6 @@
     <orderEntry type="library" exported="" name="firebase-database-connection-9.4.0" level="project" />
     <orderEntry type="library" exported="" name="robototextview-2.2.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-panorama-9.4.0" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-24.1.1" level="project" />
     <orderEntry type="library" exported="" name="support-vector-drawable-24.1.1" level="project" />
     <orderEntry type="library" exported="" name="android-database-sqlcipher-3.5.2" level="project" />
     <orderEntry type="library" exported="" name="play-services-cast-framework-9.4.0" level="project" />
@@ -268,6 +269,7 @@
     <orderEntry type="library" exported="" name="appcompat-v7-24.1.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-basement-9.4.0" level="project" />
     <orderEntry type="library" exported="" name="gson-2.7" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-24.2.0" level="project" />
     <orderEntry type="library" exported="" name="firebase-crash-9.4.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-safetynet-9.4.0" level="project" />
     <orderEntry type="library" exported="" name="mediarouter-v7-23.0.0" level="project" />

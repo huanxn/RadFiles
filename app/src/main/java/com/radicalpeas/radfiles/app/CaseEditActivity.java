@@ -377,10 +377,10 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		}
 
 		// add new study types to database
-		if(pref_auto_add_to_list)
+		if(pref_auto_add_to_list && new_study_type != null)
 		{
 			final Cursor study_types_all_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, null, null, CasesProvider.KEY_ORDER);
-			if (new_study_type != null && study_types_all_cursor != null && study_types_all_cursor.moveToFirst())
+			if (study_types_all_cursor != null && study_types_all_cursor.moveToFirst())
 			{
 				int studyType_lastPosition = study_types_all_cursor.getCount();
 				boolean found = false;
@@ -620,7 +620,11 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 					imageValues.put(CasesProvider.KEY_ORDER, i);      // set order to display images.  new files last.  //todo user reodering
 
 					//getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
-					UtilsDatabase.insertImage(this, imageValues, i);
+					boolean isThumbnail = false;
+					if(i == imageGridView.getThumbnail())
+						isThumbnail = true;
+
+					UtilsDatabase.insertImage(this, imageValues, i, isThumbnail);
 				}
 				else
 				{
@@ -687,33 +691,22 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 			if (resultCode == RESULT_OK)
 			{
 				Uri resultUri = result.getUri();
-				File resultFile = new File(resultUri.getPath());
 
 				// Create the Filename where the photo should go
 				String tempFilename = null;
 
 				// Create an image file name based on timestamp
 				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-				tempFilename = "IMAGE_" + timeStamp + "_";	// temp file will add extra random numbers to filename
+				tempFilename = "IMAGE_" + timeStamp + ".png";
 
-				// Get the private application storage directory for pictures
-				File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-				// Create the file
+				// Create the scaled image file
 				try
 				{
-					tempImageFile = File.createTempFile(tempFilename, ".jpg", storageDir);
-					UtilsFile.copyFile(tempImageFile, resultFile);
+					tempImageFile = UtilClass.getScaledImageFile(this, resultUri, tempFilename);
 				}
 				catch (IOException ex)
 				{
 					Log.e("getPictureFromCamera", "Could not open new image file.");
-				}
-
-				// clean up
-				if(resultFile.exists())
-				{
-					resultFile.delete();
 				}
 
 				imageGridView.addImage(tempImageFile.getPath());

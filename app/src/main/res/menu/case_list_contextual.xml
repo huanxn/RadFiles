@@ -11,7 +11,7 @@
         android:id="@+id/menu_share"
 
         android:icon="@drawable/ic_share_variant_white_24dp"
-        android:title="Share"
+        android:title="@string/action_share"
         app:showAsAction="always"/>
 
     <!-- Delete selected cases, should appear as action button -->

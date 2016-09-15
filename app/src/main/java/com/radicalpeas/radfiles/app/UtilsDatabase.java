@@ -597,6 +597,12 @@ public class UtilsDatabase extends Activity
 
     public static final int updateCase(Context context, long key_id, ContentValues values)
     {
+        // update last modified date field
+        // format string for database
+        SimpleDateFormat db_sdf = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
+        String today_date_str = db_sdf.format(Calendar.getInstance().getTime());
+        values.put(CasesProvider.KEY_LAST_MODIFIED_DATE, today_date_str);
+
         Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
         context.getContentResolver().update(row_uri, values, null, null);
 
@@ -617,105 +623,140 @@ public class UtilsDatabase extends Activity
 
             if (firebaseUser != null && firebaseDatabase != null)
             {
-                DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
 
+                DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
                 // use SQL key _id as node of case in firebase database
                 DatabaseReference caseRef = databaseRef.child("Cases/" + key_id);
+
+                // flattened data structure for Elastic Search indexing
+                DatabaseReference caseSearchIndexRef = firebaseDatabase.getReference("Cases/" + firebaseUser.getUid() + "_" + key_id);
 
                 if(values.getAsString(CasesProvider.KEY_DIAGNOSIS) != null)
                 {
                     DatabaseReference diagnosisRef = caseRef.child(CasesProvider.KEY_DIAGNOSIS);
                     diagnosisRef.setValue(values.getAsString(CasesProvider.KEY_DIAGNOSIS));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_DIAGNOSIS).setValue(values.getAsString(CasesProvider.KEY_DIAGNOSIS));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_FINDINGS) != null)
                 {
                     DatabaseReference findingsRef = caseRef.child(CasesProvider.KEY_FINDINGS);
                     findingsRef.setValue(values.getAsString(CasesProvider.KEY_FINDINGS));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_FINDINGS).setValue(values.getAsString(CasesProvider.KEY_FINDINGS));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_SECTION) != null)
                 {
                     DatabaseReference sectionRef = caseRef.child(CasesProvider.KEY_SECTION);
                     sectionRef.setValue(values.getAsString(CasesProvider.KEY_SECTION));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_SECTION).setValue(values.getAsString(CasesProvider.KEY_SECTION));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_STUDY_TYPE) != null)
                 {
                     DatabaseReference studytypeRef = caseRef.child(CasesProvider.KEY_STUDY_TYPE);
                     studytypeRef.setValue(values.getAsString(CasesProvider.KEY_STUDY_TYPE));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_STUDY_TYPE).setValue(values.getAsString(CasesProvider.KEY_STUDY_TYPE));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_KEYWORDS) != null)
                 {
                     DatabaseReference keywordsRef = caseRef.child(CasesProvider.KEY_KEYWORDS);
                     keywordsRef.setValue(values.getAsString(CasesProvider.KEY_KEYWORDS));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_KEYWORDS).setValue(values.getAsString(CasesProvider.KEY_KEYWORDS));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_BIOPSY) != null)
                 {
                     DatabaseReference biopsyRef = caseRef.child(CasesProvider.KEY_BIOPSY);
                     biopsyRef.setValue(values.getAsString(CasesProvider.KEY_BIOPSY));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_BIOPSY).setValue(values.getAsString(CasesProvider.KEY_BIOPSY));
                 }
 
                 if(values.getAsInteger(CasesProvider.KEY_FOLLOWUP) != null)
                 {
                     DatabaseReference followupRef = caseRef.child(CasesProvider.KEY_FOLLOWUP);
                     followupRef.setValue(values.getAsInteger(CasesProvider.KEY_FOLLOWUP));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_FOLLOWUP).setValue(values.getAsString(CasesProvider.KEY_FOLLOWUP));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_FOLLOWUP_COMMENT) != null)
                 {
                     DatabaseReference followupCommentRef = caseRef.child(CasesProvider.KEY_FOLLOWUP_COMMENT);
                     followupCommentRef.setValue(values.getAsString(CasesProvider.KEY_FOLLOWUP_COMMENT));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_FOLLOWUP_COMMENT).setValue(values.getAsString(CasesProvider.KEY_FOLLOWUP_COMMENT));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_COMMENTS) != null)
                 {
                     DatabaseReference commentsRef = caseRef.child(CasesProvider.KEY_COMMENTS);
                     commentsRef.setValue(values.getAsString(CasesProvider.KEY_COMMENTS));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_COMMENTS).setValue(values.getAsString(CasesProvider.KEY_COMMENTS));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_FAVORITE) != null)
                 {
                     DatabaseReference favoriteRef = caseRef.child(CasesProvider.KEY_FAVORITE);
                     favoriteRef.setValue(values.getAsString(CasesProvider.KEY_FAVORITE));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_FAVORITE).setValue(values.getAsString(CasesProvider.KEY_FAVORITE));
                 }
 
                 if(values.getAsInteger(CasesProvider.KEY_IMAGE_COUNT) != null)
                 {
                     DatabaseReference imageCountRef = caseRef.child(CasesProvider.KEY_IMAGE_COUNT);
                     imageCountRef.setValue(values.getAsInteger(CasesProvider.KEY_IMAGE_COUNT));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_IMAGE_COUNT).setValue(values.getAsString(CasesProvider.KEY_IMAGE_COUNT));
                 }
 
                 if(values.getAsInteger(CasesProvider.KEY_THUMBNAIL) != null)
                 {
                     DatabaseReference thumbnailRef = caseRef.child(CasesProvider.KEY_THUMBNAIL);
                     thumbnailRef.setValue(values.getAsInteger(CasesProvider.KEY_THUMBNAIL));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_THUMBNAIL).setValue(values.getAsString(CasesProvider.KEY_THUMBNAIL));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_LAST_MODIFIED_DATE) != null)
                 {
                     DatabaseReference modifiedDateRef = caseRef.child(CasesProvider.KEY_LAST_MODIFIED_DATE);
                     modifiedDateRef.setValue(values.getAsString(CasesProvider.KEY_LAST_MODIFIED_DATE));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_LAST_MODIFIED_DATE).setValue(values.getAsString(CasesProvider.KEY_LAST_MODIFIED_DATE));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_ORIGINAL_CREATOR) != null)
                 {
                     DatabaseReference originalCreatorRef = caseRef.child(CasesProvider.KEY_ORIGINAL_CREATOR);
                     originalCreatorRef.setValue(values.getAsString(CasesProvider.KEY_ORIGINAL_CREATOR));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_ORIGINAL_CREATOR).setValue(values.getAsString(CasesProvider.KEY_ORIGINAL_CREATOR));
                 }
 
                 if(values.getAsInteger(CasesProvider.KEY_IS_SHARED) != null)
                 {
                     DatabaseReference isSharedRef = caseRef.child(CasesProvider.KEY_IS_SHARED);
                     isSharedRef.setValue(values.getAsInteger(CasesProvider.KEY_IS_SHARED));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_IS_SHARED).setValue(values.getAsString(CasesProvider.KEY_IS_SHARED));
                 }
 
                 if(values.getAsString(CasesProvider.KEY_USER_ID) != null)
                 {
                     DatabaseReference UserIdRef = caseRef.child(CasesProvider.KEY_USER_ID);
                     UserIdRef.setValue(values.getAsString(CasesProvider.KEY_USER_ID));
+
+                    caseSearchIndexRef.child(CasesProvider.KEY_USER_ID).setValue(values.getAsString(CasesProvider.KEY_USER_ID));
                 }
 
             }
@@ -726,12 +767,19 @@ public class UtilsDatabase extends Activity
 
     static public final Uri insertImage(Context context, ContentValues values, int image_index)
     {
+        return insertImage(context, values, image_index, false);
+    }
+    static public final Uri insertImage(Context context, ContentValues values, int image_index, boolean isThumbnail)
+    {
         // insert into local SQL database
         Uri imageUri = context.getContentResolver().insert(CasesProvider.IMAGES_URI, values);
 
         long newImage_KEYID = Integer.valueOf(imageUri.getLastPathSegment());
 
-        insertImageToCloud(context, values, newImage_KEYID);
+        insertImageToCloud(context, values, newImage_KEYID, isThumbnail);
+
+        // update last modified date field of the parent case
+        UtilsDatabase.updateLastModifiedDate(context, values.getAsInteger(CasesProvider.KEY_IMAGE_PARENT_CASE_ID));
 
         return imageUri;
     }
@@ -743,10 +791,18 @@ public class UtilsDatabase extends Activity
 
         insertImageToCloud(context, values, image_keyID);
 
+        // update last modified date field of the parent case
+        UtilsDatabase.updateLastModifiedDate(context, values.getAsInteger(CasesProvider.KEY_IMAGE_PARENT_CASE_ID));
+
         return ret;
     }
 
     static public int insertImageToCloud(Context context, ContentValues values, long image_keyID)
+    {
+        // default isThumbnail = false;
+        return insertImageToCloud(context, values, image_keyID, false);
+    }
+    static public int insertImageToCloud(Context context, ContentValues values, long image_keyID, final boolean isThumbnail)
     {
         // insert into Firebase database
         // Create Firebase storage references
@@ -760,22 +816,29 @@ public class UtilsDatabase extends Activity
             {
             //    DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
             //    DatabaseReference imageRef = databaseRef.child("Cases/" + values.getAsInteger(CasesProvider.KEY_IMAGE_PARENT_CASE_ID) + "/Images/" + newImage_KEYID);
-                DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
+                final DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
 
                 // use SQL key _id as node of case in firebase database
-                DatabaseReference caseRef = databaseRef.child("Cases/" + values.getAsInteger(CasesProvider.KEY_IMAGE_PARENT_CASE_ID));
-                DatabaseReference imageRef = caseRef.child("Images/" + image_keyID);
+                final DatabaseReference caseRef = databaseRef.child("Cases/" + values.getAsInteger(CasesProvider.KEY_IMAGE_PARENT_CASE_ID));
+                final DatabaseReference imageRef = caseRef.child("Images/" + image_keyID);
+
+                final DatabaseReference caseSearchIndexRef = firebaseDatabase.getReference("Cases/" + firebaseUser.getUid() + "_" + values.getAsInteger(CasesProvider.KEY_IMAGE_PARENT_CASE_ID));
+                final DatabaseReference imageSearchIndexRef = caseSearchIndexRef.child("Images/" + image_keyID);
 
                 if(values.getAsString(CasesProvider.KEY_IMAGE_FILENAME) != null)
                 {
                     DatabaseReference filenameRef = imageRef.child(CasesProvider.KEY_IMAGE_FILENAME);
                     filenameRef.setValue(values.getAsString(CasesProvider.KEY_IMAGE_FILENAME));
+
                 }
 
                 if(values.getAsString(CasesProvider.KEY_IMAGE_CAPTION) != null)
                 {
                     DatabaseReference captionRef = imageRef.child(CasesProvider.KEY_IMAGE_CAPTION);
                     captionRef.setValue(values.getAsString(CasesProvider.KEY_IMAGE_CAPTION));
+
+                    // only caption is searchable for Elastic Search
+                    imageSearchIndexRef.child(CasesProvider.KEY_IMAGE_CAPTION).setValue(values.getAsString(CasesProvider.KEY_IMAGE_CAPTION));
                 }
 
                 if(values.getAsInteger(CasesProvider.KEY_ORDER) != null)
@@ -830,9 +893,13 @@ public class UtilsDatabase extends Activity
                                 {
                                     // Handle successful uploads on complete
                                     Uri downloadUrl = taskSnapshot.getMetadata().getDownloadUrl();
-//							showSnackbar(context, "Upload images successful.");
 
-                                    System.out.println("Successfully uploaded image: " + filePath.getName());
+                                    // store in db
+                                    imageRef.child("image_URL").setValue(downloadUrl.getScheme() + ":" + downloadUrl.getEncodedSchemeSpecificPart());
+                                    if(isThumbnail)
+                                    {
+                                        caseRef.child("thumbnail_URL").setValue(downloadUrl.getScheme() + ":" + downloadUrl.getEncodedSchemeSpecificPart());
+                                    }
                                     Log.d(TAG, "Successfully uploaded image: " + filePath.getName());
 
                                 }
@@ -845,7 +912,6 @@ public class UtilsDatabase extends Activity
                                     //				showSnackbar(activity, "Failed uploading images.");
 
 //							showSnackbar(context, "Failed uploading images.");
-                                    System.out.println("Failed uploading image: " + filePath.getName());
                                     Log.d(TAG, "Failed uploading image: " + filePath.getName());
                                 }
                             }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>()
@@ -892,6 +958,7 @@ public class UtilsDatabase extends Activity
     }
 
 
+    // used when changing Images table
     public static void updateLastModifiedDate(Context context, long key_id)
     {
         // put data into "values" for database insert/update
@@ -923,12 +990,17 @@ public class UtilsDatabase extends Activity
 
             if (firebaseUser != null && firebaseDatabase != null)
             {
-                DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
+            //    DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
+
+                DatabaseReference caseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid() + "/Cases/" + key_id);
+                caseRef.removeValue();
 
                 // use SQL key _id as node of case in firebase database
-                DatabaseReference caseRef = databaseRef.child("Cases/" + key_id);
+                DatabaseReference caseSearchIndexRef = firebaseDatabase.getReference("Cases/" + firebaseUser.getUid() + "_" + key_id);
+                caseSearchIndexRef.removeValue();
 
-                caseRef.removeValue();
+                Log.d(TAG, "Deleted case: " + key_id);
+
             }
         }
 
@@ -949,13 +1021,19 @@ public class UtilsDatabase extends Activity
 
             if (firebaseUser != null && firebaseDatabase != null)
             {
-                DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
+                //DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
 
                 // use SQL key _id as node of case in firebase database
-                DatabaseReference imageRef = databaseRef.child("Cases/" + case_key_id + "/Images/" + image_key_id);
+                DatabaseReference imageRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid() + "/" + case_key_id + "/Images/" + image_key_id);
+                imageRef.removeValue();
+                DatabaseReference imageSearchIndexRef = firebaseDatabase.getReference("Cases/" + firebaseUser.getUid() + "_" + case_key_id + "/Images/" + image_key_id);
+                imageSearchIndexRef.removeValue();
+
                 deleteCaseImageFile(context, image_filename); // can probably get filename from imageRef databaseRef
 
-                imageRef.removeValue();
+                // remove thumbnail_URL link in case it needs to be refreshed
+                DatabaseReference caseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid() + "/" + case_key_id + "thumbnail_URL");
+                caseRef.removeValue();
             }
         }
 

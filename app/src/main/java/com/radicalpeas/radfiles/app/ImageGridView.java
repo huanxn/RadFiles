@@ -18,7 +18,9 @@ import android.widget.EditText;
 import android.widget.GridView;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -184,9 +186,6 @@ public class ImageGridView
 												//	Uri caption_row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_id);
 												//	context.getContentResolver().update(caption_row_uri, captionValue, null, null);
 													UtilsDatabase.updateImage(context, captionValue, image_id);
-
-													// update last modified date field
-													UtilsDatabase.updateLastModifiedDate(act, case_id);
 												}
 
 												// update mAdapter
@@ -239,9 +238,6 @@ public class ImageGridView
 												UtilsDatabase.updateCase(context, case_id, thumbnailValue);
 
 												((CaseDetailActivity) act).reloadHeaderView(thumbnail);
-
-												// update last modified date field
-												UtilsDatabase.updateLastModifiedDate(act, case_id);
 											}
 
 											act.setResult(CaseCardListActivity.RESULT_EDITED);
@@ -272,6 +268,8 @@ public class ImageGridView
 											{
 												thumbnail = 0;
 											}
+
+											// changes will be written to database on "save"
 										}
 										else if (mode == DETAIL_ACTIVITY)
 										{
@@ -317,13 +315,21 @@ public class ImageGridView
 														thumbnail = 0;
 													}
 
+													// put data into "values" for database insert/update
+													ContentValues values = new ContentValues();
+
+													// update image_count and thumbnail in database
+													values.put(CasesProvider.KEY_IMAGE_COUNT, mAdapter.getCount());
+													values.put(CasesProvider.KEY_THUMBNAIL, thumbnail);
+
+													UtilsDatabase.updateCase(context, case_id, values);
+
+
 													if (mode == DETAIL_ACTIVITY)
 													{
 														((CaseDetailActivity) act).reloadHeaderView(thumbnail);
 													}
 
-													// update last modified date field
-													UtilsDatabase.updateLastModifiedDate(act, case_id);
 
 													UtilClass.showSnackbar(activity, "Image deleted.");
 
@@ -397,6 +403,18 @@ public class ImageGridView
 	public void addImage(String newImage, long newID)
 	{
 		mAdapter.addImage(newImage, newID);
+
+		// if editing an existing case, update the image_count and thumbnail
+		if(newID != -1)
+		{
+			// put data into "values" for database insert/update
+			ContentValues values = new ContentValues();
+
+			// update image_count and thumbnail in database
+			values.put(CasesProvider.KEY_IMAGE_COUNT, mAdapter.getCount());
+			UtilsDatabase.updateCase(activity, case_key_id, values);
+		}
+
 		notifyDataSetChanged();
 		Resize();
 

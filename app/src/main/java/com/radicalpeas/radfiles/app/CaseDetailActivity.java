@@ -41,6 +41,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
@@ -156,13 +157,28 @@ public class CaseDetailActivity extends AppCompatActivity
 
 		}
 
-		// show picture under transparent toolbar, ie no margin
-		RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.WRAP_CONTENT,
-				RelativeLayout.LayoutParams.WRAP_CONTENT
-		);
-		params.setMargins(0, 0, 0, 0);
-		findViewById(R.id.container).setLayoutParams(params);
+		if(hasImage)
+		{
+			// show picture under transparent toolbar, ie no margin
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT
+			);
+			params.setMargins(0, 0, 0, 0);
+			findViewById(R.id.container).setLayoutParams(params);
+		}
+		else
+		{
+			// show fragment below transparent toolbar, ie with a margin
+			RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.WRAP_CONTENT,
+					RelativeLayout.LayoutParams.WRAP_CONTENT
+			);
+			//params.setMargins(0, UtilClass.getStatusBarHeight(this) + UtilClass.getToolbarHeight(this), 0, 0);
+			params.setMargins(0, UtilClass.getToolbarHeight(this), 0, 0);
+
+			findViewById(R.id.container).setLayoutParams(params);
+		}
 
 		// toolbar title
 		mToolbar.setTitleTextColor(UtilClass.get_attr(this, R.attr.actionMenuTextColor));
@@ -229,7 +245,7 @@ public class CaseDetailActivity extends AppCompatActivity
 		{
 			star.setTitle(getResources().getString(R.string.unlike));
 			star.setIcon(new IconicsDrawable(activity)
-					.icon(GoogleMaterial.Icon.gmd_favorite)
+					.icon(GoogleMaterial.Icon.gmd_star)
 					.color(Color.WHITE)
 					.sizeDp(24));
 		}
@@ -237,7 +253,7 @@ public class CaseDetailActivity extends AppCompatActivity
 		{
 			star.setTitle(getResources().getString(R.string.like));
 			star.setIcon(new IconicsDrawable(activity)
-					.icon(GoogleMaterial.Icon.gmd_favorite_border)
+					.icon(GoogleMaterial.Icon.gmd_star_border)
 					.color(Color.WHITE)
 					.sizeDp(24));
 		}
@@ -395,6 +411,14 @@ public class CaseDetailActivity extends AppCompatActivity
 
 				return true;
 
+			case R.id.menu_share:
+
+				//new ShareCasesTask(mCardAdapter.getMultiselectList(), mode).execute();
+
+				// todo add share code similar to CaseCardListActivity
+
+				return true;
+
 			case R.id.menu_delete:
 				if (key_id != -1)
 				{
@@ -463,7 +487,7 @@ public class CaseDetailActivity extends AppCompatActivity
 			com.theartofdev.edmodo.cropper.CropImage.ActivityResult result = com.theartofdev.edmodo.cropper.CropImage.getActivityResult(data);
 			if (resultCode == RESULT_OK)
 			{
-				Uri resultUri = result.getUri();
+/*				Uri resultUri = result.getUri();
 				File resultFile = new File(resultUri.getPath());
 
 				// Create the Filename where the photo should go
@@ -492,8 +516,26 @@ public class CaseDetailActivity extends AppCompatActivity
 				{
 					resultFile.delete();
 				}
+*/
+				Uri resultUri = result.getUri();
 
-				// imageGridView.addImage(tempImageFile.getPath());
+				// Create the Filename where the photo should go
+				String tempFilename = null;
+
+				// Create an image file name based on timestamp
+				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+				tempFilename = "IMAGE_" + timeStamp + ".png";
+
+				// Create the scaled image file
+				try
+				{
+					tempImageFile = UtilClass.getScaledImageFile(this, resultUri, tempFilename);
+				}
+				catch (IOException ex)
+				{
+					Log.e("getPictureFromCamera", "Could not open new image file.");
+				}
+
 				addNewImageToDatabase(tempImageFile.getPath());
 
 			} else if (resultCode == com.theartofdev.edmodo.cropper.CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
@@ -529,8 +571,6 @@ public class CaseDetailActivity extends AppCompatActivity
 		Uri row_uri = UtilsDatabase.insertImage(this, imageValues, new_image_index);
 		long new_image_id = Long.parseLong(row_uri.getLastPathSegment());
 
-		// update last modified date field
-		UtilsDatabase.updateLastModifiedDate(this, key_id);
 
 		setResult(CaseCardListActivity.RESULT_EDITED);
 
@@ -541,6 +581,11 @@ public class CaseDetailActivity extends AppCompatActivity
 		}
 		else
 		{
+			//update image count
+			ContentValues caseValues = new ContentValues();
+			caseValues.put(CasesProvider.KEY_IMAGE_COUNT, 1);
+			UtilsDatabase.updateCase(this, key_id, caseValues);
+
 			//reload activity to show new header
 			startActivityForResult(starterIntent, CaseCardListActivity.REQUEST_CASE_DETAILS);
 
@@ -583,6 +628,181 @@ public class CaseDetailActivity extends AppCompatActivity
 
 	private void runTutorial(final int step)
 	{
+		if(mToolbar == null)
+		{
+			return;
+		}
+
+		View viewTarget = null;
+
+		if(step == 0)
+		{
+			viewTarget = mToolbar.findViewById(R.id.menu_like);
+			if (viewTarget != null)
+			{
+				TapTargetView tapTargetView = new TapTargetView.Builder(this)
+						.title("Favorites")
+						.description("Star this case as one of your favorites.")
+						.outerCircleColor(R.color.default_colorHeaderText)
+						.cancelable(false)
+						.listener(new TapTargetView.Listener()
+						{
+							@Override
+							public void onTargetClick(TapTargetView view)
+							{
+								view.dismiss(true);
+								runTutorial(step + 1);
+							}
+
+							@Override
+							public void onTargetLongClick(TapTargetView view)
+							{
+
+							}
+						})
+						.showFor(viewTarget);
+			}
+		}
+		else if(step == 1)
+		{
+			viewTarget = mToolbar.findViewById(R.id.menu_edit);
+			if (viewTarget != null)
+			{
+				TapTargetView tapTargetView = new TapTargetView.Builder(this)
+						.title("Edit")
+						.description("Edit and add details to this case.")
+						.outerCircleColor(R.color.default_colorHeaderText)
+						.cancelable(false)
+						.listener(new TapTargetView.Listener()
+						{
+							@Override
+							public void onTargetClick(TapTargetView view)
+							{
+								view.dismiss(true);
+								runTutorial(step + 1);
+							}
+
+							@Override
+							public void onTargetLongClick(TapTargetView view)
+							{
+
+							}
+						})
+						.showFor(viewTarget);
+			}
+		}
+		else if(step == 2)
+		{
+			View diagnosisTarget = null;
+			View diagnosisLabelTarget = null;
+			String contentText = null;
+			if(fragment != null && fragment.getView() != null)
+			{
+
+				diagnosisLabelTarget = fragment.getView().findViewById(R.id.CaseInfoLabel);
+				/*
+				if(diagnosisLabelTarget != null)
+				{
+					// Scroll to Diagnosis Label
+					int[] view_coordinates = new int[2];
+					diagnosisLabelTarget.getLocationInWindow(view_coordinates);
+					if(fragment.mScrollView != null)
+					{
+						fragment.mScrollView.scrollVerticallyTo(view_coordinates[1]);
+					}
+				}
+				*/
+
+				// Diagnosis vs Findings
+				if( diagnosisLabelTarget != null && ((TextView)diagnosisLabelTarget).getText().toString().contentEquals("Diagnosis"))  //todo change to @string
+				{
+					contentText = "Long press to search for this diagnosis online.";
+				}
+				else
+				{
+					contentText = "In a case with a diagnosis, long press to search for the diagnosis online.";
+				}
+
+				diagnosisTarget = fragment.getView().findViewById(R.id.case_info1);
+				if(diagnosisTarget != null && diagnosisLabelTarget != null)
+				{
+					new TapTargetView.Builder(this)
+							.title("Diagnosis")
+							.description(contentText)
+							.outerCircleColor(R.color.default_colorHeaderText)
+							.cancelable(false)
+							.listener(new TapTargetView.Listener()
+							{
+								@Override
+								public void onTargetClick(TapTargetView view)
+								{
+									view.dismiss(true);
+									runTutorial(step + 1);
+								}
+
+								@Override
+								public void onTargetLongClick(TapTargetView view)
+								{
+
+								}
+							})
+							.showFor(diagnosisTarget);
+
+				}
+				else
+				{
+					// no target
+				}
+			}
+
+
+		}
+		else if(step == 3)
+		{
+			View imagesTarget = null;
+			if(fragment != null && fragment.imageGridView != null)
+			{
+				//imagesTarget = fragment.getView().findViewById(R.id.ImagesLabel);
+				imagesTarget = fragment.imageGridView.getView();
+				//imagesTarget = fragment.getView().findViewById(R.id.ImagesTarget);
+			}
+
+			if(imagesTarget != null)
+			{
+				int[] image_coordinates = new int[2];
+				imagesTarget.getLocationInWindow(image_coordinates);
+
+				fragment.mScrollView.scrollVerticallyTo(image_coordinates[1]);
+
+				new TapTargetView.Builder(this)
+						.title("Case Images")
+						.description("Click to open the image gallery.\nLong press for more options.")
+						.outerCircleColor(R.color.default_colorHeaderText)
+						.cancelable(true)
+						.listener(new TapTargetView.Listener()
+						{
+							@Override
+							public void onTargetClick(TapTargetView view)
+							{
+								view.dismiss(true);
+								//runTutorial(step + 1);
+							}
+
+							@Override
+							public void onTargetLongClick(TapTargetView view)
+							{
+
+							}
+						})
+						.showFor(imagesTarget);
+
+			}
+			else
+			{
+				// no target
+			}
+		}
+		/*
 		if(step == 0)
 		{
 			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
@@ -728,10 +948,10 @@ public class CaseDetailActivity extends AppCompatActivity
 						                                  .hideOnTouchOutside()
 						                                  .build();
 
-				/*
-				showcaseView.setShowcaseX(image_coordinates[0]/2);
-				showcaseView.setShowcaseY(image_coordinates[1]);
-				*/
+
+			//	showcaseView.setShowcaseX(image_coordinates[0]/2);
+			//	showcaseView.setShowcaseY(image_coordinates[1]);
+
 
 				showcaseView.overrideButtonClick(new View.OnClickListener()
 				{
@@ -755,10 +975,7 @@ public class CaseDetailActivity extends AppCompatActivity
 						                                  .hideOnTouchOutside()
 						                                  .build();
 
-				/*
-				showcaseView.setShowcaseX(image_coordinates[0]/2);
-				showcaseView.setShowcaseY(image_coordinates[1]);
-				*/
+
 
 				showcaseView.overrideButtonClick(new View.OnClickListener()
 				{
@@ -772,51 +989,6 @@ public class CaseDetailActivity extends AppCompatActivity
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 		}
-		/*
-		else if(step == 4)
-		{
-			final Target viewTarget = new Target() {
-				@Override
-				public Point getPoint() {
-					View navIcon = null;
-					for (int i = 0; i < mToolbar.getChildCount(); i++)
-					{
-						View child = mToolbar.getChildAt(i);
-						if (ImageButton.class.isInstance(child))
-						{
-							navIcon = child;
-							break;
-						}
-					}
-
-					if (navIcon != null)
-						return new ViewTarget(navIcon).getPoint();
-					else
-						return new ViewTarget(mToolbar).getPoint();
-				}
-			};
-
-			final ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-					//.setTarget( new ViewTarget( ((ViewGroup)findViewById(R.id.action_bar)).getChildAt(1) ) )
-					.setTarget(viewTarget)
-					.setContentTitle("Back")
-					.setContentText("Return to your case list.")
-					.setStyle(R.style.CustomShowcaseThemeEnd)
-					.hideOnTouchOutside()
-					.build();
-
-			showcaseView.overrideButtonClick(new View.OnClickListener()
-			{
-				@Override
-				public void onClick(View v)
-				{
-					showcaseView.hide();
-					runTutorial(step + 1);
-				}
-			});
-
-		}
-		*/
 		else if(step == 4)
 		{
 
@@ -830,7 +1002,7 @@ public class CaseDetailActivity extends AppCompatActivity
 					                                  .build();
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 		}
-
+*/
 		return;
 	}
 
@@ -944,6 +1116,7 @@ public class CaseDetailActivity extends AppCompatActivity
 
 				mScrollView = (ObservableScrollView) view.findViewById(R.id.scroll);
 				mScrollView.setScrollViewCallbacks(this);
+				mScrollView.setVerticalScrollBarEnabled(false);
 
 				// get size of screen display
 				Point size = new Point();

@@ -14,6 +14,9 @@
     <!-- Add image to this case, should appear as action button -->
     <item android:title="@string/action_camera" app:showAsAction="never" android:icon="@drawable/ic_camera_grey600_24dp" android:id="@+id/menu_camera"/>
 
+    <!-- Share this case, should appear as action button -->
+    <item android:title="@string/action_share" app:showAsAction="never" android:icon="@drawable/ic_share_variant_grey600_24dp" android:id="@+id/menu_share"/>
+
     <!-- Delete this case, should appear as action button -->
     <item android:title="@string/action_delete" app:showAsAction="never" android:icon="@drawable/ic_delete_grey600_24dp" android:id="@+id/menu_delete"/>
 
