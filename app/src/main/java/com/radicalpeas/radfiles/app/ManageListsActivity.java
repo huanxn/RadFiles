@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.astuetz.PagerSlidingTabStrip;
+import com.getkeepsafe.taptargetview.TapTargetView;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
@@ -93,6 +94,126 @@ public class ManageListsActivity extends NavDrawerActivity
 
 	private void runTutorial(final int step)
 	{
+		if(mToolbar == null)
+		{
+			return;
+		}
+
+		View viewTarget = null;
+
+		if(step == 0)
+		{
+			viewTarget = fragment.rootView.findViewById(R.id.tabs);
+			if (viewTarget != null)
+			{
+				TapTargetView tapTargetView = new TapTargetView.Builder(this)
+						.title("Select a list")
+						.description("Swipe or click the tabs to select a list.")
+						.outerCircleColor(R.color.default_colorHeaderText)
+						.cancelable(false)
+						.listener(new TapTargetView.Listener()
+						{
+							@Override
+							public void onTargetClick(TapTargetView view)
+							{
+								view.dismiss(true);
+								runTutorial(step + 1);
+							}
+
+							@Override
+							public void onTargetLongClick(TapTargetView view)
+							{
+
+							}
+						})
+						.showFor(viewTarget);
+			}
+		}
+		else if(step == 1)
+		{
+			viewTarget = fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem()).getListItemTextView();
+			if (viewTarget != null)
+			{
+				TapTargetView tapTargetView = new TapTargetView.Builder(this)
+						.title("Edit list item")
+						.description("Click to edit the list item.\n\nLong press for more options.")
+						.outerCircleColor(R.color.default_colorHeaderText)
+						.cancelable(false)
+						.listener(new TapTargetView.Listener()
+						{
+							@Override
+							public void onTargetClick(TapTargetView view)
+							{
+								view.dismiss(true);
+								runTutorial(step + 1);
+							}
+
+							@Override
+							public void onTargetLongClick(TapTargetView view)
+							{
+
+							}
+						})
+						.showFor(viewTarget);
+			}
+		}
+		if(step == 2)
+		{
+			viewTarget = fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem()).getListItemHandleView();
+
+			if (viewTarget != null)
+			{
+				TapTargetView tapTargetView = new TapTargetView.Builder(this)
+						.title("Sort list items")
+						.description("Drag the handle up or down to change the order of list items.")
+						.outerCircleColor(R.color.default_colorHeaderText)
+						.cancelable(false)
+						.listener(new TapTargetView.Listener()
+						{
+							@Override
+							public void onTargetClick(TapTargetView view)
+							{
+								view.dismiss(true);
+								runTutorial(step + 1);
+							}
+
+							@Override
+							public void onTargetLongClick(TapTargetView view)
+							{
+
+							}
+						})
+						.showFor(viewTarget);
+			}
+		}
+		else if(step == 3)
+		{
+			viewTarget = fragment.mSectionsPagerAdapter.getList(fragment.mViewPager.getCurrentItem()).getListItemAddView();
+			if (viewTarget != null)
+			{
+				TapTargetView tapTargetView = new TapTargetView.Builder(this)
+						.title("Add new item")
+						.description("Click to add a new item to the list.")
+						.outerCircleColor(R.color.default_colorHeaderText)
+						.cancelable(false)
+						.listener(new TapTargetView.Listener()
+						{
+							@Override
+							public void onTargetClick(TapTargetView view)
+							{
+								view.dismiss(false);
+							}
+
+							@Override
+							public void onTargetLongClick(TapTargetView view)
+							{
+
+							}
+						})
+						.showFor(viewTarget);
+			}
+		}
+		/*
 		if (step == 1)
 		{
 			View viewTarget = fragment.rootView.findViewById(R.id.tabs);
@@ -205,6 +326,7 @@ public class ManageListsActivity extends NavDrawerActivity
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { showcaseView.setPadding(0, 0, 0, UtilClass.getNavigationBarHeight(this)); }
 			}
 		}
+		*/
 	}
 
 	public static class TabbedFragment extends Fragment

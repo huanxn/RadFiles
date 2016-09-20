@@ -669,6 +669,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
         public void setOnClickListeners(View view)
         {
+            /*
             // CASE SAVE / BACKUP TO CLOUD
             view.findViewById(R.id.case_upload_button).setOnClickListener(new View.OnClickListener()
             {
@@ -695,6 +696,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
 
                 }
             });
+            */
 
             // CASE IMPORT
             view.findViewById(R.id.case_import_button).setOnClickListener(new View.OnClickListener()

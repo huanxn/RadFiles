@@ -62,8 +62,16 @@
 
             <com.radicalpeas.radfiles.app.SpinnerMultiSelect
                 android:id="@+id/edit_section"
-                style="@style/customSpinnerStyle"
-                android:prompt="@string/section_prompt"/>
+                style="?android:attr/spinnerStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dip"
+                android:textSize="@dimen/standardTextSize"
+                android:textColor="@color/text_dark"
+                android:textColorHint="@color/text_dark_hint"
+                android:hint="@string/section_prompt"
+                android:onClick="onClick_Button"
+                />
 
             <!-- STUDIES -->
             <TextView
@@ -118,9 +126,17 @@
                 android:text="Key Words"/>
 
             <com.radicalpeas.radfiles.app.SpinnerMultiSelect
-                style="@style/customSpinnerStyle"
                 android:id="@+id/edit_key_words"
-                android:prompt="@string/keyWords_prompt"/>
+                style="?android:attr/spinnerStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dip"
+                android:textSize="@dimen/standardTextSize"
+                android:textColor="@color/text_dark"
+                android:textColorHint="@color/text_dark_hint"
+                android:hint="@string/keyWords_prompt"
+                android:onClick="onClick_Button"
+                />
 
             <!-- BIOPSY -->
             <TextView

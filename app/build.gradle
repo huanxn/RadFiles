@@ -52,9 +52,6 @@ dependencies {
     // https://github.com/google/gson
     compile 'com.google.code.gson:gson:2.7'
 
-
-    //compile 'com.timehop.stickyheadersrecyclerview:library:0.3.6@aar' //buggy
-
     // advanced recyclerview for drag/drap lists
     // https://github.com/h6ah4i/android-advancedrecyclerview
     compile ('com.h6ah4i.android.widget.advrecyclerview:advrecyclerview:0.9.3@aar'){transitive=true}
@@ -70,6 +67,10 @@ dependencies {
     // TapTargetView feature discovery
     // https://github.com/KeepSafe/TapTargetView
     compile 'com.getkeepsafe.taptargetview:taptargetview:1.0.0'
+
+    // Material Dialogs
+    // https://github.com/afollestad/material-dialogs
+    compile 'com.afollestad.material-dialogs:core:0.9.0.1'
 
 
     // ViewPager Indicator for gallery view

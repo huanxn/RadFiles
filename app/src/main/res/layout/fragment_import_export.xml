@@ -14,7 +14,7 @@
         tools:context="com.radicalpeas.radfiles.app.ImportExportActivity$CloudStorageFragment">
 
 
-        <!-- CASES -->
+        <!-- CASES
         <TextView
             android:id="@+id/firebase_header"
             style="@style/sectionHeader"
@@ -22,7 +22,6 @@
             android:text="SAVE AND RESTORE CASES"
             />
 
-        <!-- Upload -->
         <RelativeLayout
             android:id="@+id/case_upload_button"
             style="@style/textButtonStyle"
@@ -40,7 +39,6 @@
 
         </RelativeLayout>
 
-        <!-- Download -->
         <RelativeLayout
             android:id="@+id/case_download_button"
             style="@style/textButtonStyle"
@@ -57,13 +55,15 @@
                 android:text="Download all cases from your personal RadFiles cloud storage."/>
 
         </RelativeLayout>
+        -->
 
 
+        <!--android:layout_below="@id/case_download_button"-->
         <TextView
             android:id="@+id/export_header"
             style="@style/sectionHeader"
-            android:layout_below="@id/case_download_button"
-            android:text="SHARE CASES"
+            android:layout_alignParentTop="true"
+            android:text="CASES"
             />
 
         <!-- Import -->

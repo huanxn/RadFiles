@@ -15,7 +15,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -39,7 +38,6 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 
-import com.bumptech.glide.util.Util;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.theartofdev.edmodo.cropper.CropImage;
@@ -78,6 +76,8 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 	private static boolean confirmSave = false;
 	private static boolean madeChanges = false;
 
+	private EditCaseFragment fragment = null;
+
 
 	// standard directories
 	//private static File downloadsDir = CaseCardListActivity.downloadsDir;
@@ -95,7 +95,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 		if (savedInstanceState == null)
 		{
-			final EditCaseFragment fragment = new EditCaseFragment();
+			fragment = new EditCaseFragment();
 
 			getFragmentManager().beginTransaction().remove(fragment).commit();
 			getFragmentManager().beginTransaction().add(R.id.container, fragment).commit();
@@ -129,7 +129,6 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		study_types_cursor = getContentResolver().query(CasesProvider.STUDYTYPE_LIST_URI, null, CasesProvider.KEY_LIST_ITEM_IS_HIDDEN + " = ?", new String[]{"0"}, CasesProvider.KEY_ORDER);
 		key_words_cursor = getContentResolver().query(CasesProvider.KEYWORD_LIST_URI, null, CasesProvider.KEY_LIST_ITEM_IS_HIDDEN + " = ?", new String[]{"0"}, CasesProvider.KEY_ORDER);
 		section_cursor = getContentResolver().query(CasesProvider.SECTION_LIST_URI, null, CasesProvider.KEY_LIST_ITEM_IS_HIDDEN + " = ?", new String[]{"0"}, CasesProvider.KEY_ORDER);
-
 	}
 
 	@Override
@@ -273,6 +272,20 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 				saveToDatabase();
 				finish();
 				break;
+
+
+			case R.id.edit_key_words:
+
+				//keyWords_dialog.show();
+				fragment.key_words_spinner.showDialog();
+				break;
+
+			case R.id.edit_section:
+
+				//keyWords_dialog.show();
+				fragment.section_spinner.showDialog();
+				break;
+
 			/*
 			case R.id.cancelButton:
 				//TODO delete files that we don't need
@@ -423,7 +436,9 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		}
 
 		// SECTIONS
+		//String new_sections = ((SpinnerMultiSelect)findViewById(R.id.edit_section)).getSelectedString();
 		String new_sections = ((SpinnerMultiSelect)findViewById(R.id.edit_section)).getSelectedString();
+
 		if (new_sections != null && !new_sections.isEmpty())
 		{
 			values.put(CasesProvider.KEY_SECTION, new_sections);
@@ -475,6 +490,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		}
 
 		// KEYWORDS
+		//String new_keyWords = ((SpinnerMultiSelect)findViewById(R.id.edit_key_words)).getSelectedString();
 		String new_keyWords = ((SpinnerMultiSelect)findViewById(R.id.edit_key_words)).getSelectedString();
 
 		if (new_keyWords != null && !new_keyWords.isEmpty())
@@ -809,8 +825,9 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		private static Cursor case_cursor;
 
 		private SpinnerCustom study_type_spinner;
-		private SpinnerMultiSelect key_words_spinner;
+
 		private SpinnerMultiSelect section_spinner;
+		private SpinnerMultiSelect key_words_spinner;
 
 		private Activity activity;
 		private View rootView;
@@ -894,11 +911,45 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 
 			// SECTION MULTI SPINNER
 			section_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_section);
+			section_spinner.setTitle("Sections");
+			section_spinner.setAddCustomTitle("New section");
 			section_spinner.setItems(section_cursor, CasesProvider.COL_LIST_ITEM_VALUE);
 
 			// KEYWORDS MULTI SPINNER
 			key_words_spinner = (SpinnerMultiSelect) view.findViewById(R.id.edit_key_words);
+			key_words_spinner.setTitle("Key Words");
+			key_words_spinner.setAddCustomTitle("New key word");
 			key_words_spinner.setItems(key_words_cursor, CasesProvider.COL_LIST_ITEM_VALUE);
+
+			/*
+			List<String> items = new ArrayList<String>();
+			if(key_words_cursor != null && key_words_cursor.moveToFirst())
+			{
+				do
+				{
+					items.add(key_words_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
+
+				} while(key_words_cursor.moveToNext());
+			}
+
+			//key_words_spinner = new SpinnerMultiSelect2(activity);
+			key_words_spinner.init("Key Words", items);
+
+
+
+			items = new ArrayList<String>();
+			if(section_cursor != null && section_cursor.moveToFirst())
+			{
+				do
+				{
+					items.add(section_cursor.getString(CasesProvider.COL_LIST_ITEM_VALUE));
+
+				} while(section_cursor.moveToNext());
+			}
+
+			//key_words_spinner = new SpinnerMultiSelect2(activity);
+			section_spinner.init("Sections", items);
+*/
 
 			if(key_id > 0)
 			{
