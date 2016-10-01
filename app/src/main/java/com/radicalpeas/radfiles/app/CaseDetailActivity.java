@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -568,7 +569,7 @@ public class CaseDetailActivity extends AppCompatActivity
 		imageValues.put(CasesProvider.KEY_ORDER, new_image_index);      // set order to display images.  new files last.  //todo user reodering
 
 		//Uri row_uri = getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
-		Uri row_uri = UtilsDatabase.insertImage(this, imageValues, new_image_index);
+		Uri row_uri = UtilsDatabase.insertImage(this, imageValues);
 		long new_image_id = Long.parseLong(row_uri.getLastPathSegment());
 
 
@@ -1037,7 +1038,10 @@ public class CaseDetailActivity extends AppCompatActivity
 		//private int thumbnail_pos;
 		private ImageGridView imageGridView = null;
 
+		private SwipeRefreshLayout swipeRefreshLayout;
+
 		private Case mCase;
+		private Case mFirebaseCase;
 
 		// Hold a reference to the current animator,
 		// so that it can be canceled mid-way.
@@ -1050,6 +1054,7 @@ public class CaseDetailActivity extends AppCompatActivity
 		public CaseDetailFragment()
 		{
 			mCase = new Case();
+			mFirebaseCase = new Case();
 		}
 
 		@Override
@@ -1132,6 +1137,21 @@ public class CaseDetailActivity extends AppCompatActivity
 				mImageView = (ImageView) view.findViewById(R.id.header_image);
 			}
 
+			// Setup SwipeRefreshLayout
+			swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+			swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+			{
+				@Override
+				public void onRefresh()
+				{
+					populateFields();
+				}
+			});
+			swipeRefreshLayout.setColorSchemeResources(android.R.color.holo_blue_bright,
+					android.R.color.holo_green_light,
+					android.R.color.holo_orange_light,
+					android.R.color.holo_red_light);
+
 
 			// lollipop transitions
 			if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
@@ -1156,6 +1176,7 @@ public class CaseDetailActivity extends AppCompatActivity
 				mActivity.getWindow().setExitTransition(set);
 				mActivity.getWindow().setEnterTransition(set);
 			}
+
 			return view;
 		}
 
@@ -1242,11 +1263,13 @@ public class CaseDetailActivity extends AppCompatActivity
 			if (getArguments().containsKey(CaseCardListActivity.ARG_KEY_ID))
 			{
 				mCase.key_id = selected_key_id = getArguments().getLong(CaseCardListActivity.ARG_KEY_ID);
+				mFirebaseCase.key_id = selected_key_id;
 			}
 			else    //TODO show error message (no selected key id from listview)
 			{
 				selected_key_id = -1;
 				mCase.key_id = -1;
+				mFirebaseCase.key_id = -1;
 				return;
 			}
 
@@ -1270,6 +1293,7 @@ public class CaseDetailActivity extends AppCompatActivity
 			if(mCase.setCase(getActivity(), mCase.key_id))	// if set case info is successful
 			{
 		//		mCase.setCaseFromCursor(getActivity(), case_cursor);
+				//mFirebaseCase.setCaseFromCloud(selected_key_id);
 
 				boolean followup_bool;
 				if(mCase.followup==1)
@@ -1533,6 +1557,8 @@ public class CaseDetailActivity extends AppCompatActivity
 			}
 
 //			case_cursor.close();
+
+			swipeRefreshLayout.setRefreshing(false);
 
 		}// end populateFields
 

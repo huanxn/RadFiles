@@ -640,7 +640,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 					if(i == imageGridView.getThumbnail())
 						isThumbnail = true;
 
-					UtilsDatabase.insertImage(this, imageValues, i, isThumbnail);
+					UtilsDatabase.insertImage(this, imageValues, isThumbnail);
 				}
 				else
 				{

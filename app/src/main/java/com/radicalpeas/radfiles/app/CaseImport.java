@@ -549,7 +549,7 @@ public class CaseImport extends AppCompatActivity
 								isThumbnail = true;
 
 							// insert the set of image info into the DB images table
-							UtilsDatabase.insertImage(context, insertImageValues, i, isThumbnail);
+							UtilsDatabase.insertImage(context, insertImageValues, isThumbnail);
 						}
 					}
 

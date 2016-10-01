@@ -20,8 +20,12 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnPausedListener;
 import com.google.firebase.storage.OnProgressListener;
@@ -765,11 +769,11 @@ public class UtilsDatabase extends Activity
 
     }
 
-    static public final Uri insertImage(Context context, ContentValues values, int image_index)
+    static public final Uri insertImage(Context context, ContentValues values)
     {
-        return insertImage(context, values, image_index, false);
+        return insertImage(context, values, false);
     }
-    static public final Uri insertImage(Context context, ContentValues values, int image_index, boolean isThumbnail)
+    static public final Uri insertImage(Context context, ContentValues values, boolean isThumbnail)
     {
         // insert into local SQL database
         Uri imageUri = context.getContentResolver().insert(CasesProvider.IMAGES_URI, values);
@@ -1007,7 +1011,7 @@ public class UtilsDatabase extends Activity
     }
 
     // single image deleted from ImageGridView
-    public static void deleteImage(Context context, long case_key_id, long image_key_id, String image_filename)
+    public static void deleteImage(Context context, long case_key_id, long image_key_id, final String image_filename)
     {
         Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, image_key_id);
         context.getContentResolver().delete(row_uri, null, null);
@@ -1024,16 +1028,54 @@ public class UtilsDatabase extends Activity
                 //DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
 
                 // use SQL key _id as node of case in firebase database
-                DatabaseReference imageRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid() + "/" + case_key_id + "/Images/" + image_key_id);
-                imageRef.removeValue();
-                DatabaseReference imageSearchIndexRef = firebaseDatabase.getReference("Cases/" + firebaseUser.getUid() + "_" + case_key_id + "/Images/" + image_key_id);
-                imageSearchIndexRef.removeValue();
+        //        DatabaseReference imageRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid() + "/" + case_key_id + "/Images/" + image_key_id);
+        //        imageRef.removeValue();
+        //        DatabaseReference imageSearchIndexRef = firebaseDatabase.getReference("Cases/" + firebaseUser.getUid() + "_" + case_key_id + "/Images/" + image_key_id);
+        //        imageSearchIndexRef.removeValue();
+
+
+                ////
+                DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
+                // use SQL key _id as node of case in firebase database
+                DatabaseReference caseRef = databaseRef.child("Cases/" + case_key_id);
+                DatabaseReference caseImagesRef = caseRef.child("Images");
+
+                caseImagesRef.addListenerForSingleValueEvent(new ValueEventListener()
+                {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot)
+                    {
+                        Iterable<DataSnapshot> imageList = dataSnapshot.getChildren();
+
+                        for(DataSnapshot imageSnapshot: imageList)
+                        {
+                            final String filename = (String) imageSnapshot.child(CasesProvider.KEY_IMAGE_FILENAME).getValue();
+
+                            if(filename.equals(image_filename))
+                            {
+                                // found the image to delete
+                                imageSnapshot.getRef().removeValue();
+                                break;
+                            }
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError)
+                    {
+
+                    }
+                });
+                ////
+
+
 
                 deleteCaseImageFile(context, image_filename); // can probably get filename from imageRef databaseRef
 
                 // remove thumbnail_URL link in case it needs to be refreshed
-                DatabaseReference caseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid() + "/" + case_key_id + "thumbnail_URL");
-                caseRef.removeValue();
+                DatabaseReference thumbnailRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid() + "/" + case_key_id + "thumbnail_URL");
+                thumbnailRef.removeValue();
             }
         }
 
@@ -1056,11 +1098,12 @@ public class UtilsDatabase extends Activity
                 final File filePath = new File(picturesDir + "/" + image_filename); //values.getAsString(CasesProvider.KEY_IMAGE_FILENAME)
                 final StorageReference storageImage = mStorageRef.child(firebaseUser.getUid() + "/pictures/" + filePath.getName());
 
-
                 // Delete the file
                 storageImage.delete();
                 Log.d(TAG, "Deleting image file: " + firebaseUser.getUid() + "/pictures/" +  filePath.getName());
             }
         }
+
+        //todo delete local file
     }
 }

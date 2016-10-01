@@ -349,9 +349,12 @@ public class SpinnerMultiSelect extends Button
     public List<String> getSelectedStrings() {
         List<String> selection = new LinkedList<String>();
 
-        for(int i = 0; i < _selectedIndices.length; i++)
+        if(_selectedIndices != null)
         {
-            selection.add(_items[_selectedIndices[i]]);
+            for (int i = 0; i < _selectedIndices.length; i++)
+            {
+                selection.add(_items[_selectedIndices[i]]);
+            }
         }
 
         return selection;
