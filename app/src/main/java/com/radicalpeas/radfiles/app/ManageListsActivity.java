@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -380,8 +381,8 @@ public class ManageListsActivity extends NavDrawerActivity
 //			tabs.setTextColor(activity.getResources().getColor(R.attr.actionMenuTextColor));
 
 			// TODO get from attr
-			tabs.setIndicatorColor(activity.getResources().getColor(R.color.white_text));
-			tabs.setIndicatorColor(activity.getResources().getColor(R.color.white_text));
+			tabs.setIndicatorColor(ContextCompat.getColor(activity, R.color.white_text));
+			//tabs.setIndicatorColor(activity.getResources().getColor(R.color.white_text));
 			tabs.setShouldExpand(true);
 
 

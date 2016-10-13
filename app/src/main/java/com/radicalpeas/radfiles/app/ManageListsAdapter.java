@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
@@ -101,11 +102,11 @@ public class ManageListsAdapter
 		// grey-out if hidden
 		if(isHiddenList.get(position))
 		{
-			holder.mTextView.setTextColor(activity.getResources().getColor(R.color.text_dark_hint));
+			holder.mTextView.setTextColor(ContextCompat.getColor(activity, R.color.text_dark_hint));
 		}
 		else
 		{
-			holder.mTextView.setTextColor(activity.getResources().getColor(R.color.text_dark));
+			holder.mTextView.setTextColor(ContextCompat.getColor(activity, R.color.text_dark));
 		}
 
 		holder.mContainer.setOnClickListener(this);

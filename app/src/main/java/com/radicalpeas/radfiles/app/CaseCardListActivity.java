@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -290,9 +291,10 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 		// change text color
 
 		SearchView.SearchAutoComplete searchText = (SearchView.SearchAutoComplete)searchView.findViewById(R.id.search_src_text);
-		searchText.setTextColor(getResources().getColor(R.color.text_light));
+		//searchText.setTextColor(getResources().getColor(R.color.text_light));
+		searchText.setTextColor(ContextCompat.getColor(this, R.color.text_light));
 		searchText.setHint(getResources().getString(R.string.search_prompt));
-		searchText.setHintTextColor(getResources().getColor(R.color.text_light_hint));
+		searchText.setTextColor(ContextCompat.getColor(this, R.color.text_light_hint));
 
 		/*
 		// hide spinner if drawer is open

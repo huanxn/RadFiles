@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -265,7 +266,7 @@ public class SpinnerCustom extends Spinner // implements DialogInterface.OnMulti
 
 				// get hint color
 				//final ColorStateList colors = new EditText(context).getHintTextColors();
-				v.setTextColor(context.getResources().getColor(R.color.text_dark_hint));
+				v.setTextColor(ContextCompat.getColor(context, R.color.text_dark_hint));
 				//v.setTextColor(colors);
 				return v;
 			}

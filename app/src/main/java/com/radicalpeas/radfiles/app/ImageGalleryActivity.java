@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -93,7 +94,7 @@ public class ImageGalleryActivity extends AppCompatActivity
 			Window window = getWindow();
 			window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
 			window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-			window.setStatusBarColor(getResources().getColor(android.R.color.black));
+			window.setStatusBarColor(ContextCompat.getColor(this, android.R.color.black));
 		}
 
 		case_id = getIntent().getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);

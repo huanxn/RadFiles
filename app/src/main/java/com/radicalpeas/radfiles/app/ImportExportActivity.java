@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.util.JsonWriter;
 import android.util.Log;
@@ -207,7 +208,7 @@ public class ImportExportActivity extends NavDrawerActivity // GoogleDriveBaseAc
             case R.id.menu_clear_cache:
 
                 final File downloadsDir = activity.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-                android.app.ProgressDialog progressWheelDialog = new android.app.ProgressDialog(activity, activity.getResources().getColor(R.color.default_colorAccent));
+                android.app.ProgressDialog progressWheelDialog = new android.app.ProgressDialog(activity, ContextCompat.getColor(activity, R.color.default_colorAccent));
                 progressWheelDialog.setTitle("Clearing cache...");
                 new ClearDirectoryTask(this, progressWheelDialog).execute(downloadsDir);
 

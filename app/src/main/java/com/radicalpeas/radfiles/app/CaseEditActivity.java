@@ -602,8 +602,6 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 			// get the key_id of the new case
 			key_id = ContentUris.parseId(new_case_uri);
 
-			// FIREBASE
-
 		}
 		else
 		{

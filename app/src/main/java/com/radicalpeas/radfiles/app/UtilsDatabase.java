@@ -593,6 +593,20 @@ public class UtilsDatabase extends Activity
             // get parent key information
             long newCase_KEYID = Integer.valueOf(new_case_uri.getLastPathSegment());
 
+            // make unique id across all SQL databases and firebase
+            // use time stamp and this SQL generated key_id
+            SimpleDateFormat timestamp = new SimpleDateFormat("yyyy-MM-dd-HHmm-ss");
+            String timestamp_str = timestamp.format(Calendar.getInstance().getTime());
+
+            ContentValues id_value = new ContentValues();
+            id_value.clear();
+            id_value.put(CasesProvider.KEY_UNIQUE_ID, timestamp_str + "_" + newCase_KEYID);
+
+            Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, newCase_KEYID);
+            context.getContentResolver().update(row_uri, id_value, null, null);
+
+            // insert into firebase database
+            values.put(CasesProvider.KEY_UNIQUE_ID, timestamp_str + "_" + newCase_KEYID);
             insertCaseToCloud(newCase_KEYID, values);
         }
 
@@ -761,6 +775,13 @@ public class UtilsDatabase extends Activity
                     UserIdRef.setValue(values.getAsString(CasesProvider.KEY_USER_ID));
 
                     caseSearchIndexRef.child(CasesProvider.KEY_USER_ID).setValue(values.getAsString(CasesProvider.KEY_USER_ID));
+                }
+
+                if(values.getAsString(CasesProvider.KEY_UNIQUE_ID) != null)
+                {
+                    caseRef.child(CasesProvider.KEY_UNIQUE_ID).setValue(values.getAsString(CasesProvider.KEY_UNIQUE_ID));
+
+                    // caseSearchIndexRef.child(CasesProvider.KEY_UNIQUE_ID).setValue(values.getAsString(CasesProvider.KEY_UNIQUE_ID));
                 }
 
             }

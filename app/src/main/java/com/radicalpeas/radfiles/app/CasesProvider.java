@@ -127,8 +127,9 @@ public class CasesProvider extends ContentProvider
 	public static final String KEY_ORIGINAL_CREATOR = "ORIGINAL_CREATOR";	// RadFiles user name who first submitted this case
 	public static final String KEY_IS_SHARED = "IS_SHARED";	// flag if shared publicly
 
-	public static final String KEY_CASE_INFO1 = "CASE_INFO1";	// extra rows in case need for future
-	public static final String KEY_CASE_INFO2 = "CASE_INFO2";
+	public static final String KEY_UNIQUE_ID = "CASE_INFO1";	// unique ID across firebase and SQL of multiple devices
+
+	public static final String KEY_CASE_INFO2 = "CASE_INFO2"; // extra rows in case need for future
 	public static final String KEY_CASE_INFO3 = "CASE_INFO3";
 	public static final String KEY_CASE_INFO4 = "CASE_INFO4";
 	public static final String KEY_CASE_INFO5 = "CASE_INFO5";
@@ -210,7 +211,7 @@ public class CasesProvider extends ContentProvider
 		KEY_SECTION, KEY_FINDINGS, KEY_BIOPSY, KEY_FOLLOWUP, KEY_FOLLOWUP_COMMENT, KEY_KEYWORDS, KEY_COMMENTS, KEY_STUDY_TYPE,
 			KEY_STUDY_DATE, KEY_IMAGE_COUNT, KEY_THUMBNAIL, KEY_FAVORITE, KEY_CLINICAL_HISTORY, KEY_LAST_MODIFIED_DATE,
 			KEY_USER_ID, KEY_ORIGINAL_CREATOR, KEY_IS_SHARED,
-			KEY_CASE_INFO1, KEY_CASE_INFO2, KEY_CASE_INFO3, KEY_CASE_INFO4, KEY_CASE_INFO5};
+			KEY_UNIQUE_ID, KEY_CASE_INFO2, KEY_CASE_INFO3, KEY_CASE_INFO4, KEY_CASE_INFO5};
 
 	// DB info: it's name, and the table we are using.
 	public static final String DATABASE_NAME = "MyDB";
@@ -266,7 +267,7 @@ public class CasesProvider extends ContentProvider
 					+ KEY_ORIGINAL_CREATOR + " text, "
 					+ KEY_IS_SHARED + " integer, "							// boolean
 
-					+ KEY_CASE_INFO1 + " text, "
+					+ KEY_UNIQUE_ID + " text, "
 					+ KEY_CASE_INFO2 + " text, "
 					+ KEY_CASE_INFO3 + " text, "
 					+ KEY_CASE_INFO4 + " integer, "	//int
@@ -831,8 +832,6 @@ public class CasesProvider extends ContentProvider
 			initialValues.put(KEY_SECTION, "Pediatric");
 			initialValues.put(KEY_ORDER, 7);
 			_db.insert(SECTION_LIST_TABLE, null, initialValues);
-
-			return;
 		}
 
 		@Override

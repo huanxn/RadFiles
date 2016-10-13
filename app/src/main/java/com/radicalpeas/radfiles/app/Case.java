@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.widget.EditText;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -96,8 +95,8 @@ public class Case
 	@SerializedName(CasesProvider.KEY_IS_SHARED)
 	public int is_shared;
 
-	@SerializedName(CasesProvider.KEY_CASE_INFO1)
-	public String case_info1;
+	@SerializedName(CasesProvider.KEY_UNIQUE_ID)
+	public String unique_id;
 
 	@SerializedName(CasesProvider.KEY_CASE_INFO2)
 	public String case_info2;
@@ -158,7 +157,7 @@ public class Case
 		followup_comment = caseCursor.getString(CasesProvider.COL_FOLLOWUP_COMMENT);
 		comments = caseCursor.getString(CasesProvider.COL_COMMENTS);
 		favorite = caseCursor.getString(CasesProvider.COL_FAVORITE);
-		image_count = caseCursor.getInt(CasesProvider.COL_IMAGE_COUNT);;
+		image_count = caseCursor.getInt(CasesProvider.COL_IMAGE_COUNT);
 		thumbnail = caseCursor.getInt(CasesProvider.COL_THUMBNAIL);
 		last_modified_date = caseCursor.getString(CasesProvider.COL_LAST_MODIFIED_DATE);
 
@@ -211,8 +210,7 @@ public class Case
 
 	}
 
-
-	public void setCaseFromCloud(final Context context, final long key_id)
+	private void setCaseFromCloud(final Context context, final long key_id)
 	{
 		// get data fromFirebase database
 		final FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -233,8 +231,19 @@ public class Case
 					@Override
 					public void onDataChange(DataSnapshot dataSnapshot)
 					{
+						String local_data = diagnosis;
+						if(local_data == null)
+						{
+							local_data = "";
+						}
+
 						String cloud_data = (String) dataSnapshot.getValue();
-						if(diagnosis != cloud_data )
+						if(cloud_data == null)
+						{
+							cloud_data = "";
+						}
+
+						if(!local_data.contentEquals(cloud_data))
 						{
 							diagnosis = cloud_data;
 							// put data into "values" for database insert/update
@@ -259,8 +268,19 @@ public class Case
 					@Override
 					public void onDataChange(DataSnapshot dataSnapshot)
 					{
+						String local_data = findings;
+						if(local_data == null)
+						{
+							local_data = "";
+						}
+
 						String cloud_data = (String) dataSnapshot.getValue();
-						if(findings != cloud_data )
+						if(cloud_data == null)
+						{
+							cloud_data = "";
+						}
+
+						if(!local_data.contentEquals(cloud_data))
 						{
 							findings = cloud_data;
 							// put data into "values" for database insert/update
@@ -285,8 +305,19 @@ public class Case
 					@Override
 					public void onDataChange(DataSnapshot dataSnapshot)
 					{
+						String local_data = comments;
+						if(local_data == null)
+						{
+							local_data = "";
+						}
+
 						String cloud_data = (String) dataSnapshot.getValue();
-						if(comments != cloud_data )
+						if(cloud_data == null)
+						{
+							cloud_data = "";
+						}
+
+						if(!local_data.contentEquals(cloud_data))
 						{
 							comments = cloud_data;
 							// put data into "values" for database insert/update
@@ -311,8 +342,19 @@ public class Case
 					@Override
 					public void onDataChange(DataSnapshot dataSnapshot)
 					{
+						String local_data = followup_comment;
+						if(local_data == null)
+						{
+							local_data = "";
+						}
+
 						String cloud_data = (String) dataSnapshot.getValue();
-						if(followup_comment != cloud_data )
+						if(cloud_data == null)
+						{
+							cloud_data = "";
+						}
+
+						if(!local_data.contentEquals(cloud_data))
 						{
 							followup_comment = cloud_data;
 							// put data into "values" for database insert/update
@@ -346,8 +388,19 @@ public class Case
 					@Override
 					public void onDataChange(DataSnapshot dataSnapshot)
 					{
+						String local_data = biopsy;
+						if(local_data == null)
+						{
+							local_data = "";
+						}
+
 						String cloud_data = (String) dataSnapshot.getValue();
-						if(biopsy != cloud_data )
+						if(cloud_data == null)
+						{
+							cloud_data = "";
+						}
+
+						if(!local_data.contentEquals(cloud_data))
 						{
 							biopsy = cloud_data;
 							// put data into "values" for database insert/update
@@ -367,7 +420,81 @@ public class Case
 					}
 				});
 
-				//// TODO: 9/26/2016 section, keywords
+
+
+				caseRef.child(CasesProvider.KEY_SECTION).addValueEventListener(new ValueEventListener()
+				{
+					@Override
+					public void onDataChange(DataSnapshot dataSnapshot)
+					{
+						String local_data = section;
+						if(local_data == null)
+						{
+							local_data = "";
+						}
+
+						String cloud_data = (String) dataSnapshot.getValue();
+						if(cloud_data == null)
+						{
+							cloud_data = "";
+						}
+
+						if(!local_data.contentEquals(cloud_data))
+						{
+							section = cloud_data;
+							// put data into "values" for database insert/update
+							ContentValues values = new ContentValues();
+							values.put(CasesProvider.KEY_SECTION, section);
+
+							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+							context.getContentResolver().update(row_uri, values, null, null);
+
+						}
+					}
+
+					@Override
+					public void onCancelled(DatabaseError databaseError)
+					{
+
+					}
+				});
+
+				caseRef.child(CasesProvider.KEY_KEYWORDS).addValueEventListener(new ValueEventListener()
+				{
+					@Override
+					public void onDataChange(DataSnapshot dataSnapshot)
+					{
+						String local_data = key_words;
+						if(local_data == null)
+						{
+							local_data = "";
+						}
+
+						String cloud_data = (String) dataSnapshot.getValue();
+						if(cloud_data == null)
+						{
+							cloud_data = "";
+						}
+
+						if(!local_data.contentEquals(cloud_data))
+						{
+							key_words = cloud_data;
+							// put data into "values" for database insert/update
+							ContentValues values = new ContentValues();
+							values.put(CasesProvider.KEY_KEYWORDS, key_words);
+
+							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+							context.getContentResolver().update(row_uri, values, null, null);
+
+						}
+					}
+
+					@Override
+					public void onCancelled(DatabaseError databaseError)
+					{
+
+					}
+				});
 
 				caseImagesRef.addListenerForSingleValueEvent(new ValueEventListener()
 				{
@@ -390,11 +517,17 @@ public class Case
 								}
 							}
 
-							if(found == false)
+							if(!found)
 							{
 								// not found in local SQL database.  add firebase data to local SQL database
 								int new_image_index = image_count;	// row order, put at end
+
+								// update image count
 								image_count += 1;
+								ContentValues values = new ContentValues();
+								values.put(CasesProvider.KEY_IMAGE_COUNT, image_count);
+								Uri case_row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+								context.getContentResolver().update(case_row_uri, values, null, null);
 
 								//store in image table
 								ContentValues imageValues = new ContentValues();
@@ -403,9 +536,9 @@ public class Case
 								imageValues.put(CasesProvider.KEY_ORDER, new_image_index);      // set order to display images.  new files last.  //todo user reodering
 
 								// insert into local SQL database
-								Uri row_uri = context.getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
+								Uri image_row_uri = context.getContentResolver().insert(CasesProvider.IMAGES_URI, imageValues);
 								//Uri row_uri = UtilsDatabase.insertImage(context, imageValues);
-								long new_image_id = Long.parseLong(row_uri.getLastPathSegment());
+								long new_image_id = Long.parseLong(image_row_uri.getLastPathSegment());
 
 								// add to this case instatiation
 								CaseImage caseImage = new CaseImage();
@@ -437,7 +570,9 @@ public class Case
 										// Local image file has been created
 										UtilClass.showToast(context, "Downloaded file " + filename);
 
+
 										//todo refresh casedetail view
+										//todo or show snackbar with refresh button
 									}
 								}).addOnFailureListener(new OnFailureListener() {
 									@Override

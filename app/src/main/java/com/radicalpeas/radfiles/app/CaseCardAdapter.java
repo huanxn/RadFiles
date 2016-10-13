@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.database.Cursor;
 //import android.support.v7.view.ActionMode;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -259,7 +260,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 			if(mActionMode == null || !mCase.isSelected)
 			{
 				// clear color highlight of unselected items
-				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_card_background));
+				//viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_card_background));
+				viewHolder.container.setBackgroundColor(ContextCompat.getColor(activity, R.color.default_card_background));
 				viewHolder.thumbnail.setColorFilter(0x00000000);
 
 				/*
@@ -272,8 +274,8 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 				//viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.attr.colorAccent));
 
 				// color highlight the selected items
-				viewHolder.container.setBackgroundColor(activity.getResources().getColor(R.color.default_colorSelected));
-				viewHolder.thumbnail.setColorFilter(activity.getResources().getColor(R.color.default_colorSelected));
+				viewHolder.container.setBackgroundColor(ContextCompat.getColor(activity, R.color.default_colorSelected));
+				viewHolder.thumbnail.setColorFilter(ContextCompat.getColor(activity, R.color.default_colorSelected));
 				//viewHolder.thumbnail.setColorFilter(UtilClass.get_attr(activity, R.attr.colorControlHighlight)); // too opaque
 			}
 		}
