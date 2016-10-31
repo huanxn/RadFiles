@@ -296,7 +296,7 @@ public class ImageGridView
 													{
 														//Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, mAdapter.getImageID(image_position));
 														//context.getContentResolver().delete(row_uri, null, null);
-														UtilsDatabase.deleteImage(context, case_key_id, mAdapter.getImageID(image_position), mAdapter.getImageFilename(image_position));
+														UtilsDatabase.deleteImage(context, case_key_id, /*mAdapter.getImageID(image_position),*/ mAdapter.getImageFilename(image_position));
 													}
 
 													// delete from gridview adapter

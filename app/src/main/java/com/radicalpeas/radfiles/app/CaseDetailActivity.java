@@ -488,36 +488,7 @@ public class CaseDetailActivity extends AppCompatActivity
 			com.theartofdev.edmodo.cropper.CropImage.ActivityResult result = com.theartofdev.edmodo.cropper.CropImage.getActivityResult(data);
 			if (resultCode == RESULT_OK)
 			{
-/*				Uri resultUri = result.getUri();
-				File resultFile = new File(resultUri.getPath());
 
-				// Create the Filename where the photo should go
-				String tempFilename = null;
-
-				// Create an image file name based on timestamp
-				String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-				tempFilename = "IMAGE_" + timeStamp + "_";	// temp file will add extra random numbers to filename
-
-				// Get the private application storage directory for pictures
-				File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-				// Create the file
-				try
-				{
-					tempImageFile = File.createTempFile(tempFilename, ".jpg", storageDir);
-					UtilsFile.copyFile(tempImageFile, resultFile);
-				}
-				catch (IOException ex)
-				{
-					Log.e("getPictureFromCamera", "Could not open new image file.");
-				}
-
-				// clean up
-				if(resultFile.exists())
-				{
-					resultFile.delete();
-				}
-*/
 				Uri resultUri = result.getUri();
 
 				// Create the Filename where the photo should go

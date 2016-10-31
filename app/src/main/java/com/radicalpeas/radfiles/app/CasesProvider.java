@@ -182,7 +182,7 @@ public class CasesProvider extends ContentProvider
 	public static final int COL_ORIGINAL_CREATOR = 18;	// RadFiles user who first submitted this case
 	public static final int COL_IS_SHARED = 19;	// flag if shared publicly
 
-	public static final int COL_CASE_INFO1 = 20;	// extra rows in case need for future
+	public static final int COL_UNIQUE_ID = 20;	// extra rows in case need for future
 	public static final int COL_CASE_INFO2 = 21;
 	public static final int COL_CASE_INFO3 = 22;
 	public static final int COL_CASE_INFO4 = 23;

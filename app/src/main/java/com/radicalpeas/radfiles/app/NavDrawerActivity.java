@@ -24,6 +24,9 @@ import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -644,6 +647,7 @@ public class NavDrawerActivity extends AppCompatActivity
 
     public void authSignOut()
     {
+
         AuthUI.getInstance()
                 .signOut(this)
                 .addOnCompleteListener(new OnCompleteListener<Void>()
@@ -653,6 +657,16 @@ public class NavDrawerActivity extends AppCompatActivity
                         if (task.isSuccessful())
                         {
                             // user is now signed out
+/*
+                            // Google sign out
+                            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                                    new ResultCallback<Status>() {
+                                        @Override
+                                        public void onResult(@NonNull Status status) {
+                                            updateUI(null);
+                                        }
+                                    });
+  */
                             //startActivity(new Intent(mActivity, SignInActivity.class));
                             //finish();
 

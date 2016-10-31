@@ -1,5 +1,6 @@
 package com.radicalpeas.radfiles.app;
 
+import android.app.Activity;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
@@ -16,6 +17,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
@@ -41,11 +43,11 @@ public class Case
 	@SerializedName(CasesProvider.KEY_DIAGNOSIS)
 	public String diagnosis;
 
-	@SerializedName(CasesProvider.KEY_SECTION)
-	public String section;
-
 	@SerializedName(CasesProvider.KEY_FINDINGS)
 	public String findings;
+
+	@SerializedName(CasesProvider.KEY_SECTION)
+	public String section;
 
 	@SerializedName(CasesProvider.KEY_BIOPSY)
 	public String biopsy;
@@ -121,7 +123,7 @@ public class Case
 		caseImageList = new ArrayList<CaseImage>();
 	}
 
-	public boolean setCase(Context context, long key_id)
+	public boolean setCase(Activity context, long key_id)
 	{
 		this.key_id = key_id;
 
@@ -144,8 +146,10 @@ public class Case
 
 	}
 
-	public void setCaseFromCursor(Context context, Cursor caseCursor)
+	public void setCaseFromCursor(Activity context, Cursor caseCursor)
 	{
+		unique_id = caseCursor.getString(CasesProvider.COL_UNIQUE_ID);
+
 		case_id = caseCursor.getString(CasesProvider.COL_CASE_NUMBER);
 		diagnosis = caseCursor.getString(CasesProvider.COL_DIAGNOSIS);
 		findings = caseCursor.getString(CasesProvider.COL_FINDINGS);
@@ -167,6 +171,7 @@ public class Case
 		userID = caseCursor.getString(CasesProvider.COL_USER_ID);
 		original_creator = caseCursor.getString(CasesProvider.COL_ORIGINAL_CREATOR);
 		is_shared = caseCursor.getInt(CasesProvider.COL_IS_SHARED);
+
 
 		if(image_count > 0)
 		{
@@ -206,11 +211,14 @@ public class Case
 
 		}
 
-		setCaseFromCloud(context, key_id);
+		syncCaseWithCloud(context);
 
 	}
 
-	private void setCaseFromCloud(final Context context, final long key_id)
+	//todo create method to set new case to SQL from a mCase (as currently done in CaseCardAdapter.java)
+
+	// uses this cases key_id and unique_id
+	public void syncCaseWithCloud(final Activity context)
 	{
 		// get data fromFirebase database
 		final FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -222,297 +230,103 @@ public class Case
 			if (firebaseUser != null && firebaseDatabase != null)
 			{
 				DatabaseReference databaseRef = firebaseDatabase.getReference("users/" + firebaseUser.getUid());
-				// use SQL key _id as node of case in firebase database
-				DatabaseReference caseRef = databaseRef.child("Cases/" + key_id);
-				DatabaseReference caseImagesRef = caseRef.child("Images");
 
-				caseRef.child(CasesProvider.KEY_DIAGNOSIS).addValueEventListener(new ValueEventListener()
+				// get node of case in firebase database, based on unique_ID
+				final Query caseQuery = databaseRef.child("Cases").orderByChild(CasesProvider.KEY_UNIQUE_ID).equalTo(unique_id);
+
+				caseQuery.addListenerForSingleValueEvent(new ValueEventListener()
 				{
 					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
+					public void onDataChange(DataSnapshot parentDataSnapshot)
 					{
-						String local_data = diagnosis;
-						if(local_data == null)
-						{
-							local_data = "";
-						}
+						DataSnapshot dataSnapshot = parentDataSnapshot.getChildren().iterator().next();
 
-						String cloud_data = (String) dataSnapshot.getValue();
-						if(cloud_data == null)
-						{
-							cloud_data = "";
-						}
+						ContentValues values = new ContentValues();
+						values.clear();
 
-						if(!local_data.contentEquals(cloud_data))
+						String cloud_data;
+
+						boolean madeChanges = false;
+
+						cloud_data = UtilsDatabase.getDataSnapshotValue(dataSnapshot, CasesProvider.KEY_DIAGNOSIS);
+						if(!UtilClass.compare(diagnosis, cloud_data))
 						{
 							diagnosis = cloud_data;
-							// put data into "values" for database insert/update
-							ContentValues values = new ContentValues();
-							values.put(CasesProvider.KEY_DIAGNOSIS, diagnosis);
-
-							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().update(row_uri, values, null, null);
-
-						}
-					}
-
-					@Override
-					public void onCancelled(DatabaseError databaseError)
-					{
-
-					}
-				});
-
-				caseRef.child(CasesProvider.KEY_FINDINGS).addValueEventListener(new ValueEventListener()
-				{
-					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
-					{
-						String local_data = findings;
-						if(local_data == null)
-						{
-							local_data = "";
+							values.put(CasesProvider.KEY_DIAGNOSIS, cloud_data);
+							madeChanges = true;
 						}
 
-						String cloud_data = (String) dataSnapshot.getValue();
-						if(cloud_data == null)
-						{
-							cloud_data = "";
-						}
-
-						if(!local_data.contentEquals(cloud_data))
+						cloud_data = UtilsDatabase.getDataSnapshotValue(dataSnapshot, CasesProvider.KEY_FINDINGS);
+						if(!UtilClass.compare(findings, cloud_data))
 						{
 							findings = cloud_data;
-							// put data into "values" for database insert/update
-							ContentValues values = new ContentValues();
-							values.put(CasesProvider.KEY_FINDINGS, findings);
-
-							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().update(row_uri, values, null, null);
-
-						}
-					}
-
-					@Override
-					public void onCancelled(DatabaseError databaseError)
-					{
-
-					}
-				});
-
-				caseRef.child(CasesProvider.KEY_COMMENTS).addValueEventListener(new ValueEventListener()
-				{
-					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
-					{
-						String local_data = comments;
-						if(local_data == null)
-						{
-							local_data = "";
+							values.put(CasesProvider.KEY_FINDINGS, cloud_data);
+							madeChanges = true;
 						}
 
-						String cloud_data = (String) dataSnapshot.getValue();
-						if(cloud_data == null)
-						{
-							cloud_data = "";
-						}
-
-						if(!local_data.contentEquals(cloud_data))
-						{
-							comments = cloud_data;
-							// put data into "values" for database insert/update
-							ContentValues values = new ContentValues();
-							values.put(CasesProvider.KEY_COMMENTS, comments);
-
-							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().update(row_uri, values, null, null);
-
-						}
-					}
-
-					@Override
-					public void onCancelled(DatabaseError databaseError)
-					{
-
-					}
-				});
-
-				caseRef.child(CasesProvider.KEY_FOLLOWUP_COMMENT).addValueEventListener(new ValueEventListener()
-				{
-					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
-					{
-						String local_data = followup_comment;
-						if(local_data == null)
-						{
-							local_data = "";
-						}
-
-						String cloud_data = (String) dataSnapshot.getValue();
-						if(cloud_data == null)
-						{
-							cloud_data = "";
-						}
-
-						if(!local_data.contentEquals(cloud_data))
-						{
-							followup_comment = cloud_data;
-							// put data into "values" for database insert/update
-							ContentValues values = new ContentValues();
-							values.put(CasesProvider.KEY_FOLLOWUP_COMMENT, followup_comment);
-
-							if(followup_comment != null && !followup_comment.isEmpty())
-							{
-								values.put(CasesProvider.KEY_FOLLOWUP, 1);	// set true
-							}
-							else
-							{
-								values.put(CasesProvider.KEY_FOLLOWUP, 0);	// set false
-							}
-
-							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().update(row_uri, values, null, null);
-
-						}
-					}
-
-					@Override
-					public void onCancelled(DatabaseError databaseError)
-					{
-
-					}
-				});
-
-				caseRef.child(CasesProvider.KEY_BIOPSY).addValueEventListener(new ValueEventListener()
-				{
-					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
-					{
-						String local_data = biopsy;
-						if(local_data == null)
-						{
-							local_data = "";
-						}
-
-						String cloud_data = (String) dataSnapshot.getValue();
-						if(cloud_data == null)
-						{
-							cloud_data = "";
-						}
-
-						if(!local_data.contentEquals(cloud_data))
-						{
-							biopsy = cloud_data;
-							// put data into "values" for database insert/update
-							ContentValues values = new ContentValues();
-							values.put(CasesProvider.KEY_BIOPSY, biopsy);
-
-							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().update(row_uri, values, null, null);
-
-						}
-					}
-
-					@Override
-					public void onCancelled(DatabaseError databaseError)
-					{
-
-					}
-				});
-
-
-
-				caseRef.child(CasesProvider.KEY_SECTION).addValueEventListener(new ValueEventListener()
-				{
-					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
-					{
-						String local_data = section;
-						if(local_data == null)
-						{
-							local_data = "";
-						}
-
-						String cloud_data = (String) dataSnapshot.getValue();
-						if(cloud_data == null)
-						{
-							cloud_data = "";
-						}
-
-						if(!local_data.contentEquals(cloud_data))
+						cloud_data = UtilsDatabase.getDataSnapshotValue(dataSnapshot, CasesProvider.KEY_SECTION);
+						if(!UtilClass.compare(section, cloud_data))
 						{
 							section = cloud_data;
-							// put data into "values" for database insert/update
-							ContentValues values = new ContentValues();
-							values.put(CasesProvider.KEY_SECTION, section);
-
-							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().update(row_uri, values, null, null);
-
-						}
-					}
-
-					@Override
-					public void onCancelled(DatabaseError databaseError)
-					{
-
-					}
-				});
-
-				caseRef.child(CasesProvider.KEY_KEYWORDS).addValueEventListener(new ValueEventListener()
-				{
-					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
-					{
-						String local_data = key_words;
-						if(local_data == null)
-						{
-							local_data = "";
+							values.put(CasesProvider.KEY_SECTION, cloud_data);
+							madeChanges = true;
 						}
 
-						String cloud_data = (String) dataSnapshot.getValue();
-						if(cloud_data == null)
-						{
-							cloud_data = "";
-						}
-
-						if(!local_data.contentEquals(cloud_data))
+						cloud_data = UtilsDatabase.getDataSnapshotValue(dataSnapshot, CasesProvider.KEY_KEYWORDS);
+						if(!UtilClass.compare(key_words, cloud_data))
 						{
 							key_words = cloud_data;
-							// put data into "values" for database insert/update
-							ContentValues values = new ContentValues();
-							values.put(CasesProvider.KEY_KEYWORDS, key_words);
-
-							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-							context.getContentResolver().update(row_uri, values, null, null);
-
+							values.put(CasesProvider.KEY_KEYWORDS, cloud_data);
+							madeChanges = true;
 						}
-					}
 
-					@Override
-					public void onCancelled(DatabaseError databaseError)
-					{
-
-					}
-				});
-
-				caseImagesRef.addListenerForSingleValueEvent(new ValueEventListener()
-				{
-					@Override
-					public void onDataChange(DataSnapshot dataSnapshot)
-					{
-						Iterable<DataSnapshot> imageList = dataSnapshot.getChildren();
-
-						for(DataSnapshot imageSnapshot: imageList)
+						cloud_data = UtilsDatabase.getDataSnapshotValue(dataSnapshot, CasesProvider.KEY_COMMENTS);
+						if(!UtilClass.compare(comments, cloud_data))
 						{
-							final String filename = (String) imageSnapshot.child(CasesProvider.KEY_IMAGE_FILENAME).getValue();
+							comments = cloud_data;
+							values.put(CasesProvider.KEY_COMMENTS, cloud_data);
+							madeChanges = true;
+						}
+
+						cloud_data = UtilsDatabase.getDataSnapshotValue(dataSnapshot, CasesProvider.KEY_FOLLOWUP_COMMENT);
+						if(!UtilClass.compare(followup_comment, cloud_data))
+						{
+							followup_comment = cloud_data;
+							values.put(CasesProvider.KEY_FOLLOWUP_COMMENT, cloud_data);
+							madeChanges = true;
+						}
+
+						int cloud_data_integer = UtilsDatabase.getDataSnapshotInteger(dataSnapshot, CasesProvider.KEY_FOLLOWUP);
+						if(followup != cloud_data_integer)
+						{
+							followup = cloud_data_integer;
+							values.put(CasesProvider.KEY_FOLLOWUP, cloud_data_integer);
+							madeChanges = true;
+						}
+
+						cloud_data = UtilsDatabase.getDataSnapshotValue(dataSnapshot, CasesProvider.KEY_BIOPSY);
+						if(!UtilClass.compare(biopsy, cloud_data))
+						{
+							biopsy = cloud_data;
+							values.put(CasesProvider.KEY_BIOPSY, cloud_data);
+							madeChanges = true;
+						}
+
+						//todo sync favorite, thumbnail, clinical history
+
+						// loop through imageList (all images in firebase database)
+						for(DataSnapshot imageSnapshot: dataSnapshot.child("Images").getChildren())
+						{
+							final String filename = UtilsDatabase.getDataSnapshotValue(imageSnapshot, CasesProvider.KEY_IMAGE_FILENAME);
 							boolean found = false;
 
+							// compare to caseImageList (images in the local SQL database)
 							for(CaseImage caseImage: caseImageList)
 							{
 								if(filename.equals(caseImage.getFilename()))
 								{
 									found = true;
+									caseImage.foundInCloudDatabase = true;
 									break;
 								}
 							}
@@ -521,18 +335,20 @@ public class Case
 							{
 								// not found in local SQL database.  add firebase data to local SQL database
 								int new_image_index = image_count;	// row order, put at end
+								String caption = UtilsDatabase.getDataSnapshotValue(imageSnapshot, CasesProvider.KEY_IMAGE_CAPTION);
+								String details = UtilsDatabase.getDataSnapshotValue(imageSnapshot, CasesProvider.KEY_IMAGE_DETAILS);
 
 								// update image count
-								image_count += 1;
-								ContentValues values = new ContentValues();
+								image_count = image_count + 1;
 								values.put(CasesProvider.KEY_IMAGE_COUNT, image_count);
-								Uri case_row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
-								context.getContentResolver().update(case_row_uri, values, null, null);
+								madeChanges = true;
 
 								//store in image table
 								ContentValues imageValues = new ContentValues();
 								imageValues.put(CasesProvider.KEY_IMAGE_PARENT_CASE_ID, key_id);
 								imageValues.put(CasesProvider.KEY_IMAGE_FILENAME, filename);
+								imageValues.put(CasesProvider.KEY_IMAGE_CAPTION, caption);
+								imageValues.put(CasesProvider.KEY_IMAGE_DETAILS, details);
 								imageValues.put(CasesProvider.KEY_ORDER, new_image_index);      // set order to display images.  new files last.  //todo user reodering
 
 								// insert into local SQL database
@@ -545,8 +361,10 @@ public class Case
 								caseImage.set_id((int)new_image_id);
 								caseImage.setParent_id((int)key_id);
 								caseImage.setFilename(filename);
-								//caseImage.setCaption(caption);
-								//caseImage.setDetails(details);
+								caseImage.setCaption(caption);
+								caseImage.setDetails(details);
+
+								caseImage.foundInCloudDatabase = true;
 
 								caseImageList.add(caseImage);
 
@@ -570,9 +388,9 @@ public class Case
 										// Local image file has been created
 										UtilClass.showToast(context, "Downloaded file " + filename);
 
-
 										//todo refresh casedetail view
 										//todo or show snackbar with refresh button
+
 									}
 								}).addOnFailureListener(new OnFailureListener() {
 									@Override
@@ -582,6 +400,39 @@ public class Case
 									}
 								});
 							}
+						}
+
+						// loop through local case images again
+						// if image was not found in cloud database, then it is deleted from local database
+						for(CaseImage caseImage: caseImageList)
+						{
+							if(caseImage.foundInCloudDatabase == false)
+							{
+								// delete from SQL database
+								//UtilsDatabase.deleteImage(context, key_id, caseImage.get_id(), caseImage.getFilename());
+								Uri row_uri = ContentUris.withAppendedId(CasesProvider.IMAGES_URI, caseImage.get_id());
+								context.getContentResolver().delete(row_uri, null, null);
+
+								// delete local image file: caseImage.getFilename()
+								final File picturesDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+								final File localFilePath = new File(picturesDir + "/" + caseImage.getFilename());
+								localFilePath.delete();
+
+								// update image_count
+								image_count = image_count - 1;
+								values.put(CasesProvider.KEY_IMAGE_COUNT, image_count);
+								madeChanges = true;
+							}
+						}
+
+						if(madeChanges)
+						{
+							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
+							context.getContentResolver().update(row_uri, values, null, null);
+
+							//todo notifydatachange
+							UtilClass.showSnackbar(context, "Updated info from cloud");
+
 						}
 					}
 
@@ -660,4 +511,6 @@ public class Case
 		*/
 
 	}
+
+
 }

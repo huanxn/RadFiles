@@ -289,12 +289,10 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 		searchView.setIconifiedByDefault(true);
 
 		// change text color
-
 		SearchView.SearchAutoComplete searchText = (SearchView.SearchAutoComplete)searchView.findViewById(R.id.search_src_text);
-		//searchText.setTextColor(getResources().getColor(R.color.text_light));
 		searchText.setTextColor(ContextCompat.getColor(this, R.color.text_light));
 		searchText.setHint(getResources().getString(R.string.search_prompt));
-		searchText.setTextColor(ContextCompat.getColor(this, R.color.text_light_hint));
+		searchText.setHintTextColor(ContextCompat.getColor(this, R.color.text_light_hint));
 
 		/*
 		// hide spinner if drawer is open
@@ -1490,7 +1488,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 					UtilsDatabase.deleteCase(activity, key_id);
 					//Uri case_delete_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
 					//activity.getContentResolver().delete(case_delete_uri, null, null);
-
+/*
 					// delete all linked images files
 					Cursor image_cursor = activity.getContentResolver().query(CasesProvider.IMAGES_URI, null, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)}, CasesProvider.KEY_ORDER);
 					File imageFile = null;
@@ -1508,7 +1506,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 
 					// delete all child rows from IMAGES table, by parent case key_id
 					activity.getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ?", new String[]{String.valueOf(key_id)});
-
+*/
 				}
 				return deleteIdList.size();
 			}

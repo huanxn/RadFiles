@@ -7,6 +7,7 @@ import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -655,13 +656,18 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 				}
 			}
 
-			// delete old images
+
+			// delete old stored images only after saving changes
 			ArrayList<String> deletedImageList = imageGridView.getDeletedImageList();   // contains full path of files to be deleted
 			File deleteFile = null;
-			for (int i = 0; i < deletedImageList.size(); i++)
+			//for (int i = 0; i < deletedImageList.size(); i++)
+			for(String deleteFilename: deletedImageList)
 			{
-				deleteFile = new File(deletedImageList.get(i));
+				deleteFile = new File(deleteFilename);
 
+				UtilsDatabase.deleteImage(this, key_id, deleteFile.getName());
+
+/*
 				// delete from IMAGES table, select by case key_id and fileNAME
 				String[] selArgs = {String.valueOf(key_id), deleteFile.getName()};
 				getContentResolver().delete(CasesProvider.IMAGES_URI, CasesProvider.KEY_IMAGE_PARENT_CASE_ID + " = ? AND " + CasesProvider.KEY_IMAGE_FILENAME + " = ?", selArgs);
@@ -672,6 +678,8 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 					deleteFile.delete();
 					UtilsDatabase.deleteCaseImageFile(this, deleteFile.getName());
 				}
+				*/
+
 			}
 
 		}

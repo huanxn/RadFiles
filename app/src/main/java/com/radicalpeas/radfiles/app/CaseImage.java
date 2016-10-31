@@ -34,6 +34,8 @@ public class CaseImage
     @SerializedName(CasesProvider.KEY_IMAGE_INFO3)
     private int image_info3;
 
+    public boolean foundInCloudDatabase = false;
+
     public int getParent_id()
     {
         return parent_id;
