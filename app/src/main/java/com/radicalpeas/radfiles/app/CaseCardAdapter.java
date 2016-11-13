@@ -527,10 +527,18 @@ public class CaseCardAdapter extends RecyclerView.Adapter<CaseCardAdapter.ViewHo
 
 			viewHolder.key_id = mCase.key_id;
 
+			/*
 			viewHolder.card_title.setText(mCase.case_id);
 			viewHolder.card_text1.setText(mCase.diagnosis);
 			viewHolder.card_text2.setText(mCase.findings);
 			viewHolder.card_text3.setText(mCase.key_words);
+			*/
+			viewHolder.card_title.setText(mCase.diagnosis);
+			viewHolder.card_text1.setVisibility(View.GONE);
+			viewHolder.card_text2.setText(mCase.findings);
+			viewHolder.card_text3.setText(mCase.key_words);
+
+
 			//viewHolder.thumbnail.setImageDrawable(activity.getDrawable(country.getImageResourceId(mContext)));
 
 			Glide.with(activity).load(mCase.thumbnail_filename)

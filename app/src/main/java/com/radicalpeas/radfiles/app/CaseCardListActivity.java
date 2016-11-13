@@ -46,9 +46,7 @@ import android.widget.Toast;
 
 //import com.gc.materialdesign.widgets.ProgressDialog;
 import com.getkeepsafe.taptargetview.TapTargetView;
-import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.Target;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 //import com.google.firebase.database.DatabaseReference;
 //import com.google.firebase.database.FirebaseDatabase;
 
@@ -654,7 +652,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				TapTargetView tapTargetView = new TapTargetView.Builder(this)
 						.title("Case Sorting")
 						.description("Click to change how your cases are sorted.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{
@@ -682,7 +680,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				new TapTargetView.Builder(this)
 						.title("Search")
 						.description("Search through your cases.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{
@@ -712,7 +710,7 @@ public class CaseCardListActivity extends NavDrawerActivity implements SearchVie
 				new TapTargetView.Builder(this)
 						.title("Add cases")
 						.description("Add a new case to your list.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(true)
 						.listener(new TapTargetView.Listener()
 						{

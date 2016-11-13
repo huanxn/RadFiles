@@ -5,7 +5,6 @@ import android.app.ActivityOptions;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.ActivityNotFoundException;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +14,6 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -43,8 +41,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.getkeepsafe.taptargetview.TapTargetView;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollView;
 import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCallbacks;
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
@@ -224,6 +220,12 @@ public class CaseDetailActivity extends AppCompatActivity
 		}
 
 
+	}
+
+	// called from Case.java after sync with cloud data
+	public void populateFields()
+	{
+		fragment.populateFields();
 	}
 
 	//todo change to just do headerview update
@@ -615,7 +617,7 @@ public class CaseDetailActivity extends AppCompatActivity
 				TapTargetView tapTargetView = new TapTargetView.Builder(this)
 						.title("Favorites")
 						.description("Star this case as one of your favorites.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{
@@ -643,7 +645,7 @@ public class CaseDetailActivity extends AppCompatActivity
 				TapTargetView tapTargetView = new TapTargetView.Builder(this)
 						.title("Edit")
 						.description("Edit and add details to this case.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{
@@ -695,13 +697,13 @@ public class CaseDetailActivity extends AppCompatActivity
 					contentText = "In a case with a diagnosis, long press to search for the diagnosis online.";
 				}
 
-				diagnosisTarget = fragment.getView().findViewById(R.id.case_info1);
+				diagnosisTarget = fragment.getView().findViewById(R.id.detail_case_info1);
 				if(diagnosisTarget != null && diagnosisLabelTarget != null)
 				{
 					new TapTargetView.Builder(this)
 							.title("Diagnosis")
 							.description(contentText)
-							.outerCircleColor(R.color.default_colorHeaderText)
+							.outerCircleColor(R.color.default_colorHeaderLight)
 							.cancelable(false)
 							.listener(new TapTargetView.Listener()
 							{
@@ -749,7 +751,7 @@ public class CaseDetailActivity extends AppCompatActivity
 				new TapTargetView.Builder(this)
 						.title("Case Images")
 						.description("Click to open the image gallery.\nLong press for more options.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(true)
 						.listener(new TapTargetView.Listener()
 						{
@@ -1263,6 +1265,8 @@ public class CaseDetailActivity extends AppCompatActivity
 		//	if (case_cursor != null && case_cursor.moveToFirst())
 			if(mCase.setCase(getActivity(), mCase.key_id))	// if set case info is successful
 			{
+				mCase.syncCaseWithCloud(mActivity);
+
 		//		mCase.setCaseFromCursor(getActivity(), case_cursor);
 				//mFirebaseCase.setCaseFromCloud(selected_key_id);
 
@@ -1287,7 +1291,7 @@ public class CaseDetailActivity extends AppCompatActivity
 					actionBar.setTitle(mActivity.mTitle);
 
 				// Case Information (DIAGNOSIS and FINDINGS)
-				TextView TV_case_info1 = (TextView) rootView.findViewById(R.id.case_info1);
+				TextView TV_case_info1 = (TextView) rootView.findViewById(R.id.detail_case_info1);
 				TextView TV_case_info2 = (TextView) rootView.findViewById(R.id.detail_case_info2);
 
 				if(mCase.diagnosis != null && !mCase.diagnosis.isEmpty())
@@ -1525,6 +1529,19 @@ public class CaseDetailActivity extends AppCompatActivity
 					rootView.findViewById(R.id.CommentsLabel).setVisibility(GONE);
 				}
 
+				// CASE NUMBER
+				TextView TV_caseNumber = (TextView) rootView.findViewById(R.id.detail_caseNumber);
+				if (mCase.case_id != null && !mCase.case_id.isEmpty())
+				{
+					TV_caseNumber.setText(mCase.case_id);
+					TV_caseNumber.setVisibility(View.VISIBLE);
+					rootView.findViewById(R.id.CaseNumberLabel).setVisibility(View.VISIBLE);
+				}
+				else
+				{
+					TV_caseNumber.setVisibility(GONE);
+					rootView.findViewById(R.id.CaseNumberLabel).setVisibility(GONE);
+				}
 			}
 
 //			case_cursor.close();

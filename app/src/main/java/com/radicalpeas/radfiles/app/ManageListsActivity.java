@@ -11,7 +11,6 @@ import android.database.Cursor;
 import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -26,8 +25,6 @@ import android.view.ViewGroup;
 
 import com.astuetz.PagerSlidingTabStrip;
 import com.getkeepsafe.taptargetview.TapTargetView;
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.h6ah4i.android.widget.advrecyclerview.animator.GeneralItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.animator.RefactoredDefaultItemAnimator;
 import com.h6ah4i.android.widget.advrecyclerview.decoration.SimpleListDividerDecorator;
@@ -110,7 +107,7 @@ public class ManageListsActivity extends NavDrawerActivity
 				TapTargetView tapTargetView = new TapTargetView.Builder(this)
 						.title("Select a list")
 						.description("Swipe or click the tabs to select a list.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{
@@ -138,7 +135,7 @@ public class ManageListsActivity extends NavDrawerActivity
 				TapTargetView tapTargetView = new TapTargetView.Builder(this)
 						.title("Edit list item")
 						.description("Click to edit the list item.\n\nLong press for more options.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{
@@ -167,7 +164,7 @@ public class ManageListsActivity extends NavDrawerActivity
 				TapTargetView tapTargetView = new TapTargetView.Builder(this)
 						.title("Sort list items")
 						.description("Drag the handle up or down to change the order of list items.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{
@@ -195,7 +192,7 @@ public class ManageListsActivity extends NavDrawerActivity
 				TapTargetView tapTargetView = new TapTargetView.Builder(this)
 						.title("Add new item")
 						.description("Click to add a new item to the list.")
-						.outerCircleColor(R.color.default_colorHeaderText)
+						.outerCircleColor(R.color.default_colorHeaderLight)
 						.cancelable(false)
 						.listener(new TapTargetView.Listener()
 						{

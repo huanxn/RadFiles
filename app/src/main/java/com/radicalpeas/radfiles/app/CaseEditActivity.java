@@ -105,6 +105,7 @@ public class CaseEditActivity extends AppCompatActivity implements DatePickerDia
 		selected_date = Calendar.getInstance();
 
 		// get the intent and the method argument: unique CASE KEY_ID
+		// todo pass entire Case ??
 		Intent intent = getIntent();
 		key_id = intent.getLongExtra(CaseCardListActivity.ARG_KEY_ID, -1);
 

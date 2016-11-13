@@ -87,7 +87,7 @@
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
         <item name="android:paddingTop">0dip</item>
-        <item name="android:background">@color/default_colorHeaderText</item>
+        <item name="android:background">@color/default_colorHeaderLight</item>
     </style>
 
 
@@ -97,7 +97,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/text_box_height</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/default_colorHeaderText</item>
+        <item name="android:textColor">@color/default_colorHeaderLight</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dip</item>
@@ -218,17 +218,31 @@
 
 
     <!-- Cards -->
-    <style name="cardTitle"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
+    <style name="cardTitle_old"> <!--parent="android:style/Widget.Holo.Light.TextView.ListSeparator"-->
         <item name="android:drawableBottom">@drawable/list_section_divider</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">@dimen/text_box_height</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">@color/default_colorHeaderText</item>
+        <item name="android:textColor">@color/default_colorHeaderLight</item>
         <item name="android:textSize">@dimen/standardTextSize</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingLeft">8dp</item>
         <item name="android:paddingTop">1dp</item>
+    </style>
+
+    <style name="cardTitle">
+        <item name="android:drawableBottom">@drawable/list_section_divider</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/text_box_height</item>
+        <item name="android:textSize">@dimen/cardTextSize</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingLeft">8dip</item>
+        <item name="android:paddingRight">8dip</item>
+        <item name="android:paddingTop">2dip</item>
+        <item name="android:paddingBottom">4dip</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/md_black_1000</item>
     </style>
 
 

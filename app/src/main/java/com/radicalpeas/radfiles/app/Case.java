@@ -211,7 +211,7 @@ public class Case
 
 		}
 
-		syncCaseWithCloud(context);
+		// syncCaseWithCloud(context);
 
 	}
 
@@ -430,7 +430,8 @@ public class Case
 							Uri row_uri = ContentUris.withAppendedId(CasesProvider.CASES_URI, key_id);
 							context.getContentResolver().update(row_uri, values, null, null);
 
-							//todo notifydatachange
+							//todo notifydatachange listener
+							((CaseDetailActivity) context).populateFields();
 							UtilClass.showSnackbar(context, "Updated info from cloud");
 
 						}

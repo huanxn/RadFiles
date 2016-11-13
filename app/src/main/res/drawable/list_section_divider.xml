@@ -3,5 +3,5 @@
     android:shape="rectangle">
     <size android:width="1000dp" android:height="1dp" />
     <solid
-        android:color="@color/default_colorHeaderText"/>
+        android:color="@color/default_colorHeaderLight"/>
 </shape>
